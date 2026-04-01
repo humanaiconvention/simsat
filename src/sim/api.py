@@ -5,11 +5,25 @@ import json
 from datetime import datetime, timezone
 from ImagingProviders.sentinel_provider import SentinelProvider
 from ImagingProviders.mapbox_provider import MapboxlProvider
+from haic.api_router import router as haic_router
+import haic.api_router as _haic_api
 
-api = FastAPI()
+api = FastAPI(title="SimSat API", description="Satellite simulation + HAIC convention layer")
 
 sentinel = SentinelProvider()
-mapbox = MapboxlProvider()
+
+# Mapbox is optional — requires MAPBOX_ACCESS_TOKEN
+try:
+    mapbox = MapboxlProvider()
+except ValueError:
+    import logging as _logging
+    _logging.getLogger(__name__).warning(
+        "MAPBOX_ACCESS_TOKEN not set — Mapbox imagery disabled"
+    )
+    mapbox = None
+
+# Mount HAIC router
+api.include_router(haic_router)
 
 
 def serialize_xarray_dataset(ds):
@@ -54,7 +68,6 @@ def format_timestamp_utc(timestamp):
 
 @api.get("/data/current/position")
 async def get_metrics():
-    # We access the shared data that the orchestrator will inject
     data = getattr(api.state, "shared_data", {})
     timestamp = format_timestamp_utc(data.get("last_updated", 0))
     return {
@@ -72,10 +85,8 @@ async def get_sentinel_image(
 ):
     data = getattr(api.state, "shared_data", {}).get("satellite_position", None)
     timestamp = getattr(api.state, "shared_data", {}).get("last_updated", None)
-    # if data is none return an error
     if data is None:
         raise HTTPException(status_code=500, detail="Error fetching satellite position from shared data - is the simulator running?")
-    #try:
     sentinel_data = sentinel.get_single_image_lon_lat(
         data[0],
         data[1],
@@ -85,10 +96,6 @@ async def get_sentinel_image(
         size_km=size_km,
         window_seconds=window_seconds,
     )
-    #except Exception as e:
-    #    error_details = traceback.format_exc()
-    #    raise HTTPException(status_code=500, detail="Error fetching Sentinel image: " + error_details)
-    #image = serialize_xarray_dataset(data["image"]) # this was used befor we returned a png
     image = sentinel_data["image"]
     metadata = sentinel_data["metadata"]
 
@@ -138,6 +145,9 @@ async def get_mapbox_image(
         satellite_position = getattr(api.state, "shared_data", {}).get("satellite_position", None)
         timestamp = getattr(api.state, "shared_data", {}).get("last_updated", None)
 
+        if mapbox is None:
+            raise HTTPException(status_code=503, detail="Mapbox imagery disabled — MAPBOX_ACCESS_TOKEN not set")
+
         if satellite_position is None:
             raise HTTPException(status_code=500, detail="Error fetching satellite position from shared data - is the simulator running?")
 
@@ -162,7 +172,7 @@ async def get_mapbox_image(
             "bearing": metadata["bearing"],
             "pitch": metadata["pitch"],
             "satellite_position": satellite_position,
-            "timestamp": format_timestamp_utc(timestamp),   
+            "timestamp": format_timestamp_utc(timestamp),
         }
         headers = {
             "mapbox_metadata": json.dumps(response_metadata),
@@ -187,7 +197,6 @@ async def get_sentinel_image_lon_lat(
     window_seconds: float = Query(default=10 * 24 * 60 * 60, gt=0),
     return_type: Literal["array", "png"] = "png"
 ):
-    #try:
     sentinel_data = sentinel.get_single_image_lon_lat(
         lon,
         lat,
@@ -197,10 +206,6 @@ async def get_sentinel_image_lon_lat(
         size_km=size_km,
         window_seconds=window_seconds,
     )
-    #except Exception as e:
-    #    error_details = traceback.format_exc()
-    #    raise HTTPException(status_code=500, detail="Error fetching Sentinel image: " + error_details)
-    #image = serialize_xarray_dataset(data["image"]) # this was used befor we returned a png
     image = sentinel_data["image"]
     metadata = sentinel_data["metadata"]
 
@@ -247,6 +252,8 @@ async def get_mapbox_image_lon_lat(
     alt_satellite: float = Query(..., description="The altitude of the satellite", ge=0),
 ):
     try:
+        if mapbox is None:
+            raise HTTPException(status_code=503, detail="Mapbox imagery disabled — MAPBOX_ACCESS_TOKEN not set")
         mapbox_data = mapbox.get_target_image(lon_satellite, lat_satellite, alt_satellite, lon_target, lat_target)
         image = mapbox_data["image"]
         metadata = mapbox_data["metadata"]
@@ -274,4 +281,20 @@ async def get_mapbox_image_lon_lat(
 
 @api.get("/")
 async def root():
-    return {"message": "Simulation API is online"}
+    return {"message": "Simulation API is online", "haic": "enabled"}
+
+
+@api.on_event("startup")
+async def _startup():
+    """Inject providers into the HAIC router after shared_data is available."""
+    from haic.bridge import StimulusBridge
+    from haic.prism_loop import get_prism_loop
+
+    shared = getattr(api.state, "shared_data", {})
+    bridge = StimulusBridge(
+        shared_data=shared,
+        sentinel_provider=sentinel,
+        mapbox_provider=mapbox,
+    )
+    prism = get_prism_loop()
+    _haic_api.init(bridge, prism)

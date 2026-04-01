@@ -23,9 +23,9 @@ def main(timing, time_step):
         target=run_sim,
         args=(shared_data_dict, timing, time_step)
     )
-    
+
     api_proc = multiprocessing.Process(
-        target=run_api, 
+        target=run_api,
         args=(shared_data_dict,)
     )
 
@@ -35,7 +35,6 @@ def main(timing, time_step):
     print("Both processes are running. Press Ctrl+C to stop.")
 
     try:
-        # Keep the main script alive while children run
         sim_proc.join()
         api_proc.join()
     except KeyboardInterrupt:
@@ -44,27 +43,44 @@ def main(timing, time_step):
         api_proc.terminate()
 
 def run_api(shared_data_dict):
-    api.state.shared_data =    shared_data_dict
+    api.state.shared_data = shared_data_dict
     uvicorn.run(api, host="0.0.0.0", port=8000)
 
 def run_sim(shared_data_dict, timing, time_step):
-
-    # 3. initialize the simulation GUI if needed
+    # Initialize the simulation GUI connector
     gui = WebGuiConnector()
 
-    # 4. Initialize the simulation engine
+    # Initialize the simulation engine
     line1 = "1 60989U 24157A   26075.16558042  .00000129  00000-0  65710-4 0  9997"
     line2 = "2 60989  98.5677 151.2852 0000884 109.8893 250.2385 14.30816791 79683"
     sim_engine = Simulator("SatelliteName", TLE=[line1, line2], t0=None, timing_mode=timing, time_step=time_step)
 
-    # 5. Add subsystems (only the camera in this case)
+    # Add subsystems
     camera = Camera(shared_data_dict=shared_data_dict)
-    # 6. Run the simulation
+
+    # PRISM loop — ticks in the sim process to track entropy drift over time
+    try:
+        from haic.prism_loop import get_prism_loop
+        prism_loop = get_prism_loop()
+        prism_enabled = True
+    except Exception as e:
+        print(f"[HAIC] PRISM loop unavailable: {e}")
+        prism_loop = None
+        prism_enabled = False
+
+    # Run the simulation
     sim_engine.reset()
 
+    tick_counter = 0
+    PRISM_TICK_INTERVAL = 100  # tick PRISM every 100 sim steps (~10s at 0.1s sleep)
+
     while True:
-        sim_step = sim_engine.sim_step() # returns none if no step is taken (e.g. because the time for teh next step has not yet come
+        sim_engine.sim_step()
         time.sleep(0.1)
-    
+
+        tick_counter += 1
+        if prism_enabled and prism_loop and tick_counter % PRISM_TICK_INTERVAL == 0:
+            prism_loop.tick()
+
 if __name__ == '__main__':
     main()

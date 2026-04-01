@@ -3,6 +3,7 @@ pydispatcher
 numpy
 uvicorn
 fastapi
+pydantic>=2.0
 matplotlib
 pyorbital
 pystac-client
@@ -11,3 +12,5 @@ click
 cartopy
 httplib2
 pyqt6
+# HAIC convention layer
+anthropic>=0.25.0

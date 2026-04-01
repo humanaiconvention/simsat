@@ -14,6 +14,8 @@ services:
     environment:
       - DJANGO_DEBUG=1
       - DJANGO_SECRET_KEY=dev-secret-key-change-me-in-production
+      # Proxy to simulator — used by Django's /sim/* proxy view
+      - SIM_URL=http://sim:8000
     networks:
       - fakesat-network
     healthcheck:
@@ -33,6 +35,10 @@ services:
     environment:
       - DASHBOARD_URL=http://dashboard:8000
       - MAPBOX_ACCESS_TOKEN
+      # HAIC convention layer
+      - ANTHROPIC_API_KEY
+      - HAIC_PRISM_MODE=synthetic
+      - HAIC_EPSILON=0.01
     depends_on:
       dashboard:
         condition: service_healthy

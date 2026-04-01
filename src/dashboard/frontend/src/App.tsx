@@ -3,6 +3,7 @@ import { TelemetryPoint, fetchRecentTelemetry } from "./api";
 import { GlobeView } from "./GlobeView";
 import { TelemetryPanel } from "./TelemetryPanel";
 import { SimulationControls } from "./SimulationControls";
+import { HAICPanel } from "./HAICPanel";
 
 export const App: React.FC = () => {
   const [telemetry, setTelemetry] = useState<TelemetryPoint[]>([]);
@@ -38,6 +39,7 @@ export const App: React.FC = () => {
     <div className="app">
       <header className="app-header">
         <h1>Satellite Simulation Dashboard</h1>
+        <span className="app-header-badge">HAIC Convention Layer</span>
       </header>
       <main className="app-main">
         <section className="globe-section">
@@ -46,9 +48,9 @@ export const App: React.FC = () => {
         <section className="side-panel">
           <TelemetryPanel latest={latest} />
           <SimulationControls />
+          <HAICPanel />
         </section>
       </main>
     </div>
   );
 };
-
