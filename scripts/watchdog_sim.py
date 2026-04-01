@@ -1,14 +1,16 @@
 """
 SimSat API Watchdog — auto-starts and restarts the simulator API on port 9005.
 
-Run once per console session (or at system startup):
+Normally launched automatically by the SimSat Pipeline terminal profile.
+Can also be run directly:
     python scripts/watchdog_sim.py
 
 The watchdog:
   1. Checks if the API is already running on port 9005.
-  2. Spawns it if not, using a shared Manager dict.
+  2. Spawns it if not.
   3. Polls every POLL_INTERVAL seconds; respawns on crash.
-  4. Exits cleanly on Ctrl+C.
+  4. Handles SIGTERM cleanly — kills the child API process and exits.
+     (The SimSat Pipeline .bashrc trap sends SIGTERM on console close.)
 
 Environment variables forwarded to the API process:
   HAIC_PRISM_MODE     synthetic (default) or full
@@ -21,6 +23,7 @@ Environment variables forwarded to the API process:
 from __future__ import annotations
 
 import os
+import signal
 import subprocess
 import sys
 import time
@@ -28,17 +31,19 @@ import urllib.request
 import urllib.error
 
 POLL_INTERVAL = 5       # seconds between health checks
-STARTUP_GRACE = 10      # seconds to wait after spawn before first health check
-PORT = int(os.environ.get("SIM_PORT", "9005"))
-HEALTH_URL = f"http://localhost:{PORT}/"
+STARTUP_GRACE = 15      # seconds to wait after spawn before first health check
+PORT          = int(os.environ.get("SIM_PORT", "9005"))
+HEALTH_URL    = f"http://localhost:{PORT}/"
 
-# ---- locate repo root (two levels up from this file) ----
+# ---- locate repo root ----
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT   = os.path.dirname(SCRIPT_DIR)
 SIM_DIR     = os.path.join(REPO_ROOT, "src", "sim")
 
 _proc: subprocess.Popen | None = None
 
+
+# ---- Health check ----
 
 def _is_up() -> bool:
     try:
@@ -48,104 +53,121 @@ def _is_up() -> bool:
         return False
 
 
+# ---- Process spawn ----
+
 def _spawn() -> subprocess.Popen:
-    """Launch the simulator API as a subprocess."""
+    """
+    Launch the simulator API as a child process.
+
+    Uses a regular dict for shared_data (not multiprocessing.Manager) because
+    the watchdog runs only the API — no separate sim process needs IPC.
+    A plain dict is sufficient and avoids multiprocessing spawn issues on Windows.
+    """
     env = {**os.environ}
     env.setdefault("HAIC_PRISM_MODE", "synthetic")
-    env.setdefault("PYTHONPATH", SIM_DIR)
 
-    # Inline bootstrap — sets up shared data and starts uvicorn on SIM_PORT
-    bootstrap = f"""
-import sys, os, multiprocessing
-sys.path.insert(0, {SIM_DIR!r})
-os.environ.setdefault("HAIC_PRISM_MODE", "synthetic")
-import api as api_module
-from api import api
-import uvicorn
+    # Write a small launcher script to a temp file so multiprocessing
+    # freeze_support works correctly (avoids re-import loops with -c on Windows)
+    import tempfile, textwrap
+    launcher = textwrap.dedent(f"""
+        import sys, os
+        sys.path.insert(0, {SIM_DIR!r})
+        os.environ.setdefault("HAIC_PRISM_MODE", "synthetic")
 
-manager = multiprocessing.Manager()
-shared_data_dict = manager.dict()
-shared_data_dict["satellite_position"] = (0.0, 0.0, 550.0)
-shared_data_dict["last_updated"] = "startup"
-api.state.shared_data = shared_data_dict
+        import multiprocessing
+        multiprocessing.freeze_support()
 
-uvicorn.run(api, host="0.0.0.0", port={PORT})
-"""
+        if __name__ == "__main__":
+            import api as api_module
+            from api import api
+            import uvicorn
+
+            shared_data_dict = {{
+                "satellite_position": (0.0, 0.0, 550.0),
+                "last_updated": "watchdog-start",
+            }}
+            api.state.shared_data = shared_data_dict
+            uvicorn.run(api, host="0.0.0.0", port={PORT}, log_level="warning")
+    """)
+
+    tmp = tempfile.NamedTemporaryFile(
+        mode="w", suffix="_simsat_api.py", delete=False, dir=SIM_DIR
+    )
+    tmp.write(launcher)
+    tmp.flush()
+    tmp.close()
+
     proc = subprocess.Popen(
-        [sys.executable, "-c", bootstrap],
+        [sys.executable, tmp.name],
         cwd=SIM_DIR,
         env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        bufsize=1,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
-    print(f"[watchdog] spawned API process PID={proc.pid} on port {PORT}")
+    print(f"[watchdog] spawned API (PID={proc.pid}) on :{PORT}", flush=True)
     return proc
 
 
-def _drain(proc: subprocess.Popen) -> None:
-    """Print any buffered output from the subprocess (non-blocking)."""
-    if proc.stdout is None:
-        return
-    import select
-    import io
-    # On Windows select() doesn't work on pipes; use a reader thread instead
-    # (output is printed via the thread started in _spawn_with_reader)
+# ---- Shutdown handler ----
 
+def _shutdown(signum=None, frame=None) -> None:
+    global _proc
+    print("\n[watchdog] received shutdown — stopping API...", flush=True)
+    if _proc and _proc.poll() is None:
+        _proc.terminate()
+        try:
+            _proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            _proc.kill()
+    print("[watchdog] exiting.", flush=True)
+    sys.exit(0)
+
+
+signal.signal(signal.SIGTERM, _shutdown)
+try:
+    signal.signal(signal.SIGBREAK, _shutdown)   # Windows Ctrl+Break
+except AttributeError:
+    pass
+
+
+# ---- Main loop ----
 
 def main() -> None:
     global _proc
-    print(f"[watchdog] SimSat API watchdog starting — target port {PORT}")
-    print(f"[watchdog] Repo:    {REPO_ROOT}")
-    print(f"[watchdog] Sim dir: {SIM_DIR}")
-    print(f"[watchdog] Press Ctrl+C to stop.\n")
+    print(f"[watchdog] SimSat pipeline  port={PORT}  pid={os.getpid()}", flush=True)
 
     restart_count = 0
 
     try:
         while True:
-            # --- check if already up externally ---
             if _is_up():
-                # still alive — just wait
                 time.sleep(POLL_INTERVAL)
                 continue
 
-            # --- check if our subprocess is still alive ---
             if _proc is not None and _proc.poll() is None:
-                # Process running but not responding — give it a bit more time
+                # Running but not yet responding — keep waiting
                 time.sleep(POLL_INTERVAL)
                 continue
 
-            # --- (re)spawn ---
             if _proc is not None:
-                retcode = _proc.poll()
-                print(f"[watchdog] Process exited (code={retcode}), restarting...")
+                print(f"[watchdog] API exited (code={_proc.poll()}) — restarting...", flush=True)
                 restart_count += 1
             else:
-                print(f"[watchdog] API not running, starting...")
+                print("[watchdog] starting API...", flush=True)
 
             _proc = _spawn()
 
-            # Wait for startup grace period, checking health
             deadline = time.time() + STARTUP_GRACE
             while time.time() < deadline:
                 time.sleep(1)
                 if _is_up():
-                    print(f"[watchdog] API is up (restarts={restart_count})")
+                    print(f"[watchdog] API ready  (restarts={restart_count})", flush=True)
                     break
             else:
-                print(f"[watchdog] WARNING: API didn't respond within {STARTUP_GRACE}s")
+                print(f"[watchdog] WARNING: API unresponsive after {STARTUP_GRACE}s", flush=True)
 
     except KeyboardInterrupt:
-        print("\n[watchdog] Shutting down...")
-        if _proc and _proc.poll() is None:
-            _proc.terminate()
-            try:
-                _proc.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                _proc.kill()
-        print("[watchdog] Done.")
+        _shutdown()
 
 
 if __name__ == "__main__":
