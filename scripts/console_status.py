@@ -1,24 +1,18 @@
 """
-BEAST Console Status — daily briefing and live updates on console open.
+BEAST Console Status — what actually happened since you were last here.
 
-Reads from:
-  - D:/humanai-convention/agents/control-plane/summary.json  (agent fleet state)
-  - D:/humanai-convention/STATUS.md                          (project snapshot)
-  - D:/humanai-convention/HANDOFF.md                        (recent changes)
-  - D:/humanai-convention/agents/*/workspace/               (agent-specific data)
-  - /tmp/simsat_access.log                                   (SimSat traffic)
-  - SimSat API on :9005                                      (if running)
+Reads agent logs, security patrol, supervisor relay, convention-hall inbox,
+mapper/librarian activity. Surfaces observations, not infrastructure state.
 """
 
 from __future__ import annotations
 
 import io
 import json
-import os
 import re
 import sys
 import time
-import urllib.request
+from collections import defaultdict
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
@@ -26,47 +20,29 @@ if sys.platform == "win32":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 # ── Paths ──────────────────────────────────────────────────────────────────
-HAIC_ROOT    = Path("D:/humanai-convention")
-AGENTS_DIR   = HAIC_ROOT / "agents"
-SUMMARY_FILE = AGENTS_DIR / "control-plane" / "summary.json"
-STATUS_FILE  = HAIC_ROOT / "STATUS.md"
-HANDOFF_FILE = HAIC_ROOT / "HANDOFF.md"
-STAMP_FILE   = Path("/tmp/beast_last_open")
-ACCESS_LOG   = Path(os.environ.get("SIMSAT_ACCESS_LOG", "/tmp/simsat_access.log"))
-
-SIM_PORT     = int(os.environ.get("SIM_PORT", "9005"))
-SIM_URL      = f"http://localhost:{SIM_PORT}"
+HAIC          = Path("D:/humanai-convention")
+AGENTS        = HAIC / "agents"
+STAMP_FILE    = Path("/tmp/beast_last_open")
 
 # ── ANSI ───────────────────────────────────────────────────────────────────
-BOLD   = "\033[1m"
-DIM    = "\033[2m"
-GREEN  = "\033[92m"
-YELLOW = "\033[93m"
-CYAN   = "\033[96m"
-RED    = "\033[91m"
-BLUE   = "\033[94m"
-RESET  = "\033[0m"
-W      = 60
-SEP    = f"{DIM}{'-' * W}{RESET}"
+BOLD  = "\033[1m"
+DIM   = "\033[2m"
+GREEN = "\033[92m"
+YELLOW= "\033[93m"
+RED   = "\033[91m"
+CYAN  = "\033[96m"
+RESET = "\033[0m"
+W     = 62
+SEP   = f"{DIM}{'-' * W}{RESET}"
 
 
-# ── Helpers ────────────────────────────────────────────────────────────────
-
-def _get(path: str, timeout: int = 3):
-    try:
-        with urllib.request.urlopen(f"{SIM_URL}{path}", timeout=timeout) as r:
-            return json.loads(r.read())
-    except Exception:
-        return None
-
+# ── Stamp ──────────────────────────────────────────────────────────────────
 
 def _read_stamp() -> datetime:
     try:
-        ts = float(STAMP_FILE.read_text().strip())
-        return datetime.fromtimestamp(ts, tz=timezone.utc)
+        return datetime.fromtimestamp(float(STAMP_FILE.read_text()), tz=timezone.utc)
     except Exception:
         return datetime.now(timezone.utc) - timedelta(hours=24)
-
 
 def _write_stamp():
     try:
@@ -74,145 +50,270 @@ def _write_stamp():
     except Exception:
         pass
 
+def _ago(dt: datetime) -> str:
+    delta = datetime.now(timezone.utc) - dt
+    h = int(delta.total_seconds() // 3600)
+    m = int((delta.total_seconds() % 3600) // 60)
+    if h > 48: return f"{h//24}d ago"
+    if h:      return f"{h}h {m}m ago"
+    return f"{m}m ago"
 
-def _time_ago(dt_str: str) -> str:
-    """Convert ISO timestamp to human 'Xh ago'."""
+def _parse_ts(s: str) -> datetime | None:
     try:
-        dt = datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
-        delta = datetime.now(timezone.utc) - dt
-        h = int(delta.total_seconds() // 3600)
-        m = int((delta.total_seconds() % 3600) // 60)
-        if h > 48:
-            return f"{h//24}d ago"
-        if h:
-            return f"{h}h {m}m ago"
-        return f"{m}m ago"
+        return datetime.fromisoformat(s.replace("Z", "+00:00"))
     except Exception:
-        return "?"
+        return None
 
 
-def _md_first_section(path: Path, section: str) -> str:
-    """Extract the first content paragraph after a heading containing `section`."""
+# ── Security ───────────────────────────────────────────────────────────────
+
+def _security_report(since: datetime) -> list[str]:
+    lines = []
+    log = AGENTS / "haic-security" / "workspace" / "logs" / "patrol.log"
     try:
-        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
-        in_section = False
-        buf = []
-        for line in lines:
-            if re.match(r"^#{1,3}\s+.*" + re.escape(section), line, re.IGNORECASE):
-                in_section = True
-                continue
-            if in_section:
-                if re.match(r"^#{1,3}\s+", line) and buf:
-                    break
-                if line.strip():
-                    buf.append(line.strip())
-                    if len(buf) >= 3:
-                        break
-        return " ".join(buf)
-    except Exception:
-        return ""
-
-
-def _handoff_today(last_open: datetime) -> list[str]:
-    """Extract bullet points added to HANDOFF.md since last_open."""
-    try:
-        text = HANDOFF_FILE.read_text(encoding="utf-8", errors="replace")
-        lines = text.splitlines()
-        items = []
-        in_recent = False
-        for line in lines:
-            if "What Changed" in line or "This Session" in line:
-                in_recent = True
-                continue
-            if in_recent:
-                if re.match(r"^#{1,3}\s+", line) and items:
-                    break
-                if line.strip().startswith(("- ", "* ", "+ ")):
-                    items.append(line.strip().lstrip("-*+ ").strip())
-        return items[:8]
-    except Exception:
-        return []
-
-
-def _simsat_log_stats() -> dict:
-    stats = {"total": 0, "external": 0, "sessions": 0, "turns": 0, "receipts": 0, "ext_ips": set()}
-    try:
-        for line in ACCESS_LOG.read_text(encoding="utf-8", errors="replace").splitlines():
-            if " - \"" not in line:
-                continue
-            stats["total"] += 1
-            ip_part = line.split("INFO:")[1].strip().split(":")[0] if "INFO:" in line else ""
-            if ip_part and ip_part not in ("127.0.0.1", "::1", "0.0.0.0", ""):
-                stats["external"] += 1
-                stats["ext_ips"].add(ip_part)
-            if "POST /haic/session" in line and "/turn" not in line and "/close" not in line:
-                stats["sessions"] += 1
-            if "/turn" in line and "POST" in line:
-                stats["turns"] += 1
-            if "/receipt" in line and "GET" in line:
-                stats["receipts"] += 1
+        raw = log.read_text(encoding="utf-8", errors="replace").splitlines()
     except FileNotFoundError:
-        pass
-    return stats
+        return lines
+
+    # Deduplicate consent warnings — report count, not each UUID
+    consent_missing: set[str] = set()
+    detections: list[str] = []
+    blocks = 0
+    warns = 0
+    last_stats: dict = {}
+    restarts = 0
+
+    for line in raw:
+        ts_m = re.match(r"\[(\d{4}-\d{2}-\d{2}T[\d:.]+Z)\]", line)
+        if not ts_m:
+            continue
+        ts = _parse_ts(ts_m.group(1))
+        if ts and ts < since:
+            continue
+
+        if "worker-started" in line:
+            restarts += 1
+        elif "lattice-missing-consent" in line:
+            sid_m = re.search(r"session_id=([a-f0-9-]+)", line)
+            if sid_m:
+                consent_missing.add(sid_m.group(1)[:8])
+        elif ("blocked" in line.lower() or "inject" in line.lower() or "poison" in line.lower()) \
+                and "shutdown" not in line.lower():
+            detections.append(line.split("] ", 1)[-1].strip())
+        elif "shutdown" in line and "stats=" in line:
+            stats_m = re.search(r"stats=(\{.+\})", line)
+            if stats_m:
+                try:
+                    last_stats = json.loads(stats_m.group(1))
+                    blocks += last_stats.get("blocks", 0)
+                    warns  += last_stats.get("warns", 0)
+                except Exception:
+                    pass
+
+    if blocks > 0:
+        lines.append(f"{RED}Security: {blocks} block(s) — review patrol.log{RESET}")
+    if warns > 0:
+        lines.append(f"{YELLOW}Security: {warns} warning(s){RESET}")
+    if consent_missing:
+        lines.append(f"{YELLOW}Security: {len(consent_missing)} lattice session(s) missing consent_hash{RESET}")
+    for d in detections[:3]:
+        lines.append(f"{RED}  detection: {d[:70]}{RESET}")
+    if not lines:
+        lines.append(f"{DIM}Security: clean — no detections, no blocks{RESET}")
+    return lines
 
 
-# ── Agent fleet ────────────────────────────────────────────────────────────
+# ── Supervisor ────────────────────────────────────────────────────────────
 
-STATE_ICON = {
-    "live":            f"{GREEN}*{RESET}",
-    "working":         f"{CYAN}>{RESET}",
-    "active":          f"{GREEN}+{RESET}",
-    "paused":          f"{DIM}~{RESET}",
-    "stopped":         f"{DIM}.{RESET}",
-    "shutting-down":   f"{YELLOW}v{RESET}",
-    "error":           f"{RED}!{RESET}",
-}
-
-AGENTS_OF_INTEREST = [
-    "haic-supervisor",
-    "haic-dispatch",
-    "haic-envoy",
-    "haic-security",
-    "haic-maestro",
-    "haic-prism",
-    "haic-librarian",
-    "haic-mapper",
-]
-
-
-def _load_fleet() -> list[dict]:
+def _supervisor_report(since: datetime) -> list[str]:
+    lines = []
+    log = AGENTS / "supervisor" / "logs" / "supervisor.log"
     try:
-        return json.loads(SUMMARY_FILE.read_text(encoding="utf-8", errors="replace")).get("agents", [])
-    except Exception:
-        return []
+        raw = log.read_text(encoding="utf-8", errors="replace").splitlines()
+    except FileNotFoundError:
+        return lines
+
+    events: list[str] = []
+    fleet_snapshots: list[tuple[datetime, int, int]] = []  # (ts, live, paused)
+
+    for line in raw:
+        ts_m = re.match(r"\[(\d{4}-\d{2}-\d{2}T[\d:.]+Z)\]", line)
+        if not ts_m:
+            continue
+        ts = _parse_ts(ts_m.group(1))
+        if ts and ts < since:
+            continue
+
+        if "envoy-briefed" in line:
+            pass  # captured via fleet_snapshots; skip duplicate narrative
+        elif "relay-forwarded" in line:
+            from_m = re.search(r"from=(\S+)", line)
+            to_m   = re.search(r"to=(\S+)", line)
+            if from_m and to_m:
+                events.append(f"Relay: {from_m.group(1).replace('haic-','')} -> {to_m.group(1).replace('haic-','')}")
+        elif "relay-blocked" in line or "relay-rejected" in line:
+            events.append(f"{RED}Relay blocked: {line.split('] ',1)[-1].strip()[:60]}{RESET}")
+        elif re.search(r"sync \|.*live=(\d+).*paused=(\d+)", line):
+            m = re.search(r"live=(\d+).*paused=(\d+)", line)
+            if m and ts:
+                fleet_snapshots.append((ts, int(m.group(1)), int(m.group(2))))
+
+    # Summarise fleet peak from snapshots
+    if fleet_snapshots:
+        peak_live = max(s[1] for s in fleet_snapshots)
+        latest    = fleet_snapshots[-1]
+        lines.append(f"{DIM}Supervisor: peak {peak_live} agents live, now {latest[1]} live / {latest[2]} paused{RESET}")
+
+    for e in events[:5]:
+        lines.append(f"  {DIM}{e}{RESET}")
+
+    return lines
 
 
-def _agent_row(a: dict) -> str:
-    state  = a.get("state", "?")
-    icon   = STATE_ICON.get(state, f"{DIM}?{RESET}")
-    name   = a["id"].replace("haic-", "").title().replace("-", " ")
-    task   = a.get("current_task", "").strip()
-    # Clean up garbled unicode from the encoding issue in summary.json
-    # Normalise garbled bytes that appear when the JS agent writes latin1-encoded em-dashes
-    task   = task.encode("latin-1", "replace").decode("utf-8", "replace")
-    task   = re.sub(r"[\ufffd\x00-\x08\x0b-\x1f]", "", task).strip()
-    # Truncate
-    task   = (task[:36] + "..") if len(task) > 38 else task
-    ago    = _time_ago(a["updated_at"]) if a.get("updated_at") else ""
-    return f"  {icon} {BOLD}{name:<14}{RESET} {DIM}{task:<38}{RESET}  {DIM}{ago}{RESET}"
+# ── Mapper ─────────────────────────────────────────────────────────────────
+
+def _mapper_report(since: datetime) -> list[str]:
+    lines = []
+    log = AGENTS / "haic-mapper" / "workspace" / "logs" / "worker.log"
+    try:
+        raw = log.read_text(encoding="utf-8", errors="replace").splitlines()
+    except FileNotFoundError:
+        return lines
+
+    prompts_done = 0
+    yielded_to: set[str] = set()
+    last_active = None
+
+    for line in raw:
+        ts_m = re.match(r"\[(\d{4}-\d{2}-\d{2}T[\d:.]+Z)\]", line)
+        if not ts_m:
+            continue
+        ts = _parse_ts(ts_m.group(1))
+        if ts and ts < since:
+            continue
+        if "prompt-complete" in line or "map-updated" in line:
+            prompts_done += 1
+            last_active = ts
+        elif "compute-busy" in line:
+            yt_m = re.search(r"yield_to=([^\|]+)", line)
+            if yt_m:
+                for a in yt_m.group(1).split(","):
+                    yielded_to.add(a.strip().replace("haic-", ""))
+
+    if prompts_done:
+        lines.append(f"Mapper: {prompts_done} mapping task(s) completed")
+    elif yielded_to:
+        agents = ", ".join(sorted(yielded_to)[:4])
+        lines.append(f"{DIM}Mapper: yielded to {agents} (idle — no mapping work done){RESET}")
+    return lines
 
 
-# ── Security agent details ─────────────────────────────────────────────────
+# ── Librarian ─────────────────────────────────────────────────────────────
 
-def _security_summary(agent: dict) -> str:
-    task = agent.get("current_task", "")
-    # Parse "scans:N blocks:N warns:N escalations:N" from task string
-    m = re.search(r"scans:(\d+).*?blocks:(\d+).*?warns:(\d+)", task)
-    if m:
-        scans, blocks, warns = m.group(1), m.group(2), m.group(3)
-        color = RED if int(blocks) > 0 or int(warns) > 0 else DIM
-        return f"  {color}Security  scans={scans}  blocks={blocks}  warns={warns}{RESET}"
-    return ""
+def _librarian_report(since: datetime) -> list[str]:
+    lines = []
+    log = AGENTS / "haic-librarian" / "workspace" / "logs" / "worker.log"
+    try:
+        raw = log.read_text(encoding="utf-8", errors="replace").splitlines()
+    except FileNotFoundError:
+        return lines
+
+    papers_moved = 0
+    deferred = False
+
+    for line in raw:
+        ts_m = re.match(r"\[(\d{4}-\d{2}-\d{2}T[\d:.]+Z)\]", line)
+        if not ts_m:
+            continue
+        ts = _parse_ts(ts_m.group(1))
+        if ts and ts < since:
+            continue
+        if "paper-classified" in line or "paper-moved" in line or "batch-complete" in line:
+            papers_moved += 1
+        elif "compute-busy" in line:
+            deferred = True
+
+    if papers_moved:
+        lines.append(f"Librarian: {papers_moved} article(s) classified/moved")
+    elif deferred:
+        lines.append(f"{DIM}Librarian: deferred — higher-priority agents were active{RESET}")
+    return lines
+
+
+# ── Convention Hall ────────────────────────────────────────────────────────
+
+def _convention_report(since: datetime) -> list[str]:
+    lines = []
+    inbox = AGENTS / "convention-hall" / "workspace" / "INBOX.md"
+    try:
+        raw = inbox.read_text(encoding="utf-8", errors="replace")
+    except FileNotFoundError:
+        return lines
+
+    sessions: list[str] = []
+    for block in re.split(r"\n(?=\{)", raw):
+        try:
+            msg = json.loads(block.strip())
+            ts = _parse_ts(msg.get("timestamp", ""))
+            if ts and ts >= since:
+                frm   = msg.get("from", "?").replace("haic-", "")
+                topic = msg.get("content", "")[:60].replace("\n", " ")
+                sessions.append(f"{frm}: {topic}")
+        except Exception:
+            pass
+
+    if sessions:
+        lines.append(f"Convention Hall: {len(sessions)} message(s)")
+        for s in sessions[:3]:
+            lines.append(f"  {DIM}{s}{RESET}")
+    return lines
+
+
+# ── Envoy ──────────────────────────────────────────────────────────────────
+
+def _envoy_report(since: datetime) -> list[str]:
+    lines = []
+    log = AGENTS / "haic-envoy" / "workspace" / "logs" / "worker.log"
+    try:
+        raw = log.read_text(encoding="utf-8", errors="replace").splitlines()
+    except FileNotFoundError:
+        return lines
+
+    contacts = 0
+    for line in raw:
+        ts_m = re.match(r"\[(\d{4}-\d{2}-\d{2}T[\d:.]+Z)\]", line)
+        if not ts_m:
+            continue
+        ts = _parse_ts(ts_m.group(1))
+        if ts and ts < since:
+            continue
+        if "outreach" in line or "contact" in line or "response-sent" in line:
+            contacts += 1
+
+    if contacts:
+        lines.append(f"Envoy: {contacts} outreach/contact event(s)")
+    return lines
+
+
+# ── Pending inboxes ────────────────────────────────────────────────────────
+
+def _pending_inboxes() -> list[str]:
+    """Find agent inboxes with unprocessed content."""
+    lines = []
+    for agent_dir in sorted(AGENTS.iterdir()):
+        inbox = agent_dir / "workspace" / "INBOX.md"
+        if not inbox.exists():
+            continue
+        try:
+            text = inbox.read_text(encoding="utf-8", errors="replace")
+            # Look for JSON blocks that look like unprocessed relay messages
+            pending = re.findall(r'"type":\s*"relay"', text)
+            if pending:
+                name = agent_dir.name.replace("haic-", "")
+                lines.append(f"{YELLOW}  {name}: {len(pending)} pending relay(s){RESET}")
+        except Exception:
+            pass
+    return lines
 
 
 # ── Main ───────────────────────────────────────────────────────────────────
@@ -221,103 +322,69 @@ def main():
     last_open = _read_stamp()
     _write_stamp()
 
-    now      = datetime.now(timezone.utc)
-    delta    = now - last_open
-    h, m     = int(delta.total_seconds() // 3600), int((delta.total_seconds() % 3600) // 60)
-    since    = f"{h}h {m}m ago" if h else f"{m}m ago"
-
-    fleet    = _load_fleet()
-    fleet_by_id = {a["id"]: a for a in fleet}
-
-    # Count live/working
-    live_n   = sum(1 for a in fleet if a.get("state") in ("live", "working", "active"))
-    total_n  = len(fleet)
+    now   = datetime.now(timezone.utc)
+    delta = now - last_open
+    h, m  = int(delta.total_seconds() // 3600), int((delta.total_seconds() % 3600) // 60)
+    since_str = f"{h}h {m}m ago" if h else f"{m}m ago"
 
     print()
     print(SEP)
-    print(f"{BOLD}  BEAST Console{RESET}  {DIM}{now.strftime('%a %d %b %Y  %H:%M UTC')}{RESET}")
-    print(f"  {DIM}last open {since}{RESET}")
+    print(f"{BOLD}  BEAST  {RESET}{DIM}{now.strftime('%a %d %b  %H:%M UTC')}  |  since {since_str}{RESET}")
     print(SEP)
 
-    # ── Agent fleet ──────────────────────────────────────────────────────
-    print(f"\n{BOLD}  Agents  {DIM}({live_n} active / {total_n} total){RESET}")
+    any_output = False
 
-    for aid in AGENTS_OF_INTEREST:
-        a = fleet_by_id.get(aid)
-        if a:
-            print(_agent_row(a))
-
-    # Security inline summary
-    sec = fleet_by_id.get("haic-security")
+    # Security
+    sec = _security_report(last_open)
     if sec:
-        s = _security_summary(sec)
-        if s:
-            print(s)
+        print(f"\n{BOLD}  Security{RESET}")
+        for l in sec: print(f"  {l}")
+        any_output = True
 
-    # ── What changed (HANDOFF) ───────────────────────────────────────────
-    changes = _handoff_today(last_open)
-    if changes:
-        print(f"\n{BOLD}  Recent changes{RESET}  {DIM}(HANDOFF.md){RESET}")
-        for item in changes[:5]:
-            # Condense — show first line only
-            short = item.split(" -- ")[0].split(": ", 1)[-1]
-            short = (short[:55] + "..") if len(short) > 57 else short
-            print(f"  {DIM}- {short}{RESET}")
+    # Supervisor
+    sup = _supervisor_report(last_open)
+    if sup:
+        print(f"\n{BOLD}  Supervisor{RESET}")
+        for l in sup: print(f"  {l}")
+        any_output = True
 
-    # ── SimSat pipeline ──────────────────────────────────────────────────
-    print(f"\n{BOLD}  SimSat Pipeline{RESET}")
-    sim_health = _get("/haic/health")
-    if sim_health:
-        pos = _get("/data/current/position")
-        pos_str = ""
-        if pos and "position" in pos:
-            p = pos["position"]
-            pos_str = f"  {p[1]:.1f}N {p[0]:.1f}E {p[2]:.0f}km"
-        print(f"  {GREEN}* online{RESET}{DIM}{pos_str}  PRISM {sim_health.get('prism','?')}{RESET}")
-        log = _simsat_log_stats()
-        if log["external"] > 0:
-            ips = ", ".join(sorted(log["ext_ips"]))
-            print(f"  {YELLOW}! {log['external']} external visit(s): {ips}{RESET}")
-        if log["sessions"] > 0:
-            print(f"  {CYAN}  {log['sessions']} HAIC sessions  {log['turns']} turns  {log['receipts']} receipts{RESET}")
-        wins = _get("/haic/windows?count=1")
-        if wins and wins.get("windows"):
-            w = wins["windows"][0]
-            wt = w.get("start_time", "")[:16].replace("T", " ")
-            print(f"  {DIM}next window {wt}Z  {w.get('region_description','')}{RESET}")
-    else:
-        print(f"  {DIM}. offline (watchdog will start on pipeline open){RESET}")
+    # Convention Hall
+    conv = _convention_report(last_open)
+    if conv:
+        print(f"\n{BOLD}  Convention Hall{RESET}")
+        for l in conv: print(f"  {l}")
+        any_output = True
 
-    # ── Project snapshot (one line from STATUS.md) ───────────────────────
-    try:
-        status_lines = STATUS_FILE.read_text(encoding="utf-8", errors="replace").splitlines()
-        for line in status_lines[3:12]:
-            line = line.strip()
-            if line.startswith("- **") and "active model" in line.lower():
-                model = re.search(r"\*\*(.+?)\*\*", line)
-                if model:
-                    print(f"\n  {DIM}Model  {model.group(1)}{RESET}")
-                break
-    except Exception:
-        pass
+    # Mapper
+    mapper = _mapper_report(last_open)
+    if mapper:
+        print(f"\n{BOLD}  Mapper{RESET}")
+        for l in mapper: print(f"  {l}")
+        any_output = True
 
-    # ── Training pipeline status ──────────────────────────────────────────
-    try:
-        training = json.loads((AGENTS_DIR / "control-plane" / "training-status.json").read_text(encoding="utf-8"))
-        current  = training.get("lattice_sessions", "?")
-        target   = training.get("pipeline_threshold", "?")
-        model    = training.get("next_version", training.get("current_model", "?"))
-        ready    = training.get("pipeline_ready", False)
-        bar_len  = 20
-        try:
-            filled = int(bar_len * int(current) / int(target))
-        except Exception:
-            filled = 0
-        bar   = f"{'#' * filled}{'.' * (bar_len - filled)}"
-        color = CYAN if ready else DIM
-        print(f"  {color}Training  [{bar}] {current}/{target} sessions  next={model}{RESET}")
-    except Exception:
-        pass
+    # Librarian
+    lib = _librarian_report(last_open)
+    if lib:
+        print(f"\n{BOLD}  Librarian{RESET}")
+        for l in lib: print(f"  {l}")
+        any_output = True
+
+    # Envoy
+    env = _envoy_report(last_open)
+    if env:
+        print(f"\n{BOLD}  Envoy{RESET}")
+        for l in env: print(f"  {l}")
+        any_output = True
+
+    # Pending inbox relays
+    pending = _pending_inboxes()
+    if pending:
+        print(f"\n{BOLD}  Pending{RESET}")
+        for l in pending: print(l)
+        any_output = True
+
+    if not any_output:
+        print(f"\n  {DIM}No agent activity since last open.{RESET}")
 
     print()
     print(SEP)
