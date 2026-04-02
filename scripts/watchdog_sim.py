@@ -69,6 +69,8 @@ def _spawn() -> subprocess.Popen:
     # Write a small launcher script to a temp file so multiprocessing
     # freeze_support works correctly (avoids re-import loops with -c on Windows)
     import tempfile, textwrap
+    access_log = os.environ.get("SIMSAT_ACCESS_LOG", "/tmp/simsat_access.log")
+
     launcher = textwrap.dedent(f"""
         import sys, os
         sys.path.insert(0, {SIM_DIR!r})
@@ -81,6 +83,13 @@ def _spawn() -> subprocess.Popen:
             import api as api_module
             from api import api
             import uvicorn
+            import logging
+
+            # Append-mode file handler for access log (persists across restarts)
+            access_log_path = {access_log!r}
+            file_handler = logging.FileHandler(access_log_path, mode="a", encoding="utf-8")
+            file_handler.setFormatter(logging.Formatter("%(levelname)-8s  %(message)s"))
+            logging.getLogger("uvicorn.access").addHandler(file_handler)
 
             shared_data_dict = {{
                 "satellite_position": (0.0, 0.0, 550.0),
