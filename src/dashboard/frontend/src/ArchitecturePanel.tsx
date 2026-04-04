@@ -8,15 +8,32 @@ interface ModelInfo {
 }
 
 const MODELS: ModelInfo[] = [
-  { id: "gemma4-2b", name: "Gemma 4 2B (HAIC)", family: "Transformer + AltUp", file: "/static/arch/gemma4-2b_arch.html" },
-  { id: "lfm2-8b", name: "LFM2 8B A1B", family: "MoE + ShortConv", file: "/static/arch/lfm2-8b_arch.html" },
-  { id: "qwen3.5-2b", name: "Qwen3.5 2B", family: "Hybrid SSM", file: "/static/arch/qwen3.5-2b_arch.html" },
-  { id: "nemotron-4b", name: "Nemotron 4B", family: "Hybrid SSM", file: "/static/arch/nemotron-4b_arch.html" },
-  { id: "llama3.1-8b", name: "Llama 3.1 8B", family: "Dense Transformer", file: "/static/arch/llama3.1-8b_arch.html" },
-  { id: "qwen3-8b", name: "Qwen3 8B", family: "Dense Transformer", file: "/static/arch/qwen3-8b_arch.html" },
-  { id: "phi4-mini", name: "Phi-4 Mini", family: "Dense Transformer", file: "/static/arch/phi4-mini_arch.html" },
-  { id: "ministral-3b", name: "Ministral 3B", family: "Dense Transformer", file: "/static/arch/ministral-3b_arch.html" },
-  { id: "smollm3-3b", name: "SmolLM3 3B", family: "Dense Transformer", file: "/static/arch/smollm3-3b_arch.html" },
+  // HAIC family
+  { id: "haic-v3-2b", name: "HAIC v3 2B (Q5) ACTIVE", family: "Hybrid SSM | SGT 9.64", file: "/static/arch/haic-v3-2b_arch.html" },
+  { id: "haic-v3-2b-q4", name: "HAIC v3 2B (Q4)", family: "Hybrid SSM | SGT 8.80", file: "/static/arch/haic-v3-2b-q4_arch.html" },
+  { id: "haic-v6-2b", name: "HAIC v6 2B", family: "Hybrid SSM | SGT 8.00", file: "/static/arch/haic-v6-2b_arch.html" },
+  { id: "haic-v5-2b", name: "HAIC v5 2B", family: "Hybrid SSM | SGT 8.00", file: "/static/arch/haic-v5-2b_arch.html" },
+  { id: "haic-v4-2b", name: "HAIC v4 2B", family: "Hybrid SSM | SGT 7.92", file: "/static/arch/haic-v4-2b_arch.html" },
+  { id: "haic-v3-2b-q3", name: "HAIC v3 2B (Q3)", family: "Hybrid SSM | SGT 7.56", file: "/static/arch/haic-v3-2b-q3_arch.html" },
+  { id: "haic-v7-2b", name: "HAIC v7 2B", family: "Hybrid SSM | SGT 6.40", file: "/static/arch/haic-v7-2b_arch.html" },
+  { id: "haic-v8-2b", name: "HAIC v8 2B", family: "Hybrid SSM | SGT 6.12", file: "/static/arch/haic-v8-2b_arch.html" },
+  { id: "haic-v3-2b-q2", name: "HAIC v3 2B (Q2)", family: "Hybrid SSM | SGT 5.60", file: "/static/arch/haic-v3-2b-q2_arch.html" },
+  { id: "haic-v3-8b", name: "HAIC v3 8B (LoRA)", family: "Dense LoRA | SGT 6.84", file: "/static/arch/haic-v3-8b_arch.html" },
+  // Competitors
+  { id: "gemma-3n-e2b", name: "Gemma 3n E2B", family: "AltUp | SGT 9.92", file: "/static/arch/gemma-3n-e2b_arch.html" },
+  { id: "qwen3-8b", name: "Qwen3 8B", family: "Dense | SGT 8.96", file: "/static/arch/qwen3-8b_arch.html" },
+  { id: "qwen3-8b-q2k", name: "Qwen3 8B (Q2)", family: "Dense | SGT 9.56", file: "/static/arch/qwen3-8b-q2k_arch.html" },
+  { id: "qwen35-4b-opus", name: "Qwen3.5 4B Opus", family: "Hybrid SSM | SGT 7.72", file: "/static/arch/qwen35-4b-opus_arch.html" },
+  { id: "ministral-3b", name: "Ministral 3B", family: "Dense | SGT 7.52", file: "/static/arch/ministral-3b_arch.html" },
+  { id: "nemotron-nano-4b", name: "Nemotron Nano 4B", family: "Hybrid SSM | SGT 7.36", file: "/static/arch/nemotron-nano-4b_arch.html" },
+  { id: "phi4-mini", name: "Phi-4 Mini", family: "Dense | SGT 7.24", file: "/static/arch/phi4-mini_arch.html" },
+  { id: "llama3-8b", name: "Llama 3.1 8B", family: "Dense | SGT 6.48", file: "/static/arch/llama3.1-8b_arch.html" },
+  { id: "qwen35-2b-base", name: "Qwen3.5 2B (base)", family: "Hybrid SSM | SGT 6.48", file: "/static/arch/qwen35-2b-base_arch.html" },
+  { id: "lfm2-8b-a1b", name: "LFM2 8B-A1B", family: "MoE+ShortConv | SGT 6.52", file: "/static/arch/lfm2-8b-a1b_arch.html" },
+  { id: "gemma3-4b", name: "Gemma 3 4B", family: "Dense | SGT 6.48", file: "/static/arch/gemma3-4b_arch.html" },
+  { id: "smollm3-3b", name: "SmolLM3 3B", family: "Dense | SGT 5.60", file: "/static/arch/smollm3-3b_arch.html" },
+  { id: "gemma4-e2b", name: "Gemma 4 E2B", family: "AltUp | SGT 5.60", file: "/static/arch/gemma4-e2b_arch.html" },
+  { id: "gemma4-2b", name: "Gemma 4 2B (HAIC)", family: "AltUp (animated)", file: "/static/arch/gemma4-2b_arch.html" },
 ];
 
 interface Props {

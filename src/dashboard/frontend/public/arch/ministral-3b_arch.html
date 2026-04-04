@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Ministral 3B Reasoning — Architecture 3D</title>
+<title>Ministral 3B — Architecture 3D</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:#04040f; }
@@ -54,8 +54,8 @@
 <div id="info-overlay" onclick="toggleInfo()"></div>
 <div id="info-panel">
   <span class="close" onclick="toggleInfo()">✕</span>
-  <h2>MINISTRAL 3B REASONING · ARCHITECTURE</h2>
-  <p>Mistral's 3B reasoning model. 26 layers, GQA. Notable: Q projects UP to 4096 dims from d_model=3072, and attn_output maps 4096->3072. SwiGLU FFN with 9216 hidden dim.</p>
+  <h2>MINISTRAL 3B · ARCHITECTURE</h2>
+  <p>Mistral reasoning model. 26 layers, GQA. Q projects UP to 4096 from d_model=3072. SGT 7.52.</p>
   <p>Every shape is falsifiable: verify against the GGUF tensor info section.</p>
 
   <h3>Axes</h3>
@@ -205,7 +205,7 @@ ARCH.global.forEach((g,i) => {
 const layout = {
   paper_bgcolor:'#04040f', plot_bgcolor:'#04040f',
   font:{family:'Courier New,monospace',color:'#445566',size:10},
-  title:{text:'MINISTRAL 3B REASONING  ·  TENSOR ARCHITECTURE  ·  '+allX.length+' displayed  ·  Height ∝ log₂(params)',
+  title:{text:'MINISTRAL 3B  ·  TENSOR ARCHITECTURE  ·  '+allX.length+' displayed  ·  Height ∝ log₂(params)',
     font:{size:13,color:'#b8c8ee',family:'Courier New'},x:0.03,y:0.985,xanchor:'left'},
   margin:{l:0,r:0,t:36,b:12},
   showlegend:true,

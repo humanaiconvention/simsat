@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HAIC v4 2B — Architecture 3D</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#04040f; }
+  #plot { width:100vw; height:100vh; }
+  #source-note {
+    position:fixed; bottom:12px; right:12px;
+    font:9px/1.7 'Courier New',monospace;
+    color:#1a2a3a; pointer-events:none; text-align:right;
+  }
+  #help-btn {
+    position:fixed; bottom:16px; right:20px;
+    width:26px; height:26px; border-radius:50%;
+    background:#0d1a2e; border:1px solid #1e3355;
+    color:#4488bb; font:bold 13px/26px 'Courier New',monospace;
+    text-align:center; cursor:pointer; z-index:200; user-select:none;
+  }
+  #help-btn:hover { background:#112233; color:#66aadd; }
+  #info-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:290; display:none; }
+  #info-panel {
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:min(700px,92vw); background:rgba(4,6,18,0.98);
+    border:1px solid #1a2a44; border-radius:10px;
+    padding:26px 30px 22px; font:11px/1.9 'Courier New',monospace;
+    color:#8899bb; z-index:300; display:none;
+    box-shadow:0 8px 48px rgba(0,0,0,0.9); max-height:90vh; overflow-y:auto;
+  }
+  #info-panel h2 { font-size:13px; color:#c8d8ff; letter-spacing:1.5px; margin-bottom:14px; border-bottom:1px solid #1a2a44; padding-bottom:10px; }
+  #info-panel h3 { font-size:10px; color:#667788; letter-spacing:1px; margin:14px 0 5px; text-transform:uppercase; }
+  #info-panel p  { margin-bottom:5px; }
+  #info-panel .kv { display:flex; gap:10px; margin-bottom:3px; }
+  #info-panel .k  { color:#aabbcc; min-width:180px; flex-shrink:0; }
+  #info-panel .v  { color:#667788; }
+  #info-panel .sw { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px; vertical-align:middle; }
+  #info-panel .hl { color:#ffdd44; }
+  #info-panel .close { position:absolute; top:14px; right:18px; color:#334455; font-size:16px; cursor:pointer; line-height:1; }
+  #info-panel .close:hover { color:#88aacc; }
+</style>
+</head>
+<body>
+<div id="plot"></div>
+
+<div id="source-note">
+  Source: haic-v4-2b-Q5_K_M.gguf<br>
+  242 of 320 tensors displayed (78 norms omitted)<br>
+  All displayed shapes verified from GGUF tensor info · no estimates
+</div>
+
+<div id="help-btn" onclick="toggleInfo()">?</div>
+<div id="info-overlay" onclick="toggleInfo()"></div>
+<div id="info-panel">
+  <span class="close" onclick="toggleInfo()">✕</span>
+  <h2>HAIC V4 2B · ARCHITECTURE</h2>
+  <p>120 SGT examples, 3 epochs. SGT 7.92. Same Qwen3.5-2B architecture as v3.</p>
+  <p>Every shape is falsifiable: verify against the GGUF tensor info section.</p>
+
+  <h3>Axes</h3>
+  <div class="kv"><span class="k">X axis (left -> right)</span><span class="v">Layer index 0–23. x=−4 holds global (non-layer) tensors.</span></div>
+  <div class="kv"><span class="k">Y axis (front -> back)</span><span class="v">Tensor type, grouped by subsystem.</span></div>
+  <div class="kv"><span class="k">Z axis (height)</span><span class="v">Proportional to log₂(parameters), scaled ×0.76 offset −17. Read tick labels for actual param counts.</span></div>
+
+  <h3>Tensor subsystems (15 types displayed)</h3>
+  <div class="kv"><span class="k"><span class="sw" style="background:#7788dd"></span>attn_gate / attn_k / attn_output / attn_q + 2 more</span><span class="v">Attention subsystem</span></div>
+  <div class="kv"><span class="k"><span class="sw" style="background:#ff6644"></span>ssm_a / ssm_alpha / ssm_beta / ssm_conv1d + 2 more</span><span class="v">SSM subsystem</span></div>
+  <div class="kv"><span class="k"><span class="sw" style="background:#11aa44"></span>ffn_down / ffn_gate / ffn_up</span><span class="v">FFN subsystem</span></div>
+
+  <h3>Layer types (24 layers)</h3>
+  <div class="kv"><span class="k">ATTN+FFN+FUSED_QKV+SSM</span><span class="v">L0–L22 (18 layers)</span></div>
+  <div class="kv"><span class="k">ATTN+FFN</span><span class="v">L3, L7, L11, L15, L19, L23</span></div>
+
+  <h3>Architecture details</h3>
+  <div class="kv"><span class="k">d_model</span><span class="v">2048</span></div>
+  <div class="kv"><span class="k">Total tensors in GGUF</span><span class="v">320 (78 norms not displayed)</span></div>
+  <div class="kv"><span class="k">Architecture family</span><span class="v">hybrid_ssm</span></div>
+
+  <h3>Camera controls</h3>
+  <div class="kv"><span class="k">Left drag</span><span class="v">Orbit / rotate</span></div>
+  <div class="kv"><span class="k">Right drag / shift-drag</span><span class="v">Pan</span></div>
+  <div class="kv"><span class="k">Scroll</span><span class="v">Zoom</span></div>
+  <div class="kv"><span class="k">Hover bar top</span><span class="v">Tensor name, exact shape, parameter count</span></div>
+</div>
+
+<script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+<script>
+// Ground-truth data from GGUF tensor info section
+const ARCH = {"layers":[{"attn_gate.weight":[2048, 2048],"attn_k.weight":null,"attn_output.weight":null,"attn_q.weight":null,"attn_qkv.weight":[2048, 6144],"attn_v.weight":null,"ssm_a":[16],"ssm_alpha.weight":[2048, 16],"ssm_beta.weight":[2048, 16],"ssm_conv1d.weight":[4, 6144],"ssm_dt.bias":[16],"ssm_out.weight":[2048, 2048],"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":[2048, 2048],"attn_k.weight":null,"attn_output.weight":null,"attn_q.weight":null,"attn_qkv.weight":[2048, 6144],"attn_v.weight":null,"ssm_a":[16],"ssm_alpha.weight":[2048, 16],"ssm_beta.weight":[2048, 16],"ssm_conv1d.weight":[4, 6144],"ssm_dt.bias":[16],"ssm_out.weight":[2048, 2048],"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":[2048, 2048],"attn_k.weight":null,"attn_output.weight":null,"attn_q.weight":null,"attn_qkv.weight":[2048, 6144],"attn_v.weight":null,"ssm_a":[16],"ssm_alpha.weight":[2048, 16],"ssm_beta.weight":[2048, 16],"ssm_conv1d.weight":[4, 6144],"ssm_dt.bias":[16],"ssm_out.weight":[2048, 2048],"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":null,"attn_k.weight":[2048, 512],"attn_output.weight":[2048, 2048],"attn_q.weight":[2048, 4096],"attn_qkv.weight":null,"attn_v.weight":[2048, 512],"ssm_a":null,"ssm_alpha.weight":null,"ssm_beta.weight":null,"ssm_conv1d.weight":null,"ssm_dt.bias":null,"ssm_out.weight":null,"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":[2048, 2048],"attn_k.weight":null,"attn_output.weight":null,"attn_q.weight":null,"attn_qkv.weight":[2048, 6144],"attn_v.weight":null,"ssm_a":[16],"ssm_alpha.weight":[2048, 16],"ssm_beta.weight":[2048, 16],"ssm_conv1d.weight":[4, 6144],"ssm_dt.bias":[16],"ssm_out.weight":[2048, 2048],"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":[2048, 2048],"attn_k.weight":null,"attn_output.weight":null,"attn_q.weight":null,"attn_qkv.weight":[2048, 6144],"attn_v.weight":null,"ssm_a":[16],"ssm_alpha.weight":[2048, 16],"ssm_beta.weight":[2048, 16],"ssm_conv1d.weight":[4, 6144],"ssm_dt.bias":[16],"ssm_out.weight":[2048, 2048],"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":[2048, 2048],"attn_k.weight":null,"attn_output.weight":null,"attn_q.weight":null,"attn_qkv.weight":[2048, 6144],"attn_v.weight":null,"ssm_a":[16],"ssm_alpha.weight":[2048, 16],"ssm_beta.weight":[2048, 16],"ssm_conv1d.weight":[4, 6144],"ssm_dt.bias":[16],"ssm_out.weight":[2048, 2048],"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":null,"attn_k.weight":[2048, 512],"attn_output.weight":[2048, 2048],"attn_q.weight":[2048, 4096],"attn_qkv.weight":null,"attn_v.weight":[2048, 512],"ssm_a":null,"ssm_alpha.weight":null,"ssm_beta.weight":null,"ssm_conv1d.weight":null,"ssm_dt.bias":null,"ssm_out.weight":null,"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":[2048, 2048],"attn_k.weight":null,"attn_output.weight":null,"attn_q.weight":null,"attn_qkv.weight":[2048, 6144],"attn_v.weight":null,"ssm_a":[16],"ssm_alpha.weight":[2048, 16],"ssm_beta.weight":[2048, 16],"ssm_conv1d.weight":[4, 6144],"ssm_dt.bias":[16],"ssm_out.weight":[2048, 2048],"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":[2048, 2048],"attn_k.weight":null,"attn_output.weight":null,"attn_q.weight":null,"attn_qkv.weight":[2048, 6144],"attn_v.weight":null,"ssm_a":[16],"ssm_alpha.weight":[2048, 16],"ssm_beta.weight":[2048, 16],"ssm_conv1d.weight":[4, 6144],"ssm_dt.bias":[16],"ssm_out.weight":[2048, 2048],"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":[2048, 2048],"attn_k.weight":null,"attn_output.weight":null,"attn_q.weight":null,"attn_qkv.weight":[2048, 6144],"attn_v.weight":null,"ssm_a":[16],"ssm_alpha.weight":[2048, 16],"ssm_beta.weight":[2048, 16],"ssm_conv1d.weight":[4, 6144],"ssm_dt.bias":[16],"ssm_out.weight":[2048, 2048],"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":null,"attn_k.weight":[2048, 512],"attn_output.weight":[2048, 2048],"attn_q.weight":[2048, 4096],"attn_qkv.weight":null,"attn_v.weight":[2048, 512],"ssm_a":null,"ssm_alpha.weight":null,"ssm_beta.weight":null,"ssm_conv1d.weight":null,"ssm_dt.bias":null,"ssm_out.weight":null,"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":[2048, 2048],"attn_k.weight":null,"attn_output.weight":null,"attn_q.weight":null,"attn_qkv.weight":[2048, 6144],"attn_v.weight":null,"ssm_a":[16],"ssm_alpha.weight":[2048, 16],"ssm_beta.weight":[2048, 16],"ssm_conv1d.weight":[4, 6144],"ssm_dt.bias":[16],"ssm_out.weight":[2048, 2048],"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":[2048, 2048],"attn_k.weight":null,"attn_output.weight":null,"attn_q.weight":null,"attn_qkv.weight":[2048, 6144],"attn_v.weight":null,"ssm_a":[16],"ssm_alpha.weight":[2048, 16],"ssm_beta.weight":[2048, 16],"ssm_conv1d.weight":[4, 6144],"ssm_dt.bias":[16],"ssm_out.weight":[2048, 2048],"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":[2048, 2048],"attn_k.weight":null,"attn_output.weight":null,"attn_q.weight":null,"attn_qkv.weight":[2048, 6144],"attn_v.weight":null,"ssm_a":[16],"ssm_alpha.weight":[2048, 16],"ssm_beta.weight":[2048, 16],"ssm_conv1d.weight":[4, 6144],"ssm_dt.bias":[16],"ssm_out.weight":[2048, 2048],"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":null,"attn_k.weight":[2048, 512],"attn_output.weight":[2048, 2048],"attn_q.weight":[2048, 4096],"attn_qkv.weight":null,"attn_v.weight":[2048, 512],"ssm_a":null,"ssm_alpha.weight":null,"ssm_beta.weight":null,"ssm_conv1d.weight":null,"ssm_dt.bias":null,"ssm_out.weight":null,"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":[2048, 2048],"attn_k.weight":null,"attn_output.weight":null,"attn_q.weight":null,"attn_qkv.weight":[2048, 6144],"attn_v.weight":null,"ssm_a":[16],"ssm_alpha.weight":[2048, 16],"ssm_beta.weight":[2048, 16],"ssm_conv1d.weight":[4, 6144],"ssm_dt.bias":[16],"ssm_out.weight":[2048, 2048],"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":[2048, 2048],"attn_k.weight":null,"attn_output.weight":null,"attn_q.weight":null,"attn_qkv.weight":[2048, 6144],"attn_v.weight":null,"ssm_a":[16],"ssm_alpha.weight":[2048, 16],"ssm_beta.weight":[2048, 16],"ssm_conv1d.weight":[4, 6144],"ssm_dt.bias":[16],"ssm_out.weight":[2048, 2048],"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":[2048, 2048],"attn_k.weight":null,"attn_output.weight":null,"attn_q.weight":null,"attn_qkv.weight":[2048, 6144],"attn_v.weight":null,"ssm_a":[16],"ssm_alpha.weight":[2048, 16],"ssm_beta.weight":[2048, 16],"ssm_conv1d.weight":[4, 6144],"ssm_dt.bias":[16],"ssm_out.weight":[2048, 2048],"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":null,"attn_k.weight":[2048, 512],"attn_output.weight":[2048, 2048],"attn_q.weight":[2048, 4096],"attn_qkv.weight":null,"attn_v.weight":[2048, 512],"ssm_a":null,"ssm_alpha.weight":null,"ssm_beta.weight":null,"ssm_conv1d.weight":null,"ssm_dt.bias":null,"ssm_out.weight":null,"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":[2048, 2048],"attn_k.weight":null,"attn_output.weight":null,"attn_q.weight":null,"attn_qkv.weight":[2048, 6144],"attn_v.weight":null,"ssm_a":[16],"ssm_alpha.weight":[2048, 16],"ssm_beta.weight":[2048, 16],"ssm_conv1d.weight":[4, 6144],"ssm_dt.bias":[16],"ssm_out.weight":[2048, 2048],"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":[2048, 2048],"attn_k.weight":null,"attn_output.weight":null,"attn_q.weight":null,"attn_qkv.weight":[2048, 6144],"attn_v.weight":null,"ssm_a":[16],"ssm_alpha.weight":[2048, 16],"ssm_beta.weight":[2048, 16],"ssm_conv1d.weight":[4, 6144],"ssm_dt.bias":[16],"ssm_out.weight":[2048, 2048],"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":[2048, 2048],"attn_k.weight":null,"attn_output.weight":null,"attn_q.weight":null,"attn_qkv.weight":[2048, 6144],"attn_v.weight":null,"ssm_a":[16],"ssm_alpha.weight":[2048, 16],"ssm_beta.weight":[2048, 16],"ssm_conv1d.weight":[4, 6144],"ssm_dt.bias":[16],"ssm_out.weight":[2048, 2048],"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]},{"attn_gate.weight":null,"attn_k.weight":[2048, 512],"attn_output.weight":[2048, 2048],"attn_q.weight":[2048, 4096],"attn_qkv.weight":null,"attn_v.weight":[2048, 512],"ssm_a":null,"ssm_alpha.weight":null,"ssm_beta.weight":null,"ssm_conv1d.weight":null,"ssm_dt.bias":null,"ssm_out.weight":null,"ffn_down.weight":[6144, 2048],"ffn_gate.weight":[2048, 6144],"ffn_up.weight":[2048, 6144]}],"global":[{"name": "output_norm.weight", "shape": [2048], "type": "F32"}, {"name": "token_embd.weight", "shape": [2048, 248320], "type": "Q6_K"}]};
+
+const TDEFS = [
+  ['attn_gate', 'attn_gate', 0.0, '#7788dd', 'attn_gate.weight'],
+  ['attn_k', 'attn_k', 1.3, '#22aadd', 'attn_k.weight'],
+  ['attn_output', 'attn_output', 2.6, '#66ccff', 'attn_output.weight'],
+  ['attn_q', 'attn_q', 3.9, '#4488ff', 'attn_q.weight'],
+  ['attn_qkv', 'attn_qkv', 5.2, '#5599ee', 'attn_qkv.weight'],
+  ['attn_v', 'attn_v', 6.5, '#1199cc', 'attn_v.weight'],
+  ['ssm_a', 'ssm_a', 9.6, '#ff6644', 'ssm_a'],
+  ['ssm_alpha', 'ssm_alpha', 10.9, '#ee5533', 'ssm_alpha.weight'],
+  ['ssm_beta', 'ssm_beta', 12.2, '#dd4422', 'ssm_beta.weight'],
+  ['ssm_conv1d', 'ssm_conv1d', 13.5, '#cc6633', 'ssm_conv1d.weight'],
+  ['ssm_dt', 'ssm_dt', 14.8, '#bb5522', 'ssm_dt.bias'],
+  ['ssm_out', 'ssm_out', 16.1, '#ff7755', 'ssm_out.weight'],
+  ['ffn_down', 'ffn_down', 19.2, '#11aa44', 'ffn_down.weight'],
+  ['ffn_gate', 'ffn_gate', 20.5, '#33dd77', 'ffn_gate.weight'],
+  ['ffn_up', 'ffn_up', 21.8, '#22bb55', 'ffn_up.weight'],
+];
+const YMIN = -0.9, YMAX = 23.3;
+const N = 24;
+
+// Helpers
+const nP = s => s ? s.reduce((a,b)=>a*b,1) : 0;
+const barH = s => { if (!s) return 0; const p=nP(s); return p>0 ? Math.max(0.12, Math.min((Math.log2(p)-17)*0.76, 9.8)) : 0; };
+const fmt = n => n>=1e9?(n/1e9).toFixed(3)+'B':n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':String(n);
+
+function hexRgb(h) { return {r:parseInt(h.slice(1,3),16),g:parseInt(h.slice(3,5),16),b:parseInt(h.slice(5,7),16)}; }
+function dimColor(hex, factor) {
+  const {r,g,b} = hexRgb(hex);
+  return 'rgb('+Math.round(r*factor+4*(1-factor))+','+Math.round(g*factor+4*(1-factor))+','+Math.round(b*factor+4*(1-factor))+')';
+}
+
+// Build traces
+const traces = [];
+
+// Floor plates
+const FLOOR_COLORS = {"ATTN": "#112266", "SSM": "#662211", "MoE": "#116622", "CONV": "#664411", "FUSED_QKV": "#442266"};
+const LAYER_TYPES = [["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"]];
+for (let L = 0; L < N; L++) {
+  const tags = LAYER_TYPES[L];
+  if (tags.length === 0) continue;
+  // Pick dominant color
+  let col = '#111111';
+  const priority = ['ATTN','SSM','MoE','CONV','FUSED_QKV'];
+  for (const p of priority) { if (tags.includes(p) && FLOOR_COLORS[p]) { col = FLOOR_COLORS[p]; break; } }
+  // Multi-type gets blended purple-ish
+  if (tags.length >= 2) {
+    const h = tags.sort().join('+');
+    if (h.includes('ATTN') && h.includes('MoE')) col = '#113355';
+    else if (h.includes('SSM') && h.includes('FFN')) col = '#442211';
+    else if (h.includes('ATTN') && h.includes('SSM')) col = '#331144';
+  }
+  const tip = '<b>Layer '+L+'</b><br>'+tags.join(' + ');
+  const hw = 0.44;
+  for (const [xi,yi,zi] of [
+    [[L-hw,L+hw,L+hw],[YMIN,YMIN,YMAX],[0,0,0]],
+    [[L-hw,L+hw,L-hw],[YMIN,YMAX,YMAX],[0,0,0]],
+  ]) {
+    traces.push({type:'mesh3d',x:xi,y:yi,z:zi,i:[0],j:[1],k:[2],
+      color:col,opacity:0.25,flatshading:true,
+      hovertemplate:tip+'<extra></extra>',showlegend:false});
+  }
+}
+
+// Line traces (static bar bodies)
+for (const [fullKey,,yOff,color,archKey] of TDEFS) {
+  const lx=[],ly=[],lz=[];
+  for (let L=0;L<N;L++) {
+    const shape = ARCH.layers[L][archKey];
+    if (!shape) continue;
+    const ht = barH(shape);
+    lx.push(L,L,null); ly.push(yOff,yOff,null); lz.push(0,ht,null);
+  }
+  if (lx.length > 0) {
+    traces.push({type:'scatter3d',mode:'lines',x:lx,y:ly,z:lz,
+      line:{color:dimColor(color,0.45),width:7},
+      showlegend:false,hoverinfo:'skip',name:fullKey});
+  }
+}
+
+// Marker dots (one per tensor that exists)
+const allX=[],allY=[],allZ=[],allC=[],allS=[],allT=[];
+for (let L=0;L<N;L++) {
+  for (const [fullKey,,yOff,color,archKey] of TDEFS) {
+    const shape = ARCH.layers[L][archKey];
+    if (!shape) continue;
+    const tags = LAYER_TYPES[L].join(' + ');
+    allX.push(L); allY.push(yOff); allZ.push(barH(shape));
+    allC.push(color); allS.push(5);
+    allT.push('<b>blk.'+L+'.'+archKey+'</b><br>Layer '+L+'  ·  '+tags+'<br>Shape: ['+shape.join(' × ')+']<br>Parameters: '+fmt(nP(shape)));
+  }
+}
+traces.push({type:'scatter3d',mode:'markers',
+  x:allX,y:allY,z:allZ,text:allT,
+  hovertemplate:'%{text}<extra></extra>',
+  marker:{color:allC,size:allS,opacity:0.95},
+  name:'tensors',showlegend:false});
+
+// Legend traces
+const legendSeen = new Set();
+for (const [fullKey,label,,color] of TDEFS) {
+  if (legendSeen.has(label)) continue;
+  legendSeen.add(label);
+  traces.push({type:'scatter3d',mode:'markers',
+    x:[null],y:[null],z:[null],
+    marker:{color,size:6},name:label,showlegend:true,
+    hoverinfo:'skip'});
+}
+
+// Global tensors
+ARCH.global.forEach((g,i) => {
+  const ht = barH(g.shape);
+  const p = nP(g.shape);
+  const y = i * 2.1;
+  const col = '#ffdd44';
+  traces.push({type:'scatter3d',mode:'lines+markers',
+    x:[-4,-4],y:[y,y],z:[0,ht],
+    text:['','<b>'+g.name+'</b><br>Type: '+g.type+'<br>Shape: ['+g.shape.join(' × ')+']<br>Parameters: '+fmt(p)],
+    hovertemplate:'%{text}<extra></extra>',
+    line:{color:col,width:9},marker:{color:col,size:[0,6]},
+    name:g.name.split('.')[0],showlegend:true});
+});
+
+// Layout
+const layout = {
+  paper_bgcolor:'#04040f', plot_bgcolor:'#04040f',
+  font:{family:'Courier New,monospace',color:'#445566',size:10},
+  title:{text:'HAIC V4 2B  ·  TENSOR ARCHITECTURE  ·  '+allX.length+' displayed  ·  Height ∝ log₂(params)',
+    font:{size:13,color:'#b8c8ee',family:'Courier New'},x:0.03,y:0.985,xanchor:'left'},
+  margin:{l:0,r:0,t:36,b:12},
+  showlegend:true,
+  legend:{x:0.01,y:0.07,bgcolor:'rgba(4,6,18,0.88)',bordercolor:'#152040',borderwidth:1,
+    font:{size:9,color:'#667788',family:'Courier New'}},
+  scene:{
+    bgcolor:'#04040f',
+    camera:{eye:{x:-1.55,y:-2.05,z:0.88},center:{x:0.05,y:0.15,z:-0.10},up:{x:0,y:0,z:1}},
+    xaxis:{title:{text:'Layer',font:{color:'#334455',size:10}},
+      tickvals:[-4, 0, 3, 6, 9, 12, 15, 18, 21, 23],
+      ticktext:["GLOBAL", "L0*", "L3*", "L6*", "L9*", "L12*", "L15*", "L18*", "L21*", "L23*"],
+      gridcolor:'#0a1220',zerolinecolor:'#152035',color:'#334455',
+      showbackground:true,backgroundcolor:'#050515',range:[-6.5,25]},
+    yaxis:{title:{text:'Tensor type',font:{color:'#334455',size:10}},
+      tickvals:TDEFS.map(t=>t[2]),ticktext:TDEFS.map(t=>t[1]),
+      gridcolor:'#0a1220',zerolinecolor:'#152035',color:'#334455',
+      showbackground:true,backgroundcolor:'#050515',range:[YMIN,YMAX+1]},
+    zaxis:{title:{text:'Parameters (log₂ scale)',font:{color:'#334455',size:10}},
+      tickvals:[0,1,2,3,4,5,6,7,8,9],
+      ticktext:['128K','262K','524K','1M','2M','4M','8M','17M','33M','67M'],
+      gridcolor:'#0a1220',zerolinecolor:'#152035',color:'#334455',
+      showbackground:true,backgroundcolor:'#050515',range:[-0.4,11]},
+    aspectmode:'manual',aspectratio:{x:2.6,y:1.55,z:0.75},
+  },
+};
+
+Plotly.newPlot('plot', traces, layout, {responsive:true,displaylogo:false,
+  modeBarButtonsToRemove:['toImage','sendDataToCloud']});
+
+function toggleInfo() {
+  const p=document.getElementById('info-panel');
+  const o=document.getElementById('info-overlay');
+  const v=p.style.display==='block';
+  p.style.display=o.style.display=v?'none':'block';
+}
+</script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Llama 3.1 8B Instruct — Architecture 3D</title>
+<title>Llama 3.1 8B — Architecture 3D</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:#04040f; }
@@ -54,8 +54,8 @@
 <div id="info-overlay" onclick="toggleInfo()"></div>
 <div id="info-panel">
   <span class="close" onclick="toggleInfo()">✕</span>
-  <h2>LLAMA 3.1 8B INSTRUCT · ARCHITECTURE</h2>
-  <p>Meta's flagship open-weight dense transformer. 32 layers, GQA (8 KV heads), SwiGLU FFN, RoPE positional encoding. Standard pre-norm architecture.</p>
+  <h2>LLAMA 3.1 8B · ARCHITECTURE</h2>
+  <p>Meta Llama 3.1 8B Instruct. 32 layers, GQA, SwiGLU, RoPE. INVALID: 20% pivot rate. SGT 6.48. Baseline reference.</p>
   <p>Every shape is falsifiable: verify against the GGUF tensor info section.</p>
 
   <h3>Axes</h3>
@@ -205,7 +205,7 @@ ARCH.global.forEach((g,i) => {
 const layout = {
   paper_bgcolor:'#04040f', plot_bgcolor:'#04040f',
   font:{family:'Courier New,monospace',color:'#445566',size:10},
-  title:{text:'LLAMA 3.1 8B INSTRUCT  ·  TENSOR ARCHITECTURE  ·  '+allX.length+' displayed  ·  Height ∝ log₂(params)',
+  title:{text:'LLAMA 3.1 8B  ·  TENSOR ARCHITECTURE  ·  '+allX.length+' displayed  ·  Height ∝ log₂(params)',
     font:{size:13,color:'#b8c8ee',family:'Courier New'},x:0.03,y:0.985,xanchor:'left'},
   margin:{l:0,r:0,t:36,b:12},
   showlegend:true,
