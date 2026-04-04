@@ -69,7 +69,7 @@
   <div class="kv"><span class="k"><span class="sw" style="background:#11aa44"></span>ffn_down / ffn_gate / ffn_up</span><span class="v">FFN subsystem</span></div>
 
   <h3>Layer types (32 layers)</h3>
-  <div class="kv"><span class="k">ATTN+FFN+FUSED_QKV+SSM</span><span class="v">L0–L30 (24 layers)</span></div>
+  <div class="kv"><span class="k">FFN+FUSED_QKV+SSM</span><span class="v">L0–L30 (24 layers)</span></div>
   <div class="kv"><span class="k">ATTN+FFN</span><span class="v">L3, L7, L11, L15, L19, L23, L27, L31</span></div>
 
   <h3>Architecture details</h3>
@@ -125,7 +125,7 @@ const traces = [];
 
 // Floor plates
 const FLOOR_COLORS = {"ATTN": "#112266", "SSM": "#662211", "MoE": "#116622", "CONV": "#664411", "FUSED_QKV": "#442266"};
-const LAYER_TYPES = [["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"]];
+const LAYER_TYPES = [["FUSED_QKV", "SSM", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["FUSED_QKV", "SSM", "FFN"], ["ATTN", "FFN"]];
 for (let L = 0; L < N; L++) {
   const tags = LAYER_TYPES[L];
   if (tags.length === 0) continue;
@@ -226,7 +226,7 @@ const layout = {
     camera:{eye:{x:-1.55,y:-2.05,z:0.88},center:{x:0.05,y:0.15,z:-0.10},up:{x:0,y:0,z:1}},
     xaxis:{title:{text:'Layer',font:{color:'#334455',size:10}},
       tickvals:[-4, 0, 4, 8, 12, 16, 20, 24, 28, 31],
-      ticktext:["GLOBAL", "L0*", "L4*", "L8*", "L12*", "L16*", "L20*", "L24*", "L28*", "L31*"],
+      ticktext:["GLOBAL", "L0", "L4", "L8", "L12", "L16", "L20", "L24", "L28", "L31*"],
       gridcolor:'#0a1220',zerolinecolor:'#152035',color:'#334455',
       showbackground:true,backgroundcolor:'#050515',range:[-6.5,33]},
     yaxis:{title:{text:'Tensor type',font:{color:'#334455',size:10}},
