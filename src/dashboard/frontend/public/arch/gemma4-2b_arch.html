@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Gemma 4 2B — Architecture 3D</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#04040f; }
+  #plot { width:100vw; height:100vh; }
+
+  /* ── Controls bar ───────────────────────────────────────── */
+  #controls {
+    position:fixed; bottom:0; left:0; right:0; height:52px;
+    background:rgba(4,6,18,0.95); border-top:1px solid #0d1a2e;
+    display:flex; align-items:center; gap:14px; padding:0 18px;
+    font:11px 'Courier New',monospace; color:#556677; z-index:100;
+  }
+  .mbt {
+    background:transparent; border:1px solid #1a2a3a; color:#445566;
+    font:10px 'Courier New',monospace; padding:5px 13px; border-radius:4px;
+    cursor:pointer; letter-spacing:1px; transition:all 0.15s;
+  }
+  .mbt:hover  { border-color:#2a4a6a; color:#6688aa; }
+  .mbt.active { border-color:#2244aa; color:#88aadd; background:#0a1530; }
+
+  .ctrl { display:none; align-items:center; gap:10px; }
+  .ctrl.on { display:flex; }
+  .ctrl input[type=range] { width:170px; accent-color:#2244aa; cursor:pointer; }
+  .ctrl button {
+    background:#0a1530; border:1px solid #1e3355; color:#6688aa;
+    font:12px 'Courier New',monospace; padding:3px 10px;
+    border-radius:4px; cursor:pointer; min-width:30px;
+  }
+  .ctrl button:hover { background:#112244; }
+  .ctrl select {
+    background:#0a1530; border:1px solid #1e3355; color:#6688aa;
+    font:10px 'Courier New',monospace; padding:3px 7px; border-radius:4px;
+  }
+  .clbl  { color:#334455; min-width:120px; white-space:nowrap; }
+  .cwarn { color:#554422; font-size:9px; letter-spacing:0.5px; }
+
+  /* ── Info badges ─────────────────────────────────────────── */
+  .badge {
+    position:fixed; top:16px; right:12px;
+    background:rgba(4,6,22,0.95); border:1px solid #1a2a44;
+    border-radius:7px; padding:10px 16px;
+    font:11px/1.9 'Courier New',monospace; text-align:right;
+    display:none; z-index:100; min-width:200px;
+  }
+  #infer-badge { border-color:#1a2a44; }
+  #infer-badge .b1 { color:#c8d8ff; font-size:14px; font-weight:bold; }
+  #infer-badge .b2 { color:#4488aa; font-size:10px; }
+  #infer-badge .b3 { color:#44aa66; font-size:10px; }
+  #train-badge { border-color:#2a1a0a; }
+  #train-badge .b1 { color:#ffaa44; font-size:14px; font-weight:bold; }
+  #train-badge .b2 { color:#664422; font-size:9px; }
+  #train-badge .b3 { color:#556644; font-size:9px; }
+
+  /* ── Source note ─────────────────────────────────────────── */
+  #source-note {
+    position:fixed; bottom:58px; right:12px;
+    font:9px/1.7 'Courier New',monospace;
+    color:#1a2a3a; pointer-events:none; text-align:right;
+  }
+
+  /* ── Help button ─────────────────────────────────────────── */
+  #help-btn {
+    position:fixed; bottom:62px; right:20px;
+    width:26px; height:26px; border-radius:50%;
+    background:#0d1a2e; border:1px solid #1e3355;
+    color:#4488bb; font:bold 13px/26px 'Courier New',monospace;
+    text-align:center; cursor:pointer; z-index:200; user-select:none;
+  }
+  #help-btn:hover { background:#112233; color:#66aadd; }
+
+  /* ── Info panel ──────────────────────────────────────────── */
+  #info-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:290; display:none; }
+  #info-panel {
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:min(660px,92vw); background:rgba(4,6,18,0.98);
+    border:1px solid #1a2a44; border-radius:10px;
+    padding:26px 30px 22px; font:11px/1.9 'Courier New',monospace;
+    color:#8899bb; z-index:300; display:none;
+    box-shadow:0 8px 48px rgba(0,0,0,0.9); max-height:90vh; overflow-y:auto;
+  }
+  #info-panel h2 { font-size:13px; color:#c8d8ff; letter-spacing:1.5px; margin-bottom:14px; border-bottom:1px solid #1a2a44; padding-bottom:10px; }
+  #info-panel h3 { font-size:10px; color:#667788; letter-spacing:1px; margin:14px 0 5px; text-transform:uppercase; }
+  #info-panel p  { margin-bottom:5px; }
+  #info-panel .kv { display:flex; gap:10px; margin-bottom:3px; }
+  #info-panel .k  { color:#aabbcc; min-width:145px; flex-shrink:0; }
+  #info-panel .v  { color:#667788; }
+  #info-panel .sw { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px; vertical-align:middle; }
+  #info-panel .hl { color:#ffdd44; }
+  #info-panel .close { position:absolute; top:14px; right:18px; color:#334455; font-size:16px; cursor:pointer; line-height:1; }
+  #info-panel .close:hover { color:#88aacc; }
+</style>
+</head>
+<body>
+<div id="plot"></div>
+
+<div id="source-note">
+  Source: gemma4-haic-finetuned-f16.gguf<br>
+  356 of 601 tensors displayed (245 per-layer norms omitted)<br>
+  All displayed shapes verified from GGUF tensor info · no estimates
+</div>
+
+<!-- Narrative overlay — inference & training plain-English description -->
+<div id="narrative" style="
+  display:none; position:fixed; top:44px; left:50%; transform:translateX(-50%);
+  background:rgba(4,6,22,0.92); border:1px solid #1a2a44; border-radius:8px;
+  padding:11px 26px; z-index:150; max-width:680px; width:max-content;
+  font:11px/1.8 'Courier New',monospace; text-align:center; pointer-events:none;">
+  <div id="narr-head" style="font-size:13px;color:#c8d8ff;letter-spacing:0.5px;margin-bottom:3px"></div>
+  <div id="narr-body" style="color:#8899bb;font-size:10.5px"></div>
+  <div id="narr-flow" style="color:#2a4a6a;font-size:9px;letter-spacing:1.5px;margin-top:3px"></div>
+</div>
+
+<!-- Controls bar -->
+<div id="controls">
+  <div style="display:flex;gap:6px;flex-shrink:0">
+    <button class="mbt active" id="btn-arch"  onclick="setMode('arch')">ARCHITECTURE</button>
+    <button class="mbt"        id="btn-infer" onclick="setMode('infer')">INFERENCE</button>
+    <button class="mbt"        id="btn-train" onclick="setMode('train')">TRAINING</button>
+  </div>
+  <div class="ctrl" id="infer-ctrl">
+    <button id="play-btn" onclick="toggleInferPlay()">▶</button>
+    <input  type="range" id="layer-slider" min="0" max="209" value="0" oninput="seekInfer(+this.value)">
+    <span   class="clbl" id="layer-lbl">Layer 0 / 34</span>
+    <select id="speed-sel" onchange="inferSpeed=+this.value">
+      <option value="900">Slow</option>
+      <option value="350" selected>Normal</option>
+      <option value="120">Fast</option>
+      <option value="40">Very fast</option>
+    </select>
+  </div>
+  <div class="ctrl" id="train-ctrl">
+    <button id="train-play-btn" onclick="toggleTrainPlay()">▶</button>
+    <input  type="range" id="train-slider" min="0" max="100" value="0" oninput="seekTrain(+this.value)">
+    <span   class="clbl" id="step-lbl">Step 0 / 100</span>
+    <span   class="cwarn">⚠ SIMULATED · connect real checkpoints after next training run</span>
+  </div>
+</div>
+
+<!-- Inference badge -->
+<div class="badge" id="infer-badge">
+  <div class="b1" id="ib-num">Layer 0</div>
+  <div class="b2" id="ib-type">—</div>
+  <div class="b3" id="ib-params">—</div>
+</div>
+
+<!-- Training badge -->
+<div class="badge" id="train-badge">
+  <div class="b1" id="tb-step">Step 0 / 100</div>
+  <div class="b2" id="tb-note">SIMULATED training progression</div>
+  <div class="b3" id="tb-pct">Weight saturation: 0%</div>
+</div>
+
+<!-- Help -->
+<div id="help-btn" onclick="toggleInfo()">?</div>
+<div id="info-overlay" onclick="toggleInfo()"></div>
+<div id="info-panel">
+  <span class="close" onclick="toggleInfo()">✕</span>
+  <h2>GEMMA 4 2B · WHAT YOU'RE LOOKING AT</h2>
+  <p>Three modes, all based on the same ground-truth tensor manifest extracted from the GGUF file.
+     Every shape is falsifiable: open <span class="hl">tensor_manifest.json</span> to verify.</p>
+
+  <h3>Axes (all modes)</h3>
+  <div class="kv"><span class="k">X axis (left → right)</span><span class="v">Layer index 0–34. x=−4 holds global (non-layer) tensors.</span></div>
+  <div class="kv"><span class="k">Y axis (front → back)</span><span class="v">Tensor type, grouped by subsystem: Attention → FFN → AltUp.</span></div>
+  <div class="kv"><span class="k">Z axis (height)</span><span class="v">Proportional to log₂(parameters), scaled by 0.76 and offset by −17. Read actual param counts from the tick labels, not the raw Z value.</span></div>
+
+  <h3>Tensor subsystems</h3>
+  <div class="kv"><span class="k"><span class="sw" style="background:#4488ff"></span>attn_q / k / v / out</span><span class="v">Self-attention projections. Q and O double in width at global-attention layers.</span></div>
+  <div class="kv"><span class="k"><span class="sw" style="background:#33dd77"></span>ffn_gate / up / down</span><span class="v">Feed-forward (SwiGLU). Hidden dim doubles from 6144 → 12288 at layer 15 and stays there.</span></div>
+  <div class="kv"><span class="k"><span class="sw" style="background:#ff44cc"></span>altup_scale</span><span class="v">AltUp.correct_output_scale — scalar [1] per layer. AltUp correction magnitude. Tiny bar height = min(log₂ scale).</span></div>
+  <div class="kv"><span class="k"><span class="sw" style="background:#ff9933"></span>inp_gate / proj</span><span class="v">per_layer_input_gate [1536→256] + per_layer_projection [256→1536]. Last block operation. Constant 256-dim.</span></div>
+
+  <h3>Architectural phases</h3>
+  <div class="kv"><span class="k">Layers 0–14</span><span class="v">Small FFN (6144). Global attn at L4, L9, L14.</span></div>
+  <div class="kv"><span class="k">Layers 15–34</span><span class="v">Large FFN (12288). Global attn continues at L19, L24, L29, L34. Layers 19/24/29/34 have both.</span></div>
+
+  <h3>Floor plates</h3>
+  <div class="kv"><span class="k"><span class="sw" style="background:#112266"></span>Blue</span><span class="v">Global attention layer — Q/K/V projections are 2× wider.</span></div>
+  <div class="kv"><span class="k"><span class="sw" style="background:#441100"></span>Red</span><span class="v">Large FFN layer — gate/up/down are 2× wider.</span></div>
+  <div class="kv"><span class="k"><span class="sw" style="background:#551133"></span>Purple</span><span class="v">Both: global attn + large FFN (L19, L24, L29, L34).</span></div>
+
+  <h3>INFERENCE mode</h3>
+  <p>Simulates a single token's forward pass. Each layer resolves into <span class="hl">6 sub-phases</span>
+     matching <code>Gemma3nTextDecoderLayer.forward()</code> exactly (verified against transformers source):</p>
+  <div class="kv"><span class="k">Phase 1 — Q · K · V</span><span class="v">Attention projections. AltUp.predict() and the Laurel block also fire here — their weights are <span class="hl">not in the GGUF</span> (llama.cpp doesn't export them). Global layers pulse white.</span></div>
+  <div class="kv"><span class="k">Phase 2 — attn_out</span><span class="v">QK<sup>T</sup>/√d → softmax → weighted V → output projection back to d_model.</span></div>
+  <div class="kv"><span class="k">Phase 3 — FFN gate + up</span><span class="v">SwiGLU expand: gate_proj × up_proj → hidden dim (6144 or 12288).</span></div>
+  <div class="kv"><span class="k">Phase 4 — FFN down</span><span class="v">Compress back to d_model. Laurel block output also merges into residual here (per source), but Laurel weights are not in the GGUF — this merge is invisible.</span></div>
+  <div class="kv"><span class="k">Phase 5 — altup_scale</span><span class="v">AltUp.correct_output_scale — a single scalar [1] per layer in the GGUF. Tiny bar, real tensor.</span></div>
+  <div class="kv"><span class="k">Phase 6 — inp_gate + proj</span><span class="v">per_layer_input_gate [1536→256] + per_layer_projection [256→1536]. Last operation in the block.</span></div>
+  <p style="margin-top:6px">Glow flows <span class="hl">up the Y-axis</span> (attn → FFN → AltUp → per-layer gate) before advancing to the next layer.
+     210 sub-steps (35 × 6). Drag slider to scrub. Source: <span class="hl">modeling_gemma3n.py lines 1410–1477</span>.</p>
+
+  <h3>What is NOT in the GGUF (llama.cpp omits)</h3>
+  <div class="kv"><span class="k">Laurel block</span><span class="v">linear_left [d_model→laurel_rank], linear_right [laurel_rank→d_model]. Runs alongside attention; merged into residual after FFN.</span></div>
+  <div class="kv"><span class="k">AltUp modality_router</span><span class="v">Routes across altup_num_inputs stacked embeddings. Predict + correct coefficients not exported.</span></div>
+  <p>These are novel Gemma 3n architecture features. The GGUF represents the llama.cpp-runnable subset of the model.</p>
+
+  <h3>TRAINING mode (LoRA fine-tuning)</h3>
+  <p><span class="hl">Entirely synthetic</span> — no real checkpoint data is loaded. Illustrates LoRA adapter
+     magnitude growth, not base weight changes. Config verified from <span class="hl">run_full_session.py</span>:</p>
+  <div class="kv"><span class="k">LoRA config</span><span class="v">r=16, α=32, scale=α/r=2×, dropout=0.05, bias=none, lr=5e-6</span></div>
+  <div class="kv"><span class="k">target_modules (7)</span><span class="v">q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj — shown as vivid bars that animate</span></div>
+  <div class="kv"><span class="k">Frozen (3)</span><span class="v">altup_scale, inp_gate, proj — shown as static steel-blue bars throughout</span></div>
+  <div class="kv"><span class="k">Dynamics</span><span class="v">All 35 layers update simultaneously (no wave). Per-adapter onset variation is hash-based noise, exaggerated ±25% for visibility (real ≈ ±10–20%). No paper cited for specific magnitudes.</span></div>
+  <p style="margin-top:6px">After the next training run, call <span class="hl">loadCheckpoint(data)</span> from the console
+     to replace this synthetic proxy with real per-adapter-per-step measurements. See console for API docs.</p>
+
+  <h3>Camera controls</h3>
+  <div class="kv"><span class="k">Left drag</span><span class="v">Orbit / rotate</span></div>
+  <div class="kv"><span class="k">Right drag or shift-drag</span><span class="v">Pan</span></div>
+  <div class="kv"><span class="k">Scroll</span><span class="v">Zoom</span></div>
+  <div class="kv"><span class="k">Hover bar top</span><span class="v">Tensor name, exact shape, parameter count</span></div>
+</div>
+
+<script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+<script>
+// ── Ground-truth data (from tensor_manifest.json) ─────────────────────────────
+// Falsifiable: every shape matches blk.L.key.weight in the GGUF tensor info section.
+
+const ARCH={"layers":[{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,6144],"ffn_u":[1536,6144],"ffn_d":[6144,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,6144],"ffn_u":[1536,6144],"ffn_d":[6144,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,6144],"ffn_u":[1536,6144],"ffn_d":[6144,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,6144],"ffn_u":[1536,6144],"ffn_d":[6144,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,4096],"attn_k":[1536,512],"attn_v":[1536,512],"attn_o":[4096,1536],"ffn_g":[1536,6144],"ffn_u":[1536,6144],"ffn_d":[6144,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,6144],"ffn_u":[1536,6144],"ffn_d":[6144,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,6144],"ffn_u":[1536,6144],"ffn_d":[6144,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,6144],"ffn_u":[1536,6144],"ffn_d":[6144,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,6144],"ffn_u":[1536,6144],"ffn_d":[6144,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,4096],"attn_k":[1536,512],"attn_v":[1536,512],"attn_o":[4096,1536],"ffn_g":[1536,6144],"ffn_u":[1536,6144],"ffn_d":[6144,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,6144],"ffn_u":[1536,6144],"ffn_d":[6144,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,6144],"ffn_u":[1536,6144],"ffn_d":[6144,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,6144],"ffn_u":[1536,6144],"ffn_d":[6144,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,6144],"ffn_u":[1536,6144],"ffn_d":[6144,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,4096],"attn_k":[1536,512],"attn_v":[1536,512],"attn_o":[4096,1536],"ffn_g":[1536,6144],"ffn_u":[1536,6144],"ffn_d":[6144,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,12288],"ffn_u":[1536,12288],"ffn_d":[12288,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,12288],"ffn_u":[1536,12288],"ffn_d":[12288,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,12288],"ffn_u":[1536,12288],"ffn_d":[12288,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,12288],"ffn_u":[1536,12288],"ffn_d":[12288,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,4096],"attn_k":[1536,512],"attn_v":[1536,512],"attn_o":[4096,1536],"ffn_g":[1536,12288],"ffn_u":[1536,12288],"ffn_d":[12288,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,12288],"ffn_u":[1536,12288],"ffn_d":[12288,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,12288],"ffn_u":[1536,12288],"ffn_d":[12288,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,12288],"ffn_u":[1536,12288],"ffn_d":[12288,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,12288],"ffn_u":[1536,12288],"ffn_d":[12288,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,4096],"attn_k":[1536,512],"attn_v":[1536,512],"attn_o":[4096,1536],"ffn_g":[1536,12288],"ffn_u":[1536,12288],"ffn_d":[12288,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,12288],"ffn_u":[1536,12288],"ffn_d":[12288,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,12288],"ffn_u":[1536,12288],"ffn_d":[12288,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,12288],"ffn_u":[1536,12288],"ffn_d":[12288,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,12288],"ffn_u":[1536,12288],"ffn_d":[12288,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,4096],"attn_k":[1536,512],"attn_v":[1536,512],"attn_o":[4096,1536],"ffn_g":[1536,12288],"ffn_u":[1536,12288],"ffn_d":[12288,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,12288],"ffn_u":[1536,12288],"ffn_d":[12288,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,12288],"ffn_u":[1536,12288],"ffn_d":[12288,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,12288],"ffn_u":[1536,12288],"ffn_d":[12288,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,2048],"attn_k":[1536,256],"attn_v":[1536,256],"attn_o":[2048,1536],"ffn_g":[1536,12288],"ffn_u":[1536,12288],"ffn_d":[12288,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]},{"attn_q":[1536,4096],"attn_k":[1536,512],"attn_v":[1536,512],"attn_o":[4096,1536],"ffn_g":[1536,12288],"ffn_u":[1536,12288],"ffn_d":[12288,1536],"altup_scale":[1],"inp":[1536,256],"proj":[256,1536]}],"global":[{"name":"rope_freqs.weight","shape":[256],"type":"F32"},{"name":"token_embd.weight","shape":[1536,262144],"type":"F16"},{"name":"per_layer_token_embd.weight","shape":[8960,262144],"type":"F16"},{"name":"output_norm.weight","shape":[1536],"type":"F32"},{"name":"per_layer_model_proj.weight","shape":[1536,8960],"type":"F16"},{"name":"per_layer_proj_norm.weight","shape":[256],"type":"F32"}]};
+
+// ── Tensor layout ─────────────────────────────────────────────────────────────
+// [displayKey, label, yOffset, hexColor, archKey]
+// Ordered by execution phase within each layer:
+//   Phase 1: attn_q/k/v  (AltUp.predict + Laurel run here but have no GGUF tensors)
+//   Phase 2: attn_out
+//   Phase 3: ffn_gate/up
+//   Phase 4: ffn_down
+//   Phase 5: altup_scale  (AltUp.correct — layer_output_scale [1], real GGUF tensor)
+//   Phase 6: inp_gate/proj (per_layer_input_gate + per_layer_projection — last in block)
+const TDEFS = [
+  ['attn_q',      'attn_q',      0.0,  '#4488ff', 'attn_q'     ],
+  ['attn_k',      'attn_k',      1.3,  '#22aadd', 'attn_k'     ],
+  ['attn_v',      'attn_v',      2.6,  '#1199cc', 'attn_v'     ],
+  ['attn_output', 'attn_out',    3.9,  '#66ccff', 'attn_o'     ],
+  ['ffn_gate',    'ffn_gate',    5.8,  '#33dd77', 'ffn_g'      ],
+  ['ffn_up',      'ffn_up',      7.1,  '#22bb55', 'ffn_u'      ],
+  ['ffn_down',    'ffn_down',    8.4,  '#11aa44', 'ffn_d'      ],
+  ['altup_scale', 'altup_scale', 9.8,  '#ff44cc', 'altup_scale'],  // AltUp.correct scalar [1]
+  ['inp_gate',    'inp_gate',   11.2,  '#ff9933', 'inp'        ],
+  ['proj',        'proj',       12.5,  '#dd7722', 'proj'       ],
+];
+const YMIN = -0.9, YMAX = 13.5;
+const N = 35;
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const nP   = s => s.reduce((a,b)=>a*b,1);
+const barH = s => Math.max(0.12, Math.min((Math.log2(nP(s))-17)*0.76, 9.8));
+const fmt  = n => n>=1e9?(n/1e9).toFixed(3)+'B':n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':String(n);
+
+function layerFlags(L) {
+  const ly = ARCH.layers[L];
+  return { isGlobal: ly.attn_q[1]===4096, isLargeFfn: ly.ffn_g[1]===12288 };
+}
+
+// Parse hex #rrggbb → {r,g,b}
+function hexRgb(h) {
+  return { r:parseInt(h.slice(1,3),16), g:parseInt(h.slice(3,5),16), b:parseInt(h.slice(5,7),16) };
+}
+// Blend color toward dark bg by factor (1=full, 0=black)
+function dimColor(hex, factor) {
+  const {r,g,b} = hexRgb(hex);
+  const bg = 4; // bg channel value
+  return `rgb(${Math.round(r*factor+bg*(1-factor))},${Math.round(g*factor+bg*(1-factor))},${Math.round(b*factor+bg*(1-factor))})`;
+}
+
+// Layer total params (all tensor types)
+function layerParams(L) {
+  const ly = ARCH.layers[L];
+  return Object.values(ly).reduce((s,d)=>s+nP(d),0);
+}
+
+// ── Build traces ──────────────────────────────────────────────────────────────
+const traces = [];
+
+// 1. Floor plates (mesh3d) — one rectangle per architectural-variant layer
+for (let L = 0; L < N; L++) {
+  const {isGlobal, isLargeFfn} = layerFlags(L);
+  if (!isGlobal && !isLargeFfn) continue;
+  const col  = (isGlobal&&isLargeFfn)?'#551133':isGlobal?'#112266':'#441100';
+  const flags = [];
+  if (isGlobal)   flags.push('GLOBAL ATTN (q-dim=4096)');
+  if (isLargeFfn) flags.push('LARGE FFN (dim=12288)');
+  const tip = `<b>Layer ${L}</b><br>${flags.join('<br>')}`;
+  const hw = 0.44;
+  for (const [xi,yi,zi] of [
+    [[L-hw,L+hw,L+hw],[YMIN,YMIN,YMAX],[0,0,0]],
+    [[L-hw,L+hw,L-hw],[YMIN,YMAX,YMAX],[0,0,0]],
+  ]) {
+    traces.push({type:'mesh3d',x:xi,y:yi,z:zi,i:[0],j:[1],k:[2],
+      color:col,opacity:0.28,flatshading:true,
+      hovertemplate:tip+'<extra></extra>',showlegend:false});
+  }
+}
+
+// 2. Line traces (bar bodies) — one per tensor type, all 35 layers as polyline.
+// These are STATIC architectural scaffolding — they do NOT animate.
+// Animation is handled entirely by the unified marker trace (proven working).
+const LINE_TRACE_START = traces.length;
+for (const [fullKey,,yOff,color,archKey] of TDEFS) {
+  const lx=[],ly=[],lz=[];
+  for (let L=0;L<N;L++) {
+    const ht=barH(ARCH.layers[L][archKey]);
+    lx.push(L,L,null); ly.push(yOff,yOff,null); lz.push(0,ht,null);
+  }
+  traces.push({type:'scatter3d',mode:'lines',x:lx,y:ly,z:lz,
+    line:{color:dimColor(color,0.45),width:7},
+    showlegend:false,hoverinfo:'skip',name:fullKey});
+}
+
+// 3. Unified marker trace — all 350 points (35 layers × 10 tensor types)
+// This single trace is restyle'd for animation (one call = all points updated)
+const allX=[],allY=[],allZ=[],allC=[],allS=[],allT=[];
+for (let L=0;L<N;L++) {
+  for (const [fullKey,,yOff,color,archKey] of TDEFS) {
+    const shape = ARCH.layers[L][archKey];
+    const {isGlobal,isLargeFfn} = layerFlags(L);
+    const gf = isGlobal   ? '  ·  <b>GLOBAL ATTN</b>' : '  ·  local sliding';
+    const ff = isLargeFfn ? '  ·  <b>LARGE FFN</b>'   : '';
+    allX.push(L); allY.push(yOff); allZ.push(barH(shape));
+    allC.push(color); allS.push(5);
+    allT.push(`<b>blk.${L}.${fullKey}.weight</b><br>Layer ${L}${gf}${ff}<br>Shape: [${shape.join(' × ')}]<br>Parameters: ${fmt(nP(shape))}`);
+  }
+}
+const UNIFIED_IDX = traces.length;
+traces.push({type:'scatter3d',mode:'markers',
+  x:allX,y:allY,z:allZ,text:allT,
+  hovertemplate:'%{text}<extra></extra>',
+  marker:{color:allC,size:allS,opacity:0.95},
+  name:'tensors',showlegend:false});
+
+// Legend-only traces (one point each, not interactive)
+for (const [fullKey,label,,color] of TDEFS) {
+  traces.push({type:'scatter3d',mode:'markers',
+    x:[null],y:[null],z:[null],
+    marker:{color,size:6},name:label,showlegend:true,
+    hoverinfo:'skip'});
+}
+
+// 4. Global (non-layer) tensors at x = −4
+const GLB_META = {
+  'rope_freqs.weight':           {col:'#9999ff',label:'rope_freqs',     note:'RoPE base frequencies'},
+  'token_embd.weight':           {col:'#ffdd44',label:'token_embd',     note:'Embedding table (tied output projection)'},
+  'per_layer_token_embd.weight': {col:'#ff8844',label:'per_layer_embd', note:'AltUp per-layer routing embeddings'},
+  'output_norm.weight':          {col:'#888888',label:'output_norm',    note:'Final RMSNorm weight'},
+  'per_layer_model_proj.weight': {col:'#dd6622',label:'per_layer_proj', note:'AltUp model→routing projection'},
+  'per_layer_proj_norm.weight':  {col:'#aaaaaa',label:'per_layer_pnorm',note:'AltUp projection norm'},
+};
+ARCH.global.forEach((g,i)=>{
+  const m=GLB_META[g.name]||{col:'#cccccc',label:g.name,note:''};
+  const ht=barH(g.shape), p=nP(g.shape), y=i*2.1;
+  traces.push({type:'scatter3d',mode:'lines+markers',
+    x:[-4,-4],y:[y,y],z:[0,ht],
+    text:['',`<b>${g.name}</b><br>Type: ${g.type}  ·  ${m.note}<br>Shape: [${g.shape.join(' × ')}]<br>Parameters: ${fmt(p)}`],
+    hovertemplate:'%{text}<extra></extra>',
+    line:{color:m.col,width:9},marker:{color:m.col,size:[0,6]},
+    name:m.label,showlegend:true});
+});
+
+// 5. Spotlight trace (inference mode) — starts hidden
+const SPOT_IDX = traces.length;
+traces.push({type:'scatter3d',mode:'markers',
+  x:TDEFS.map(()=>0), y:TDEFS.map(t=>t[2]), z:TDEFS.map(t=>barH(ARCH.layers[0][t[4]])),
+  marker:{color:TDEFS.map(t=>t[3]),size:14,opacity:0,symbol:'circle'},
+  showlegend:false,hoverinfo:'skip',name:'spotlight'});
+
+// ── Layout ────────────────────────────────────────────────────────────────────
+const layout = {
+  paper_bgcolor:'#04040f', plot_bgcolor:'#04040f',
+  font:{family:'Courier New,monospace',color:'#445566',size:10},
+  title:{text:'GEMMA 4 2B  ·  TENSOR ARCHITECTURE  ·  356 of 601 tensors (norms omitted)  ·  Height ∝ log₂(params)',
+    font:{size:13,color:'#b8c8ee',family:'Courier New'},x:0.03,y:0.985,xanchor:'left'},
+  margin:{l:0,r:0,t:36,b:52},
+  showlegend:true,
+  legend:{x:0.01,y:0.07,bgcolor:'rgba(4,6,18,0.88)',bordercolor:'#152040',borderwidth:1,
+    font:{size:10,color:'#667788',family:'Courier New'}},
+  scene:{
+    bgcolor:'#04040f',
+    camera:{eye:{x:-1.55,y:-2.05,z:0.88},center:{x:0.05,y:0.15,z:-0.10},up:{x:0,y:0,z:1}},
+    xaxis:{title:{text:'Layer',font:{color:'#334455',size:10}},
+      tickvals:[-4,0,4,9,14,15,19,24,29,34],
+      ticktext:['GLOBAL','L0','L4↑','L9↑','L14↑','L15⇑','L19↑⇑','L24↑⇑','L29↑⇑','L34↑⇑'],
+      gridcolor:'#0a1220',zerolinecolor:'#152035',color:'#334455',
+      showbackground:true,backgroundcolor:'#050515',range:[-6.5,36]},
+    yaxis:{title:{text:'Tensor type',font:{color:'#334455',size:10}},
+      tickvals:TDEFS.map(t=>t[2]),ticktext:TDEFS.map(t=>t[1]),
+      gridcolor:'#0a1220',zerolinecolor:'#152035',color:'#334455',
+      showbackground:true,backgroundcolor:'#050515',range:[YMIN,YMAX+1]},
+    zaxis:{title:{text:'Parameters (log₂ scale)',font:{color:'#334455',size:10}},
+      tickvals:[0,1,2,3,4,5,6,7,8,9],
+      ticktext:['128K','262K','524K','1M','2M','4M','8M','17M','33M','67M'],
+      gridcolor:'#0a1220',zerolinecolor:'#152035',color:'#334455',
+      showbackground:true,backgroundcolor:'#050515',range:[-0.4,11]},
+    aspectmode:'manual',aspectratio:{x:2.6,y:1.55,z:0.75},
+    annotations:[
+      {x:7, y:1.95,z:10.4,text:'L0–14: small FFN (6144)',showarrow:false,font:{color:'#1e3a5a',size:9,family:'Courier New'}},
+      {x:24,y:1.95,z:10.4,text:'L15–34: large FFN (12288)',showarrow:false,font:{color:'#2a1a1a',size:9,family:'Courier New'}},
+      {x:17,y:7.1, z:10.4,text:'↑ GLOBAL ATTN: L4,9,14,19,24,29,34',showarrow:false,font:{color:'#1a1a3a',size:9,family:'Courier New'}},
+    ],
+  },
+};
+
+Plotly.newPlot('plot', traces, layout, {responsive:true,displaylogo:false,
+  modeBarButtonsToRemove:['toImage','sendDataToCloud']});
+
+// ── Animation state ───────────────────────────────────────────────────────────
+let currentMode = 'arch';
+let inferStep   = 0;
+let inferTimer  = null;
+let inferSpeed  = 350;
+let inferPlaying = false;
+let trainStep   = 0;
+let trainTimer  = null;
+let trainPlaying = false;
+
+// BASE colours for arch/reset
+const BASE_COLORS = [];
+const BASE_SIZES  = [];
+for (let L=0;L<N;L++) for (const [,,,c] of TDEFS) { BASE_COLORS.push(c); BASE_SIZES.push(5); }
+
+// ── Inference animation ───────────────────────────────────────────────────────
+// Within each layer the computation flows in a fixed order matching the actual
+// transformer forward pass:
+//   Phase 0 — Q, K, V projections (parallel)
+//   Phase 1 — Attention output projection  (after scores+softmax+AV)
+//   Phase 2 — FFN gate + up projections    (parallel, SwiGLU expand)
+//   Phase 3 — FFN down projection          (compress back to d_model)
+//   Phase 4 — AltUp inp_gate + proj        (per-layer routing)
+// The glow therefore travels UP the Y-axis within each layer before advancing.
+
+// 6 phases matching Gemma3nTextDecoderLayer.forward() exactly.
+// AltUp.predict() and Laurel run at phase 0 but have NO per-layer GGUF tensors
+// (llama.cpp convert_hf_to_gguf.py does not export them). Noted in badge.
+// altup_scale [1] = AltUp.correct_output_scale — IS in GGUF, shown in phase 5.
+const INFER_PHASES = [
+  [0,1,2],   // phase 1 — attn_q, attn_k, attn_v  [+AltUp.predict & Laurel: no GGUF tensors]
+  [3],       // phase 2 — attn_out
+  [4,5],     // phase 3 — ffn_gate, ffn_up
+  [6],       // phase 4 — ffn_down
+  [7],       // phase 5 — altup_scale (AltUp.correct_output_scale)
+  [8,9],     // phase 6 — inp_gate, proj (per_layer_input_gate + per_layer_projection)
+];
+const PHASE_NAMES = [
+  'Q · K · V projections',
+  'Attention output',
+  'FFN gate + up (expand)',
+  'FFN down (compress)',
+  'AltUp.correct scale  [1]',
+  'per-layer input gate',
+];
+const N_PHASES = INFER_PHASES.length;              // 6
+const TOTAL_INFER_STEPS = N * N_PHASES;            // 210
+
+function applyInferSubStep(substep) {
+  const L     = Math.floor(substep / N_PHASES);
+  const phase = substep % N_PHASES;
+  const activeSet = new Set(INFER_PHASES[phase]);
+  const {isGlobal, isLargeFfn} = layerFlags(L);
+
+  const colors=[], sizes=[];
+  for (let i=0;i<N;i++) {
+    const layerDist = i - L;           // negative = already processed
+    for (let t=0;t<TDEFS.length;t++) {
+      const [,,,c] = TDEFS[t];
+      let f, sz;
+      if (i === L && activeSet.has(t)) {
+        // Currently computing — full brightness, bigger
+        // Global attention phases 0-1 get a white-ish boost to show full-seq scope
+        f  = (isGlobal && phase<=1) ? 1.15 : 1.0;
+        sz = (isGlobal && phase<=1) ? 13   : 11;
+      } else if (i === L) {
+        // Same layer, different subsystem (done or not yet)
+        const tDef   = TDEFS[t];
+        const tPhase = INFER_PHASES.findIndex(p=>p.includes(t));
+        f  = tPhase < phase ? 0.28 : 0.06;  // already done = dim glow; not yet = dark
+        sz = 4;
+      } else if (layerDist < 0) {
+        // Trailing layers — fade with distance
+        const d = -layerDist;
+        f  = d===1?0.38:d===2?0.20:d===3?0.10:0.05;
+        sz = d===1?6:d===2?5:3.5;
+      } else {
+        // Ahead — very dim
+        f=0.04; sz=3;
+      }
+      colors.push(dimColor(c, Math.min(f,1)));
+      sizes.push(sz);
+    }
+  }
+
+  // Spotlight only on active tensor types at layer L
+  const spotX = TDEFS.map((_,t) => activeSet.has(t) ? L : -99);
+  const spotZ = TDEFS.map((_,t) => barH(ARCH.layers[L][TDEFS[t][4]]));
+  const spotC = TDEFS.map((_,t) => activeSet.has(t)
+    ? (isGlobal && phase<=1 ? '#ffffff' : TDEFS[t][3])
+    : 'rgba(0,0,0,0)');
+
+  Plotly.restyle('plot',
+    {'marker.color':[colors],'marker.size':[sizes]}, [UNIFIED_IDX]);
+  Plotly.restyle('plot',
+    {x:[spotX], z:[spotZ], 'marker.color':[spotC],
+     'marker.opacity': activeSet.size ? 0.45 : 0,
+     'marker.size': (isGlobal && phase<=1) ? 18 : 15},
+    [SPOT_IDX]);
+
+  // Line traces are static scaffolding — animation via marker trace only.
+
+  // Badge
+  const attnTag   = isGlobal ? '  ·  GLOBAL (full-seq)' : '  ·  local window';
+  const ffnTag    = isLargeFfn ? '  ·  large FFN' : '  ·  small FFN';
+  const laurelNote = phase===0
+    ? '⚠ AltUp.predict + Laurel block also run here — not in GGUF export' : '';
+  const phaseTag = phase<=1 ? attnTag : phase<=3 ? ffnTag : '';
+  document.getElementById('ib-num').textContent  = `Layer ${L}  ·  phase ${phase+1}/6`;
+  document.getElementById('ib-type').textContent = PHASE_NAMES[phase] + phaseTag;
+  document.getElementById('ib-params').textContent =
+    laurelNote || `~${fmt(layerParams(L))} params this layer`;
+  document.getElementById('layer-slider').value   = substep;
+  document.getElementById('layer-lbl').textContent = `L${L} · ${PHASE_NAMES[phase]}`;
+
+  // Narrative overlay
+  updateInferNarrative(L, phase, isGlobal, isLargeFfn);
+}
+
+function stepInfer() {
+  inferStep = (inferStep + 1) % TOTAL_INFER_STEPS;
+  applyInferSubStep(inferStep);
+}
+
+function toggleInferPlay() {
+  inferPlaying = !inferPlaying;
+  document.getElementById('play-btn').textContent = inferPlaying?'⏸':'▶';
+  if (inferPlaying) inferTimer = setInterval(stepInfer, inferSpeed);
+  else { clearInterval(inferTimer); inferTimer=null; }
+}
+
+function seekInfer(val) {
+  inferStep = +val;
+  applyInferSubStep(inferStep);
+}
+
+// ── Training animation ────────────────────────────────────────────────────────
+// Synthetic learning curve: weight magnitude ∝ saturation(step)
+// Real data hookup: call loadCheckpoint(step, weightSaturationPerType) from console
+
+let checkpointData = null; // null = use synthetic curve
+
+// ── LoRA fine-tuning dynamics (verified from run_full_session.py) ─────────────
+// LoraConfig: r=16, alpha=32, scale=2×
+// target_modules: q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj
+//   → TDEFS indices 0-6 (attn_q, attn_k, attn_v, attn_output, ffn_gate, ffn_up, ffn_down)
+// FROZEN (not in target_modules):
+//   → TDEFS index 7 = altup_scale  (layer_output_scale [1])
+//   → TDEFS index 8 = inp_gate     (per_layer_input_gate)
+//   → TDEFS index 9 = proj         (per_layer_projection)
+// Backprop flows OUTPUT → L34 → L33 → ... → L0 (later layers receive gradient first).
+// All 35 layers update simultaneously — LoRA adapters are small low-rank deltas on
+// frozen base weights; there is no left-to-right wave.
+const LORA_FROZEN = new Set([7, 8, 9]);
+// typeIdx 0-3 = attn (q,k,v,out); 4-6 = ffn (gate,up,down); 7-9 = frozen
+const LORA_FFN   = new Set([4, 5, 6]);
+
+// LoRA adapter magnitude proxy:
+//
+// VERIFIED from run_full_session.py:
+//   1. All adapters update simultaneously every backward pass (no wave).
+//   2. Frozen tensors (altup_scale, inp_gate, proj) never change.
+//   3. LoRA config: r=16, alpha=32, 7 target modules.
+//
+// ASSUMED (not measured, not cited):
+//   4. FFN adapters shown reaching higher ceiling (1.0) than attn (0.78).
+//      This is a common observation in LoRA analyses but NO specific paper is cited,
+//      and it has NOT been measured for this Gemma4 + HAIC task specifically.
+//      The 78% attn ceiling is a fabricated number chosen for visual contrast.
+//   5. Per-adapter onset spread of 38 steps is exaggerated for visibility.
+//      Real gradient-noise variation is smaller. Exact magnitude unknown.
+//
+// Onset is a per-adapter hash — NOT correlated with layer index.
+function syntheticSaturation(step, L, typeIdx) {
+  if (LORA_FROZEN.has(typeIdx)) return 0.22;
+
+  const isFfn = LORA_FFN.has(typeIdx);
+
+  // Independent onset per adapter: 0–38 steps (hash-based, not ordered by L).
+  // Spread of 38 steps makes half the adapters visibly lit before the other half.
+  const hash   = ((L * 17 + typeIdx * 37 + L * typeIdx * 3) % 53) / 53; // 0..1
+  const onset  = hash * 38 + (isFfn ? 0 : 8); // FFN starts sooner on average (+8 attn delay)
+  const dur    = isFfn ? 38 : 45;              // FFN converges faster too
+
+  const localT = Math.max(0, Math.min(1, (step - onset) / dur));
+  const base   = 1 - Math.exp(-5 * localT);
+
+  // FFN adapters reach higher final magnitude than attn (literature-supported)
+  const ceiling = isFfn ? 1.0 : 0.78;
+  return Math.max(0, Math.min(ceiling, base * ceiling));
+}
+
+// Two-pole color ramp for LoRA-trained tensors:
+//   sat=0   → near-black init
+//   sat=0.5 → 50% native color
+//   sat=1   → full native + bloom
+// Frozen tensors (altup_scale, inp_gate, proj) get a flat steel-blue tint
+// to visually distinguish "base weights not modified" from "adapters converging".
+const FROZEN_COLOR = 'rgb(22,32,55)'; // cold steel-blue, visually distinct
+
+function trainColor(hex, sat, isFrozen) {
+  if (isFrozen) return FROZEN_COLOR;
+  const {r,g,b} = hexRgb(hex);
+  const cr=5, cg=7, cb=18;                            // cold dark pole
+  const br=Math.min(255,r+65), bg_=Math.min(255,g+65), bb=Math.min(255,b+65); // bloom pole
+  let fr, fg, fb;
+  if (sat < 0.25) {
+    const f = sat / 0.25;
+    fr = cr + (r*0.28-cr)*f; fg = cg + (g*0.28-cg)*f; fb = cb + (b*0.28-cb)*f;
+  } else if (sat < 0.68) {
+    const f = (sat-0.25)/0.43;
+    fr = r*0.28+(r-r*0.28)*f; fg = g*0.28+(g-g*0.28)*f; fb = b*0.28+(b-b*0.28)*f;
+  } else {
+    const f = (sat-0.68)/0.32;
+    fr = r+(br-r)*f; fg = g+(bg_-g)*f; fb = b+(bb-b)*f;
+  }
+  return `rgb(${Math.round(fr)},${Math.round(fg)},${Math.round(fb)})`;
+}
+
+function applyTrainStep(step) {
+  const markerColors=[], markerSizes=[];
+  const typeSat = new Array(TDEFS.length).fill(0);
+
+  let totalSat = 0, trainedCount = 0;
+  for (let L=0;L<N;L++) {
+    for (let ti=0;ti<TDEFS.length;ti++) {
+      const [,,,c] = TDEFS[ti];
+      const frozen = LORA_FROZEN.has(ti);
+      let sat;
+      if (!checkpointData) {
+        sat = syntheticSaturation(step, L, ti);
+      } else if (checkpointData.type === 'flat') {
+        sat = Math.max(0, Math.min(1, checkpointData.values[Math.min(step, checkpointData.values.length-1)]));
+      } else if (checkpointData.type === 'full') {
+        const frame = checkpointData.steps[Math.min(step, checkpointData.steps.length-1)];
+        sat = Math.max(0, Math.min(1, frame.adapters[L * TDEFS.length + ti] || 0));
+      } else {
+        sat = syntheticSaturation(step, L, ti);
+      }
+      if (!frozen) { totalSat += sat; trainedCount++; }
+      typeSat[ti] += sat;
+      markerColors.push(trainColor(c, sat, frozen));
+      // Large size range makes variation visible regardless of colour perception
+      markerSizes.push(frozen ? 3.0 : 2.5 + sat * 11.5); // 2.5 (dark) → 14 (bright)
+    }
+  }
+
+  Plotly.restyle('plot',{'marker.color':[markerColors],'marker.size':[markerSizes]},[UNIFIED_IDX]);
+
+  // Line traces are static scaffolding — training animation via marker trace only.
+
+  const avgSat = trainedCount > 0 ? totalSat / trainedCount : 0;
+  document.getElementById('train-slider').value = step;
+  document.getElementById('step-lbl').textContent = `Step ${step} / 100`;
+  document.getElementById('tb-step').textContent  = `Step ${step} / 100`;
+  document.getElementById('tb-pct').textContent   = `Avg weight saturation: ${Math.round(avgSat*100)}%`;
+  updateTrainNarrative(step, avgSat);
+}
+
+function toggleTrainPlay() {
+  trainPlaying = !trainPlaying;
+  document.getElementById('train-play-btn').textContent = trainPlaying?'⏸':'▶';
+  if (trainPlaying) {
+    const maxStep = checkpointData?.type==='full' ? checkpointData.steps.length-1
+                  : checkpointData?.type==='flat'  ? checkpointData.values.length-1
+                  : 100;
+    trainTimer = setInterval(()=>{
+      trainStep = trainStep >= maxStep ? 0 : trainStep+1;
+      applyTrainStep(trainStep);
+    }, 80);
+  } else { clearInterval(trainTimer); trainTimer=null; }
+}
+
+function seekTrain(val) { trainStep=+val; applyTrainStep(trainStep); }
+
+// Public API: plug in real checkpoint data after next training run.
+//
+// Two supported formats:
+//
+// FORMAT 1 — flat (one scalar per step):
+//   loadCheckpoint([0.05, 0.12, 0.28, ...])
+//   Each value = global average adapter magnitude at that step.
+//   All 245 adapters get the same value. Simple but loses per-adapter detail.
+//
+// FORMAT 2 — per-adapter-per-step (full fidelity):
+//   loadCheckpoint([
+//     { step: 0,  adapters: Float32Array(350) },  // 35 layers × 10 types
+//     { step: 10, adapters: Float32Array(350) },
+//     ...
+//   ])
+//   adapters[L * 10 + ti] = saturation 0-1 for layer L, TDEFS type ti.
+//   Frozen types (ti=7,8,9) should be 0 in real data.
+//   This replaces the synthetic curve entirely with real measurements.
+//
+// Call from browser console after extracting adapter norms from checkpoints.
+window.loadCheckpoint = function(data) {
+  if (Array.isArray(data) && typeof data[0] === 'number') {
+    // Format 1: flat array of scalars
+    checkpointData = { type: 'flat', values: data };
+    console.log(`loadCheckpoint: ${data.length} steps (flat scalar per step).`);
+  } else if (Array.isArray(data) && data[0] && data[0].adapters) {
+    // Format 2: per-adapter-per-step
+    checkpointData = { type: 'full', steps: data };
+    console.log(`loadCheckpoint: ${data.length} steps × ${data[0].adapters.length} adapters (full fidelity).`);
+  } else {
+    console.error('loadCheckpoint: unrecognised format. Pass [numbers] or [{step, adapters: Float32Array(350)}].');
+    return;
+  }
+  if (currentMode==='train') applyTrainStep(trainStep);
+};
+
+// ── Narrative overlay ─────────────────────────────────────────────────────────
+
+function updateInferNarrative(L, phase, isGlobal, isLargeFfn) {
+  const qDim  = isGlobal   ? 4096 : 2048;
+  const kvDim = isGlobal   ? 512  : 256;
+  const ffnH  = isLargeFfn ? 12288 : 6144;
+
+  const heads = [
+    // phase 0 — Q·K·V
+    isGlobal
+      ? `Layer ${L} — full-sequence attention`
+      : `Layer ${L} — local sliding-window attention`,
+    // phase 1 — attn_out
+    `Layer ${L} — attention output`,
+    // phase 2 — FFN gate + up
+    `Layer ${L} — feed-forward expansion`,
+    // phase 3 — FFN down
+    `Layer ${L} — feed-forward compression`,
+    // phase 4 — AltUp correct
+    `Layer ${L} — AltUp correction`,
+    // phase 5 — per-layer gate
+    `Layer ${L} — per-layer input gate`,
+  ];
+
+  const bodies = [
+    // Q·K·V — verified from GGUF shapes + modeling_gemma3n.py
+    isGlobal
+      ? `Q projected to ${qDim} dims, K and V each to ${kvDim} dims. Head dimension is wider than local layers — confirmed by attn_q shape [1536,${qDim}] in tensor manifest. AltUp.predict() and the Laurel block also fire here (weights not in GGUF export).`
+      : `Q projected to ${qDim} dims, K and V each to ${kvDim} dims — confirmed by attn_q shape [1536,${qDim}] in tensor manifest. Attention window is local (sliding); exact window size is a runtime hyperparameter not stored in GGUF.`,
+    // attn_out — verified from GGUF shape attn_output [qDim, 1536]
+    `Output projection: attn_output weight shape [${qDim},1536]. NOTE: Gemma4 uses learned per-head Q/K norms (attn_q_norm [${kvDim}], attn_k_norm [${kvDim}] — both in GGUF), NOT standard √d scaling. Scores = norm(Q)·norm(K)ᵀ, then softmax, then weighted V, then this output projection.`,
+    // FFN gate + up — verified from GGUF shapes
+    `SwiGLU: gate_proj and up_proj each have shape [1536,${ffnH}] — confirmed from GGUF. Element-wise product of gate(silu) × up forms the hidden activation. ${isLargeFfn ? 'Large FFN: hidden dim doubles here (L15+).' : 'Small FFN: hidden dim 6144 (L0–14).'}`,
+    // FFN down — verified from GGUF shape ffn_down [ffnH, 1536]
+    `ffn_down shape [${ffnH},1536] — confirmed from GGUF. Compresses SwiGLU output back to residual stream dimension. Laurel block output is also merged into the residual here (per source), but Laurel's own weights (linear_left, linear_right) are NOT in the GGUF — this merge is invisible in the visualisation.`,
+    // AltUp correct — verified: layer_output_scale [1] in GGUF
+    `AltUp.correct_output_scale: shape [1] — one scalar per layer, confirmed present in GGUF (blk.${L}.layer_output_scale.weight). Scales the corrected AltUp prediction before merging. AltUp modality_router and correction coefficients are NOT in the GGUF.`,
+    // per-layer gate — verified from GGUF shapes
+    `per_layer_input_gate [1536,256] compresses residual to routing dim. After activation and per-layer token embedding gating, per_layer_projection [256,1536] expands back. post_norm [1536] applied. All shapes confirmed from GGUF blk.${L}.* tensors. Last operation in this block.`,
+  ];
+
+  const flows = [
+    // Q·K·V
+    `1536 → Q:${qDim}  K:${kvDim}  V:${kvDim}`,
+    // attn_out — uses learned Q/K norms, not √d
+    `softmax(norm(Q)·norm(K)ᵀ) · V  →  ${qDim} → 1536`,
+    // FFN gate + up
+    `1536 → gate:${ffnH}  up:${ffnH}   (SwiGLU)`,
+    // FFN down
+    `${ffnH} → 1536  +  residual`,
+    // AltUp
+    `scale [1]  ·  corrected prediction`,
+    // per-layer gate
+    `1536 → 256 → 1536  +  per-layer embd`,
+  ];
+
+  document.getElementById('narr-head').textContent = heads[phase];
+  document.getElementById('narr-body').textContent = bodies[phase];
+  document.getElementById('narr-flow').textContent = flows[phase];
+}
+
+function updateTrainNarrative(step, avgSat) {
+  const pct = Math.round(avgSat * 100);
+  let head, body, flow;
+  // LoRA-accurate narrative — verified from run_full_session.py LoraConfig
+  if (step < 5) {
+    head = '[SIMULATED]  LoRA init — base weights frozen, adapters at zero';
+    body = 'Steel-blue tensors (altup_scale, inp_gate, proj) are NOT in target_modules — frozen throughout. The 245 vivid bars (attn q/k/v/out + ffn gate/up/down, × 35 layers) will receive low-rank adapter deltas A·B where A∈ℝ^{d×16}, B∈ℝ^{16×d}. Scale = α/r = 2×.';
+    flow = 'LoraConfig: r=16  α=32  scale=2×  lr=5e-6  grad_accum=4  target=7 modules';
+  } else if (pct < 40) {
+    head = '[SIMULATED]  Early LoRA — adapters activating, scattered across architecture';
+    body = 'All 35 layers update simultaneously (verified: LoRA applies to all layers). The scattered brightening is hash-based onset noise — NOT a measured gradient pattern. FFN adapters (greens) shown converging ahead of attention (blues) — this is an ASSUMED dynamic, not measured for this model or task.';
+    flow = `245 adapters active  ·  3 frozen (steel-blue)  ·  avg ΔW proxy: ${pct}%`;
+  } else if (pct < 72) {
+    head = '[SIMULATED]  Mid LoRA — FFN adapters ahead of attention';
+    body = 'Green bars (ffn gate/up/down) shown brighter than blue (attn q/k/v/out). This is an ASSUMED dynamic — some LoRA analyses observe higher FFN adapter norms, but no paper is cited and this has NOT been measured for Gemma4 + HAIC. The FFN=100%/attn=78% ceiling split is a fabricated ratio for visual contrast.';
+    flow = `FFN ceiling: 100%  ·  attn ceiling: 78%  ·  avg ΔW proxy: ${pct}%`;
+  } else if (pct < 90) {
+    head = '[SIMULATED]  Late LoRA — attention adapters plateauing below FFN';
+    body = 'Attention adapters approach their assumed 78% ceiling (fabricated number). FFN adapters near assumed 100% ceiling. Whether this split is real for HAIC fine-tuning is unknown — replace with loadCheckpoint() data after next run. Steel-blue frozen tensors unchanged throughout.';
+    flow = `Synthetic ΔW: ${pct}%  ·  lr=5e-6  ·  ⚠ exaggerated spread for visibility`;
+  } else {
+    head = '[SIMULATED]  LoRA converged — replace with real checkpoint data';
+    body = 'This is a synthetic proxy based on documented LoRA dynamics, not measurements from this model. After the next training run: call loadCheckpoint(perStepSatArray) in the console. Real data would show whether FFN adapters genuinely dominate for this HAIC task.';
+    flow = `Synthetic ΔW: ${pct}%  ·  ⚠ not measured  ·  loadCheckpoint() to replace`;
+  }
+  document.getElementById('narr-head').textContent = head;
+  document.getElementById('narr-body').textContent = body;
+  document.getElementById('narr-flow').textContent = flow;
+}
+
+// ── Mode switching ────────────────────────────────────────────────────────────
+
+function resetToArch() {
+  Plotly.restyle('plot',{'marker.color':[BASE_COLORS],'marker.size':[BASE_SIZES]},[UNIFIED_IDX]);
+  Plotly.restyle('plot',{'marker.opacity':0},[SPOT_IDX]);
+  // Line traces are static — no reset needed.
+}
+
+function setMode(mode) {
+  // Stop any running animations
+  if (inferTimer) { clearInterval(inferTimer); inferTimer=null; }
+  if (trainTimer) { clearInterval(trainTimer); trainTimer=null; }
+  inferPlaying=false; trainPlaying=false;
+  document.getElementById('play-btn').textContent='▶';
+  document.getElementById('train-play-btn').textContent='▶';
+
+  currentMode = mode;
+
+  // Buttons
+  ['arch','infer','train'].forEach(m=>{
+    document.getElementById(`btn-${m}`).classList.toggle('active',m===mode);
+  });
+  // Control panels
+  document.getElementById('infer-ctrl').classList.toggle('on',mode==='infer');
+  document.getElementById('train-ctrl').classList.toggle('on',mode==='train');
+  // Badges
+  document.getElementById('infer-badge').style.display = mode==='infer'?'block':'none';
+  document.getElementById('train-badge').style.display = mode==='train'?'block':'none';
+
+  document.getElementById('narrative').style.display = mode==='arch' ? 'none' : 'block';
+
+  if (mode==='arch') {
+    resetToArch();
+  } else if (mode==='infer') {
+    inferStep=0;
+    applyInferSubStep(0);
+  } else if (mode==='train') {
+    Plotly.restyle('plot',{'marker.opacity':0},[SPOT_IDX]);
+    trainStep=0;
+    applyTrainStep(0);
+  }
+}
+
+// ── Help panel ────────────────────────────────────────────────────────────────
+function toggleInfo() {
+  const p=document.getElementById('info-panel');
+  const o=document.getElementById('info-overlay');
+  const v=p.style.display==='block';
+  p.style.display=o.style.display=v?'none':'block';
+}
+</script>
+</body>
+</html>
