@@ -1,0 +1,10 @@
+{
+  "scenario": "maritime_chokepoints",
+  "trace_id": "trace_2507337b7939460ebf01cbc9fcef8055",
+  "target_label": "Suez Canal",
+  "window_id": "enc_9f8f80563f119c1d",
+  "start_time": "2026-04-10T16:38:17Z",
+  "sentinel_source": "sentinel-2a",
+  "sentinel_cloud_cover": 0.130026,
+  "assessment_action": "accept"
+}

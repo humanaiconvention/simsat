@@ -36,3 +36,10 @@ ENV/
 # --- OS Specific ---
 .DS_Store
 Thumbs.db
+# --- Build artifacts and deps (added 2026-04-22 reconciliation) ---
+node_modules/
+**/node_modules/
+.pytest_cache/
+.mypy_cache/
+*.pyc
+weights/

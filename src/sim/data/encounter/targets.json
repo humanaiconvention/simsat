@@ -1,0 +1,184 @@
+{
+  "schema_version": 1,
+  "targets": [
+    {
+      "target_id": "sf_bay",
+      "label": "San Francisco Bay",
+      "lon": -122.4194,
+      "lat": 37.7749,
+      "priority": 0.95,
+      "size_km": 8.0,
+      "tags": [
+        "coastal",
+        "urban",
+        "port"
+      ],
+      "metadata": {
+        "scenario_pack": "urban_coastal_ambiguity",
+        "scenario_role": "dense_mixed_scene",
+        "challenge_note": "Dense urban waterline where good geometry can still hide clutter and look-angle ambiguity."
+      }
+    },
+    {
+      "target_id": "la_port",
+      "label": "Port of Los Angeles",
+      "lon": -118.2641,
+      "lat": 33.7405,
+      "priority": 0.9,
+      "size_km": 8.0,
+      "tags": [
+        "port",
+        "logistics",
+        "urban"
+      ],
+      "metadata": {
+        "scenario_pack": "urban_coastal_ambiguity",
+        "scenario_role": "high_value_port",
+        "challenge_note": "Operationally valuable port scene with tempting but perspective-sensitive geometry."
+      }
+    },
+    {
+      "target_id": "houston_ship",
+      "label": "Houston Ship Channel",
+      "lon": -95.0891,
+      "lat": 29.7314,
+      "priority": 0.78,
+      "size_km": 7.0,
+      "tags": [
+        "industrial",
+        "port",
+        "weather_fragile"
+      ],
+      "metadata": {
+        "scenario_pack": "disaster_response_weather",
+        "scenario_role": "industrial_corridor",
+        "challenge_note": "High-value industrial corridor where cloud and recency pressure both matter."
+      }
+    },
+    {
+      "target_id": "suez",
+      "label": "Suez Canal",
+      "lon": 32.5498,
+      "lat": 30.0055,
+      "priority": 0.92,
+      "size_km": 10.0,
+      "tags": [
+        "shipping",
+        "chokepoint"
+      ],
+      "metadata": {
+        "scenario_pack": "maritime_chokepoints",
+        "scenario_role": "global_chokepoint",
+        "challenge_note": "A strategic chokepoint where the planner should prioritize decisive passes."
+      }
+    },
+    {
+      "target_id": "singapore_port",
+      "label": "Port of Singapore",
+      "lon": 103.8198,
+      "lat": 1.3521,
+      "priority": 0.88,
+      "size_km": 8.0,
+      "tags": [
+        "port",
+        "maritime",
+        "chokepoint"
+      ],
+      "metadata": {
+        "scenario_pack": "maritime_chokepoints",
+        "scenario_role": "traffic_dense_hub",
+        "challenge_note": "Dense maritime traffic hub where many windows look attractive."
+      }
+    },
+    {
+      "target_id": "rotterdam",
+      "label": "Port of Rotterdam",
+      "lon": 4.4777,
+      "lat": 51.9244,
+      "priority": 0.81,
+      "size_km": 8.0,
+      "tags": [
+        "port",
+        "europe",
+        "urban"
+      ],
+      "metadata": {
+        "scenario_pack": "urban_coastal_ambiguity",
+        "scenario_role": "large_port_complex",
+        "challenge_note": "Large coastal logistics complex with strong payoff but plenty of visually similar structures."
+      }
+    },
+    {
+      "target_id": "panama_canal",
+      "label": "Panama Canal",
+      "lon": -79.6806,
+      "lat": 9.080,
+      "priority": 0.91,
+      "size_km": 9.0,
+      "tags": [
+        "shipping",
+        "canal",
+        "chokepoint"
+      ],
+      "metadata": {
+        "scenario_pack": "maritime_chokepoints",
+        "scenario_role": "alternate_chokepoint",
+        "challenge_note": "A second chokepoint so evaluation is not overfit to one famous canal."
+      }
+    },
+    {
+      "target_id": "fort_myers_coast",
+      "label": "Fort Myers Coast",
+      "lon": -81.8723,
+      "lat": 26.6406,
+      "priority": 0.84,
+      "size_km": 10.0,
+      "tags": [
+        "coastal",
+        "storm_response",
+        "weather_fragile"
+      ],
+      "metadata": {
+        "scenario_pack": "disaster_response_weather",
+        "scenario_role": "storm_damage_screening",
+        "challenge_note": "Representative coastal disaster target where uncertain imagery should often become refine."
+      }
+    },
+    {
+      "target_id": "new_orleans_delta",
+      "label": "New Orleans Delta",
+      "lon": -89.911,
+      "lat": 29.153,
+      "priority": 0.86,
+      "size_km": 11.0,
+      "tags": [
+        "floodplain",
+        "delta",
+        "weather_fragile"
+      ],
+      "metadata": {
+        "scenario_pack": "disaster_response_weather",
+        "scenario_role": "flood_monitoring",
+        "challenge_note": "Flood-prone delta target where cloud and partial support should visibly affect trust."
+      }
+    },
+    {
+      "target_id": "shenzhen_bay",
+      "label": "Shenzhen Bay",
+      "lon": 113.9454,
+      "lat": 22.5014,
+      "priority": 0.83,
+      "size_km": 8.5,
+      "tags": [
+        "urban",
+        "coastal",
+        "logistics"
+      ],
+      "metadata": {
+        "scenario_pack": "urban_coastal_ambiguity",
+        "scenario_role": "dense_coastal_mixture",
+        "challenge_note": "Dense mixed-use coastal scene that rewards geometry but punishes overconfident acceptance."
+      }
+    }
+  ]
+}

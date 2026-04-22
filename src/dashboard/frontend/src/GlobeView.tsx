@@ -30,8 +30,12 @@ export const GlobeView: React.FC<GlobeViewProps> = ({ telemetry }) => {
     });
 
     // Remove the default blue sky/atmosphere
-    viewer.scene.skyBox.show = false;
-    viewer.scene.skyAtmosphere.show = false;
+    if (viewer.scene.skyBox) {
+      viewer.scene.skyBox.show = false;
+    }
+    if (viewer.scene.skyAtmosphere) {
+      viewer.scene.skyAtmosphere.show = false;
+    }
     
     // Remove default imagery and add satellite imagery
     viewer.imageryLayers.removeAll();

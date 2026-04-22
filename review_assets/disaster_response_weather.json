@@ -1,0 +1,10 @@
+{
+  "scenario": "disaster_response_weather",
+  "trace_id": "trace_1926b646ee4b48478913681a33fcdfb1",
+  "target_label": "Houston Ship Channel",
+  "window_id": "enc_3d064317b28ada52",
+  "start_time": "2026-04-10T16:38:13Z",
+  "sentinel_source": "sentinel-2c",
+  "sentinel_cloud_cover": 4.050763,
+  "assessment_action": "accept"
+}

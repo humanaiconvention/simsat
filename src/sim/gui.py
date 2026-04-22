@@ -48,6 +48,10 @@ class WebGuiConnector:
             self.reset_simulation(parameters)
         elif command == 'set_start_time':
             self.set_start_time(parameters)
+        elif command == 'set_step_size':
+            self.set_step_size(parameters)
+        elif command == 'set_replay_speed':
+            self.set_replay_speed(parameters)
         
         
 
@@ -116,4 +120,20 @@ class WebGuiConnector:
             signal=TOPIC_SIMULATION_COMMAND,
             sender=self,
             data={'command': 'set_start_time', 'parameters': parameters},
+        )
+
+    def set_step_size(self, parameters):
+        print("Setting simulation step size...")
+        dispatcher.send(
+            signal=TOPIC_SIMULATION_COMMAND,
+            sender=self,
+            data={'command': 'set_step_size', 'parameters': parameters},
+        )
+
+    def set_replay_speed(self, parameters):
+        print("Setting simulation replay speed...")
+        dispatcher.send(
+            signal=TOPIC_SIMULATION_COMMAND,
+            sender=self,
+            data={'command': 'set_replay_speed', 'parameters': parameters},
         )

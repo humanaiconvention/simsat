@@ -1,0 +1,1671 @@
+{
+  "schema_version": 1,
+  "evaluations": [
+    {
+      "evaluation_id": "eval_6b77303ce4bb4d51a9c663918e6a4bfa",
+      "created_at": "2026-04-10T15:49:14Z",
+      "parameters": {
+        "start_time": "2026-04-10T15:49:14Z",
+        "hours": 6.0,
+        "step_seconds": 120,
+        "top_k": 6,
+        "materialize_top_k": 2,
+        "scenario_pack": "maritime_chokepoints"
+      },
+      "scenario_pack": "maritime_chokepoints",
+      "window_count": 1,
+      "sample_window_ids": [
+        "enc_e445129941421c25"
+      ],
+      "action_transition_counts": {
+        "accept->accept": 1
+      },
+      "decision_deltas": [
+        {
+          "window_id": "enc_e445129941421c25",
+          "target_id": "suez",
+          "target_label": "Suez Canal",
+          "scenario_pack": "maritime_chokepoints",
+          "scaffold_action": "accept",
+          "trust_action": "accept",
+          "scaffold_score": 0.9302102207740208,
+          "trust_score": 0.9527769372245051,
+          "trust_combined_score": 0.935659746015499,
+          "score_delta": 0.005449525241478126,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ]
+        }
+      ],
+      "scaffold_summary": {
+        "planner_id": "scaffold",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "analytic-scaffold-v1",
+        "evaluated_windows": 1,
+        "action_counts": {
+          "accept": 1,
+          "defer": 0,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.9302102207740208,
+        "mean_combined_score": 0.9302102207740208,
+        "mean_trust_score": 1.0,
+        "materialization_attempts": 1,
+        "materialization_successes": 1,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_f0f433ff124d4561ac5cd7d527bb0545"
+        ]
+      },
+      "trust_summary": {
+        "planner_id": "wcli_trust",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "wcli-trust-sentinel-v2",
+        "evaluated_windows": 1,
+        "action_counts": {
+          "accept": 1,
+          "defer": 0,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.9302102207740208,
+        "mean_combined_score": 0.935659746015499,
+        "mean_trust_score": 0.9527769372245051,
+        "materialization_attempts": 1,
+        "materialization_successes": 1,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_8baf97e394e044b3981d3543df5f625f"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "eval_82c7bfc802ed41908de1a9112fa97f64",
+      "created_at": "2026-04-10T15:49:16Z",
+      "parameters": {
+        "start_time": "2026-04-10T15:49:17Z",
+        "hours": 6.0,
+        "step_seconds": 120,
+        "top_k": 6,
+        "materialize_top_k": 2,
+        "scenario_pack": "urban_coastal_ambiguity"
+      },
+      "scenario_pack": "urban_coastal_ambiguity",
+      "window_count": 3,
+      "sample_window_ids": [
+        "enc_854b30543a4fba02",
+        "enc_abd614ad13d7f9ef",
+        "enc_179bc1b80dd78e2c"
+      ],
+      "action_transition_counts": {
+        "accept->accept": 2,
+        "defer->defer": 1
+      },
+      "decision_deltas": [
+        {
+          "window_id": "enc_854b30543a4fba02",
+          "target_id": "la_port",
+          "target_label": "Port of Los Angeles",
+          "scenario_pack": "urban_coastal_ambiguity",
+          "scaffold_action": "accept",
+          "trust_action": "accept",
+          "scaffold_score": 0.758471041057985,
+          "trust_score": 0.7725942876314995,
+          "trust_combined_score": 0.7748466580359797,
+          "score_delta": 0.016375616977994722,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight",
+            "cloud_risk"
+          ]
+        },
+        {
+          "window_id": "enc_179bc1b80dd78e2c",
+          "target_id": "rotterdam",
+          "target_label": "Port of Rotterdam",
+          "scenario_pack": "urban_coastal_ambiguity",
+          "scaffold_action": "defer",
+          "trust_action": "defer",
+          "scaffold_score": 0.6768636114478287,
+          "trust_score": 0.6695534528249606,
+          "trust_combined_score": 0.6617091747450867,
+          "score_delta": -0.015154436702741969,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight",
+            "cloud_risk"
+          ]
+        },
+        {
+          "window_id": "enc_abd614ad13d7f9ef",
+          "target_id": "sf_bay",
+          "target_label": "San Francisco Bay",
+          "scenario_pack": "urban_coastal_ambiguity",
+          "scaffold_action": "accept",
+          "trust_action": "accept",
+          "scaffold_score": 0.8160822676629108,
+          "trust_score": 0.8437594063744128,
+          "trust_combined_score": 0.8206707988139526,
+          "score_delta": 0.0045885311510417415,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_priority",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_priority",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ]
+        }
+      ],
+      "scaffold_summary": {
+        "planner_id": "scaffold",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "analytic-scaffold-v1",
+        "evaluated_windows": 3,
+        "action_counts": {
+          "accept": 2,
+          "defer": 1,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.7504723067229082,
+        "mean_combined_score": 0.7504723067229082,
+        "mean_trust_score": 1.0,
+        "materialization_attempts": 2,
+        "materialization_successes": 2,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_b1b7c783be834f5db5c5fb37860c5d2a",
+          "dec_c69285a6a4e542579d4e30a9665955ca"
+        ]
+      },
+      "trust_summary": {
+        "planner_id": "wcli_trust",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "wcli-trust-sentinel-v2",
+        "evaluated_windows": 3,
+        "action_counts": {
+          "accept": 2,
+          "defer": 1,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.7504723067229082,
+        "mean_combined_score": 0.7524088771983397,
+        "mean_trust_score": 0.7619690489436244,
+        "materialization_attempts": 2,
+        "materialization_successes": 2,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_dfaaa2fea48348838a2f14d8c71e272d",
+          "dec_c6aba75b94b944288b74a02b6d16309d"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "eval_4fc812fb7e294dd7b50174007daaa880",
+      "created_at": "2026-04-10T15:50:51Z",
+      "parameters": {
+        "start_time": "2026-04-10T15:50:52Z",
+        "hours": 6.0,
+        "step_seconds": 120,
+        "top_k": 6,
+        "materialize_top_k": 2,
+        "scenario_pack": "disaster_response_weather"
+      },
+      "scenario_pack": "disaster_response_weather",
+      "window_count": 2,
+      "sample_window_ids": [
+        "enc_478756e7aa4f07a2",
+        "enc_b74c825d2fe3ae05"
+      ],
+      "action_transition_counts": {
+        "accept->accept": 1,
+        "defer->defer": 1
+      },
+      "decision_deltas": [
+        {
+          "window_id": "enc_b74c825d2fe3ae05",
+          "target_id": "new_orleans_delta",
+          "target_label": "New Orleans Delta",
+          "scenario_pack": "disaster_response_weather",
+          "scaffold_action": "defer",
+          "trust_action": "defer",
+          "scaffold_score": 0.6559057863870867,
+          "trust_score": 0.6999257366146544,
+          "trust_combined_score": 0.6732070225341447,
+          "score_delta": 0.01730123614705792,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight",
+            "edge_geometry",
+            "cloud_risk"
+          ]
+        },
+        {
+          "window_id": "enc_478756e7aa4f07a2",
+          "target_id": "houston_ship",
+          "target_label": "Houston Ship Channel",
+          "scenario_pack": "disaster_response_weather",
+          "scaffold_action": "accept",
+          "trust_action": "accept",
+          "scaffold_score": 0.8135115794859171,
+          "trust_score": 0.8733423941962034,
+          "trust_combined_score": 0.8289284450607353,
+          "score_delta": 0.01541686557481814,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_visibility",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_visibility",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ]
+        }
+      ],
+      "scaffold_summary": {
+        "planner_id": "scaffold",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "analytic-scaffold-v1",
+        "evaluated_windows": 2,
+        "action_counts": {
+          "accept": 1,
+          "defer": 1,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.7347086829365019,
+        "mean_combined_score": 0.7347086829365019,
+        "mean_trust_score": 1.0,
+        "materialization_attempts": 2,
+        "materialization_successes": 2,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_8000e9dfdda944e88a8014187e940329",
+          "dec_d665e6e6f429455d8ddb79164e278d77"
+        ]
+      },
+      "trust_summary": {
+        "planner_id": "wcli_trust",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "wcli-trust-sentinel-v2",
+        "evaluated_windows": 2,
+        "action_counts": {
+          "accept": 1,
+          "defer": 1,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.7347086829365019,
+        "mean_combined_score": 0.75106773379744,
+        "mean_trust_score": 0.7866340654054289,
+        "materialization_attempts": 2,
+        "materialization_successes": 2,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_e1876fc338134cfd9a3ebfa35058bddc",
+          "dec_3a090b2a674d4a538e08180e27cc7075"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "eval_133b472ac15144c2950757255f2095f1",
+      "created_at": "2026-04-10T15:50:56Z",
+      "parameters": {
+        "start_time": "2026-04-10T15:50:56Z",
+        "hours": 6.0,
+        "step_seconds": 120,
+        "top_k": 6,
+        "materialize_top_k": 2,
+        "scenario_pack": "maritime_chokepoints"
+      },
+      "scenario_pack": "maritime_chokepoints",
+      "window_count": 1,
+      "sample_window_ids": [
+        "enc_935baa523e5c7771"
+      ],
+      "action_transition_counts": {
+        "accept->accept": 1
+      },
+      "decision_deltas": [
+        {
+          "window_id": "enc_935baa523e5c7771",
+          "target_id": "suez",
+          "target_label": "Suez Canal",
+          "scenario_pack": "maritime_chokepoints",
+          "scaffold_action": "accept",
+          "trust_action": "accept",
+          "scaffold_score": 0.8914385899194925,
+          "trust_score": 0.9185637377431094,
+          "trust_combined_score": 0.896786314751266,
+          "score_delta": 0.005347724831773482,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ]
+        }
+      ],
+      "scaffold_summary": {
+        "planner_id": "scaffold",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "analytic-scaffold-v1",
+        "evaluated_windows": 1,
+        "action_counts": {
+          "accept": 1,
+          "defer": 0,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.8914385899194925,
+        "mean_combined_score": 0.8914385899194925,
+        "mean_trust_score": 1.0,
+        "materialization_attempts": 1,
+        "materialization_successes": 1,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_8602d842b7d845d8ba0154e51c0e6c37"
+        ]
+      },
+      "trust_summary": {
+        "planner_id": "wcli_trust",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "wcli-trust-sentinel-v2",
+        "evaluated_windows": 1,
+        "action_counts": {
+          "accept": 1,
+          "defer": 0,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.8914385899194925,
+        "mean_combined_score": 0.896786314751266,
+        "mean_trust_score": 0.9185637377431094,
+        "materialization_attempts": 1,
+        "materialization_successes": 1,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_760cc71fe9364cd5930bb6baba79c9dc"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "eval_d71462162f7c40ec87c21052afae223b",
+      "created_at": "2026-04-10T15:50:59Z",
+      "parameters": {
+        "start_time": "2026-04-10T15:50:59Z",
+        "hours": 6.0,
+        "step_seconds": 120,
+        "top_k": 6,
+        "materialize_top_k": 2,
+        "scenario_pack": "urban_coastal_ambiguity"
+      },
+      "scenario_pack": "urban_coastal_ambiguity",
+      "window_count": 3,
+      "sample_window_ids": [
+        "enc_2b8ee1f934808966",
+        "enc_f7dfe3059215bcab",
+        "enc_9ed3f35b377ed7e6"
+      ],
+      "action_transition_counts": {
+        "accept->accept": 2,
+        "defer->accept": 1
+      },
+      "decision_deltas": [
+        {
+          "window_id": "enc_9ed3f35b377ed7e6",
+          "target_id": "rotterdam",
+          "target_label": "Port of Rotterdam",
+          "scenario_pack": "urban_coastal_ambiguity",
+          "scaffold_action": "defer",
+          "trust_action": "accept",
+          "scaffold_score": 0.6806642295992577,
+          "trust_score": 0.7313665489581169,
+          "trust_combined_score": 0.7002114579753421,
+          "score_delta": 0.01954722837608447,
+          "action_changed": true,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight",
+            "cloud_risk"
+          ]
+        },
+        {
+          "window_id": "enc_2b8ee1f934808966",
+          "target_id": "la_port",
+          "target_label": "Port of Los Angeles",
+          "scenario_pack": "urban_coastal_ambiguity",
+          "scaffold_action": "accept",
+          "trust_action": "accept",
+          "scaffold_score": 0.7731484024892538,
+          "trust_score": 0.7855440178979415,
+          "trust_combined_score": 0.789565943287757,
+          "score_delta": 0.016417540798503216,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight",
+            "cloud_risk"
+          ]
+        },
+        {
+          "window_id": "enc_f7dfe3059215bcab",
+          "target_id": "sf_bay",
+          "target_label": "San Francisco Bay",
+          "scenario_pack": "urban_coastal_ambiguity",
+          "scaffold_action": "accept",
+          "trust_action": "accept",
+          "scaffold_score": 0.8053502982146626,
+          "trust_score": 0.8342979614287668,
+          "trust_combined_score": 0.8100690473485196,
+          "score_delta": 0.004718749133856948,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_priority",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_priority",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ]
+        }
+      ],
+      "scaffold_summary": {
+        "planner_id": "scaffold",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "analytic-scaffold-v1",
+        "evaluated_windows": 3,
+        "action_counts": {
+          "accept": 2,
+          "defer": 1,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.7530543101010579,
+        "mean_combined_score": 0.7530543101010579,
+        "mean_trust_score": 1.0,
+        "materialization_attempts": 2,
+        "materialization_successes": 2,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_d76fbcb650af4e4b881f9a5b96c885f3",
+          "dec_6e52dc1405fb459eb7aac6b324d1c6e7"
+        ]
+      },
+      "trust_summary": {
+        "planner_id": "wcli_trust",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "wcli-trust-sentinel-v2",
+        "evaluated_windows": 3,
+        "action_counts": {
+          "accept": 3,
+          "defer": 0,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.7530543101010579,
+        "mean_combined_score": 0.7666154828705395,
+        "mean_trust_score": 0.7837361760949418,
+        "materialization_attempts": 2,
+        "materialization_successes": 2,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_377bc11669404f37bfa443c5aa3de9e5",
+          "dec_f04bd37cf77e4df5913c798e6d7dbf4b"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "eval_9c6d8bd76f3641fe9cad175f9460f4dc",
+      "created_at": "2026-04-10T16:03:49Z",
+      "parameters": {
+        "start_time": "2026-04-10T16:03:49Z",
+        "hours": 6.0,
+        "step_seconds": 120,
+        "top_k": 6,
+        "materialize_top_k": 2,
+        "scenario_pack": "maritime_chokepoints"
+      },
+      "scenario_pack": "maritime_chokepoints",
+      "window_count": 1,
+      "sample_window_ids": [
+        "enc_8f77fd7d66c188a5"
+      ],
+      "action_transition_counts": {
+        "accept->accept": 1
+      },
+      "decision_deltas": [
+        {
+          "window_id": "enc_8f77fd7d66c188a5",
+          "target_id": "suez",
+          "target_label": "Suez Canal",
+          "scenario_pack": "maritime_chokepoints",
+          "scaffold_action": "accept",
+          "trust_action": "accept",
+          "scaffold_score": 0.8963403641559622,
+          "trust_score": 0.9228889634202778,
+          "trust_combined_score": 0.9016965098017711,
+          "score_delta": 0.005356145645808885,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ]
+        }
+      ],
+      "scaffold_summary": {
+        "planner_id": "scaffold",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "analytic-scaffold-v1",
+        "evaluated_windows": 1,
+        "action_counts": {
+          "accept": 1,
+          "defer": 0,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.8963403641559622,
+        "mean_combined_score": 0.8963403641559622,
+        "mean_trust_score": 1.0,
+        "materialization_attempts": 1,
+        "materialization_successes": 1,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_cb350b9415354fb7bc688aa9764dcfb2"
+        ]
+      },
+      "trust_summary": {
+        "planner_id": "wcli_trust",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "wcli-trust-sentinel-v2",
+        "evaluated_windows": 1,
+        "action_counts": {
+          "accept": 1,
+          "defer": 0,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.8963403641559622,
+        "mean_combined_score": 0.9016965098017711,
+        "mean_trust_score": 0.9228889634202778,
+        "materialization_attempts": 1,
+        "materialization_successes": 1,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_bdff50612e6e46a99054198d54561935"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "eval_274e78c03b854fa1b4675fbd4c12621b",
+      "created_at": "2026-04-10T16:03:52Z",
+      "parameters": {
+        "start_time": "2026-04-10T16:03:53Z",
+        "hours": 6.0,
+        "step_seconds": 120,
+        "top_k": 6,
+        "materialize_top_k": 2,
+        "scenario_pack": "urban_coastal_ambiguity"
+      },
+      "scenario_pack": "urban_coastal_ambiguity",
+      "window_count": 3,
+      "sample_window_ids": [
+        "enc_369e70ac4e20560d",
+        "enc_3a7b8e0a0913d766",
+        "enc_363310d0cf1abb8b"
+      ],
+      "action_transition_counts": {
+        "accept->accept": 2,
+        "defer->accept": 1
+      },
+      "decision_deltas": [
+        {
+          "window_id": "enc_3a7b8e0a0913d766",
+          "target_id": "la_port",
+          "target_label": "Port of Los Angeles",
+          "scenario_pack": "urban_coastal_ambiguity",
+          "scaffold_action": "defer",
+          "trust_action": "accept",
+          "scaffold_score": 0.6951853221241046,
+          "trust_score": 0.7167787177504538,
+          "trust_combined_score": 0.7117415973440571,
+          "score_delta": 0.01655627521995251,
+          "action_changed": true,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight",
+            "cloud_risk"
+          ]
+        },
+        {
+          "window_id": "enc_363310d0cf1abb8b",
+          "target_id": "rotterdam",
+          "target_label": "Port of Rotterdam",
+          "scenario_pack": "urban_coastal_ambiguity",
+          "scaffold_action": "accept",
+          "trust_action": "accept",
+          "scaffold_score": 0.7147284108855664,
+          "trust_score": 0.7613939516717512,
+          "trust_combined_score": 0.7339248265715884,
+          "score_delta": 0.01919641568602204,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight",
+            "cloud_risk"
+          ]
+        },
+        {
+          "window_id": "enc_369e70ac4e20560d",
+          "target_id": "sf_bay",
+          "target_label": "San Francisco Bay",
+          "scenario_pack": "urban_coastal_ambiguity",
+          "scaffold_action": "accept",
+          "trust_action": "accept",
+          "scaffold_score": 0.8631690265583395,
+          "trust_score": 0.8852849135931269,
+          "trust_combined_score": 0.8674167294286312,
+          "score_delta": 0.004247702870291747,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ]
+        }
+      ],
+      "scaffold_summary": {
+        "planner_id": "scaffold",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "analytic-scaffold-v1",
+        "evaluated_windows": 3,
+        "action_counts": {
+          "accept": 2,
+          "defer": 1,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.7576942531893368,
+        "mean_combined_score": 0.7576942531893368,
+        "mean_trust_score": 1.0,
+        "materialization_attempts": 2,
+        "materialization_successes": 2,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_c7b083918b7d4c1182175581018ac20a",
+          "dec_7593078bb1a84945be0f41940d21c461"
+        ]
+      },
+      "trust_summary": {
+        "planner_id": "wcli_trust",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "wcli-trust-sentinel-v2",
+        "evaluated_windows": 3,
+        "action_counts": {
+          "accept": 3,
+          "defer": 0,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.7576942531893368,
+        "mean_combined_score": 0.7710277177814255,
+        "mean_trust_score": 0.7878191943384439,
+        "materialization_attempts": 2,
+        "materialization_successes": 2,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_4c35be07988640d68431282a15915d88",
+          "dec_5e9cba6e79c54063861abced1f99c1a4"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "eval_89019af8efd94858a17f3f6ea9752b62",
+      "created_at": "2026-04-10T16:38:07Z",
+      "parameters": {
+        "start_time": "2026-04-10T16:38:09Z",
+        "hours": 6.0,
+        "step_seconds": 120,
+        "top_k": 6,
+        "materialize_top_k": 2,
+        "scenario_pack": "disaster_response_weather"
+      },
+      "scenario_pack": "disaster_response_weather",
+      "window_count": 2,
+      "sample_window_ids": [
+        "enc_fb10ff629fca9808",
+        "enc_1689b1295d9dbb49"
+      ],
+      "action_transition_counts": {
+        "accept->accept": 1,
+        "defer->defer": 1
+      },
+      "decision_deltas": [
+        {
+          "window_id": "enc_1689b1295d9dbb49",
+          "target_id": "new_orleans_delta",
+          "target_label": "New Orleans Delta",
+          "scenario_pack": "disaster_response_weather",
+          "scaffold_action": "defer",
+          "trust_action": "defer",
+          "scaffold_score": 0.6396122172325585,
+          "trust_score": 0.6855840549806977,
+          "trust_combined_score": 0.657444928999052,
+          "score_delta": 0.017832711766493592,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight",
+            "edge_geometry",
+            "cloud_risk"
+          ]
+        },
+        {
+          "window_id": "enc_fb10ff629fca9808",
+          "target_id": "houston_ship",
+          "target_label": "Houston Ship Channel",
+          "scenario_pack": "disaster_response_weather",
+          "scaffold_action": "accept",
+          "trust_action": "accept",
+          "scaffold_score": 0.7978050380107107,
+          "trust_score": 0.8594871072411017,
+          "trust_combined_score": 0.8132271261457575,
+          "score_delta": 0.015422088135046863,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_visibility",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_visibility",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ]
+        }
+      ],
+      "scaffold_summary": {
+        "planner_id": "scaffold",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "analytic-scaffold-v1",
+        "evaluated_windows": 2,
+        "action_counts": {
+          "accept": 1,
+          "defer": 1,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.7187086276216346,
+        "mean_combined_score": 0.7187086276216346,
+        "mean_trust_score": 1.0,
+        "materialization_attempts": 2,
+        "materialization_successes": 2,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_72c2ca8ce22642f9a6465ceb0347704f",
+          "dec_2a27a71b302e430bb1d24dca1fea8966"
+        ]
+      },
+      "trust_summary": {
+        "planner_id": "wcli_trust",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "wcli-trust-sentinel-v2",
+        "evaluated_windows": 2,
+        "action_counts": {
+          "accept": 1,
+          "defer": 1,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.7187086276216346,
+        "mean_combined_score": 0.7353360275724048,
+        "mean_trust_score": 0.7725355811108997,
+        "materialization_attempts": 2,
+        "materialization_successes": 2,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_56538a74e89747e593888e87d7bb4c70",
+          "dec_be8000cf12f74f719248b0d10b245faa"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "eval_66235a0a1ba2420195ecba591dfb1955",
+      "created_at": "2026-04-10T16:38:14Z",
+      "parameters": {
+        "start_time": "2026-04-10T16:38:15Z",
+        "hours": 6.0,
+        "step_seconds": 120,
+        "top_k": 6,
+        "materialize_top_k": 2,
+        "scenario_pack": "maritime_chokepoints"
+      },
+      "scenario_pack": "maritime_chokepoints",
+      "window_count": 1,
+      "sample_window_ids": [
+        "enc_6223130fcb522084"
+      ],
+      "action_transition_counts": {
+        "accept->accept": 1
+      },
+      "decision_deltas": [
+        {
+          "window_id": "enc_6223130fcb522084",
+          "target_id": "suez",
+          "target_label": "Suez Canal",
+          "scenario_pack": "maritime_chokepoints",
+          "scaffold_action": "accept",
+          "trust_action": "accept",
+          "scaffold_score": 0.8386101396006276,
+          "trust_score": 0.8719615898433714,
+          "trust_combined_score": 0.8440946939970307,
+          "score_delta": 0.005484554396403163,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ]
+        }
+      ],
+      "scaffold_summary": {
+        "planner_id": "scaffold",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "analytic-scaffold-v1",
+        "evaluated_windows": 1,
+        "action_counts": {
+          "accept": 1,
+          "defer": 0,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.8386101396006276,
+        "mean_combined_score": 0.8386101396006276,
+        "mean_trust_score": 1.0,
+        "materialization_attempts": 1,
+        "materialization_successes": 1,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_5395eb0be7f543e382abf52afbf86f8c"
+        ]
+      },
+      "trust_summary": {
+        "planner_id": "wcli_trust",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "wcli-trust-sentinel-v2",
+        "evaluated_windows": 1,
+        "action_counts": {
+          "accept": 1,
+          "defer": 0,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.8386101396006276,
+        "mean_combined_score": 0.8440946939970307,
+        "mean_trust_score": 0.8719615898433714,
+        "materialization_attempts": 1,
+        "materialization_successes": 1,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_58a2ac62347a48aa8430b5dc9d403243"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "eval_9647da2965164afa9a04f40db2d31338",
+      "created_at": "2026-04-10T16:38:18Z",
+      "parameters": {
+        "start_time": "2026-04-10T16:38:19Z",
+        "hours": 6.0,
+        "step_seconds": 120,
+        "top_k": 6,
+        "materialize_top_k": 2,
+        "scenario_pack": "urban_coastal_ambiguity"
+      },
+      "scenario_pack": "urban_coastal_ambiguity",
+      "window_count": 3,
+      "sample_window_ids": [
+        "enc_7f85cb975c05b12d",
+        "enc_9cc1e44e0b3c3a3f",
+        "enc_5a5b7514ef39e014"
+      ],
+      "action_transition_counts": {
+        "accept->accept": 3
+      },
+      "decision_deltas": [
+        {
+          "window_id": "enc_5a5b7514ef39e014",
+          "target_id": "rotterdam",
+          "target_label": "Port of Rotterdam",
+          "scenario_pack": "urban_coastal_ambiguity",
+          "scaffold_action": "accept",
+          "trust_action": "accept",
+          "scaffold_score": 0.7186007356666194,
+          "trust_score": 0.7648086574885934,
+          "trust_combined_score": 0.7377790259062826,
+          "score_delta": 0.01917829023966322,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight",
+            "cloud_risk"
+          ]
+        },
+        {
+          "window_id": "enc_9cc1e44e0b3c3a3f",
+          "target_id": "la_port",
+          "target_label": "Port of Los Angeles",
+          "scenario_pack": "urban_coastal_ambiguity",
+          "scaffold_action": "accept",
+          "trust_action": "accept",
+          "scaffold_score": 0.7278144980724252,
+          "trust_score": 0.745551759055747,
+          "trust_combined_score": 0.7441984213693766,
+          "score_delta": 0.016383923296951486,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight",
+            "cloud_risk"
+          ]
+        },
+        {
+          "window_id": "enc_7f85cb975c05b12d",
+          "target_id": "sf_bay",
+          "target_label": "San Francisco Bay",
+          "scenario_pack": "urban_coastal_ambiguity",
+          "scaffold_action": "accept",
+          "trust_action": "accept",
+          "scaffold_score": 0.8620730491381475,
+          "trust_score": 0.8843180036496981,
+          "trust_combined_score": 0.866322004909259,
+          "score_delta": 0.004248955771111507,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ]
+        }
+      ],
+      "scaffold_summary": {
+        "planner_id": "scaffold",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "analytic-scaffold-v1",
+        "evaluated_windows": 3,
+        "action_counts": {
+          "accept": 3,
+          "defer": 0,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.7694960942923973,
+        "mean_combined_score": 0.7694960942923973,
+        "mean_trust_score": 1.0,
+        "materialization_attempts": 2,
+        "materialization_successes": 2,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_c484c67bb0b3430c80f7060b544bb252",
+          "dec_b521334fdfa243cc958aaa44309dfb70"
+        ]
+      },
+      "trust_summary": {
+        "planner_id": "wcli_trust",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "wcli-trust-sentinel-v2",
+        "evaluated_windows": 3,
+        "action_counts": {
+          "accept": 3,
+          "defer": 0,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.7694960942923973,
+        "mean_combined_score": 0.7827664840616394,
+        "mean_trust_score": 0.7982261400646795,
+        "materialization_attempts": 2,
+        "materialization_successes": 2,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_97acf4f6fce54fe6a33bd02e61248f79",
+          "dec_de8fde49e83e41739abaaede61fefcd2"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "eval_283627a9fb6741d28c264214843c0723",
+      "created_at": "2026-04-10T16:50:09Z",
+      "parameters": {
+        "start_time": "2026-04-10T16:50:10Z",
+        "hours": 8.0,
+        "step_seconds": 120,
+        "top_k": 8,
+        "materialize_top_k": 2,
+        "scenario_pack": "disaster_response_weather"
+      },
+      "scenario_pack": "disaster_response_weather",
+      "window_count": 2,
+      "sample_window_ids": [
+        "enc_276337ea6e5d6796",
+        "enc_39eeb6c5f34e4346"
+      ],
+      "action_transition_counts": {
+        "accept->accept": 1,
+        "defer->defer": 1
+      },
+      "decision_deltas": [
+        {
+          "window_id": "enc_39eeb6c5f34e4346",
+          "target_id": "new_orleans_delta",
+          "target_label": "New Orleans Delta",
+          "scenario_pack": "disaster_response_weather",
+          "scaffold_action": "defer",
+          "trust_action": "defer",
+          "scaffold_score": 0.6381383492488073,
+          "trust_score": 0.6842871772967773,
+          "trust_combined_score": 0.6560262451460726,
+          "score_delta": 0.01788789589726525,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight",
+            "edge_geometry",
+            "cloud_risk"
+          ]
+        },
+        {
+          "window_id": "enc_276337ea6e5d6796",
+          "target_id": "houston_ship",
+          "target_label": "Houston Ship Channel",
+          "scenario_pack": "disaster_response_weather",
+          "scaffold_action": "accept",
+          "trust_action": "accept",
+          "scaffold_score": 0.7935080552693795,
+          "trust_score": 0.8556970312930118,
+          "trust_combined_score": 0.80893943379973,
+          "score_delta": 0.015431378530350481,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_visibility",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_visibility",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ]
+        }
+      ],
+      "scaffold_summary": {
+        "planner_id": "scaffold",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "analytic-scaffold-v1",
+        "evaluated_windows": 2,
+        "action_counts": {
+          "accept": 1,
+          "defer": 1,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.7158232022590933,
+        "mean_combined_score": 0.7158232022590933,
+        "mean_trust_score": 1.0,
+        "materialization_attempts": 2,
+        "materialization_successes": 2,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_0357860c3f2442f2920f0a28ff4e206e",
+          "dec_25d8b214134f4f90bb98c7e178c4bb84"
+        ]
+      },
+      "trust_summary": {
+        "planner_id": "wcli_trust",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "wcli-trust-sentinel-v2",
+        "evaluated_windows": 2,
+        "action_counts": {
+          "accept": 1,
+          "defer": 1,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.7158232022590933,
+        "mean_combined_score": 0.7324828394729013,
+        "mean_trust_score": 0.7699921042948945,
+        "materialization_attempts": 2,
+        "materialization_successes": 2,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_c8b56997c91f4477b107e0422cddce18",
+          "dec_ef08d5d067be42a99904114fae352d3d"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "eval_450c158708eb425eb8ba95979fb27c9b",
+      "created_at": "2026-04-10T17:35:37Z",
+      "parameters": {
+        "start_time": "2026-04-10T17:35:37Z",
+        "hours": 8.0,
+        "step_seconds": 120,
+        "top_k": 8,
+        "materialize_top_k": 2,
+        "scenario_pack": "disaster_response_weather"
+      },
+      "scenario_pack": "disaster_response_weather",
+      "window_count": 0,
+      "sample_window_ids": [],
+      "action_transition_counts": {},
+      "decision_deltas": [],
+      "scaffold_summary": {
+        "planner_id": "scaffold",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "analytic-scaffold-v1",
+        "evaluated_windows": 0,
+        "action_counts": {
+          "accept": 0,
+          "defer": 0,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.0,
+        "mean_combined_score": 0.0,
+        "mean_trust_score": 0.0,
+        "materialization_attempts": 0,
+        "materialization_successes": 0,
+        "materialization_yield": 0.0,
+        "top_decision_ids": []
+      },
+      "trust_summary": {
+        "planner_id": "wcli_trust",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "wcli-trust-sentinel-v2",
+        "evaluated_windows": 0,
+        "action_counts": {
+          "accept": 0,
+          "defer": 0,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.0,
+        "mean_combined_score": 0.0,
+        "mean_trust_score": 0.0,
+        "materialization_attempts": 0,
+        "materialization_successes": 0,
+        "materialization_yield": 0.0,
+        "top_decision_ids": []
+      }
+    },
+    {
+      "evaluation_id": "eval_e61056e278974852b71003b2ebcf2236",
+      "created_at": "2026-04-10T17:36:06Z",
+      "parameters": {
+        "start_time": "2026-04-10T17:36:06Z",
+        "hours": 8.0,
+        "step_seconds": 120,
+        "top_k": 8,
+        "materialize_top_k": 2,
+        "scenario_pack": "maritime_chokepoints"
+      },
+      "scenario_pack": "maritime_chokepoints",
+      "window_count": 1,
+      "sample_window_ids": [
+        "enc_ff5cfd9519f88166"
+      ],
+      "action_transition_counts": {
+        "accept->accept": 1
+      },
+      "decision_deltas": [
+        {
+          "window_id": "enc_ff5cfd9519f88166",
+          "target_id": "suez",
+          "target_label": "Suez Canal",
+          "scenario_pack": "maritime_chokepoints",
+          "scaffold_action": "accept",
+          "trust_action": "accept",
+          "scaffold_score": 0.8566291785385973,
+          "trust_score": 0.8878543656760807,
+          "trust_combined_score": 0.8620212704844694,
+          "score_delta": 0.005392091945872091,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_visibility",
+            "high_priority",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ]
+        }
+      ],
+      "scaffold_summary": {
+        "planner_id": "scaffold",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "analytic-scaffold-v1",
+        "evaluated_windows": 1,
+        "action_counts": {
+          "accept": 1,
+          "defer": 0,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.8566291785385973,
+        "mean_combined_score": 0.8566291785385973,
+        "mean_trust_score": 1.0,
+        "materialization_attempts": 1,
+        "materialization_successes": 1,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_138febe4829c45429cfe4bf04c764789"
+        ]
+      },
+      "trust_summary": {
+        "planner_id": "wcli_trust",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "wcli-trust-sentinel-v2",
+        "evaluated_windows": 1,
+        "action_counts": {
+          "accept": 1,
+          "defer": 0,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.8566291785385973,
+        "mean_combined_score": 0.8620212704844694,
+        "mean_trust_score": 0.8878543656760807,
+        "materialization_attempts": 1,
+        "materialization_successes": 1,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_51452f2ce4b64faaa9538189ca508291"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "eval_7f160188e1054efbb8038f91fa656558",
+      "created_at": "2026-04-10T17:36:10Z",
+      "parameters": {
+        "start_time": "2026-04-10T17:36:10Z",
+        "hours": 8.0,
+        "step_seconds": 120,
+        "top_k": 8,
+        "materialize_top_k": 2,
+        "scenario_pack": "disaster_response_weather"
+      },
+      "scenario_pack": "disaster_response_weather",
+      "window_count": 0,
+      "sample_window_ids": [],
+      "action_transition_counts": {},
+      "decision_deltas": [],
+      "scaffold_summary": {
+        "planner_id": "scaffold",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "analytic-scaffold-v1",
+        "evaluated_windows": 0,
+        "action_counts": {
+          "accept": 0,
+          "defer": 0,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.0,
+        "mean_combined_score": 0.0,
+        "mean_trust_score": 0.0,
+        "materialization_attempts": 0,
+        "materialization_successes": 0,
+        "materialization_yield": 0.0,
+        "top_decision_ids": []
+      },
+      "trust_summary": {
+        "planner_id": "wcli_trust",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "wcli-trust-sentinel-v2",
+        "evaluated_windows": 0,
+        "action_counts": {
+          "accept": 0,
+          "defer": 0,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.0,
+        "mean_combined_score": 0.0,
+        "mean_trust_score": 0.0,
+        "materialization_attempts": 0,
+        "materialization_successes": 0,
+        "materialization_yield": 0.0,
+        "top_decision_ids": []
+      }
+    },
+    {
+      "evaluation_id": "eval_1261eaa52f9b4e97ad274675022f5315",
+      "created_at": "2026-04-10T17:36:10Z",
+      "parameters": {
+        "start_time": "2026-04-10T17:36:11Z",
+        "hours": 16.0,
+        "step_seconds": 120,
+        "top_k": 8,
+        "materialize_top_k": 2,
+        "scenario_pack": "disaster_response_weather"
+      },
+      "scenario_pack": "disaster_response_weather",
+      "window_count": 2,
+      "sample_window_ids": [
+        "enc_839de03e998f6ad6",
+        "enc_674507dd4b3627b7"
+      ],
+      "action_transition_counts": {
+        "accept->accept": 2
+      },
+      "decision_deltas": [
+        {
+          "window_id": "enc_839de03e998f6ad6",
+          "target_id": "new_orleans_delta",
+          "target_label": "New Orleans Delta",
+          "scenario_pack": "disaster_response_weather",
+          "scaffold_action": "accept",
+          "trust_action": "accept",
+          "scaffold_score": 0.7240887967829146,
+          "trust_score": 0.7600018790808023,
+          "trust_combined_score": 0.7401839451219471,
+          "score_delta": 0.016095148339032472,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_priority",
+            "sentinel_available",
+            "line_of_sight",
+            "cloud_risk"
+          ]
+        },
+        {
+          "window_id": "enc_674507dd4b3627b7",
+          "target_id": "houston_ship",
+          "target_label": "Houston Ship Channel",
+          "scenario_pack": "disaster_response_weather",
+          "scaffold_action": "accept",
+          "trust_action": "accept",
+          "scaffold_score": 0.7956379945442666,
+          "trust_score": 0.857575256953592,
+          "trust_combined_score": 0.8110567099962653,
+          "score_delta": 0.015418715451998688,
+          "action_changed": false,
+          "changed_to_refine": false,
+          "refinement_reason": null,
+          "scaffold_reason_codes": [
+            "high_visibility",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ],
+          "trust_reason_codes": [
+            "high_visibility",
+            "sentinel_available",
+            "low_cloud_risk",
+            "line_of_sight"
+          ]
+        }
+      ],
+      "scaffold_summary": {
+        "planner_id": "scaffold",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "analytic-scaffold-v1",
+        "evaluated_windows": 2,
+        "action_counts": {
+          "accept": 2,
+          "defer": 0,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.7598633956635906,
+        "mean_combined_score": 0.7598633956635906,
+        "mean_trust_score": 1.0,
+        "materialization_attempts": 2,
+        "materialization_successes": 2,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_4fbbb67135f547c584cac3cf09799186",
+          "dec_ff3e47acc0294673827f0e2661286971"
+        ]
+      },
+      "trust_summary": {
+        "planner_id": "wcli_trust",
+        "policy_version": "encounter-sentinel-v2",
+        "model_id": "wcli-trust-sentinel-v2",
+        "evaluated_windows": 2,
+        "action_counts": {
+          "accept": 2,
+          "defer": 0,
+          "refine": 0,
+          "skip": 0
+        },
+        "mean_scaffold_score": 0.7598633956635906,
+        "mean_combined_score": 0.7756203275591063,
+        "mean_trust_score": 0.8087885680171971,
+        "materialization_attempts": 2,
+        "materialization_successes": 2,
+        "materialization_yield": 1.0,
+        "top_decision_ids": [
+          "dec_096a8277a99e4aa4967c5aec19f8b411",
+          "dec_30a6950ef0d6484caa24b8b4c37b25c1"
+        ]
+      }
+    }
+  ]
+}

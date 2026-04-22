@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "scenario_pack": "maritime_chokepoints",
+      "trace_id": "trace_2507337b7939460ebf01cbc9fcef8055",
+      "decision_id": "dec_f850b25e2f5e42708a3dfe0ec2298de2",
+      "target_id": "suez",
+      "target_label": "Suez Canal",
+      "outcome_id": "out_ac217093c0b246af886ebd3052252ed8",
+      "label_source": "operator_review",
+      "reviewer": "Ben Haslam",
+      "pinned_at": "2026-04-10T17:35:19Z",
+      "pinned_by": "Ben Haslam",
+      "notes": "No observable cloud cover, user wouldn't know Suez canal but appears correct and useful."
+    },
+    {
+      "scenario_pack": "disaster_response_weather",
+      "trace_id": "trace_1926b646ee4b48478913681a33fcdfb1",
+      "decision_id": "dec_3d45e15388db4282a6efcf646694346b",
+      "target_id": "houston_ship",
+      "target_label": "Houston Ship Channel",
+      "outcome_id": "out_1e919a3d45104aeabf469fb00383a4da",
+      "label_source": "operator_review",
+      "reviewer": "Ben Haslam",
+      "pinned_at": "2026-04-10T17:35:19Z",
+      "pinned_by": "Ben Haslam",
+      "notes": "No observable cloud cover, user wouldn't know Houston but appears correct and useful."
+    },
+    {
+      "scenario_pack": "urban_coastal_ambiguity",
+      "trace_id": "trace_a4e31b4c39224d8fbdb2c4bf0f444823",
+      "decision_id": "dec_ae382895c85a4aba9a73201ac8a1568f",
+      "target_id": "sf_bay",
+      "target_label": "San Francisco Bay",
+      "outcome_id": "out_4780e7859b1741f9a9ef7399e16968a8",
+      "label_source": "operator_review",
+      "reviewer": "Ben Haslam",
+      "pinned_at": "2026-04-10T17:35:19Z",
+      "pinned_by": "Ben Haslam",
+      "notes": "No observable cloud cover, user wouldn't know SF Bay at all but accepted as correct and useful."
+    }
+  ]
+}

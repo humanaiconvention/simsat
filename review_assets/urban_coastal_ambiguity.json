@@ -1,0 +1,10 @@
+{
+  "scenario": "urban_coastal_ambiguity",
+  "trace_id": "trace_a4e31b4c39224d8fbdb2c4bf0f444823",
+  "target_label": "San Francisco Bay",
+  "window_id": "enc_d0ea72387d37c947",
+  "start_time": "2026-04-10T16:38:23Z",
+  "sentinel_source": "sentinel-2b",
+  "sentinel_cloud_cover": 6.890936,
+  "assessment_action": "accept"
+}

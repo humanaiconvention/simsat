@@ -1,0 +1,167 @@
+{
+  "format_version": "simsat_gemma_v3_v1",
+  "source_paths": {
+    "traces": "D:\\SimSat\\src\\sim\\data\\observation_vla\\traces.json",
+    "outcomes": "D:\\SimSat\\src\\sim\\data\\observation_vla\\outcomes.json",
+    "submission_cases": "D:\\SimSat\\src\\sim\\data\\observation_vla\\submission_cases.json",
+    "targets": "D:\\SimSat\\src\\sim\\data\\encounter\\targets.json",
+    "review_assets_dir": "D:\\SimSat\\review_queue_assets",
+    "submission_assets_dir": "D:\\SimSat\\submission_assets"
+  },
+  "counts": {
+    "total_traces_seen": 86,
+    "format_train": 66,
+    "multimodal_weak": 53,
+    "multimodal_reviewed": 0,
+    "eval_reviewed": 3,
+    "eval_shortlist": 10,
+    "copied_images": 77
+  },
+  "scenario_counts": {
+    "format_train": {
+      "disaster_response_weather": 21,
+      "maritime_chokepoints": 19,
+      "urban_coastal_ambiguity": 26
+    },
+    "multimodal_weak": {
+      "disaster_response_weather": 16,
+      "maritime_chokepoints": 15,
+      "urban_coastal_ambiguity": 22
+    },
+    "multimodal_reviewed": {},
+    "eval_reviewed": {
+      "disaster_response_weather": 1,
+      "maritime_chokepoints": 1,
+      "urban_coastal_ambiguity": 1
+    },
+    "eval_shortlist": {
+      "disaster_response_weather": 3,
+      "maritime_chokepoints": 3,
+      "urban_coastal_ambiguity": 4
+    }
+  },
+  "target_counts": {
+    "multimodal_weak": {
+      "Fort Myers Coast": 7,
+      "Houston Ship Channel": 2,
+      "New Orleans Delta": 7,
+      "Panama Canal": 7,
+      "Port of Los Angeles": 7,
+      "Port of Rotterdam": 7,
+      "Port of Singapore": 7,
+      "San Francisco Bay": 1,
+      "Shenzhen Bay": 7,
+      "Suez Canal": 1
+    },
+    "multimodal_reviewed": {},
+    "eval_shortlist": {
+      "Fort Myers Coast": 1,
+      "Houston Ship Channel": 1,
+      "New Orleans Delta": 1,
+      "Panama Canal": 1,
+      "Port of Los Angeles": 1,
+      "Port of Rotterdam": 1,
+      "Port of Singapore": 1,
+      "San Francisco Bay": 1,
+      "Shenzhen Bay": 1,
+      "Suez Canal": 1
+    }
+  },
+  "action_distribution": {
+    "format_train": {
+      "accept": 13,
+      "defer": 4,
+      "refine": 48,
+      "skip": 1
+    },
+    "multimodal_weak": {
+      "accept": 2,
+      "defer": 4,
+      "refine": 46,
+      "skip": 1
+    },
+    "multimodal_reviewed": {},
+    "eval_reviewed": {
+      "accept": 3
+    }
+  },
+  "copied_images": [
+    "images/trace_e5a00b774bcf410fafe9944b8a4cc4f8.png",
+    "images/trace_f889dbec218e45039cbf63c5b092aa60.png",
+    "images/trace_ba0e1a1a2b744cdf94f76fd990fec3f8.png",
+    "images/trace_d886c4872e1047d8b3f50b3563448968.png",
+    "images/trace_46c71a07326648039517d0a736b3ba31.png",
+    "images/trace_26f2081882cf46ba94e10b53ca5c2707.png",
+    "images/trace_103f989c13d1437a8927fc031cfefc56.png",
+    "images/trace_67918155fd3e47b8a207ae1bf635269c.png",
+    "images/trace_1926b646ee4b48478913681a33fcdfb1.png",
+    "images/trace_2507337b7939460ebf01cbc9fcef8055.png",
+    "images/trace_a4e31b4c39224d8fbdb2c4bf0f444823.png",
+    "images/trace_88c56a41ee64478b94257e26df7f5f77.png",
+    "images/trace_04e08f0b4c4c42869a7663c3cb8bf641.png",
+    "images/trace_777833d1ce0847259cfbac033b271266.png",
+    "images/trace_c6da2e5391a8418c9ec2f379436509f2.png",
+    "images/trace_9afbbc332a96426abd0629fc019d395e.png",
+    "images/trace_4f65355f5c954fbf8db3fc684bb377af.png",
+    "images/trace_7edbad05378b45eb88f8fedf7a71331c.png",
+    "images/trace_f77a115170574657ba4228ed818ec68d.png",
+    "images/trace_1113fa0223014708a27c28f6cb876e73.png",
+    "images/trace_ecb6521c521446838ea9035d9631f4ca.png",
+    "images/trace_cdcc2a7023d1433e9d4e0edc6bddf10e.png",
+    "images/trace_ae1998677df5406093334f1fcf0abc66.png",
+    "images/trace_da37bb4310014942a24d430ea238110a.png",
+    "images/trace_599f94be68e14eccb19ce49bac32d609.png",
+    "images/trace_03147bb1b2234f489ce01208d11bbf4a.png",
+    "images/trace_8b4d77c012664ec5a72cb14c96ae08b7.png",
+    "images/trace_1f00711c8db6433f9e1f7a79691c23d3.png",
+    "images/trace_b18d19ea66d84e8784a4904de93925cb.png",
+    "images/trace_0725ba13314d4aec8e695ed0fe2130dd.png",
+    "images/trace_b6aa341cd881425c89fe20bd1ee2e0d1.png",
+    "images/trace_d5b4d837f3d0444f89633ec10766d73a.png",
+    "images/trace_dbbe33015d04413082df17ba2f0c8d12.png",
+    "images/trace_58951351d068471c81106c7d029e2c81.png",
+    "images/trace_e086e5c0816d4b148ce12db9ef1684e0.png",
+    "images/trace_212662f658bd48028077bc23fb87c442.png",
+    "images/trace_cbe073faf8554afb986b632128204650.png",
+    "images/trace_f3b408a550ee4031b35ab7d452c21d71.png",
+    "images/trace_b992766137e2419e8b1575e8b4ae3fc2.png",
+    "images/trace_3957ae2fabb34f298e9ff95ec912b6e1.png",
+    "images/trace_6982090f337548b2939921ea3324f55a.png",
+    "images/trace_e0aa6488d0b541f2819fcf257006b636.png",
+    "images/trace_c3e2a26eeab540a3b34a2b5185ce6613.png",
+    "images/trace_11691f60aa8d47d38493aebb399f41f2.png",
+    "images/trace_f760ebf72a964cab8ac6372e6e2dd820.png",
+    "images/trace_31ae7bb2ac304fad9c91e6497bfb31c5.png",
+    "images/trace_00850a706d0244eaabd9799791a914a3.png",
+    "images/trace_a46b65c213aa4493a0ed34aaed741a77.png",
+    "images/trace_08ae57efb8a44376a74a3e1a2b91a037.png",
+    "images/trace_aaa144b5ec6146cca1f2cd743a9cefe0.png",
+    "images/trace_de8ffd5863714ac5bd22ff398e4fccc9.png",
+    "images/trace_e603eaf267c448b1a4ed059e6ac3e638.png",
+    "images/trace_c1de50e3492b42bf912d8bc688a360cc.png",
+    "images/trace_a58ea3113555401ea9f748c127824b49.png",
+    "images/trace_38571614c1464b8d994f61629eb22772.png",
+    "images/trace_50c8eab02a1b445a9fbb13dd9a92cf09.png",
+    "images/trace_1081256ca906412f97cc4a7bcfa75b1b.png",
+    "images/trace_4bccb9cf7b864225bad705117654f277.png",
+    "images/trace_63d2f16600264d93b7443459166cfde7.png",
+    "images/trace_ad3a863eae974301b903539c40a708b2.png",
+    "images/trace_85ddfa677bfd459d95dbed455dd38505.png",
+    "images/trace_32c41b142ecf42a5b378caa654efe6c7.png",
+    "images/trace_e9e45ad652ff4e74853f0c6d0c03a827.png",
+    "images/trace_35e90312fef94a0ca53839d7b3cdfe5d.png",
+    "images/trace_5bc171357b3a431983b9f81646117522.png",
+    "images/trace_ad3890a1998d4d90950201e048708cb4.png",
+    "images/trace_a4f965f9fce642b9ac42059907c41bd8.png",
+    "images/trace_b5870f83612a4a7798c4c342661efeab.png",
+    "images/trace_efa9e41802814c429b102c2f77eb64fc.png",
+    "images/trace_a8e23f1ff498486bbf0d60417d46f9b0.png",
+    "images/trace_978e6a6a5bf8466e99aa7b38ef7e35a8.png",
+    "images/trace_75f406cf5bff4771945fee5c975e65f1.png",
+    "images/trace_1d9e98b6bc7d493f8c292947938b6d4e.png",
+    "images/trace_31ec6996796d40c2b09e946f854f0d4a.png",
+    "images/trace_10d844ffa6a14e39b7e933375f05c9cd.png",
+    "images/trace_fccb18798b844f68b6d0ad583d1e3caf.png",
+    "images/trace_2c2e81628756417dbb0093a1babf0ffd.png"
+  ]
+}

@@ -1,0 +1,269 @@
+{
+  "schema_version": 1,
+  "outcomes": [
+    {
+      "outcome_id": "out_a2e8b729c62a4528b102615a47ae8134",
+      "trace_id": "trace_e5a00b774bcf410fafe9944b8a4cc4f8",
+      "assessment_id": "asm_62c028a95d4345cd91357b9e4a799b41",
+      "decision_id": "dec_da8f5231491f45a5ae9abfddcb4f173d",
+      "registered_at": "2026-04-10T15:49:13Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.92,
+      "outcome_tags": [
+        "simulated_submission_case",
+        "scenario:disaster_response_weather"
+      ],
+      "notes": "Auto-generated submission case label for reproducible challenge evidence."
+    },
+    {
+      "outcome_id": "out_317427fcab5949d9bba849103ba3442d",
+      "trace_id": "trace_f889dbec218e45039cbf63c5b092aa60",
+      "assessment_id": "asm_bae0a49b534e43f993599aab5eafbb2c",
+      "decision_id": "dec_10d9cf6da2ae411abe5495f286cca55d",
+      "registered_at": "2026-04-10T15:49:16Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.92,
+      "outcome_tags": [
+        "simulated_submission_case",
+        "scenario:maritime_chokepoints"
+      ],
+      "notes": "Auto-generated submission case label for reproducible challenge evidence."
+    },
+    {
+      "outcome_id": "out_929e3ed5797147de9934d449fdb10749",
+      "trace_id": "trace_ba0e1a1a2b744cdf94f76fd990fec3f8",
+      "assessment_id": "asm_0fc58efb6ac2476babfdba95dc1116a6",
+      "decision_id": "dec_b00bca25801f4cd08472626e93370fdd",
+      "registered_at": "2026-04-10T15:49:21Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.92,
+      "outcome_tags": [
+        "simulated_submission_case",
+        "scenario:urban_coastal_ambiguity"
+      ],
+      "notes": "Auto-generated submission case label for reproducible challenge evidence."
+    },
+    {
+      "outcome_id": "out_7843d44964694d909aab32a3ed94b3d1",
+      "trace_id": "trace_d886c4872e1047d8b3f50b3563448968",
+      "assessment_id": "asm_c5206f606b7b4e18bb2cb8a2bf5d1979",
+      "decision_id": "dec_d300f2ea1c4d47588749d06ff6abc484",
+      "registered_at": "2026-04-10T15:50:56Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.92,
+      "outcome_tags": [
+        "simulated_submission_case",
+        "scenario:disaster_response_weather"
+      ],
+      "notes": "Auto-generated submission case label for reproducible challenge evidence."
+    },
+    {
+      "outcome_id": "out_306e495fae204705ae28cf0c883b2fad",
+      "trace_id": "trace_46c71a07326648039517d0a736b3ba31",
+      "assessment_id": "asm_1dcebbd3203a408c93bca0679856adcd",
+      "decision_id": "dec_0c584980333340efa07c6da4f1851749",
+      "registered_at": "2026-04-10T15:50:58Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.92,
+      "outcome_tags": [
+        "simulated_submission_case",
+        "scenario:maritime_chokepoints"
+      ],
+      "notes": "Auto-generated submission case label for reproducible challenge evidence."
+    },
+    {
+      "outcome_id": "out_2cd12b12e58d497895016f32a03566ab",
+      "trace_id": "trace_26f2081882cf46ba94e10b53ca5c2707",
+      "assessment_id": "asm_c6af0ce3d49d4debb01e5686c98f11aa",
+      "decision_id": "dec_3a78834c56e5408391e63d244ea4d78c",
+      "registered_at": "2026-04-10T15:51:03Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.92,
+      "outcome_tags": [
+        "simulated_submission_case",
+        "scenario:urban_coastal_ambiguity"
+      ],
+      "notes": "Auto-generated submission case label for reproducible challenge evidence."
+    },
+    {
+      "outcome_id": "out_61231247d81d458e91e8cd18c8e1f57c",
+      "trace_id": "trace_103f989c13d1437a8927fc031cfefc56",
+      "assessment_id": "asm_e00825f08d704f7b877b405e5437b0df",
+      "decision_id": "dec_ec674cf5de604c0cb9fcd4c8681d8a51",
+      "registered_at": "2026-04-10T16:03:52Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.92,
+      "label_source": "simulated",
+      "reviewer": null,
+      "review_status": "provisional",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "simulated_submission_case",
+        "scenario:maritime_chokepoints"
+      ],
+      "notes": "Auto-generated submission case label for reproducible challenge evidence."
+    },
+    {
+      "outcome_id": "out_d139c5c41743416ba012f8bd72c6eb98",
+      "trace_id": "trace_67918155fd3e47b8a207ae1bf635269c",
+      "assessment_id": "asm_0744fc5168d04ca3bcf4da6b97c84495",
+      "decision_id": "dec_8fc9a3b1674941a0a66bf87749f083e0",
+      "registered_at": "2026-04-10T16:03:57Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.92,
+      "label_source": "simulated",
+      "reviewer": null,
+      "review_status": "provisional",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "simulated_submission_case",
+        "scenario:urban_coastal_ambiguity"
+      ],
+      "notes": "Auto-generated submission case label for reproducible challenge evidence."
+    },
+    {
+      "outcome_id": "out_d5ec1307477f42cd8e27292e906b9fa0",
+      "trace_id": "trace_1926b646ee4b48478913681a33fcdfb1",
+      "assessment_id": "asm_7b5ccfcb93794fb196210be69e2f1c2d",
+      "decision_id": "dec_3d45e15388db4282a6efcf646694346b",
+      "registered_at": "2026-04-10T16:38:14Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.92,
+      "label_source": "simulated",
+      "reviewer": null,
+      "review_status": "superseded",
+      "is_current": false,
+      "supersedes_outcome_id": "out_1e919a3d45104aeabf469fb00383a4da",
+      "outcome_tags": [
+        "simulated_submission_case",
+        "scenario:disaster_response_weather"
+      ],
+      "notes": "Auto-generated submission case label for reproducible challenge evidence."
+    },
+    {
+      "outcome_id": "out_c07070b47db34f89bb4a7aa75a3db9e1",
+      "trace_id": "trace_2507337b7939460ebf01cbc9fcef8055",
+      "assessment_id": "asm_20ff1b5828654ec9bae3d8101054daaa",
+      "decision_id": "dec_f850b25e2f5e42708a3dfe0ec2298de2",
+      "registered_at": "2026-04-10T16:38:18Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.92,
+      "label_source": "simulated",
+      "reviewer": null,
+      "review_status": "superseded",
+      "is_current": false,
+      "supersedes_outcome_id": "out_ac217093c0b246af886ebd3052252ed8",
+      "outcome_tags": [
+        "simulated_submission_case",
+        "scenario:maritime_chokepoints"
+      ],
+      "notes": "Auto-generated submission case label for reproducible challenge evidence."
+    },
+    {
+      "outcome_id": "out_939554bedfc44c7681e60cd7f92fe6cb",
+      "trace_id": "trace_a4e31b4c39224d8fbdb2c4bf0f444823",
+      "assessment_id": "asm_27760e63af514efeab5fea9fde71f62f",
+      "decision_id": "dec_ae382895c85a4aba9a73201ac8a1568f",
+      "registered_at": "2026-04-10T16:38:25Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.92,
+      "label_source": "simulated",
+      "reviewer": null,
+      "review_status": "superseded",
+      "is_current": false,
+      "supersedes_outcome_id": "out_4780e7859b1741f9a9ef7399e16968a8",
+      "outcome_tags": [
+        "simulated_submission_case",
+        "scenario:urban_coastal_ambiguity"
+      ],
+      "notes": "Auto-generated submission case label for reproducible challenge evidence."
+    },
+    {
+      "outcome_id": "out_ac217093c0b246af886ebd3052252ed8",
+      "trace_id": "trace_2507337b7939460ebf01cbc9fcef8055",
+      "assessment_id": "asm_20ff1b5828654ec9bae3d8101054daaa",
+      "decision_id": "dec_f850b25e2f5e42708a3dfe0ec2298de2",
+      "registered_at": "2026-04-10T17:35:18Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.95,
+      "label_source": "operator_review",
+      "reviewer": "Ben Haslam",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": "out_c07070b47db34f89bb4a7aa75a3db9e1",
+      "outcome_tags": [
+        "operator_reviewed",
+        "submission_case"
+      ],
+      "notes": "No observable cloud cover, user wouldn't know Suez canal but appears correct and useful."
+    },
+    {
+      "outcome_id": "out_1e919a3d45104aeabf469fb00383a4da",
+      "trace_id": "trace_1926b646ee4b48478913681a33fcdfb1",
+      "assessment_id": "asm_7b5ccfcb93794fb196210be69e2f1c2d",
+      "decision_id": "dec_3d45e15388db4282a6efcf646694346b",
+      "registered_at": "2026-04-10T17:35:19Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.92,
+      "label_source": "operator_review",
+      "reviewer": "Ben Haslam",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": "out_d5ec1307477f42cd8e27292e906b9fa0",
+      "outcome_tags": [
+        "operator_reviewed",
+        "submission_case"
+      ],
+      "notes": "No observable cloud cover, user wouldn't know Houston but appears correct and useful."
+    },
+    {
+      "outcome_id": "out_4780e7859b1741f9a9ef7399e16968a8",
+      "trace_id": "trace_a4e31b4c39224d8fbdb2c4bf0f444823",
+      "assessment_id": "asm_27760e63af514efeab5fea9fde71f62f",
+      "decision_id": "dec_ae382895c85a4aba9a73201ac8a1568f",
+      "registered_at": "2026-04-10T17:35:19Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.9,
+      "label_source": "operator_review",
+      "reviewer": "Ben Haslam",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": "out_939554bedfc44c7681e60cd7f92fe6cb",
+      "outcome_tags": [
+        "operator_reviewed",
+        "submission_case"
+      ],
+      "notes": "No observable cloud cover, user wouldn't know SF Bay at all but accepted as correct and useful."
+    }
+  ]
+}

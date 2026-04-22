@@ -29,8 +29,29 @@ class Simulator:
 
         dispatcher.connect(self.on_command, signal=TOPIC_SIMULATION_COMMAND)
 
-    def get_orbital_location(self, time):
-        np_t = np.datetime64(int(self.utcg_time), 's')
+    def _coerce_orbit_time(self, timestamp):
+        if isinstance(timestamp, np.datetime64):
+            return timestamp.astype("datetime64[ms]")
+        if isinstance(timestamp, datetime.datetime):
+            dt = timestamp
+        elif isinstance(timestamp, (int, float)):
+            dt = datetime.datetime.fromtimestamp(float(timestamp), tz=datetime.timezone.utc)
+        elif isinstance(timestamp, str):
+            normalized = timestamp.strip()
+            if normalized.endswith("Z"):
+                normalized = normalized[:-1] + "+00:00"
+            dt = datetime.datetime.fromisoformat(normalized)
+        else:
+            raise TypeError(f"Unsupported orbit timestamp type: {type(timestamp)!r}")
+
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=datetime.timezone.utc)
+        else:
+            dt = dt.astimezone(datetime.timezone.utc)
+        return np.datetime64(dt.replace(tzinfo=None))
+
+    def get_orbital_location(self, timestamp):
+        np_t = self._coerce_orbit_time(timestamp)
         lon, lat, alt = self.satellite.get_lonlatalt(np_t)
         return (lon, lat, alt)
     
@@ -106,6 +127,12 @@ class Simulator:
         elif command == 'set_start_time':
             print("[SIM COMMAND] Set start time command received.")
             self.set_start_time(parameters.get("start_time"))
+        elif command == 'set_step_size':
+            print("[SIM COMMAND] Set step size command received.")
+            self.set_sim_speed(step_size=parameters.get('step_size_seconds'))
+        elif command == 'set_replay_speed':
+            print("[SIM COMMAND] Set replay speed command received.")
+            self.set_sim_speed(replay_speed=parameters.get('replay_speed'))
         elif command == 'pause':
             print("[SIM COMMAND] Pause simulation command received.")
             self.sim_is_running = False
@@ -116,13 +143,17 @@ class Simulator:
         else:
             print(f"[SIM COMMAND] Unknown command received: {command}")
 
-    def set_sim_speed(self, step_size: int, replay_speed: float):
-        if step_size > 0:
+    def set_sim_speed(self, step_size=None, replay_speed=None):
+        if step_size is None:
+            pass
+        elif step_size > 0:
             self.time_step = step_size
         else:
             self.time_step = 10  # default
 
-        if replay_speed > 0:
+        if replay_speed is None:
+            pass
+        elif replay_speed > 0:
             self.timing_mode = replay_speed
         else:
             self.timing_mode = 0  # as fast as possible

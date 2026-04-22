@@ -11,14 +11,15 @@ import json
 import logging
 import os
 import threading
-from datetime import datetime, timezone
+from pathlib import Path
 from typing import Dict, List, Optional
 
 from .schemas import ConventionSession, SessionStatus
 
 logger = logging.getLogger(__name__)
 
-_STORE_PATH = os.environ.get("HAIC_SESSION_STORE", "")
+DEFAULT_STORE_PATH = Path(__file__).resolve().parents[1] / "data" / "haic" / "sessions.json"
+_STORE_PATH = os.environ.get("HAIC_SESSION_STORE", str(DEFAULT_STORE_PATH))
 
 
 class SessionStore:
@@ -27,7 +28,7 @@ class SessionStore:
     def __init__(self, persist_path: str = ""):
         self._lock = threading.Lock()
         self._sessions: Dict[str, ConventionSession] = {}
-        self._persist_path = persist_path or _STORE_PATH
+        self._persist_path = Path(persist_path or _STORE_PATH)
         if self._persist_path:
             self._load()
 
@@ -74,32 +75,27 @@ class SessionStore:
             return
         try:
             with self._lock:
-                data = {sid: s.to_dict() for sid, s in self._sessions.items()}
-            with open(self._persist_path, "w", encoding="utf-8") as f:
+                data = {
+                    "schema_version": 2,
+                    "sessions": {sid: s.to_dict() for sid, s in self._sessions.items()},
+                }
+            self._persist_path.parent.mkdir(parents=True, exist_ok=True)
+            tmp_path = self._persist_path.with_suffix(f"{self._persist_path.suffix}.tmp")
+            with tmp_path.open("w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, default=str)
+            tmp_path.replace(self._persist_path)
         except Exception as e:
             logger.warning("Failed to persist session store: %s", e)
 
     def _load(self) -> None:
-        if not self._persist_path or not os.path.exists(self._persist_path):
+        if not self._persist_path or not self._persist_path.exists():
             return
         try:
-            with open(self._persist_path, "r", encoding="utf-8") as f:
+            with self._persist_path.open("r", encoding="utf-8") as f:
                 data = json.load(f)
-            for sid, raw in data.items():
-                # Reconstruct minimal session from dict
-                session = ConventionSession(session_id=sid)
-                session.status = SessionStatus(raw.get("status", SessionStatus.PENDING.value))
-                session.created_at = raw.get("created_at", session.created_at)
-                session.interview_turns = raw.get("interview_turns", [])
-                session.participant_id = raw.get("participant_id")
-                session.pog_verified = raw.get("pog_verified", False)
-                session.viability_gates = raw.get("viability_gates", {})
-                session.receipt_merkle_root = raw.get("receipt_merkle_root")
-                session.entropy_delta = raw.get("entropy_delta")
-                session.geometric_health_before = raw.get("geometric_health_before")
-                session.geometric_health_after = raw.get("geometric_health_after")
-                session.settlement_result = raw.get("settlement_result")
+            raw_sessions = data.get("sessions", data)
+            for sid, raw in raw_sessions.items():
+                session = ConventionSession.from_dict({"session_id": sid, **raw})
                 self._sessions[sid] = session
             logger.info("Loaded %d sessions from %s", len(self._sessions), self._persist_path)
         except Exception as e:

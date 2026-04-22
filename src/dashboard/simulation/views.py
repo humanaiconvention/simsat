@@ -169,12 +169,12 @@ def commands(request: HttpRequest) -> JsonResponse:
     elif command_type == "set_step_size":
         if "step_size_seconds" in payload:
             try:
-                val = int(payload["step_size_seconds"])
+                val = float(payload["step_size_seconds"])
                 if val <= 0:
                     raise ValueError
                 parameters["step_size_seconds"] = val
             except (TypeError, ValueError):
-                return _json_error("'step_size_seconds' must be a positive integer", status=400)
+                return _json_error("'step_size_seconds' must be a positive number", status=400)
     
     elif command_type == "set_replay_speed":
         if "replay_speed" in payload:
@@ -197,12 +197,12 @@ def commands(request: HttpRequest) -> JsonResponse:
         
         if "step_size_seconds" in payload:
             try:
-                val = int(payload["step_size_seconds"])
+                val = float(payload["step_size_seconds"])
                 if val <= 0:
                     raise ValueError
                 parameters["step_size_seconds"] = val
             except (TypeError, ValueError):
-                return _json_error("'step_size_seconds' must be a positive integer", status=400)
+                return _json_error("'step_size_seconds' must be a positive number", status=400)
         
         if "replay_speed" in payload:
             try:

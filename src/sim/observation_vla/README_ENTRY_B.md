@@ -1,73 +1,112 @@
-# Entry B backend: Gemma-4 + HAIC v35-gov
+# ObservationVLA backends — model-agnostic template
 
-This folder now contains two ObservationVLA backends:
+This folder ships two ObservationVLA backends:
 
 | Backend file | Class | `runtime_mode` | Purpose |
 |---|---|---|---|
-| `adapter.py` (existing) | `ObservationVLMAdapter` | `clip_local`, `http_endpoint`, `stub`, `stub_fallback` | Baseline CLIP + stub path for Entry A and the current submission |
-| `gemma4_haic_local.py` (NEW) | `Gemma4HAICAdapter` | `gemma4_haic_local`, `stub_fallback` | Entry B — convention-grounded Gemma-4 + HAIC v35-gov LoRA |
+| `adapter.py` (existing) | `ObservationVLMAdapter` | `clip_local`, `http_endpoint`, `stub`, `stub_fallback` | Baseline CLIP + stub path |
+| `transformers_vlm_local.py` (NEW) | `TransformersVLMAdapter` | `transformers_vlm_local`, `stub_fallback` | **Model-agnostic template** for any transformers VLM or GGUF model |
 
-Both classes expose the same public interface (`assess(prompt, images, response_schema)`, `.runtime_mode`, `.model_id`) so they are drop-in replacements for each other at the service level.
+Both classes expose the same public interface (`assess(prompt, images, response_schema)`, `.runtime_mode`, `.model_id`).
 
-## Quick start
+## What changed from the original scaffold (previously `Gemma4HAICAdapter`)
 
-### 1. Download weights
+- **Renamed** to `TransformersVLMAdapter`.
+- **Decoupled from HAIC / Gemma-4 / v35-gov** — no hard-coded model names or paths.
+- **Auto-detects vision capability** via `AutoProcessor` → if the model has an image processor, images flow through the chat template; otherwise falls back to text-only `AutoTokenizer`.
+- **Generic env vars** (`OBSERVATION_VLM_*`) replace the `HAIC_GEMMA4_*` namespace.
 
-```bash
-# From repo root
-bash scripts/download_haic_v35_gov.sh
-# (or PowerShell: pwsh scripts\download_haic_v35_gov.ps1)
-```
+Why: the v35-gov HAIC Gemma-4 model is a human-interview / consent-governance fine-tune — it pivots on emotional user input, not satellite imagery. It was the wrong shape for SimSat Entry B. The scaffold is retained as a **template** so the same structure can host whichever model Entry A and Entry B actually ship.
 
-This populates `./weights/haic-v35-gov/` from the `benhaslam/haic-gemma4-v35-gov-unsloth` Kaggle kernel output.
+## Planned model assignments (as of 2026-04-21)
 
-### 2. Pick a load mode
-
-Set in `docker-compose.yaml` (sim service) or your shell:
-
-```yaml
-environment:
-  - OBSERVATION_VLA_BACKEND=gemma4_haic_local
-  - HAIC_GEMMA4_MODE=lora   # or "merged" or "gguf"
-  - HAIC_GEMMA4_WEIGHTS_DIR=/app/weights/haic-v35-gov
-  - OBSERVATION_VLA_DEVICE=cpu  # or "cuda" / "cuda:0"
-```
-
-| Mode | Best for | Memory | Notes |
+| Track | Entry | Model | Status |
 |---|---|---|---|
-| `lora` | Local dev, judge reproducibility | ~6–10 GB on CPU (fp32), ~3–5 GB on GPU (fp16) | Loads base Gemma-4 + LoRA via peft |
-| `merged` | Fastest inference on local GPU | same as lora | No peft call; loads the 5-shard merged safetensors |
-| `gguf` | On-orbit Orin 16GB demo + Liquid Track comparison | ~2–5 GB, CPU-friendly | Uses `llama-cpp-python`; the in-space compute story |
+| Liquid Track | Entry A | **LFM2-VL** or **LFM2.5-VL** (prefer 2.5-VL — newer generation, Lu.ma page explicitly lists both as eligible) | To be fine-tuned on Sentinel imagery |
+| General AI Track | Entry B | **Gemma-4-based fine-tune**, SimSat-specific (NOT v35-gov) | To be trained — new dataset & run scoped for this competition |
 
-### 3. Wire the factory
+Both models will load through this same `TransformersVLMAdapter` by swapping env vars.
 
-The service layer needs a tiny factory change. Find wherever `ObservationVLMAdapter(...)` is instantiated (likely `src/sim/observation_vla/service.py` or `src/sim/api.py`) and replace with:
+## Env vars
+
+```
+OBSERVATION_VLM_MODE          lora | merged | gguf             (default: lora)
+OBSERVATION_VLM_BASE_MODEL    base model path or HF repo id
+OBSERVATION_VLM_LORA_PATH     path to LoRA adapter dir
+OBSERVATION_VLM_MERGED_PATH   path to merged safetensors dir
+OBSERVATION_VLM_GGUF_PATH     path to .gguf file
+OBSERVATION_VLM_WEIGHTS_DIR   convenience root (base/, adapter/, gguf/)
+OBSERVATION_VLM_DEVICE        cpu | cuda | cuda:0              (default: cpu)
+OBSERVATION_VLM_MODEL_LABEL   cosmetic tag for model_id        (optional)
+```
+
+### Example configs
+
+**Entry A — LFM2.5-VL from HuggingFace (no weights on disk, pulls from hub):**
+```yaml
+services:
+  sim:
+    environment:
+      - OBSERVATION_VLA_BACKEND=transformers_vlm_local
+      - OBSERVATION_VLM_MODE=merged
+      - OBSERVATION_VLM_MERGED_PATH=LiquidAI/LFM2-VL-1.6B   # or LFM2.5 when repo id is confirmed
+      - OBSERVATION_VLM_MODEL_LABEL=lfm2-vl-base
+      - OBSERVATION_VLM_DEVICE=cuda
+```
+
+**Entry A — after fine-tuning (LoRA adapter locally):**
+```yaml
+services:
+  sim:
+    environment:
+      - OBSERVATION_VLA_BACKEND=transformers_vlm_local
+      - OBSERVATION_VLM_MODE=lora
+      - OBSERVATION_VLM_BASE_MODEL=LiquidAI/LFM2-VL-1.6B
+      - OBSERVATION_VLM_LORA_PATH=/app/weights/lfm2-vl-sentinel-ft/adapter
+      - OBSERVATION_VLM_MODEL_LABEL=lfm2-vl-sentinel-v1
+      - OBSERVATION_VLM_DEVICE=cuda
+```
+
+**Entry B — Gemma-4 fine-tune (once trained):**
+```yaml
+services:
+  sim:
+    environment:
+      - OBSERVATION_VLA_BACKEND=transformers_vlm_local
+      - OBSERVATION_VLM_MODE=lora
+      - OBSERVATION_VLM_BASE_MODEL=google/gemma-4-e2b-it   # or unsloth/gemma-4-E2B-it
+      - OBSERVATION_VLM_LORA_PATH=/app/weights/gemma4-simsat/adapter
+      - OBSERVATION_VLM_MODEL_LABEL=gemma4-simsat-v1
+      - OBSERVATION_VLM_DEVICE=cuda
+```
+
+**GGUF path (for the Orin on-orbit demo):**
+```yaml
+services:
+  sim:
+    environment:
+      - OBSERVATION_VLA_BACKEND=transformers_vlm_local
+      - OBSERVATION_VLM_MODE=gguf
+      - OBSERVATION_VLM_GGUF_PATH=/app/weights/{model}/model.gguf
+```
+
+## Wire the factory
+
+Find wherever the sim service instantiates `ObservationVLMAdapter(...)` and add a dispatch:
 
 ```python
 def _make_adapter():
     backend = os.environ.get("OBSERVATION_VLA_BACKEND", "auto").strip().lower()
-    if backend == "gemma4_haic_local":
-        from observation_vla.gemma4_haic_local import Gemma4HAICAdapter
-        return Gemma4HAICAdapter()
+    if backend == "transformers_vlm_local":
+        from observation_vla.transformers_vlm_local import TransformersVLMAdapter
+        return TransformersVLMAdapter()
     from observation_vla.adapter import ObservationVLMAdapter
     return ObservationVLMAdapter()
 ```
 
-(Keeps `clip_local` as default — Entry B opts in explicitly.)
+## Payload contract (unchanged)
 
-### 4. Verify against existing tests
-
-```bash
-docker compose up --build
-python scripts/haic_test.py           # HAIC convention lifecycle
-python scripts/observation_vla_eval.py --inprocess   # Re-run reviewed eval with new backend
-```
-
-The reviewed eval should produce a new `OBSERVATION_VLA_EVAL.md` with `runtime=gemma4_haic_local` and the current `1.00` agreement numbers (on the 3 pinned reviewed cases) re-computed against Gemma-4. If agreement drops, that's the signal to go back to CLIP before submission.
-
-## Payload contract
-
-`Gemma4HAICAdapter.assess()` returns the same payload shape as `ObservationVLMAdapter._assess_local_clip()`:
+`TransformersVLMAdapter.assess()` returns exactly the same shape as `ObservationVLMAdapter._assess_local_clip()`:
 
 ```python
 {
@@ -82,26 +121,30 @@ The reviewed eval should produce a new `OBSERVATION_VLA_EVAL.md` with `runtime=g
     "raw_response_text": str,
     "_prompt_used": str,
     "_schema_used": dict,
-    "_model_id": "gemma4-haic-v35-gov:{lora|merged|gguf}",
+    "_model_id": "transformers_vlm:{lora|merged|gguf}:{label}",
 }
 ```
 
-`rationale_tags` always includes `"gemma4_haic_local"` and `"haic_mode:{lora|merged|gguf}"` so downstream filters can distinguish backends.
+Always-present rationale tags:
+- `transformers_vlm_local` — identifies the backend
+- `mode:{lora|merged|gguf}` — identifies the load mode
+- `image_conditioned` | `image_available_text_only_model` | `metadata_only` — indicates whether the image was actually used in inference
 
-## Known limits of this scaffold
+## Known limits
 
-1. **No image conditioning yet.** This scaffold reasons from sample metadata only (target, probe cloud cover, Sentinel source, geometry). The fine-tuned HAIC model was trained on convention-grounded reasoning, not on image pixels. For image conditioning, stack it with the existing CLIP features from `adapter.py` — left as a follow-up.
-2. **Falls back to metadata heuristic on any failure.** `_fallback_payload` mirrors the stub behavior in `adapter.py`. `runtime_mode` will report `stub_fallback` in that case — same convention as the existing adapter.
-3. **Generation is deterministic.** `temperature=0.0`, `do_sample=False`. If the fine-tune produces degenerate repetition, switch to a low temperature (0.1) in `_generate_transformers`.
-4. **No streaming, no batching.** Single-request inference. For the 3-case eval that's fine; for the progressive-snapshot demo we should revisit.
+1. **VL chat templates vary by model.** LFM2-VL, Gemma-4-VL, and LLaVA all differ. The adapter calls `apply_chat_template` on either the processor or tokenizer; if a specific model's template disagrees with the `{"type":"image"}` convention, customize `_generate_vlm`.
+2. **llama.cpp VL support is spotty.** GGUF mode defaults to text-only. If you need VL-over-GGUF, switch to a dedicated multimodal llama.cpp fork.
+3. **Fallback is metadata-only** — `runtime_mode` becomes `stub_fallback` when the model fails to load or generate, and the assessor sees the same schema as the existing `clip_local` stub path.
 
-## What to do before submission
+## Pre-merge gate (unchanged)
 
-- [ ] Run `haic_test.py` against the new backend — all 11 sections should pass
-- [ ] Run `observation_vla_eval.py --inprocess` — confirm agreement on 3 pinned cases
-- [ ] Run `submission_evidence.py --reviewed-only` — make sure packet still passes the gate
-- [ ] Re-record demo video with `gemma4_haic_local` active
+Before merging this branch to `main`:
+
+- [ ] A concrete model is picked and wired (env vars set, factory dispatch added).
+- [ ] `docker compose up` starts cleanly with the new backend active.
+- [ ] `python scripts/haic_test.py` passes all 11 sections.
+- [ ] `python scripts/observation_vla_eval.py --inprocess` produces acceptable agreement on the 3 pinned reviewed cases.
 
 ## Feature branch
 
-This code lives on branch `entry-b/backend` in `github.com/humanaiconvention/simsat`. Merge to `main` only after the checks above pass.
+This code lives on `entry-b/backend` in `github.com/humanaiconvention/simsat`. Model-specific downloaders / config files will arrive in follow-up commits once Ben + Guilherme finalize the Liquid vs General track model assignments.

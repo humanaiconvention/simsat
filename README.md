@@ -1,6 +1,94 @@
 # SimSat
 This tool simulates the accessibility of Earth imagery from a satellite. An orbit propagator calculates the satellite position over time and an API serves as an interface to on-board users, sharing the current position, timestamp and providing satellite imagery from that location. A web-based dashboard controls and visualizes the simulation.
 
+## Challenge Entry
+
+This repo now also contains a challenge-focused encounter planner that treats observation opportunities as structured mission events instead of only continuous propagation. The challenge entry compares:
+- a deterministic scaffold planner
+- a WCLI-style trust-gated planner with an explicit `refine` action
+
+The compact submission note and reproducible demo flow are in [CHALLENGE_ENTRY.md](/D:/SimSat/CHALLENGE_ENTRY.md).
+The shortest judge-facing handoff is in [SUBMISSION_BRIEF.md](/D:/SimSat/SUBMISSION_BRIEF.md).
+The current reviewed ObservationVLA evaluation is in [OBSERVATION_VLA_EVAL.md](/D:/SimSat/OBSERVATION_VLA_EVAL.md).
+
+The challenge path is explicitly `no-Mapbox-safe`: Sentinel imagery plus orbital geometry are sufficient for the encounter planner, WCLI trust/refine flow, ObservationVLA traces, and evaluation scripts. Mapbox remains an optional high-resolution perspective source, not a requirement.
+
+### Quick Challenge Demo
+
+For a low-compute, judge-friendly comparison run:
+
+```bash
+python scripts/encounter_eval.py --base-url http://127.0.0.1:8000/sim --scenario-sweep --top-k 8 --materialize-top-k 2 --markdown
+```
+
+That prints a compact scorecard across the seeded scenario packs:
+- `maritime_chokepoints`
+- `disaster_response_weather`
+- `urban_coastal_ambiguity`
+
+This works even when `MAPBOX_ACCESS_TOKEN` is unset.
+
+For a narrated single-scenario walkthrough:
+
+```bash
+python scripts/challenge_demo.py --base-url http://127.0.0.1:8000/sim --scenario-pack maritime_chokepoints
+```
+
+For a markdown-ready submission evidence report built from stored evaluations and labelled traces:
+
+```bash
+python scripts/submission_evidence.py --base-url http://127.0.0.1:8000/sim
+```
+
+That generates [SUBMISSION_PACKET.md](/D:/SimSat/SUBMISSION_PACKET.md) with one curated case per scenario pack. By default the packet uses Sentinel-first evidence, prefers operator-reviewed labels when they exist, and otherwise falls back to `simulated_submission_case`.
+
+For the current ObservationVLA backend evaluation against operator-reviewed traces:
+
+```bash
+python scripts/observation_vla_eval.py --inprocess
+```
+
+That generates [OBSERVATION_VLA_EVAL.md](/D:/SimSat/OBSERVATION_VLA_EVAL.md). Today the stack is honest-but-early: the local `clip_local` backend is image-model-backed, shows useful/not-useful alignment on the reviewed Sentinel cases, but does not yet match operator actions closely enough to treat as an autonomous action policy.
+
+To replace a simulated label with a real operator-reviewed outcome:
+
+```bash
+python scripts/review_queue_casebook.py --inprocess
+python scripts/operator_review.py --base-url http://127.0.0.1:8000/sim --scenario-pack maritime_chokepoints
+```
+
+The review queue writes [REVIEW_QUEUE.md](/D:/SimSat/REVIEW_QUEUE.md) plus per-case images so the next human-review pass can compare the stored trace assessment with the current `clip_local` backend recommendation on the same imagery.
+
+For a specific trace, you can inspect the full review bundle first:
+
+```bash
+python scripts/operator_review.py --base-url http://127.0.0.1:8000/sim --trace-id <trace_id> --show-bundle-only
+```
+
+Then replace the current label and pin it as the canonical submission case for that scenario:
+
+```bash
+python scripts/operator_review.py --base-url http://127.0.0.1:8000/sim --trace-id <trace_id> --reviewer "Your Name" --operator-action accept --useful true --usefulness-score 0.95 --pin-submission-case --pinned-by "Your Name"
+```
+
+Once one reviewed case is pinned per scenario pack, generate a strict reviewed-only packet:
+
+```bash
+python scripts/submission_evidence.py --base-url http://127.0.0.1:8000/sim --reviewed-only
+```
+
+To generate a visual companion with the pinned case images:
+
+```bash
+python scripts/submission_casebook.py --base-url http://127.0.0.1:8000/sim
+```
+
+To generate a low-compute readiness checklist for the current submission artifacts:
+
+```bash
+python scripts/submission_readiness.py --base-url http://127.0.0.1:8000/sim
+```
+
 ## Upcoming Hackathon: AI in Space | Liquid AI x DPhi Space
 
 This is the official repository for the upcoming [AI in Space Hackathon](https://luma.com/n9cw58h0), organised in partnership between DPhi Space and Liquid AI.
@@ -51,6 +139,8 @@ python scripts/api_test.py
 ```
 
 Note: if no image is displayed, the satellite might be over the ocean. More details about image availability are reported in the [Datasets Section](#datasets).
+
+For the challenge entry specifically, Mapbox is optional. If you do not want to create a billed Mapbox account, leave `MAPBOX_ACCESS_TOKEN` unset and use the encounter planner, evaluation scripts, and Sentinel-backed ObservationVLA flow as-is.
 
 ---
 # Simulation Control
@@ -136,6 +226,8 @@ A PNG image file is returned as the response. Also, the following metadata are r
 
 An API key for Mapbox (free tier available) is required to use this endpoint. Set the environment variable `MAPBOX_ACCESS_TOKEN` to your access token before starting the simulation. More details can be found in the [Datasets Section](#datasets).
 
+This endpoint is optional and returns `503` when Mapbox is disabled. The challenge entry does not depend on it.
+
 ### GET /data/image/sentinel
 This endpoint returns an image from the Sentinel-2 dataset for a given position and timestamp (not from the current satellite simulation). The metadata returned are the same as the `/data/current/image/sentinel` endpoint except `satellite_position` and `timestamp`.
 
@@ -189,6 +281,8 @@ The Sentinel-2 API is quite slow, so take it into account when developing your a
 The [Mapbox static images API](https://docs.mapbox.com/api/maps/static-images/) is used to generate satellite imagery of a given location, bearing, and pitch. The images have high spatial resolution (10-30cm) but are static, meaning they don't have a timestamp associated and they are not updated regularly. Only RGB images are provided, with no other bands available. The data is cloud-free and available globally in an uniform manner.
 
 To use Mapbox images, go to [mapbox.com](https://www.mapbox.com/) and create an account to get an access token. Set the environment variable `MAPBOX_ACCESS_TOKEN` to your access token.
+
+Mapbox is not required for the encounter-planning challenge flow. It is only needed if you specifically want the high-resolution perspective-image endpoints.
 
 ### Uses and Limitations
 Mapbox images should be used for applications that are not time-dependent, where high resolution is necessary and radiometric accuracy is not required. 

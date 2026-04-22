@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "packs": [
+    {
+      "pack_id": "disaster_response_weather",
+      "scenario_role": "Disaster Response Weather",
+      "challenge_note": "Heavy weather occlusion likely; prioritize cloud-penetrating SAR bands",
+      "target_labels": [
+        "Houston Ship Channel",
+        "Fort Myers Coast",
+        "New Orleans Delta"
+      ]
+    },
+    {
+      "pack_id": "maritime_chokepoints",
+      "scenario_role": "Maritime Chokepoints",
+      "challenge_note": "High vessel density; flag unusual stop/transit patterns",
+      "target_labels": [
+        "Suez Canal",
+        "Port of Singapore",
+        "Panama Canal"
+      ]
+    },
+    {
+      "pack_id": "urban_coastal_ambiguity",
+      "scenario_role": "Urban Coastal Ambiguity",
+      "challenge_note": "Coastal urban mix; distinguish flood extent from dark surface reflection",
+      "target_labels": [
+        "San Francisco Bay",
+        "Port of Los Angeles",
+        "Port of Rotterdam",
+        "Shenzhen Bay"
+      ]
+    }
+  ]
+}

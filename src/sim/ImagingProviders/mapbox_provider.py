@@ -16,77 +16,15 @@ class MapboxlProvider:
 
 
     def get_target_image(self, sat_lon, sat_lat, sat_alt, target_lon, target_lat):
+        metadata = self.probe_target_geometry(sat_lon, sat_lat, sat_alt, target_lon, target_lat)
         print(f"get target input vars: sat_lon={sat_lon}, sat_lat={sat_lat}, sat_alt={sat_alt}, target_lon={target_lon}, target_lat={target_lat}")
-        cartesian_sat = self._spherical_to_cartesian(sat_lon, sat_lat,  EARTH_RADIUS_KM + sat_alt)
-        cartesian_target = self._spherical_to_cartesian(target_lon, target_lat, EARTH_RADIUS_KM)
 
-        distance = np.linalg.norm(cartesian_sat - cartesian_target)
-
-        # zoom factor
-        zoom_factor = 13.92 + log2(560/distance) # empirical choice of factors.
-
-        target_to_sat_vector = cartesian_sat - cartesian_target
-        target_to_sat_unit_vector = target_to_sat_vector / np.linalg.norm(target_to_sat_vector)
-
-        target_unit_vector = cartesian_target / np.linalg.norm(cartesian_target)
-
-        # calculate elevation angle: theta = angle between the plane normal vector and the target to satellite vector
-        theta = acos(np.clip(np.dot(target_unit_vector, target_to_sat_unit_vector), -1.0, 1.0))
-        elevation_degrees = 90 - np.degrees(theta)
-        pitch = np.degrees(theta) # mapbox pitch
-        target_visible = elevation_degrees >= 30
-        
-        # calculate bearing
-        earth_center_to_south_vector = np.array([0, 0, 1])  # Z-axis points to North Pole
-        target_to_sat_vec_projection_to_earth_surface = target_to_sat_unit_vector - np.dot(target_to_sat_unit_vector, target_unit_vector) * target_unit_vector
-        target_proj_norm = np.linalg.norm(target_to_sat_vec_projection_to_earth_surface)
-        if target_proj_norm < EPS:
-            # Near nadir view: bearing is undefined; use a stable default.
-            bearing = 0.0
-        else:
-            target_to_sat_vec_projection_to_earth_surface_unit_vector = target_to_sat_vec_projection_to_earth_surface / target_proj_norm
-            south_vec_projection_to_earth_surface = earth_center_to_south_vector - np.dot(earth_center_to_south_vector, target_unit_vector) * target_unit_vector
-            south_proj_norm = np.linalg.norm(south_vec_projection_to_earth_surface)
-            if south_proj_norm < EPS:
-                # Degenerate case close to poles; use the same stable default.
-                bearing = 0.0
-            else:
-                south_vec_projection_to_earth_surface_unit_vector = south_vec_projection_to_earth_surface / south_proj_norm
-                bearing = 180 - np.degrees(acos(np.clip(np.dot(south_vec_projection_to_earth_surface_unit_vector, target_to_sat_vec_projection_to_earth_surface_unit_vector), -1.0, 1.0)))
-                # determine if bearing should be negative
-                bearing_cross = np.cross(south_vec_projection_to_earth_surface_unit_vector, target_to_sat_vec_projection_to_earth_surface_unit_vector)
-                if np.dot(bearing_cross, target_unit_vector) < 0:
-                    bearing = -bearing
-                if bearing < 0:
-                    bearing += 360
-
-        # no image can be requested if the target is not visible from this geometry
-        if not target_visible:
-            return {
-                "image": None,
-                "metadata": {
-                    "target_visible": False,
-                    "image_available": False,
-                    "elevation_degrees": None,
-                    "zoom_factor": None,
-                    "bearing": None,
-                    "pitch": None
-                }
-            }
+        if not metadata["target_visible"]:
+            return {"image": None, "metadata": metadata}
         
         # get image from mapbox
-        filename = "test.png"
-
-        url = f"https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/{target_lon},{target_lat},{zoom_factor},{bearing},{pitch}/1280x1280@2x?access_token={self.api_token}"
+        url = f"https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/{target_lon},{target_lat},{metadata['zoom_factor']},{metadata['bearing']},{metadata['pitch']}/1280x1280@2x?access_token={self.api_token}"
         response = requests.get(url)
-        metadata = {
-            "target_visible": True,
-            "image_available": False,
-            "elevation_degrees": elevation_degrees,
-            "zoom_factor": zoom_factor,
-            "bearing": bearing,
-            "pitch": pitch
-        }
         if response.status_code != 200:
             print(f"Error fetching image: {response.status_code} - {response.text}")
             return {
@@ -98,6 +36,58 @@ class MapboxlProvider:
         return {
             "image": response.content,
             "metadata": metadata
+        }
+
+    def probe_target_geometry(self, sat_lon, sat_lat, sat_alt, target_lon, target_lat):
+        cartesian_sat = self._spherical_to_cartesian(sat_lon, sat_lat, EARTH_RADIUS_KM + sat_alt)
+        cartesian_target = self._spherical_to_cartesian(target_lon, target_lat, EARTH_RADIUS_KM)
+
+        target_to_sat_vector = cartesian_sat - cartesian_target
+        distance = np.linalg.norm(target_to_sat_vector)
+        target_to_sat_unit_vector = target_to_sat_vector / distance
+        target_unit_vector = cartesian_target / np.linalg.norm(cartesian_target)
+
+        theta = acos(np.clip(np.dot(target_unit_vector, target_to_sat_unit_vector), -1.0, 1.0))
+        elevation_degrees = 90 - np.degrees(theta)
+        pitch = np.degrees(theta)
+        target_visible = elevation_degrees >= 30
+        zoom_factor = 13.92 + log2(560 / distance)
+
+        sat_to_target_unit_vector = (cartesian_target - cartesian_sat) / distance
+        nadir_unit_vector = -cartesian_sat / np.linalg.norm(cartesian_sat)
+        off_nadir_degrees = np.degrees(
+            acos(np.clip(np.dot(nadir_unit_vector, sat_to_target_unit_vector), -1.0, 1.0))
+        )
+
+        earth_center_to_south_vector = np.array([0, 0, 1])
+        target_to_sat_vec_projection_to_earth_surface = target_to_sat_unit_vector - np.dot(target_to_sat_unit_vector, target_unit_vector) * target_unit_vector
+        target_proj_norm = np.linalg.norm(target_to_sat_vec_projection_to_earth_surface)
+        if target_proj_norm < EPS:
+            bearing = 0.0
+        else:
+            target_to_sat_vec_projection_to_earth_surface_unit_vector = target_to_sat_vec_projection_to_earth_surface / target_proj_norm
+            south_vec_projection_to_earth_surface = earth_center_to_south_vector - np.dot(earth_center_to_south_vector, target_unit_vector) * target_unit_vector
+            south_proj_norm = np.linalg.norm(south_vec_projection_to_earth_surface)
+            if south_proj_norm < EPS:
+                bearing = 0.0
+            else:
+                south_vec_projection_to_earth_surface_unit_vector = south_vec_projection_to_earth_surface / south_proj_norm
+                bearing = 180 - np.degrees(acos(np.clip(np.dot(south_vec_projection_to_earth_surface_unit_vector, target_to_sat_vec_projection_to_earth_surface_unit_vector), -1.0, 1.0)))
+                bearing_cross = np.cross(south_vec_projection_to_earth_surface_unit_vector, target_to_sat_vec_projection_to_earth_surface_unit_vector)
+                if np.dot(bearing_cross, target_unit_vector) < 0:
+                    bearing = -bearing
+                if bearing < 0:
+                    bearing += 360
+
+        return {
+            "target_visible": target_visible,
+            "image_available": False,
+            "elevation_degrees": elevation_degrees if target_visible else None,
+            "zoom_factor": zoom_factor if target_visible else None,
+            "bearing": bearing if target_visible else None,
+            "pitch": pitch if target_visible else None,
+            "slant_range_km": distance,
+            "off_nadir_degrees": off_nadir_degrees,
         }
 
     # --------------------------------------------------------

@@ -6,10 +6,25 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
+    chunkSizeWarningLimit: 4000,
     rollupOptions: {
       output: {
         entryFileNames: "assets/main.js",
+        chunkFileNames: "assets/[name]-[hash].js",
         assetFileNames: "assets/[name].[ext]",
+        manualChunks(id) {
+          if (
+            id.includes("node_modules/cesium") ||
+            id.includes("node_modules/@cesium/") ||
+            id.includes("/src/GlobeView.tsx")
+          ) {
+            return "globe";
+          }
+          if (id.includes("node_modules")) {
+            return "vendor";
+          }
+          return undefined;
+        },
       },
     },
   },

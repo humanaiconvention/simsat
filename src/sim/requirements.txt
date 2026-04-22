@@ -14,3 +14,7 @@ httplib2
 pyqt6
 # HAIC convention layer
 anthropic>=0.25.0
+# ObservationVLA local model path
+torch
+transformers
+Pillow

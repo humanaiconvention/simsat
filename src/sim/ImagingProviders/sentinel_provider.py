@@ -68,20 +68,70 @@ class SentinelProvider:
         else:
             timestamp = timestamp.astimezone(timezone.utc)
         return timestamp.replace(microsecond=0).isoformat().replace("+00:00", "Z")
-        
-    def get_single_array_image_bbox(self, bbox, datetime, spectral_bands=['red', 'green', 'blue']):
+
+    def probe_latest_scene_lon_lat(
+        self,
+        lon,
+        lat,
+        timestamp,
+        spectral_bands=['red', 'green', 'blue'],
+        size_km=5,
+        window_seconds=10 * 24 * 60 * 60,
+    ):
+        datetime_window = self.build_stac_datetime_window(timestamp, window_seconds=window_seconds)
+        bbox = self.get_bbox_around_lon_lat(lon, lat, image_size_km=size_km)
+        metadata = self._get_latest_item_metadata(bbox, datetime_window)
+
+        if metadata is None:
+            return {
+                "image_available": False,
+                "source": None,
+                "spectral_bands": spectral_bands,
+                "footprint": list(bbox),
+                "size_km": size_km,
+                "cloud_cover": None,
+                "datetime": None,
+            }
+
+        return {
+            "image_available": True,
+            "source": metadata["platform"],
+            "spectral_bands": spectral_bands,
+            "footprint": list(bbox),
+            "size_km": size_km,
+            "cloud_cover": metadata["cloud_cover"],
+            "datetime": self.format_timestamp_utc_z(metadata["date"]),
+        }
+
+    def _get_latest_item(self, bbox, datetime_window):
         search = self.client.search(
             collections=["sentinel-2-l2a"],
             bbox=bbox,
-            datetime=datetime,
+            datetime=datetime_window,
             query={"eo:cloud_cover": {"lt": 100}},
         )
-
-        # Deterministically pick the newest acquisition in the requested window.
         items = list(search.items())
         if not items:
+            return None
+        return max(items, key=lambda i: i.datetime)
+
+    def _get_latest_item_metadata(self, bbox, datetime_window):
+        item = self._get_latest_item(bbox, datetime_window)
+        if item is None:
+            return None
+
+        return {
+            "id": item.id,
+            "date": item.datetime,
+            "cloud_cover": item.properties['eo:cloud_cover'],
+            "platform": item.properties['platform'],
+            "available_bands": list(item.assets.keys())
+        }
+        
+    def get_single_array_image_bbox(self, bbox, datetime, spectral_bands=['red', 'green', 'blue']):
+        item = self._get_latest_item(bbox, datetime)
+        if item is None:
             return None, None
-        item = max(items, key=lambda i: i.datetime)
 
         metadata = {
             "id": item.id,

@@ -5,8 +5,36 @@ import json
 from datetime import datetime, timezone
 from ImagingProviders.sentinel_provider import SentinelProvider
 from ImagingProviders.mapbox_provider import MapboxlProvider
+from encounter import api_router as encounter_router
+from encounter.ephemeris import EphemerisService
+from encounter.features import FeatureBuilder
+from encounter.materialize import StimulusMaterializer
+from encounter.planner import AnalyticPlanner
+from encounter.policy import build_default_policy
+from encounter.probes import ImagingProbeService
+from encounter.service import EncounterService
+from encounter.store import get_encounter_store
+from encounter.targets import get_target_repository
+from encounter.trust_model import WCLITrustModel
+from encounter.windows import WindowDetector
 from haic.api_router import router as haic_router
 import haic.api_router as _haic_api
+from haic.stimulus_store import get_stimulus_store
+from mission_response import api_router as mission_response_router
+from mission_response.planner import MissionResponsePlanner
+from mission_response.policy import build_default_policy as build_mission_response_policy
+from mission_response.service import MissionResponseService
+from mission_response.store import MissionResponseStore
+from mission_response.utility import MissionUtilityModel
+from observation_vla import api_router as observation_vla_router
+from observation_vla.adapter import ObservationVLMAdapter
+from observation_vla.assessor import ObservationAssessor
+from observation_vla.dataset import ObservationDatasetBuilder
+from observation_vla.memory import ObservationTTTMemory
+from observation_vla.residual import ObservationResidualBuilder
+from observation_vla.service import ObservationVLAService
+from observation_vla.store import ObservationStore
+from orbit_config import DEFAULT_TLE, SATELLITE_NAME
 
 api = FastAPI(title="SimSat API", description="Satellite simulation + HAIC convention layer")
 
@@ -24,6 +52,9 @@ except ValueError:
 
 # Mount HAIC router
 api.include_router(haic_router)
+api.include_router(encounter_router.router)
+api.include_router(observation_vla_router.router)
+api.include_router(mission_response_router.router)
 
 
 def serialize_xarray_dataset(ds):
@@ -65,6 +96,82 @@ def format_timestamp_utc(timestamp):
         dt = dt.astimezone(timezone.utc)
 
     return dt.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _build_encounter_service(
+    shared_data,
+    sentinel_provider: SentinelProvider,
+    mapbox_provider: MapboxlProvider | None,
+    observation_vla_service: ObservationVLAService,
+) -> EncounterService:
+    policy = build_default_policy()
+    bridge = api.state.haic_bridge
+    return EncounterService(
+        shared_data=shared_data,
+        target_repo=get_target_repository(),
+        ephemeris=EphemerisService(SATELLITE_NAME, DEFAULT_TLE),
+        window_detector=WindowDetector(
+            min_elevation_degrees=policy.min_elevation_degrees,
+            min_window_seconds=policy.min_window_seconds,
+        ),
+        probe_service=ImagingProbeService(
+            sentinel_provider=sentinel_provider,
+            mapbox_provider=mapbox_provider,
+        ),
+        feature_builder=FeatureBuilder(),
+        planner=AnalyticPlanner(policy, trust_model=WCLITrustModel(policy)),
+        store=get_encounter_store(),
+        materializer=StimulusMaterializer(bridge, get_stimulus_store()),
+        policy=policy,
+        observation_vla=observation_vla_service,
+    )
+
+
+def _build_observation_vla_service() -> ObservationVLAService:
+    adapter = ObservationVLMAdapter()
+    assessor = ObservationAssessor(adapter=adapter, model_id=adapter.model_id)
+    residual_builder = ObservationResidualBuilder()
+    store = ObservationStore()
+    memory = ObservationTTTMemory(store)
+    dataset_builder = ObservationDatasetBuilder()
+    return ObservationVLAService(
+        assessor=assessor,
+        residual_builder=residual_builder,
+        memory=memory,
+        dataset_builder=dataset_builder,
+        store=store,
+    )
+
+
+def _build_mission_response_service(
+    observation_vla_service: ObservationVLAService,
+) -> MissionResponseService:
+    policy = build_mission_response_policy()
+    return MissionResponseService(
+        planner=MissionResponsePlanner(policy),
+        utility_model=MissionUtilityModel(),
+        store=MissionResponseStore(),
+        policy=policy,
+        observation_vla=observation_vla_service,
+    )
+
+
+def get_runtime_capabilities() -> dict:
+    observation_vla_service = getattr(api.state, "observation_vla_service", None)
+    runtime_mode = "uninitialised"
+    model_id = None
+    if observation_vla_service is not None:
+        runtime_mode = observation_vla_service.assessor.adapter.runtime_mode
+        model_id = observation_vla_service.assessor.adapter.model_id
+    return {
+        "sentinel_enabled": sentinel is not None,
+        "mapbox_enabled": mapbox is not None,
+        "challenge_no_mapbox_safe": True,
+        "sentinel_first_challenge_scoring": True,
+        "high_res_perspective_optional": True,
+        "observation_vla_runtime_mode": runtime_mode,
+        "observation_vla_model_id": model_id,
+    }
 
 @api.get("/data/current/position")
 async def get_metrics():
@@ -284,6 +391,11 @@ async def root():
     return {"message": "Simulation API is online", "haic": "enabled"}
 
 
+@api.get("/capabilities")
+async def capabilities():
+    return get_runtime_capabilities()
+
+
 @api.on_event("startup")
 async def _startup():
     """Inject providers into the HAIC router after shared_data is available."""
@@ -296,5 +408,19 @@ async def _startup():
         sentinel_provider=sentinel,
         mapbox_provider=mapbox,
     )
+    api.state.haic_bridge = bridge
     prism = get_prism_loop()
     _haic_api.init(bridge, prism)
+    observation_vla_service = _build_observation_vla_service()
+    api.state.observation_vla_service = observation_vla_service
+    observation_vla_router.init(observation_vla_service)
+    mission_response_service = _build_mission_response_service(observation_vla_service)
+    api.state.mission_response_service = mission_response_service
+    mission_response_router.init(mission_response_service)
+    encounter_service = _build_encounter_service(shared, sentinel, mapbox, observation_vla_service)
+    api.state.encounter_service = encounter_service
+    observation_vla_service.attach_context(
+        encounter_service=encounter_service,
+        mission_response_service=mission_response_service,
+    )
+    encounter_router.init(encounter_service)

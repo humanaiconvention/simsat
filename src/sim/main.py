@@ -8,6 +8,7 @@ from camera import Camera
 from simulator import Simulator
 from gui import WebGuiConnector
 from api import api
+from orbit_config import SATELLITE_NAME, DEFAULT_TLE
 import multiprocessing
 
 @click.command()
@@ -51,9 +52,13 @@ def run_sim(shared_data_dict, timing, time_step):
     gui = WebGuiConnector()
 
     # Initialize the simulation engine
-    line1 = "1 60989U 24157A   26075.16558042  .00000129  00000-0  65710-4 0  9997"
-    line2 = "2 60989  98.5677 151.2852 0000884 109.8893 250.2385 14.30816791 79683"
-    sim_engine = Simulator("SatelliteName", TLE=[line1, line2], t0=None, timing_mode=timing, time_step=time_step)
+    sim_engine = Simulator(
+        SATELLITE_NAME,
+        TLE=DEFAULT_TLE,
+        t0=None,
+        timing_mode=timing,
+        time_step=time_step,
+    )
 
     # Add subsystems
     camera = Camera(shared_data_dict=shared_data_dict)

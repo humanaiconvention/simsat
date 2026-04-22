@@ -100,7 +100,7 @@ def _spawn() -> subprocess.Popen:
     """)
 
     tmp = tempfile.NamedTemporaryFile(
-        mode="w", suffix="_simsat_api.py", delete=False, dir=SIM_DIR
+        mode="w", suffix="_simsat_api.py", delete=False
     )
     tmp.write(launcher)
     tmp.flush()

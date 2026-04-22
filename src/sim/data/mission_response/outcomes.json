@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "outcomes": [
+    {
+      "outcome_id": "resp_out_ed9c19a4daf140f4b3765a8812ba84c4",
+      "action_id": "resp_c07c0e8dbbd54bf7a55139f00f9615fb",
+      "executed_at": "2026-04-10T15:49:14Z",
+      "execution_status": "simulated",
+      "utility_realized": 0.92,
+      "notes": "Auto-generated mission response outcome for submission evidence."
+    },
+    {
+      "outcome_id": "resp_out_1cdc63c8be3a47678d61206a9913915f",
+      "action_id": "resp_b675ff0dd27b44978a2033ecf67d0629",
+      "executed_at": "2026-04-10T15:49:16Z",
+      "execution_status": "simulated",
+      "utility_realized": 0.92,
+      "notes": "Auto-generated mission response outcome for submission evidence."
+    },
+    {
+      "outcome_id": "resp_out_0a6d9d634ba64f3a8887b7c82787e473",
+      "action_id": "resp_4ffb609c70ba4ce194c3f54fc14542c0",
+      "executed_at": "2026-04-10T15:49:21Z",
+      "execution_status": "simulated",
+      "utility_realized": 0.92,
+      "notes": "Auto-generated mission response outcome for submission evidence."
+    },
+    {
+      "outcome_id": "resp_out_7f27dc9a6af2408d8cc5f4a7a201ca40",
+      "action_id": "resp_3d80547ec4c1454eb582ce6f6566e12f",
+      "executed_at": "2026-04-10T15:50:56Z",
+      "execution_status": "simulated",
+      "utility_realized": 0.92,
+      "notes": "Auto-generated mission response outcome for submission evidence."
+    },
+    {
+      "outcome_id": "resp_out_4ef1e878030d492ca6bf7b1fd56ac191",
+      "action_id": "resp_6d59866d79c744ef80e735af9765469b",
+      "executed_at": "2026-04-10T15:50:58Z",
+      "execution_status": "simulated",
+      "utility_realized": 0.92,
+      "notes": "Auto-generated mission response outcome for submission evidence."
+    },
+    {
+      "outcome_id": "resp_out_d4963eac450a4dca9929ff75e3cebc39",
+      "action_id": "resp_d5e62c641d14422d9f6528ce34a93be3",
+      "executed_at": "2026-04-10T15:51:03Z",
+      "execution_status": "simulated",
+      "utility_realized": 0.92,
+      "notes": "Auto-generated mission response outcome for submission evidence."
+    },
+    {
+      "outcome_id": "resp_out_7acc124b01ed4a69990e9051f4788ac5",
+      "action_id": "resp_be60aaa7d1e5440ca0a4b530465f0f77",
+      "executed_at": "2026-04-10T16:03:52Z",
+      "execution_status": "simulated",
+      "utility_realized": 0.92,
+      "notes": "Auto-generated mission response outcome for submission evidence."
+    },
+    {
+      "outcome_id": "resp_out_f96315f0d57b4d39b807f4be66410146",
+      "action_id": "resp_400a8fdb62d9455b90d142176f106364",
+      "executed_at": "2026-04-10T16:03:57Z",
+      "execution_status": "simulated",
+      "utility_realized": 0.92,
+      "notes": "Auto-generated mission response outcome for submission evidence."
+    },
+    {
+      "outcome_id": "resp_out_5e9aeaa621004ecd9373f51ff91efd35",
+      "action_id": "resp_c3b9f7a7f78a40f1a6545e3ae6544c74",
+      "executed_at": "2026-04-10T16:38:14Z",
+      "execution_status": "simulated",
+      "utility_realized": 0.92,
+      "notes": "Auto-generated mission response outcome for submission evidence."
+    },
+    {
+      "outcome_id": "resp_out_c5da6bf3d9ba46598d9319e8705b6044",
+      "action_id": "resp_62ab31dbb4754bf788e99224deb43306",
+      "executed_at": "2026-04-10T16:38:18Z",
+      "execution_status": "simulated",
+      "utility_realized": 0.92,
+      "notes": "Auto-generated mission response outcome for submission evidence."
+    },
+    {
+      "outcome_id": "resp_out_6a14d531d85b44faa8af1459895fd4ea",
+      "action_id": "resp_8c36db1dffad42c8b750a11578394313",
+      "executed_at": "2026-04-10T16:38:25Z",
+      "execution_status": "simulated",
+      "utility_realized": 0.92,
+      "notes": "Auto-generated mission response outcome for submission evidence."
+    },
+    {
+      "outcome_id": "resp_out_81c160548e764ccd957faa03a20143b6",
+      "action_id": "resp_c3b9f7a7f78a40f1a6545e3ae6544c74",
+      "executed_at": "2026-04-10T22:23:23Z",
+      "execution_status": "operator_reviewed",
+      "utility_realized": 0.92,
+      "notes": "Synchronized from operator_review observation outcome."
+    },
+    {
+      "outcome_id": "resp_out_5716c73a29fb4a83b49b9a8c8fd7ebaf",
+      "action_id": "resp_8c36db1dffad42c8b750a11578394313",
+      "executed_at": "2026-04-10T22:23:23Z",
+      "execution_status": "operator_reviewed",
+      "utility_realized": 0.9,
+      "notes": "Synchronized from operator_review observation outcome."
+    },
+    {
+      "outcome_id": "resp_out_9a56f4dde1e8456f8e330abbac809903",
+      "action_id": "resp_62ab31dbb4754bf788e99224deb43306",
+      "executed_at": "2026-04-10T22:23:24Z",
+      "execution_status": "operator_reviewed",
+      "utility_realized": 0.95,
+      "notes": "Synchronized from operator_review observation outcome."
+    }
+  ]
+}

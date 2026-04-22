@@ -62,6 +62,23 @@ class ObservationMetadata:
     def to_dict(self) -> Dict[str, Any]:
         return {k: v for k, v in asdict(self).items() if v is not None}
 
+    @classmethod
+    def from_dict(cls, raw: Dict[str, Any]) -> "ObservationMetadata":
+        return cls(
+            satellite_position=[float(v) for v in raw.get("satellite_position", [0.0, 0.0, 0.0])],
+            timestamp=str(raw.get("timestamp", "")),
+            footprint=[float(v) for v in raw["footprint"]] if raw.get("footprint") is not None else None,
+            cloud_cover=float(raw["cloud_cover"]) if raw.get("cloud_cover") is not None else None,
+            source=str(raw["source"]) if raw.get("source") is not None else None,
+            spectral_bands=[str(v) for v in raw.get("spectral_bands", [])] or None,
+            elevation_degrees=float(raw["elevation_degrees"]) if raw.get("elevation_degrees") is not None else None,
+            bearing=float(raw["bearing"]) if raw.get("bearing") is not None else None,
+            pitch=float(raw["pitch"]) if raw.get("pitch") is not None else None,
+            size_km=float(raw["size_km"]) if raw.get("size_km") is not None else None,
+            target_visible=bool(raw["target_visible"]) if raw.get("target_visible") is not None else None,
+            image_available=bool(raw.get("image_available", False)),
+        )
+
 
 @dataclass
 class StimulusImage:
@@ -77,6 +94,15 @@ class StimulusImage:
         if self.metadata is not None:
             d["metadata"] = self.metadata.to_dict()
         return d
+
+    @classmethod
+    def from_dict(cls, raw: Dict[str, Any]) -> "StimulusImage":
+        metadata = raw.get("metadata")
+        return cls(
+            stimulus_type=StimulusType(raw.get("stimulus_type", StimulusType.SENTINEL_RGB.value)),
+            image_b64=raw.get("image_b64"),
+            metadata=ObservationMetadata.from_dict(metadata) if metadata else None,
+        )
 
 
 @dataclass
@@ -129,6 +155,22 @@ class GroundingStimulus:
             "observation_context": self.observation_context,
             "content_hash": self.content_hash,
         }
+
+    @classmethod
+    def from_dict(cls, raw: Dict[str, Any]) -> "GroundingStimulus":
+        stimulus = cls(
+            stimulus_id=str(raw.get("stimulus_id", str(uuid.uuid4()))),
+            created_at=str(raw.get("created_at", datetime.now(timezone.utc).isoformat())),
+            satellite_position=[float(v) for v in raw.get("satellite_position", [0.0, 0.0, 0.0])],
+            simulation_timestamp=str(raw.get("simulation_timestamp", "")),
+            images=[StimulusImage.from_dict(img) for img in raw.get("images", [])],
+            location_description=str(raw.get("location_description", "")),
+            observation_context=str(raw.get("observation_context", "")),
+            content_hash=str(raw.get("content_hash", "")),
+        )
+        if not stimulus.content_hash:
+            stimulus.compute_hash()
+        return stimulus
 
 
 @dataclass
@@ -194,6 +236,28 @@ class ConventionSession:
             d["settlement_result"] = self.settlement_result
         return d
 
+    @classmethod
+    def from_dict(cls, raw: Dict[str, Any]) -> "ConventionSession":
+        session = cls(
+            session_id=str(raw.get("session_id", str(uuid.uuid4()))),
+            created_at=str(raw.get("created_at", datetime.now(timezone.utc).isoformat())),
+            status=SessionStatus(raw.get("status", SessionStatus.PENDING.value)),
+            stimulus=GroundingStimulus.from_dict(raw["stimulus"]) if raw.get("stimulus") else None,
+            interview_turns=list(raw.get("interview_turns", [])),
+            participant_id=raw.get("participant_id"),
+            pog_verified=bool(raw.get("pog_verified", False)),
+            pog_telemetry=raw.get("pog_telemetry"),
+            prism_snapshot_before=raw.get("prism_snapshot_before"),
+            prism_snapshot_after=raw.get("prism_snapshot_after"),
+            entropy_delta=raw.get("entropy_delta"),
+            geometric_health_before=raw.get("geometric_health_before"),
+            geometric_health_after=raw.get("geometric_health_after"),
+            viability_gates=dict(raw.get("viability_gates", {})),
+            settlement_result=raw.get("settlement_result"),
+            receipt_merkle_root=raw.get("receipt_merkle_root"),
+        )
+        return session
+
 
 @dataclass
 class ObservationWindow:
@@ -208,3 +272,15 @@ class ObservationWindow:
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
+
+    @classmethod
+    def from_dict(cls, raw: Dict[str, Any]) -> "ObservationWindow":
+        return cls(
+            window_id=str(raw.get("window_id", str(uuid.uuid4()))),
+            start_time=str(raw.get("start_time", "")),
+            end_time=str(raw.get("end_time", "")),
+            satellite_position_start=[float(v) for v in raw.get("satellite_position_start", [0.0, 0.0, 0.0])],
+            satellite_position_end=[float(v) for v in raw.get("satellite_position_end", [0.0, 0.0, 0.0])],
+            estimated_cloud_cover=float(raw["estimated_cloud_cover"]) if raw.get("estimated_cloud_cover") is not None else None,
+            region_description=str(raw.get("region_description", "")),
+        )

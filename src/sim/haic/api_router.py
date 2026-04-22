@@ -36,6 +36,7 @@ from .schemas import (
     StimulusType,
 )
 from .session_store import get_store
+from .stimulus_store import get_stimulus_store
 from .viability import evaluate_viability
 
 logger = logging.getLogger(__name__)
@@ -45,10 +46,6 @@ router = APIRouter(prefix="/haic", tags=["HAIC Convention"])
 # These are injected by api.py at startup
 _bridge: Optional[StimulusBridge] = None
 _prism: Optional[PRISMLoop] = None
-
-# In-memory stimulus cache (stimulus_id → GroundingStimulus)
-_stimuli: Dict[str, GroundingStimulus] = {}
-
 
 def init(bridge: StimulusBridge, prism_loop: Optional[PRISMLoop] = None) -> None:
     """Called by api.py to inject providers after startup."""
@@ -106,13 +103,13 @@ async def create_stimulus(req: StimulusRequest) -> Dict[str, Any]:
         logger.exception("Stimulus build failed")
         raise HTTPException(500, f"Stimulus build failed: {e}")
 
-    _stimuli[stimulus.stimulus_id] = stimulus
+    get_stimulus_store().put(stimulus)
     return _stimulus_response(stimulus)
 
 
 @router.get("/stimulus/{stimulus_id}", summary="Retrieve a previously built stimulus")
 async def get_stimulus(stimulus_id: str) -> Dict[str, Any]:
-    s = _stimuli.get(stimulus_id)
+    s = get_stimulus_store().get(stimulus_id)
     if s is None:
         raise HTTPException(404, "Stimulus not found")
     return _stimulus_response(s)
@@ -129,13 +126,13 @@ async def create_session(
     # Resolve stimulus
     stimulus: Optional[GroundingStimulus] = None
     if stimulus_id:
-        stimulus = _stimuli.get(stimulus_id)
+        stimulus = get_stimulus_store().get(stimulus_id)
         if stimulus is None:
             raise HTTPException(404, f"Stimulus {stimulus_id} not found")
     elif auto_stimulus and _bridge is not None:
         try:
             stimulus = _bridge.build_stimulus()
-            _stimuli[stimulus.stimulus_id] = stimulus
+            get_stimulus_store().put(stimulus)
         except Exception as e:
             logger.warning("Auto-stimulus failed: %s", e)
 
@@ -354,7 +351,7 @@ async def get_observation_windows(count: int = Query(default=5, ge=1, le=20)) ->
 
 @router.get("/stimulus/{stimulus_id}/image/{image_index}", summary="Serve a stimulus image as PNG")
 async def get_stimulus_image(stimulus_id: str, image_index: int) -> FastAPIResponse:
-    s = _stimuli.get(stimulus_id)
+    s = get_stimulus_store().get(stimulus_id)
     if s is None:
         raise HTTPException(404, "Stimulus not found")
     if image_index < 0 or image_index >= len(s.images):
