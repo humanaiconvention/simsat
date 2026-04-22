@@ -1,4 +1,4 @@
-import datetime
+﻿import datetime
 from time import time
 from pyorbital.orbital import Orbital, astronomy
 
@@ -108,7 +108,7 @@ class Simulator:
             signal=TOPIC_SATELLITE_GROUND_POSITION,
             sender=str(self),
             data={'lon': lon, 'lat': lat, 'alt': alt},
-            time=datetime.datetime.fromtimestamp(utcg_time).isoformat(),
+            time=datetime.datetime.fromtimestamp(utcg_time, tz=datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
             time_epsec=sim_time,
         )
 
