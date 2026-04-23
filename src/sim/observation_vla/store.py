@@ -23,8 +23,11 @@ class ObservationStore:
     def _load_payload(self) -> dict:
         if not self.path.exists():
             return {"schema_version": 1, "records": []}
-        with self.path.open("r", encoding="utf-8") as handle:
-            payload = json.load(handle)
+        try:
+            with self.path.open("r", encoding="utf-8") as handle:
+                payload = json.load(handle)
+        except (json.JSONDecodeError, OSError):
+            return {"schema_version": 1, "records": []}
         payload.setdefault("schema_version", 1)
         payload.setdefault("records", [])
         return payload
@@ -39,8 +42,11 @@ class ObservationStore:
     def _load_traces_payload(self) -> dict:
         if not self.traces_path.exists():
             return {"schema_version": 1, "traces": []}
-        with self.traces_path.open("r", encoding="utf-8") as handle:
-            payload = json.load(handle)
+        try:
+            with self.traces_path.open("r", encoding="utf-8") as handle:
+                payload = json.load(handle)
+        except (json.JSONDecodeError, OSError):
+            return {"schema_version": 1, "traces": []}
         payload.setdefault("schema_version", 1)
         payload.setdefault("traces", [])
         return payload
@@ -55,8 +61,11 @@ class ObservationStore:
     def _load_outcomes_payload(self) -> dict:
         if not self.outcomes_path.exists():
             return {"schema_version": 1, "outcomes": []}
-        with self.outcomes_path.open("r", encoding="utf-8") as handle:
-            payload = json.load(handle)
+        try:
+            with self.outcomes_path.open("r", encoding="utf-8") as handle:
+                payload = json.load(handle)
+        except (json.JSONDecodeError, OSError):
+            return {"schema_version": 1, "outcomes": []}
         payload.setdefault("schema_version", 1)
         payload.setdefault("outcomes", [])
         return payload
@@ -71,8 +80,11 @@ class ObservationStore:
     def _load_memory_payload(self) -> dict:
         if not self.memory_path.exists():
             return {"schema_version": 1, "states": []}
-        with self.memory_path.open("r", encoding="utf-8") as handle:
-            payload = json.load(handle)
+        try:
+            with self.memory_path.open("r", encoding="utf-8") as handle:
+                payload = json.load(handle)
+        except (json.JSONDecodeError, OSError):
+            return {"schema_version": 1, "states": []}
         payload.setdefault("schema_version", 1)
         payload.setdefault("states", [])
         return payload
@@ -80,8 +92,11 @@ class ObservationStore:
     def _load_submission_cases_payload(self) -> dict:
         if not self.submission_cases_path.exists():
             return {"schema_version": 1, "cases": []}
-        with self.submission_cases_path.open("r", encoding="utf-8") as handle:
-            payload = json.load(handle)
+        try:
+            with self.submission_cases_path.open("r", encoding="utf-8") as handle:
+                payload = json.load(handle)
+        except (json.JSONDecodeError, OSError):
+            return {"schema_version": 1, "cases": []}
         payload.setdefault("schema_version", 1)
         payload.setdefault("cases", [])
         return payload

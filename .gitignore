@@ -40,6 +40,7 @@ Thumbs.db
 node_modules/
 **/node_modules/
 .pytest_cache/
+.pytest_tmp/
 .mypy_cache/
 *.pyc
 weights/
