@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 import threading
+from contextlib import closing
 from pathlib import Path
 
 from .schemas import ObservationAssessmentRecord, ObservationMemoryState, ObservationOutcome, ObservationTraceRecord, SubmissionCasePin
@@ -17,286 +19,433 @@ class ObservationStore:
         self.outcomes_path = self.base_dir / "outcomes.json"
         self.memory_path = self.base_dir / "memory.json"
         self.submission_cases_path = self.base_dir / "submission_cases.json"
-        self._lock = threading.Lock()
+        self.sqlite_path = self.base_dir / "observation_vla.sqlite3"
+        self._lock = threading.RLock()
         self.base_dir.mkdir(parents=True, exist_ok=True)
+        self._ensure_schema()
+        self._maybe_import_legacy_json()
 
-    def _load_payload(self) -> dict:
-        if not self.path.exists():
-            return {"schema_version": 1, "records": []}
+    def _connect(self) -> sqlite3.Connection:
+        connection = sqlite3.connect(self.sqlite_path)
+        connection.row_factory = sqlite3.Row
+        return connection
+
+    def _ensure_schema(self) -> None:
+        with closing(self._connect()) as connection, connection:
+            connection.executescript(
+                """
+                PRAGMA journal_mode=WAL;
+                CREATE TABLE IF NOT EXISTS observation_assessments (
+                    assessment_id TEXT PRIMARY KEY,
+                    created_at TEXT NOT NULL,
+                    scenario_pack TEXT NOT NULL,
+                    target_id TEXT NOT NULL,
+                    raw_json TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS idx_observation_assessments_created_at
+                    ON observation_assessments(created_at DESC);
+                CREATE INDEX IF NOT EXISTS idx_observation_assessments_scenario_created
+                    ON observation_assessments(scenario_pack, created_at DESC);
+
+                CREATE TABLE IF NOT EXISTS observation_traces (
+                    trace_id TEXT PRIMARY KEY,
+                    created_at TEXT NOT NULL,
+                    scenario_pack TEXT NOT NULL,
+                    target_id TEXT NOT NULL,
+                    decision_id TEXT NOT NULL,
+                    outcome_id TEXT,
+                    runtime_mode TEXT NOT NULL,
+                    recommended_action TEXT NOT NULL,
+                    raw_json TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS idx_observation_traces_created_at
+                    ON observation_traces(created_at DESC);
+                CREATE INDEX IF NOT EXISTS idx_observation_traces_scenario_created
+                    ON observation_traces(scenario_pack, created_at DESC);
+                CREATE INDEX IF NOT EXISTS idx_observation_traces_target_created
+                    ON observation_traces(target_id, created_at DESC);
+                CREATE INDEX IF NOT EXISTS idx_observation_traces_decision_id
+                    ON observation_traces(decision_id);
+                CREATE INDEX IF NOT EXISTS idx_observation_traces_runtime_mode
+                    ON observation_traces(runtime_mode, created_at DESC);
+
+                CREATE TABLE IF NOT EXISTS observation_outcomes (
+                    outcome_id TEXT PRIMARY KEY,
+                    registered_at TEXT NOT NULL,
+                    trace_id TEXT NOT NULL,
+                    assessment_id TEXT NOT NULL,
+                    decision_id TEXT NOT NULL,
+                    mission_id TEXT NOT NULL,
+                    label_source TEXT NOT NULL,
+                    reviewer TEXT,
+                    review_status TEXT NOT NULL,
+                    is_current INTEGER NOT NULL,
+                    raw_json TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS idx_observation_outcomes_registered_at
+                    ON observation_outcomes(registered_at DESC);
+                CREATE INDEX IF NOT EXISTS idx_observation_outcomes_trace_current
+                    ON observation_outcomes(trace_id, is_current, registered_at DESC);
+                CREATE INDEX IF NOT EXISTS idx_observation_outcomes_label_current
+                    ON observation_outcomes(label_source, is_current, registered_at DESC);
+                CREATE INDEX IF NOT EXISTS idx_observation_outcomes_review_status
+                    ON observation_outcomes(review_status, registered_at DESC);
+
+                CREATE TABLE IF NOT EXISTS observation_memory_states (
+                    state_id TEXT PRIMARY KEY,
+                    scope TEXT NOT NULL,
+                    scope_id TEXT NOT NULL,
+                    last_updated TEXT NOT NULL,
+                    raw_json TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS idx_observation_memory_scope_updated
+                    ON observation_memory_states(scope, last_updated DESC);
+
+                CREATE TABLE IF NOT EXISTS observation_submission_cases (
+                    scenario_pack TEXT PRIMARY KEY,
+                    trace_id TEXT NOT NULL,
+                    pinned_at TEXT NOT NULL,
+                    target_id TEXT NOT NULL,
+                    target_label TEXT NOT NULL,
+                    outcome_id TEXT NOT NULL,
+                    raw_json TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS idx_observation_submission_cases_pinned_at
+                    ON observation_submission_cases(pinned_at DESC);
+                """
+            )
+
+    def _safe_load_json(self, path: Path, key: str) -> list[dict]:
+        if not path.exists():
+            return []
         try:
-            with self.path.open("r", encoding="utf-8") as handle:
-                payload = json.load(handle)
+            payload = json.loads(path.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, OSError):
-            return {"schema_version": 1, "records": []}
-        payload.setdefault("schema_version", 1)
-        payload.setdefault("records", [])
-        return payload
+            return []
+        items = payload.get(key, []) if isinstance(payload, dict) else []
+        return list(items) if isinstance(items, list) else []
 
-    def _write_payload(self, payload: dict) -> None:
-        self.base_dir.mkdir(parents=True, exist_ok=True)
-        tmp_path = self.path.with_suffix(f"{self.path.suffix}.tmp")
-        with tmp_path.open("w", encoding="utf-8") as handle:
-            json.dump(payload, handle, indent=2)
-        tmp_path.replace(self.path)
+    def _table_has_rows(self, table: str) -> bool:
+        with closing(self._connect()) as connection, connection:
+            row = connection.execute(f"SELECT 1 FROM {table} LIMIT 1").fetchone()
+        return row is not None
 
-    def _load_traces_payload(self) -> dict:
-        if not self.traces_path.exists():
-            return {"schema_version": 1, "traces": []}
-        try:
-            with self.traces_path.open("r", encoding="utf-8") as handle:
-                payload = json.load(handle)
-        except (json.JSONDecodeError, OSError):
-            return {"schema_version": 1, "traces": []}
-        payload.setdefault("schema_version", 1)
-        payload.setdefault("traces", [])
-        return payload
-
-    def _write_traces_payload(self, payload: dict) -> None:
-        self.base_dir.mkdir(parents=True, exist_ok=True)
-        tmp_path = self.traces_path.with_suffix(f"{self.traces_path.suffix}.tmp")
-        with tmp_path.open("w", encoding="utf-8") as handle:
-            json.dump(payload, handle, indent=2)
-        tmp_path.replace(self.traces_path)
-
-    def _load_outcomes_payload(self) -> dict:
-        if not self.outcomes_path.exists():
-            return {"schema_version": 1, "outcomes": []}
-        try:
-            with self.outcomes_path.open("r", encoding="utf-8") as handle:
-                payload = json.load(handle)
-        except (json.JSONDecodeError, OSError):
-            return {"schema_version": 1, "outcomes": []}
-        payload.setdefault("schema_version", 1)
-        payload.setdefault("outcomes", [])
-        return payload
-
-    def _write_outcomes_payload(self, payload: dict) -> None:
-        self.base_dir.mkdir(parents=True, exist_ok=True)
-        tmp_path = self.outcomes_path.with_suffix(f"{self.outcomes_path.suffix}.tmp")
-        with tmp_path.open("w", encoding="utf-8") as handle:
-            json.dump(payload, handle, indent=2)
-        tmp_path.replace(self.outcomes_path)
-
-    def _load_memory_payload(self) -> dict:
-        if not self.memory_path.exists():
-            return {"schema_version": 1, "states": []}
-        try:
-            with self.memory_path.open("r", encoding="utf-8") as handle:
-                payload = json.load(handle)
-        except (json.JSONDecodeError, OSError):
-            return {"schema_version": 1, "states": []}
-        payload.setdefault("schema_version", 1)
-        payload.setdefault("states", [])
-        return payload
-
-    def _load_submission_cases_payload(self) -> dict:
-        if not self.submission_cases_path.exists():
-            return {"schema_version": 1, "cases": []}
-        try:
-            with self.submission_cases_path.open("r", encoding="utf-8") as handle:
-                payload = json.load(handle)
-        except (json.JSONDecodeError, OSError):
-            return {"schema_version": 1, "cases": []}
-        payload.setdefault("schema_version", 1)
-        payload.setdefault("cases", [])
-        return payload
-
-    def _write_memory_payload(self, payload: dict) -> None:
-        self.base_dir.mkdir(parents=True, exist_ok=True)
-        tmp_path = self.memory_path.with_suffix(f"{self.memory_path.suffix}.tmp")
-        with tmp_path.open("w", encoding="utf-8") as handle:
-            json.dump(payload, handle, indent=2)
-        tmp_path.replace(self.memory_path)
-
-    def _write_submission_cases_payload(self, payload: dict) -> None:
-        self.base_dir.mkdir(parents=True, exist_ok=True)
-        tmp_path = self.submission_cases_path.with_suffix(f"{self.submission_cases_path.suffix}.tmp")
-        with tmp_path.open("w", encoding="utf-8") as handle:
-            json.dump(payload, handle, indent=2)
-        tmp_path.replace(self.submission_cases_path)
+    def _maybe_import_legacy_json(self) -> None:
+        with self._lock:
+            if not self._table_has_rows("observation_assessments"):
+                for raw in self._safe_load_json(self.path, "records"):
+                    record = ObservationAssessmentRecord.from_dict(raw)
+                    self.save_record(record)
+            if not self._table_has_rows("observation_traces"):
+                for raw in self._safe_load_json(self.traces_path, "traces"):
+                    trace = ObservationTraceRecord.from_dict(raw)
+                    self.save_trace(trace)
+            if not self._table_has_rows("observation_outcomes"):
+                for raw in self._safe_load_json(self.outcomes_path, "outcomes"):
+                    outcome = ObservationOutcome.from_dict(raw)
+                    self.save_outcome(outcome)
+            if not self._table_has_rows("observation_memory_states"):
+                states = [ObservationMemoryState.from_dict(raw) for raw in self._safe_load_json(self.memory_path, "states")]
+                if states:
+                    self.replace_memory_states(states)
+            if not self._table_has_rows("observation_submission_cases"):
+                for raw in self._safe_load_json(self.submission_cases_path, "cases"):
+                    pin = SubmissionCasePin.from_dict(raw)
+                    self.save_submission_case(pin)
 
     def save_record(self, record: ObservationAssessmentRecord) -> ObservationAssessmentRecord:
-        with self._lock:
-            payload = self._load_payload()
-            records = payload.get("records", [])
-            updated = False
-            for idx, raw in enumerate(records):
-                if raw.get("assessment", {}).get("assessment_id") == record.assessment.assessment_id:
-                    records[idx] = record.to_dict()
-                    updated = True
-                    break
-            if not updated:
-                records.append(record.to_dict())
-            payload["records"] = records
-            self._write_payload(payload)
+        with self._lock, closing(self._connect()) as connection, connection:
+            connection.execute(
+                """
+                INSERT OR REPLACE INTO observation_assessments(
+                    assessment_id,
+                    created_at,
+                    scenario_pack,
+                    target_id,
+                    raw_json
+                )
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    record.assessment.assessment_id,
+                    record.assessment.created_at,
+                    record.sample.scenario_pack,
+                    record.sample.target_id,
+                    json.dumps(record.to_dict()),
+                ),
+            )
         return record
 
     def get_record(self, assessment_id: str) -> ObservationAssessmentRecord | None:
-        with self._lock:
-            payload = self._load_payload()
-        for raw in payload.get("records", []):
-            if raw.get("assessment", {}).get("assessment_id") == assessment_id:
-                return ObservationAssessmentRecord.from_dict(raw)
-        return None
+        with self._lock, closing(self._connect()) as connection, connection:
+            row = connection.execute(
+                "SELECT raw_json FROM observation_assessments WHERE assessment_id = ?",
+                (assessment_id,),
+            ).fetchone()
+        if row is None:
+            return None
+        return ObservationAssessmentRecord.from_dict(json.loads(str(row["raw_json"])))
 
-    def list_records(self, limit: int = 50) -> list[ObservationAssessmentRecord]:
-        with self._lock:
-            payload = self._load_payload()
-        records = [ObservationAssessmentRecord.from_dict(raw) for raw in payload.get("records", [])]
-        records.sort(key=lambda record: record.assessment.created_at, reverse=True)
-        return records[:limit]
+    def list_records(self, limit: int = 50, scenario_pack: str | None = None) -> list[ObservationAssessmentRecord]:
+        query = "SELECT raw_json FROM observation_assessments"
+        params: list[object] = []
+        if scenario_pack not in {None, "", "all"}:
+            query += " WHERE scenario_pack = ?"
+            params.append(scenario_pack)
+        query += " ORDER BY created_at DESC, assessment_id DESC LIMIT ?"
+        params.append(limit)
+        with self._lock, closing(self._connect()) as connection, connection:
+            rows = connection.execute(query, tuple(params)).fetchall()
+        return [ObservationAssessmentRecord.from_dict(json.loads(str(row["raw_json"]))) for row in rows]
 
     def save_trace(self, trace: ObservationTraceRecord) -> ObservationTraceRecord:
-        with self._lock:
-            payload = self._load_traces_payload()
-            traces = payload.get("traces", [])
-            updated = False
-            for idx, raw in enumerate(traces):
-                if raw.get("trace_id") == trace.trace_id:
-                    traces[idx] = trace.to_dict()
-                    updated = True
-                    break
-            if not updated:
-                traces.append(trace.to_dict())
-            payload["traces"] = traces
-            self._write_traces_payload(payload)
+        with self._lock, closing(self._connect()) as connection, connection:
+            connection.execute(
+                """
+                INSERT OR REPLACE INTO observation_traces(
+                    trace_id,
+                    created_at,
+                    scenario_pack,
+                    target_id,
+                    decision_id,
+                    outcome_id,
+                    runtime_mode,
+                    recommended_action,
+                    raw_json
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    trace.trace_id,
+                    trace.created_at,
+                    trace.scenario_pack,
+                    trace.target_id,
+                    trace.decision_id,
+                    trace.outcome_id,
+                    trace.assessment.runtime_mode,
+                    trace.assessment.recommended_action,
+                    json.dumps(trace.to_dict()),
+                ),
+            )
         return trace
 
-    def list_traces(self, limit: int = 50) -> list[ObservationTraceRecord]:
-        with self._lock:
-            payload = self._load_traces_payload()
-        traces = [ObservationTraceRecord.from_dict(raw) for raw in payload.get("traces", [])]
-        traces.sort(key=lambda trace: trace.created_at, reverse=True)
-        return traces[:limit]
+    def list_traces(self, limit: int = 50, scenario_pack: str | None = None) -> list[ObservationTraceRecord]:
+        query = "SELECT raw_json FROM observation_traces"
+        params: list[object] = []
+        if scenario_pack not in {None, "", "all"}:
+            query += " WHERE scenario_pack = ?"
+            params.append(scenario_pack)
+        query += " ORDER BY created_at DESC, trace_id DESC LIMIT ?"
+        params.append(limit)
+        with self._lock, closing(self._connect()) as connection, connection:
+            rows = connection.execute(query, tuple(params)).fetchall()
+        return [ObservationTraceRecord.from_dict(json.loads(str(row["raw_json"]))) for row in rows]
 
     def get_trace(self, trace_id: str) -> ObservationTraceRecord | None:
-        with self._lock:
-            payload = self._load_traces_payload()
-        for raw in payload.get("traces", []):
-            if raw.get("trace_id") == trace_id:
-                return ObservationTraceRecord.from_dict(raw)
-        return None
+        with self._lock, closing(self._connect()) as connection, connection:
+            row = connection.execute(
+                "SELECT raw_json FROM observation_traces WHERE trace_id = ?",
+                (trace_id,),
+            ).fetchone()
+        if row is None:
+            return None
+        return ObservationTraceRecord.from_dict(json.loads(str(row["raw_json"])))
 
     def save_outcome(self, outcome: ObservationOutcome) -> ObservationOutcome:
-        with self._lock:
-            payload = self._load_outcomes_payload()
-            outcomes = payload.get("outcomes", [])
-            updated = False
-            for idx, raw in enumerate(outcomes):
-                if raw.get("outcome_id") == outcome.outcome_id:
-                    outcomes[idx] = outcome.to_dict()
-                    updated = True
-                    break
-            if not updated:
-                outcomes.append(outcome.to_dict())
-            payload["outcomes"] = outcomes
-            self._write_outcomes_payload(payload)
+        with self._lock, closing(self._connect()) as connection, connection:
+            connection.execute(
+                """
+                INSERT OR REPLACE INTO observation_outcomes(
+                    outcome_id,
+                    registered_at,
+                    trace_id,
+                    assessment_id,
+                    decision_id,
+                    mission_id,
+                    label_source,
+                    reviewer,
+                    review_status,
+                    is_current,
+                    raw_json
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    outcome.outcome_id,
+                    outcome.registered_at,
+                    outcome.trace_id,
+                    outcome.assessment_id,
+                    outcome.decision_id,
+                    outcome.mission_id,
+                    outcome.label_source,
+                    outcome.reviewer,
+                    outcome.review_status,
+                    1 if outcome.is_current else 0,
+                    json.dumps(outcome.to_dict()),
+                ),
+            )
         return outcome
 
-    def list_outcomes(self, limit: int = 50, current_only: bool = True) -> list[ObservationOutcome]:
-        with self._lock:
-            payload = self._load_outcomes_payload()
-        outcomes = [ObservationOutcome.from_dict(raw) for raw in payload.get("outcomes", [])]
+    def list_outcomes(
+        self,
+        limit: int = 50,
+        current_only: bool = True,
+        scenario_pack: str | None = None,
+    ) -> list[ObservationOutcome]:
+        query = """
+            SELECT o.raw_json
+            FROM observation_outcomes o
+            LEFT JOIN observation_traces t ON t.trace_id = o.trace_id
+        """
+        clauses: list[str] = []
+        params: list[object] = []
         if current_only:
-            outcomes = [outcome for outcome in outcomes if outcome.is_current]
-        outcomes.sort(key=lambda outcome: outcome.registered_at, reverse=True)
-        return outcomes[:limit]
+            clauses.append("o.is_current = 1")
+        if scenario_pack not in {None, "", "all"}:
+            clauses.append("t.scenario_pack = ?")
+            params.append(scenario_pack)
+        if clauses:
+            query += " WHERE " + " AND ".join(clauses)
+        query += " ORDER BY o.registered_at DESC, o.outcome_id DESC LIMIT ?"
+        params.append(limit)
+        with self._lock, closing(self._connect()) as connection, connection:
+            rows = connection.execute(query, tuple(params)).fetchall()
+        return [ObservationOutcome.from_dict(json.loads(str(row["raw_json"]))) for row in rows]
 
     def get_outcome(self, outcome_id: str) -> ObservationOutcome | None:
-        with self._lock:
-            payload = self._load_outcomes_payload()
-        for raw in payload.get("outcomes", []):
-            if raw.get("outcome_id") == outcome_id:
-                return ObservationOutcome.from_dict(raw)
-        return None
+        with self._lock, closing(self._connect()) as connection, connection:
+            row = connection.execute(
+                "SELECT raw_json FROM observation_outcomes WHERE outcome_id = ?",
+                (outcome_id,),
+            ).fetchone()
+        if row is None:
+            return None
+        return ObservationOutcome.from_dict(json.loads(str(row["raw_json"])))
 
     def get_outcome_for_trace(self, trace_id: str) -> ObservationOutcome | None:
-        with self._lock:
-            payload = self._load_outcomes_payload()
-        matches = [
-            ObservationOutcome.from_dict(raw)
-            for raw in payload.get("outcomes", [])
-            if raw.get("trace_id") == trace_id and raw.get("is_current", True)
-        ]
-        if not matches:
-            matches = [
-                ObservationOutcome.from_dict(raw)
-                for raw in payload.get("outcomes", [])
-                if raw.get("trace_id") == trace_id
-            ]
-            if not matches:
-                return None
-        matches.sort(key=lambda outcome: outcome.registered_at, reverse=True)
-        return matches[0]
+        with self._lock, closing(self._connect()) as connection, connection:
+            row = connection.execute(
+                """
+                SELECT raw_json
+                FROM observation_outcomes
+                WHERE trace_id = ?
+                ORDER BY is_current DESC, registered_at DESC, outcome_id DESC
+                LIMIT 1
+                """,
+                (trace_id,),
+            ).fetchone()
+        if row is None:
+            return None
+        return ObservationOutcome.from_dict(json.loads(str(row["raw_json"])))
 
     def replace_memory_states(self, states: list[ObservationMemoryState]) -> None:
-        with self._lock:
-            payload = {
-                "schema_version": 1,
-                "states": [state.to_dict() for state in states],
-            }
-            self._write_memory_payload(payload)
+        with self._lock, closing(self._connect()) as connection, connection:
+            connection.execute("DELETE FROM observation_memory_states")
+            connection.executemany(
+                """
+                INSERT INTO observation_memory_states(state_id, scope, scope_id, last_updated, raw_json)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                [
+                    (
+                        state.state_id,
+                        state.scope,
+                        state.scope_id,
+                        state.last_updated,
+                        json.dumps(state.to_dict()),
+                    )
+                    for state in states
+                ],
+            )
 
     def save_memory_state(self, state: ObservationMemoryState) -> ObservationMemoryState:
-        with self._lock:
-            payload = self._load_memory_payload()
-            states = payload.get("states", [])
-            updated = False
-            for idx, raw in enumerate(states):
-                if raw.get("state_id") == state.state_id:
-                    states[idx] = state.to_dict()
-                    updated = True
-                    break
-            if not updated:
-                states.append(state.to_dict())
-            payload["states"] = states
-            self._write_memory_payload(payload)
+        with self._lock, closing(self._connect()) as connection, connection:
+            connection.execute(
+                """
+                INSERT OR REPLACE INTO observation_memory_states(state_id, scope, scope_id, last_updated, raw_json)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    state.state_id,
+                    state.scope,
+                    state.scope_id,
+                    state.last_updated,
+                    json.dumps(state.to_dict()),
+                ),
+            )
         return state
 
     def get_memory_state(self, scope: str, scope_id: str) -> ObservationMemoryState | None:
-        with self._lock:
-            payload = self._load_memory_payload()
-        for raw in payload.get("states", []):
-            if raw.get("scope") == scope and raw.get("scope_id") == scope_id:
-                return ObservationMemoryState.from_dict(raw)
-        return None
+        with self._lock, closing(self._connect()) as connection, connection:
+            row = connection.execute(
+                """
+                SELECT raw_json
+                FROM observation_memory_states
+                WHERE scope = ? AND scope_id = ?
+                LIMIT 1
+                """,
+                (scope, scope_id),
+            ).fetchone()
+        if row is None:
+            return None
+        return ObservationMemoryState.from_dict(json.loads(str(row["raw_json"])))
 
     def list_memory_states(self, scope: str | None = None, limit: int = 50) -> list[ObservationMemoryState]:
-        with self._lock:
-            payload = self._load_memory_payload()
-        states = [ObservationMemoryState.from_dict(raw) for raw in payload.get("states", [])]
+        query = "SELECT raw_json FROM observation_memory_states"
+        params: list[object] = []
         if scope:
-            states = [state for state in states if state.scope == scope]
-        states.sort(key=lambda state: state.last_updated, reverse=True)
-        return states[:limit]
+            query += " WHERE scope = ?"
+            params.append(scope)
+        query += " ORDER BY last_updated DESC, state_id DESC LIMIT ?"
+        params.append(limit)
+        with self._lock, closing(self._connect()) as connection, connection:
+            rows = connection.execute(query, tuple(params)).fetchall()
+        return [ObservationMemoryState.from_dict(json.loads(str(row["raw_json"]))) for row in rows]
 
     def save_submission_case(self, pin: SubmissionCasePin) -> SubmissionCasePin:
-        with self._lock:
-            payload = self._load_submission_cases_payload()
-            cases = payload.get("cases", [])
-            updated = False
-            for idx, raw in enumerate(cases):
-                if raw.get("scenario_pack") == pin.scenario_pack:
-                    cases[idx] = pin.to_dict()
-                    updated = True
-                    break
-            if not updated:
-                cases.append(pin.to_dict())
-            payload["cases"] = cases
-            self._write_submission_cases_payload(payload)
+        with self._lock, closing(self._connect()) as connection, connection:
+            connection.execute(
+                """
+                INSERT OR REPLACE INTO observation_submission_cases(
+                    scenario_pack,
+                    trace_id,
+                    pinned_at,
+                    target_id,
+                    target_label,
+                    outcome_id,
+                    raw_json
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    pin.scenario_pack,
+                    pin.trace_id,
+                    pin.pinned_at,
+                    pin.target_id,
+                    pin.target_label,
+                    pin.outcome_id,
+                    json.dumps(pin.to_dict()),
+                ),
+            )
         return pin
 
     def get_submission_case(self, scenario_pack: str) -> SubmissionCasePin | None:
-        with self._lock:
-            payload = self._load_submission_cases_payload()
-        for raw in payload.get("cases", []):
-            if raw.get("scenario_pack") == scenario_pack:
-                return SubmissionCasePin.from_dict(raw)
-        return None
+        with self._lock, closing(self._connect()) as connection, connection:
+            row = connection.execute(
+                "SELECT raw_json FROM observation_submission_cases WHERE scenario_pack = ?",
+                (scenario_pack,),
+            ).fetchone()
+        if row is None:
+            return None
+        return SubmissionCasePin.from_dict(json.loads(str(row["raw_json"])))
 
     def list_submission_cases(self) -> list[SubmissionCasePin]:
-        with self._lock:
-            payload = self._load_submission_cases_payload()
-        cases = [SubmissionCasePin.from_dict(raw) for raw in payload.get("cases", [])]
-        cases.sort(key=lambda pin: pin.pinned_at, reverse=True)
-        return cases
+        with self._lock, closing(self._connect()) as connection, connection:
+            rows = connection.execute(
+                """
+                SELECT raw_json
+                FROM observation_submission_cases
+                ORDER BY pinned_at DESC, scenario_pack DESC
+                """
+            ).fetchall()
+        return [SubmissionCasePin.from_dict(json.loads(str(row["raw_json"]))) for row in rows]

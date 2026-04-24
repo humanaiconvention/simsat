@@ -211,6 +211,15 @@ async def list_memory(
     return {"states": [state.to_dict() for state in states], "total": len(states)}
 
 
+@router.get("/vla-weights")
+async def get_vla_weights() -> dict[str, Any]:
+    service = _require_service()
+    adapter = getattr(service, "adapter", None)
+    if adapter is None or not hasattr(adapter, "get_ttt_snapshot"):
+        return {"error": "VLA adapter does not support TTT weight inspection"}
+    return adapter.get_ttt_snapshot()
+
+
 @router.get("/dataset")
 async def export_dataset(
     limit: int = Query(default=100, ge=1, le=1000),

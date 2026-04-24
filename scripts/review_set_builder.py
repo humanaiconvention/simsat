@@ -90,9 +90,21 @@ def _sample_image_key(trace: dict) -> str:
     )
 
 
+_STUB_RUNTIME_MODES = frozenset({"stub", "stub_fallback"})
+
+
 def _is_model_backed(trace: dict) -> bool:
+    """Return True if the trace was assessed by a real (non-stub) VLA backend.
+
+    Mirrors the runtime_mode gate in ObservationVLAService.is_image_backed_assessment()
+    so that any backend accepted by assess_materialized_decision() also passes here.
+    Previously this checked for "clip_local" only, causing quality_skips to
+    accumulate whenever a non-clip_local real backend (http_endpoint,
+    transformers_vlm_local, gemma4_haic_local) was active.
+    """
     assessment = trace.get("assessment") or {}
-    return str(assessment.get("runtime_mode") or "") == "clip_local"
+    runtime_mode = str(assessment.get("runtime_mode") or "")
+    return bool(runtime_mode) and runtime_mode not in _STUB_RUNTIME_MODES
 
 
 @dataclass

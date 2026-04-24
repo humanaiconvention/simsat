@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+"""
+Build notebook.ipynb from simsat_gemma4_v1_training.py.
+
+Splits on CELL banners (# ====... / # CELL N: ... / # ====...).
+Prepends the environment/install cell as cell 0.
+Writes notebook.ipynb ready for `kaggle kernels push`.
+
+Usage:
+    python build_notebook.py
+"""
+from __future__ import annotations
+
+import json
+import re
+from pathlib import Path
+
+SRC = Path(__file__).parent / "simsat_gemma4_v1_training.py"
+OUT = Path(__file__).parent / "notebook.ipynb"
+
+src = SRC.read_text(encoding="utf-8")
+
+# Strip shebang + module docstring
+src = re.sub(r"^#!.*?\n", "", src)
+src = re.sub(r'^"""[\s\S]*?"""\n', "", src, count=1)
+
+# ── Validation checks (print on build so CI can spot regressions) ───────────
+checks = {
+    "CUDA_VISIBLE_DEVICES=0": "CUDA_VISIBLE_DEVICES" in src,
+    "float16 compute dtype": "bnb_4bit_compute_dtype=torch.float16" in src,
+    "no bfloat16 in code": "bfloat16" not in re.sub(r"#[^\n]*", "", src),
+    "fp16=False": "fp16=False" in src,
+    "inner .linear targets": '"q_proj.linear"' in src,
+    "processing_class=": "processing_class=tokenizer" in src,
+    "no tokenizer= kwarg": "tokenizer=tokenizer" not in src,
+    "no Unsloth import": "from unsloth" not in src.lower(),
+    "SFTConfig (not TrainingArguments)": "SFTConfig" in src,
+    "adamw_torch": '"adamw_torch"' in src,
+}
+print("Build checks:")
+all_pass = True
+for label, ok in checks.items():
+    icon = "✓" if ok else "✗ FAIL"
+    if not ok:
+        all_pass = False
+    print(f"  {icon}  {label}")
+
+if not all_pass:
+    raise SystemExit("Build validation failed — fix issues above before pushing.")
+
+# ── Split into cells on CELL banners ────────────────────────────────────────
+cell_pat = re.compile(r"# =+\n# CELL \d+:[^\n]*\n# =+\n", re.MULTILINE)
+parts = [p.strip() for p in cell_pat.split(src) if p.strip()]
+
+cells = [
+    {
+        "cell_type": "markdown",
+        "metadata": {},
+        "source": [
+            "# SimSat Gemma-4-E2B v1 — Kaggle T4\n",
+            "\n",
+            "QLoRA fine-tune on SimSat satellite encounter-assessment data.\n",
+            "\n",
+            "**Stack:** raw transformers + bitsandbytes NF4 4-bit + PEFT LoRA r=64 + "
+            "TRL SFTTrainer · `google/gemma-4-E2B-it` · single T4 (CUDA_VISIBLE_DEVICES=0)\n",
+            "\n",
+            "All 10 hard-won T4 fixes from GEMMA4_KAGGLE_NOTES.md applied.\n",
+            "\n",
+            "**Expected runtime:** ~30–45 min training + ~5 min eval\n",
+        ],
+    },
+]
+
+for part in parts:
+    cells.append({
+        "cell_type": "code",
+        "execution_count": None,
+        "metadata": {},
+        "outputs": [],
+        "source": part.splitlines(keepends=True),
+    })
+
+nb = {
+    "cells": cells,
+    "metadata": {
+        "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
+        "language_info": {"name": "python"},
+    },
+    "nbformat": 4,
+    "nbformat_minor": 4,
+}
+
+OUT.write_text(json.dumps(nb, indent=1), encoding="utf-8")
+print(f"\nWrote {OUT} ({len(cells)} cells, {OUT.stat().st_size:,} bytes)")

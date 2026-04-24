@@ -89,7 +89,7 @@ class Gemma4HAICAdapter:
         max_new_tokens: int = 256,
     ) -> None:
         self.mode = (mode or os.environ.get("HAIC_GEMMA4_MODE") or "lora").strip().lower()
-        self.base_model = base_model or os.environ.get("HAIC_GEMMA4_BASE_MODEL") or "google/gemma-2-2b-it"
+        self.base_model = base_model or os.environ.get("HAIC_GEMMA4_BASE_MODEL") or "google/gemma-4-e2b-it"
         self.lora_path = lora_path or os.environ.get("HAIC_GEMMA4_LORA_PATH") or str(_weights_base_dir() / "adapter")
         self.merged_path = merged_path or os.environ.get("HAIC_GEMMA4_MERGED_PATH") or str(_weights_base_dir() / "base")
         self.gguf_path = gguf_path or os.environ.get("HAIC_GEMMA4_GGUF_PATH") or str(_weights_base_dir() / "gguf" / "1.F16.gguf")

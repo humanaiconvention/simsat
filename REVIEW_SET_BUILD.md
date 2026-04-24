@@ -1,16 +1,30 @@
 # SimSat Review Set Build
 
-- Base start times: `2026-04-10T00:00:00Z, 2026-04-11T00:00:00Z, 2026-02-15T00:00:00Z, 2026-05-15T00:00:00Z`
-- Sweep direction: `both`
+- Base start times: `2026-04-10T00:00:00Z`
+- Sweep direction: `backward`
 - Quota mode: `model_backed`
-- Target filter: `houston_ship, sf_bay, suez`
-- Sweep count: `60`
-- Sweep times: `2026-06-05T00:00:00Z, 2026-06-02T00:00:00Z, 2026-05-30T00:00:00Z, 2026-05-27T00:00:00Z, 2026-05-24T00:00:00Z, 2026-05-21T00:00:00Z, 2026-05-18T00:00:00Z, 2026-05-15T00:00:00Z, 2026-05-12T00:00:00Z, 2026-05-09T00:00:00Z, 2026-05-06T00:00:00Z, 2026-05-03T00:00:00Z, 2026-05-02T00:00:00Z, 2026-05-01T00:00:00Z, 2026-04-30T00:00:00Z, 2026-04-29T00:00:00Z, 2026-04-28T00:00:00Z, 2026-04-27T00:00:00Z, 2026-04-26T00:00:00Z, 2026-04-25T00:00:00Z, 2026-04-24T00:00:00Z, 2026-04-23T00:00:00Z, 2026-04-22T00:00:00Z, 2026-04-20T00:00:00Z, 2026-04-19T00:00:00Z, 2026-04-17T00:00:00Z, 2026-04-16T00:00:00Z, 2026-04-14T00:00:00Z, 2026-04-13T00:00:00Z, 2026-04-11T00:00:00Z, 2026-04-10T00:00:00Z, 2026-04-08T00:00:00Z, 2026-04-07T00:00:00Z, 2026-04-05T00:00:00Z, 2026-04-04T00:00:00Z, 2026-04-02T00:00:00Z, 2026-04-01T00:00:00Z, 2026-03-30T00:00:00Z, 2026-03-29T00:00:00Z, 2026-03-27T00:00:00Z, 2026-03-26T00:00:00Z, 2026-03-24T00:00:00Z, 2026-03-23T00:00:00Z, 2026-03-21T00:00:00Z, 2026-03-20T00:00:00Z, 2026-03-08T00:00:00Z, 2026-03-05T00:00:00Z, 2026-03-02T00:00:00Z, 2026-02-27T00:00:00Z, 2026-02-24T00:00:00Z, 2026-02-21T00:00:00Z, 2026-02-18T00:00:00Z, 2026-02-15T00:00:00Z, 2026-02-12T00:00:00Z, 2026-02-09T00:00:00Z, 2026-02-06T00:00:00Z, 2026-02-03T00:00:00Z, 2026-01-31T00:00:00Z, 2026-01-28T00:00:00Z, 2026-01-25T00:00:00Z`
-- Target quota: `4`
-- Queue limit per scenario: `16`
+- Target filter: `all`
+- Sweep count: `1`
+- Sweep times: `2026-04-10T00:00:00Z`
+- Target quota: `3`
+- Max quality skips per target: `12`
+- Queue limit per scenario: `8`
 
 | scenario | target | existing_distinct | added_distinct | total_distinct | duplicate_skips | quality_skips |
 | --- | --- | --- | --- | --- | --- | --- |
-| disaster_response_weather | Houston Ship Channel | 2 | 0 | 2 | 0 | 60 |
-| maritime_chokepoints | Suez Canal | 1 | 0 | 1 | 0 | 60 |
-| urban_coastal_ambiguity | San Francisco Bay | 1 | 0 | 1 | 0 | 60 |
+| disaster_response_weather | Houston Ship Channel | 2 | 0 | 2 | 0 | 0 |
+| disaster_response_weather | Fort Myers Coast | 5 | 0 | 5 | 0 | 0 |
+| disaster_response_weather | New Orleans Delta | 5 | 0 | 5 | 0 | 0 |
+| maritime_chokepoints | Suez Canal | 1 | 0 | 1 | 0 | 0 |
+| maritime_chokepoints | Port of Singapore | 5 | 0 | 5 | 0 | 0 |
+| maritime_chokepoints | Panama Canal | 5 | 0 | 5 | 0 | 0 |
+| urban_coastal_ambiguity | San Francisco Bay | 1 | 0 | 1 | 0 | 0 |
+| urban_coastal_ambiguity | Port of Los Angeles | 5 | 0 | 5 | 0 | 0 |
+| urban_coastal_ambiguity | Port of Rotterdam | 5 | 0 | 5 | 0 | 0 |
+| urban_coastal_ambiguity | Shenzhen Bay | 5 | 0 | 5 | 0 | 0 |
+
+## Assess Errors
+
+- urban_coastal_ambiguity/sf_bay @ 2026-04-10T00:00:00Z: /encounter/decision/dec_0db847f10ef94705ae428394ae6bd81f/assess failed with 503: {"detail":"Observation VLA fell back to stub_fallback; refusing to persist a low-value fallback trace"}
+- disaster_response_weather/houston_ship @ 2026-04-10T00:00:00Z: /encounter/decision/dec_539ee054c3924bd88fe3b4b0c3b35e20/assess failed with 503: {"detail":"Observation VLA fell back to stub_fallback; refusing to persist a low-value fallback trace"}
+- maritime_chokepoints/suez @ 2026-04-10T00:00:00Z: /encounter/decision/dec_34c7f7bff4f344b8b184f2b418342346/assess failed with 503: {"detail":"Observation VLA fell back to stub_fallback; refusing to persist a low-value fallback trace"}

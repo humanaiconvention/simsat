@@ -229,9 +229,9 @@ The full in-repo code review from 2026-04-21 is preserved under `review/`:
 - `review/2026-04-21-phase-4/` — This submission-doc refresh, TTT + viability thesis lock-in, and frontend brand-hide patch.
 
 Known open gaps at submission time (disclosed, not hidden):
-- All 3 pinned casebook cases are `accept→accept`. The `accept→refine` thesis is logged in eval outputs but is not yet demonstrated on a pinned demo case.
-- Sweep generation (`REVIEW_SET_BUILD.md`) reports `quality_skips=60, added_distinct=0` across all 3 targets — either a dedup bug or genuinely deterministic SSO windows. Under investigation.
-- Pinned casebook traces show `Observation runtime: stub`; current backend is `clip_local`. Re-materialization under `clip_local` is in-progress (see `review/2026-04-21-phase-2/S3`).
+- The `accept→refine` thesis is now demonstrated on a pinned case: `urban_coastal_ambiguity` (Port of Rotterdam, `trace_4f65355f5c954fbf8db3fc684bb377af`) — scaffold `accept`, trust `refine`, operator confirmed `refine`, driven by cloud risk (48.78% cover). The remaining two pinned cases (`maritime_chokepoints`, `disaster_response_weather`) are `accept→accept`.
+- Sweep generation (`REVIEW_SET_BUILD.md`) reported `quality_skips=60, added_distinct=0`: root-caused to `_is_model_backed()` in `review_set_builder.py` requiring `runtime_mode="clip_local"` while the server was running a different real backend. Fixed — the check now accepts any non-stub runtime mode, matching `is_image_backed_assessment()` semantics. A fresh sweep should produce `added_distinct > 0`.
+- Two of three pinned casebook traces show `Observation runtime: stub`; current backend is `clip_local`. Re-materialization under `clip_local` is in-progress (see `review/2026-04-21-phase-2/S3`). The Rotterdam case runs `clip_local`.
 - Stacked TTT is described architecturally in this entry. Live on-orbit demonstration requires the hackathon prize hardware (NVIDIA Orin 16GB in-space compute); local demonstration shows the wiring and the gating logic but not a full on-orbit drift trajectory.
 
 ## Submission Framing

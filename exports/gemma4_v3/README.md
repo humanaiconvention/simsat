@@ -5,11 +5,11 @@ This bundle is intended for the next SimSat-focused Gemma run on Kaggle T4 or A1
 ## Files
 
 - `simsat_format_train.jsonl`: `66` rows
-- `simsat_multimodal_weak.jsonl`: `53` rows
-- `simsat_multimodal_reviewed.jsonl`: `0` rows
+- `simsat_multimodal_weak.jsonl`: `52` rows
+- `simsat_multimodal_reviewed.jsonl`: `4` rows
 - `simsat_eval_reviewed.jsonl`: `3` rows
 - `simsat_eval_shortlist.jsonl`: `10` rows
-- `images/`: `77` copied assets
+- `images/`: `79` copied assets
 
 ## Notes
 

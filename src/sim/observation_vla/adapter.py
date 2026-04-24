@@ -122,6 +122,16 @@ class ObservationVLMAdapter:
         self._model = None
         self._torch = None
         self._load_error: str | None = None
+        # VLA-layer TTT: learnable confidence blend weights (sum to 1.0)
+        self._score_weights: dict[str, float] = {
+            "scene_match": 0.35,
+            "salience": 0.20,
+            "change_or_event": 0.15,
+            "clarity": 0.20,
+            "pos_neg_margin": 0.10,
+        }
+        self._ttt_update_count: int = 0
+        self._ttt_log: list[dict] = []
 
     @property
     def model_id(self) -> str:
@@ -327,12 +337,14 @@ class ObservationVLMAdapter:
         change_or_event_score = _clamp((0.60 * event_best) + (0.40 * (1.0 - event_routine)))
         clip_cloud_risk = _clamp((0.60 * cloud_like) + (0.40 * (1.0 - clear_like)))
         occlusion_or_cloud_risk = _clamp((0.75 * metadata_cloud_fraction) + (0.25 * clip_cloud_risk))
+        w = self._score_weights
+        pos_neg_margin = _clamp((positive_best - negative_best + 1.0) / 2.0)
         confidence = _clamp(
-            (0.35 * scene_match_score)
-            + (0.20 * salience_score)
-            + (0.15 * change_or_event_score)
-            + (0.20 * (1.0 - occlusion_or_cloud_risk))
-            + (0.10 * _clamp((positive_best - negative_best + 1.0) / 2.0))
+            w["scene_match"] * scene_match_score
+            + w["salience"] * salience_score
+            + w["change_or_event"] * change_or_event_score
+            + w["clarity"] * (1.0 - occlusion_or_cloud_risk)
+            + w["pos_neg_margin"] * pos_neg_margin
         )
         action_score = _clamp(
             (0.38 * scene_match_score)
@@ -430,6 +442,65 @@ class ObservationVLMAdapter:
             raise RuntimeError("Observation VLA endpoint returned a non-dict payload")
         payload.setdefault("_model_id", self.model_name_or_path or "observation-vla-endpoint")
         return payload
+
+    def vla_online_update(
+        self,
+        evidence: dict[str, float],
+        confidence: float,
+        realized_utility: float,
+        lr: float = 0.015,
+    ) -> dict[str, float]:
+        """VLA-layer TTT: gradient step on confidence blend weights.
+
+        Uses operator usefulness_score as the supervision signal and the stored
+        intermediate evidence scores as features, reducing confidence calibration
+        error (the MAE 0.27 gap between model confidence and operator scores).
+        Both the update and the renormalisation step mirror trust_model.online_update().
+        """
+        feature_map = {
+            "scene_match": float(evidence.get("scene_match_score", 0.5)),
+            "salience": float(evidence.get("salience_score", 0.5)),
+            "change_or_event": float(evidence.get("change_or_event_score", 0.5)),
+            "clarity": 1.0 - float(evidence.get("occlusion_or_cloud_risk", 0.5)),
+            "pos_neg_margin": 0.5,  # not stored in evidence; use neutral prior
+        }
+        error = realized_utility - confidence
+        for k in list(self._score_weights):
+            self._score_weights[k] += lr * error * feature_map[k]
+            self._score_weights[k] = max(0.001, self._score_weights[k])
+        total = sum(self._score_weights.values())
+        self._score_weights = {k: v / total for k, v in self._score_weights.items()}
+        self._ttt_update_count += 1
+        self._ttt_log.append(
+            {
+                "update": self._ttt_update_count,
+                "confidence": confidence,
+                "realized_utility": realized_utility,
+                "error": error,
+            }
+        )
+        if len(self._ttt_log) > 500:
+            self._ttt_log = self._ttt_log[-500:]
+        return dict(self._score_weights)
+
+    def get_ttt_snapshot(self) -> dict:
+        """Return current VLA TTT state: weights, drift, recent updates."""
+        default_weights = {
+            "scene_match": 0.35,
+            "salience": 0.20,
+            "change_or_event": 0.15,
+            "clarity": 0.20,
+            "pos_neg_margin": 0.10,
+        }
+        drift = {k: round(self._score_weights[k] - default_weights[k], 6) for k in default_weights}
+        return {
+            "runtime_mode": self.runtime_mode,
+            "update_count": self._ttt_update_count,
+            "current_weights": dict(self._score_weights),
+            "default_weights": default_weights,
+            "drift": drift,
+            "recent_updates": self._ttt_log[-10:],
+        }
 
     def assess(
         self,

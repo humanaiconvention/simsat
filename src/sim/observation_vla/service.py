@@ -284,6 +284,7 @@ class ObservationVLAService:
         if saved_outcome.label_source == "operator_review":
             self._sync_mission_response_for_outcome(updated_trace, saved_outcome)
             self._apply_trust_layer_ttt(updated_trace, saved_outcome)
+            self._apply_vla_ttt(updated_trace, saved_outcome)
         return saved_outcome, updated_states, updated_trace
 
     def _apply_trust_layer_ttt(
@@ -316,6 +317,33 @@ class ObservationVLAService:
             )
         except Exception:
             pass  # never let TTT callback crash the outcome registration
+
+    def _apply_vla_ttt(
+        self,
+        trace: ObservationTraceRecord,
+        outcome: ObservationOutcome,
+    ) -> None:
+        """Feed realized utility back into the VLA adapter's confidence blend weights (VLA-layer TTT).
+
+        Only fires for clip_local runtime traces. Pulls evidence scores from the
+        stored assessment and calls vla_online_update() on the active adapter.
+        """
+        if trace.assessment.runtime_mode != "clip_local":
+            return
+        adapter = getattr(self, "adapter", None)
+        if adapter is None or not hasattr(adapter, "vla_online_update"):
+            return
+        evidence = trace.assessment.evidence.to_dict()
+        confidence = trace.assessment.evidence.confidence
+        realized_utility = outcome.usefulness_score if outcome.useful else 0.0
+        try:
+            adapter.vla_online_update(
+                evidence=evidence,
+                confidence=confidence,
+                realized_utility=float(realized_utility),
+            )
+        except Exception:
+            pass  # never crash outcome registration
 
     def register_operator_review(
         self,

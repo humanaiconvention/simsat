@@ -11,11 +11,11 @@
   "counts": {
     "total_traces_seen": 86,
     "format_train": 66,
-    "multimodal_weak": 53,
-    "multimodal_reviewed": 0,
+    "multimodal_weak": 52,
+    "multimodal_reviewed": 4,
     "eval_reviewed": 3,
     "eval_shortlist": 10,
-    "copied_images": 77
+    "copied_images": 79
   },
   "scenario_counts": {
     "format_train": {
@@ -24,11 +24,15 @@
       "urban_coastal_ambiguity": 26
     },
     "multimodal_weak": {
-      "disaster_response_weather": 16,
-      "maritime_chokepoints": 15,
-      "urban_coastal_ambiguity": 22
+      "disaster_response_weather": 17,
+      "maritime_chokepoints": 14,
+      "urban_coastal_ambiguity": 21
     },
-    "multimodal_reviewed": {},
+    "multimodal_reviewed": {
+      "disaster_response_weather": 1,
+      "maritime_chokepoints": 1,
+      "urban_coastal_ambiguity": 2
+    },
     "eval_reviewed": {
       "disaster_response_weather": 1,
       "maritime_chokepoints": 1,
@@ -42,18 +46,23 @@
   },
   "target_counts": {
     "multimodal_weak": {
-      "Fort Myers Coast": 7,
+      "Fort Myers Coast": 8,
       "Houston Ship Channel": 2,
       "New Orleans Delta": 7,
       "Panama Canal": 7,
       "Port of Los Angeles": 7,
-      "Port of Rotterdam": 7,
-      "Port of Singapore": 7,
+      "Port of Rotterdam": 6,
+      "Port of Singapore": 6,
       "San Francisco Bay": 1,
       "Shenzhen Bay": 7,
       "Suez Canal": 1
     },
-    "multimodal_reviewed": {},
+    "multimodal_reviewed": {
+      "Houston Ship Channel": 1,
+      "Port of Rotterdam": 1,
+      "San Francisco Bay": 1,
+      "Suez Canal": 1
+    },
     "eval_shortlist": {
       "Fort Myers Coast": 1,
       "Houston Ship Channel": 1,
@@ -77,12 +86,15 @@
     "multimodal_weak": {
       "accept": 2,
       "defer": 4,
-      "refine": 46,
+      "refine": 45,
       "skip": 1
     },
-    "multimodal_reviewed": {},
+    "multimodal_reviewed": {
+      "accept": 3,
+      "refine": 1
+    },
     "eval_reviewed": {
-      "accept": 3
+      "refine": 3
     }
   },
   "copied_images": [
@@ -162,6 +174,8 @@
     "images/trace_31ec6996796d40c2b09e946f854f0d4a.png",
     "images/trace_10d844ffa6a14e39b7e933375f05c9cd.png",
     "images/trace_fccb18798b844f68b6d0ad583d1e3caf.png",
-    "images/trace_2c2e81628756417dbb0093a1babf0ffd.png"
+    "images/trace_2c2e81628756417dbb0093a1babf0ffd.png",
+    "images/trace_22155d6f9ee14be18d072bcda4aa4a2c.png",
+    "images/trace_f7c1153a370b4c828274566a2714a524.png"
   ]
 }
