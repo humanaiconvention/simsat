@@ -7,9 +7,11 @@ This repo now also contains a challenge-focused encounter planner that treats ob
 - a deterministic scaffold planner
 - a WCLI-style trust-gated planner with an explicit `refine` action
 
-The compact submission note and reproducible demo flow are in [CHALLENGE_ENTRY.md](/D:/SimSat/CHALLENGE_ENTRY.md).
-The shortest judge-facing handoff is in [SUBMISSION_BRIEF.md](/D:/SimSat/SUBMISSION_BRIEF.md).
-The current reviewed ObservationVLA evaluation is in [OBSERVATION_VLA_EVAL.md](/D:/SimSat/OBSERVATION_VLA_EVAL.md).
+The compact submission note and reproducible demo flow are in [CHALLENGE_ENTRY.md](./CHALLENGE_ENTRY.md).
+The shortest judge-facing handoff is in [SUBMISSION_BRIEF.md](./SUBMISSION_BRIEF.md).
+The current reviewed ObservationVLA evaluation is in [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md).
+
+This repo is submitted to both tracks of the AI in Space hackathon — the Liquid Track (LFM2-VL / LFM2.5-VL backend) and the General AI Track (SimSat-specific Gemma-4 fine-tune). See the Two-Track Submission section of [CHALLENGE_ENTRY.md](./CHALLENGE_ENTRY.md) for per-track model details.
 
 The challenge path is explicitly `no-Mapbox-safe`: Sentinel imagery plus orbital geometry are sufficient for the encounter planner, WCLI trust/refine flow, ObservationVLA traces, and evaluation scripts. Mapbox remains an optional high-resolution perspective source, not a requirement.
 
@@ -40,7 +42,7 @@ For a markdown-ready submission evidence report built from stored evaluations an
 python scripts/submission_evidence.py --base-url http://127.0.0.1:8000/sim
 ```
 
-That generates [SUBMISSION_PACKET.md](/D:/SimSat/SUBMISSION_PACKET.md) with one curated case per scenario pack. By default the packet uses Sentinel-first evidence, prefers operator-reviewed labels when they exist, and otherwise falls back to `simulated_submission_case`.
+That generates [SUBMISSION_PACKET.md](./SUBMISSION_PACKET.md) with one curated case per scenario pack. By default the packet uses Sentinel-first evidence, prefers operator-reviewed labels when they exist, and otherwise falls back to `simulated_submission_case`.
 
 For the current ObservationVLA backend evaluation against operator-reviewed traces:
 
@@ -48,7 +50,7 @@ For the current ObservationVLA backend evaluation against operator-reviewed trac
 python scripts/observation_vla_eval.py --inprocess
 ```
 
-That generates [OBSERVATION_VLA_EVAL.md](/D:/SimSat/OBSERVATION_VLA_EVAL.md). Today the stack is honest-but-early: the local `clip_local` backend is image-model-backed, shows useful/not-useful alignment on the reviewed Sentinel cases, but does not yet match operator actions closely enough to treat as an autonomous action policy.
+That generates [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md). Today the stack is honest-but-early: the local `clip_local` backend is image-model-backed, shows useful/not-useful alignment on the reviewed Sentinel cases, but does not yet match operator actions closely enough to treat as an autonomous action policy.
 
 To replace a simulated label with a real operator-reviewed outcome:
 
@@ -57,7 +59,7 @@ python scripts/review_queue_casebook.py --inprocess
 python scripts/operator_review.py --base-url http://127.0.0.1:8000/sim --scenario-pack maritime_chokepoints
 ```
 
-The review queue writes [REVIEW_QUEUE.md](/D:/SimSat/REVIEW_QUEUE.md) plus per-case images so the next human-review pass can compare the stored trace assessment with the current `clip_local` backend recommendation on the same imagery.
+The review queue writes [REVIEW_QUEUE.md](./REVIEW_QUEUE.md) plus per-case images so the next human-review pass can compare the stored trace assessment with the current `clip_local` backend recommendation on the same imagery.
 
 For a specific trace, you can inspect the full review bundle first:
 
@@ -88,6 +90,19 @@ To generate a low-compute readiness checklist for the current submission artifac
 ```bash
 python scripts/submission_readiness.py --base-url http://127.0.0.1:8000/sim
 ```
+
+### Review Phases
+
+The 2026-04-21 full-repo code review is preserved in the repo so judges can audit the work we found and shipped:
+
+- `review/2026-04-21-phase-1/` — Tier-1 correctness fixes (tzinfo bug, hygiene). **Apply first.**
+- `review/2026-04-21-phase-2/` — Tier-2 thesis/calibration work (accept→refine sweep, MAE calibration reframe, re-materialization scripts).
+- `review/2026-04-21-phase-3/` — Entry B backend scaffold (`entry-b/backend` branch) and Google Drive recon block.
+- `review/2026-04-21-phase-4/` — Submission-doc refresh + frontend brand-hide patch.
+
+### Known Issues
+
+See `KNOWN_ISSUES.md` at the repo root for the consolidated list with status per item. Short version: the Phase 1 tzinfo bug in `src/sim/simulator.py:111` is the only known Tier-1 correctness issue; the rest are rigor/polish items disclosed in the submission docs rather than hidden.
 
 ## Upcoming Hackathon: AI in Space | Liquid AI x DPhi Space
 

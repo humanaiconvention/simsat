@@ -222,3 +222,56 @@ async def assess_decision(decision_id: str) -> dict[str, Any]:
         raise HTTPException(status_code=404, detail=str(exc))
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc))
+
+
+class TrustFeedbackRequest(BaseModel):
+    trust_details: dict[str, float] = Field(
+        description="trust_details dict from decision_after (must include target_priority)"
+    )
+    learned_score: float = Field(ge=0.0, le=1.0)
+    realized_utility: float = Field(
+        ge=0.0, le=1.0,
+        description="Operator usefulness_score; pass 0.0 for useful=False outcomes",
+    )
+    lr: float = Field(default=0.02, ge=1e-4, le=0.5, description="Learning rate")
+
+
+@router.post("/trust-feedback")
+async def apply_trust_feedback(req: TrustFeedbackRequest) -> dict[str, Any]:
+    """Feed realized operator utility back into the WCLI trust model.
+
+    This is the trust-layer TTT loop: after an operator reviews a trace and
+    assigns a usefulness_score, call this endpoint to shift the model's
+    learned_score_weights toward patterns that predict utility more accurately.
+
+    The trust_details dict comes from decision_after.trust_details in the stored
+    trace.  target_priority must be present (it is included automatically in
+    traces produced after the Phase 1 trust_model update).
+    """
+    service = _require_service()
+    trust_model = getattr(service.planner, "trust_model", None)
+    if trust_model is None:
+        raise HTTPException(
+            status_code=503,
+            detail="No trust model active on the current planner (scaffold-only mode)",
+        )
+    updated_weights = trust_model.online_update(
+        trust_details=req.trust_details,
+        learned_score=req.learned_score,
+        realized_utility=req.realized_utility,
+        lr=req.lr,
+    )
+    return {
+        "updated_learned_score_weights": updated_weights,
+        "snapshot": trust_model.get_weight_snapshot(),
+    }
+
+
+@router.get("/trust-weights")
+async def get_trust_weights() -> dict[str, Any]:
+    """Return current adaptive weights and drift since startup."""
+    service = _require_service()
+    trust_model = getattr(service.planner, "trust_model", None)
+    if trust_model is None:
+        raise HTTPException(status_code=503, detail="No trust model active")
+    return trust_model.get_weight_snapshot()

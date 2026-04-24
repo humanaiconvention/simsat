@@ -208,11 +208,11 @@ class ObservationVLAService:
     def get_assessment(self, assessment_id: str) -> ObservationAssessmentRecord | None:
         return self.store.get_record(assessment_id)
 
-    def list_assessments(self, limit: int = 50) -> list[ObservationAssessmentRecord]:
-        return self.store.list_records(limit=limit)
+    def list_assessments(self, limit: int = 50, scenario_pack: str | None = None) -> list[ObservationAssessmentRecord]:
+        return self.store.list_records(limit=limit, scenario_pack=scenario_pack)
 
-    def list_traces(self, limit: int = 50) -> list[ObservationTraceRecord]:
-        return self.store.list_traces(limit=limit)
+    def list_traces(self, limit: int = 50, scenario_pack: str | None = None) -> list[ObservationTraceRecord]:
+        return self.store.list_traces(limit=limit, scenario_pack=scenario_pack)
 
     def get_trace(self, trace_id: str) -> ObservationTraceRecord | None:
         return self.store.get_trace(trace_id)
@@ -283,7 +283,39 @@ class ObservationVLAService:
         updated_trace = self.store.save_trace(trace)
         if saved_outcome.label_source == "operator_review":
             self._sync_mission_response_for_outcome(updated_trace, saved_outcome)
+            self._apply_trust_layer_ttt(updated_trace, saved_outcome)
         return saved_outcome, updated_states, updated_trace
+
+    def _apply_trust_layer_ttt(
+        self,
+        trace: ObservationTraceRecord,
+        outcome: ObservationOutcome,
+    ) -> None:
+        """Feed realized utility back into the WCLI trust model (trust-layer TTT).
+
+        Pulls trust_details and learned_score from the stored trace's decision_after,
+        then calls online_update() on the active trust model.  No-ops silently if the
+        encounter service or trust model is not wired.
+        """
+        if self.encounter_service is None:
+            return
+        trust_model = getattr(getattr(self.encounter_service, "planner", None), "trust_model", None)
+        if trust_model is None:
+            return
+        decision_after = trace.decision_after or {}
+        trust_details = decision_after.get("trust_details")
+        learned_score = decision_after.get("learned_score")
+        if not trust_details or learned_score is None:
+            return
+        realized_utility = outcome.usefulness_score if outcome.useful else 0.0
+        try:
+            trust_model.online_update(
+                trust_details=trust_details,
+                learned_score=float(learned_score),
+                realized_utility=float(realized_utility),
+            )
+        except Exception:
+            pass  # never let TTT callback crash the outcome registration
 
     def register_operator_review(
         self,
@@ -311,24 +343,35 @@ class ObservationVLAService:
             replace_existing=True,
         )
 
-    def list_outcomes(self, limit: int = 50, current_only: bool = True) -> list[ObservationOutcome]:
-        return self.store.list_outcomes(limit=limit, current_only=current_only)
+    def list_outcomes(
+        self,
+        limit: int = 50,
+        current_only: bool = True,
+        scenario_pack: str | None = None,
+    ) -> list[ObservationOutcome]:
+        return self.store.list_outcomes(limit=limit, current_only=current_only, scenario_pack=scenario_pack)
 
     def list_review_candidates(
         self,
         scenario_pack: str | None = None,
         limit: int = 20,
     ) -> list[dict]:
-        traces = self.store.list_traces(limit=max(limit * 4, limit))
+        traces = self.store.list_traces(limit=max(limit * 4, limit), scenario_pack=scenario_pack)
         outcomes_by_trace = {
             outcome.trace_id: outcome
-            for outcome in self.store.list_outcomes(limit=max(limit * 8, limit * 4), current_only=True)
+            for outcome in self.store.list_outcomes(
+                limit=max(limit * 8, limit * 4),
+                current_only=True,
+                scenario_pack=scenario_pack,
+            )
         }
-        submission_cases = {pin.trace_id: pin for pin in self.store.list_submission_cases()}
+        submission_cases = {
+            pin.trace_id: pin
+            for pin in self.store.list_submission_cases()
+            if scenario_pack in {None, "", "all"} or pin.scenario_pack == scenario_pack
+        }
         candidates: list[dict] = []
         for trace in traces:
-            if scenario_pack not in {None, "", "all"} and trace.scenario_pack != scenario_pack:
-                continue
             outcome = outcomes_by_trace.get(trace.trace_id)
             needs_operator_review = outcome is None or outcome.label_source != "operator_review"
             submission_case = submission_cases.get(trace.trace_id)
