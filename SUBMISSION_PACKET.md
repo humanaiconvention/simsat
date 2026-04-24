@@ -14,16 +14,17 @@ This packet was generated from the live challenge stack.
 
 | scenario | windows | scaffold_accept | trust_accept | trust_refine | scaffold_yield | trust_yield | labelled_cases |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| disaster_response_weather | 2 | 2 | 2 | 0 | 1.0 | 1.0 | 3 |
-| maritime_chokepoints | 1 | 1 | 1 | 0 | 1.0 | 1.0 | 4 |
-| urban_coastal_ambiguity | 3 | 3 | 3 | 0 | 1.0 | 1.0 | 4 |
+| disaster_response_weather | 3 | 1 | 1 | 0 | 1.0 | 1.0 | 4 |
+| maritime_chokepoints | 2 | 1 | 1 | 0 | 1.0 | 1.0 | 5 |
+| urban_coastal_ambiguity | 3 | 0 | 1 | 0 | 1.0 | 1.0 | 6 |
 
 ## disaster_response_weather
 
-- Evaluation: `eval_1261eaa52f9b4e97ad274675022f5315`
-- Horizon used: `8.0` hour(s)
-- Transition counts: `{'accept->accept': 2}`
-- Top delta: `New Orleans Delta` `accept -> accept` (reason: `high_priority,sentinel_available,line_of_sight,cloud_risk`)
+- Evaluation: `eval_3cdeedbeeb284411b5f36d0a066a41a8`
+- Policy horizon: `16.0` hour(s)
+- Horizon used: `16.0` hour(s)
+- Transition counts: `{'accept->accept': 1, 'defer->defer': 2}`
+- Top delta: `Houston Ship Channel` `defer -> defer` (reason: `sentinel_available,line_of_sight,cloud_risk`)
 - Curated case: Houston Ship Channel: scaffold accept -> accept; assessment accept; outcome accept (useful)
 - Stored visual assessment: mode=`image_conditioned`, runtime=`stub`, recommended=`accept`, useful=`True`, usefulness_score=`0.92`
 - Mission response: action=`materialize_now`, utility_realized=`0.92`
@@ -34,10 +35,11 @@ This packet was generated from the live challenge stack.
 
 ## maritime_chokepoints
 
-- Evaluation: `eval_e61056e278974852b71003b2ebcf2236`
-- Horizon used: `8.0` hour(s)
-- Transition counts: `{'accept->accept': 1}`
-- Top delta: `Suez Canal` `accept -> accept` (reason: `high_visibility,high_priority,sentinel_available,low_cloud_risk,line_of_sight`)
+- Evaluation: `eval_27293cdacc0542899af69187d90de71f`
+- Policy horizon: `48.0` hour(s)
+- Horizon used: `48.0` hour(s)
+- Transition counts: `{'accept->accept': 1, 'defer->defer': 1}`
+- Top delta: `Panama Canal` `defer -> defer` (reason: `high_priority,sentinel_available,low_cloud_risk,line_of_sight,edge_geometry`)
 - Curated case: Suez Canal: scaffold accept -> accept; assessment accept; outcome accept (useful)
 - Stored visual assessment: mode=`image_conditioned`, runtime=`stub`, recommended=`accept`, useful=`True`, usefulness_score=`0.95`
 - Mission response: action=`materialize_now`, utility_realized=`0.95`
@@ -48,14 +50,15 @@ This packet was generated from the live challenge stack.
 
 ## urban_coastal_ambiguity
 
-- Evaluation: `eval_9647da2965164afa9a04f40db2d31338`
+- Evaluation: `eval_4baae27ac2064c7b872d1113ed295117`
+- Policy horizon: `8.0` hour(s)
 - Horizon used: `8.0` hour(s)
-- Transition counts: `{'accept->accept': 3}`
-- Top delta: `Port of Rotterdam` `accept -> accept` (reason: `high_visibility,high_priority,sentinel_available,line_of_sight,cloud_risk`)
-- Curated case: San Francisco Bay: scaffold accept -> accept; assessment accept; outcome accept (useful)
-- Stored visual assessment: mode=`image_conditioned`, runtime=`stub`, recommended=`accept`, useful=`True`, usefulness_score=`0.9`
-- Mission response: action=`materialize_now`, utility_realized=`0.9`
-- Trace: `trace_a4e31b4c39224d8fbdb2c4bf0f444823`
+- Transition counts: `{'defer->accept': 1, 'defer->defer': 2}`
+- Top delta: `Shenzhen Bay` `defer -> accept` (reason: `high_visibility,high_priority,sentinel_available,line_of_sight,cloud_risk`)
+- Curated case: Port of Rotterdam: scaffold accept -> refine; assessment refine; outcome refine (useful)
+- Stored visual assessment: mode=`image_conditioned`, runtime=`clip_local`, recommended=`refine`, useful=`True`, usefulness_score=`0.89`
+- Mission response: action=`escalate_operator`, utility_realized=`0.89`
+- Trace: `trace_4f65355f5c954fbf8db3fc684bb377af`
 - Label source: `operator_review`; reviewer=`Ben Haslam`; status=`reviewed`
 - Submission case: `pinned`
 - Case source: `historical labelled trace`
