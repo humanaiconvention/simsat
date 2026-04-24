@@ -36,6 +36,11 @@ checks = {
     "no Unsloth import": "from unsloth" not in src.lower(),
     "SFTConfig (not TrainingArguments)": "SFTConfig" in src,
     "adamw_torch": '"adamw_torch"' in src,
+    "enable_input_require_grads after get_peft_model": (
+        src.index("get_peft_model(model, peft_config)")
+        < src.index("enable_input_require_grads")
+    ),
+    "use_reentrant=False": '"use_reentrant": False' in src,
 }
 print("Build checks:")
 all_pass = True
@@ -57,14 +62,16 @@ cells = [
         "cell_type": "markdown",
         "metadata": {},
         "source": [
-            "# SimSat Gemma-4-E2B v1 — Kaggle T4\n",
+            "# SimSat Gemma-4-E2B v2 — Kaggle T4\n",
             "\n",
             "QLoRA fine-tune on SimSat satellite encounter-assessment data.\n",
             "\n",
             "**Stack:** raw transformers + bitsandbytes NF4 4-bit + PEFT LoRA r=64 + "
             "TRL SFTTrainer · `google/gemma-4-E2B-it` · single T4 (CUDA_VISIBLE_DEVICES=0)\n",
             "\n",
-            "All 10 hard-won T4 fixes from GEMMA4_KAGGLE_NOTES.md applied.\n",
+            "All 12 hard-won T4 fixes applied. v2 adds Fix #11 (enable_input_require_grads "
+            "after get_peft_model) and Fix #12 (use_reentrant=False), resolving the "
+            "grad_norm=0.0 / zero-learning failure from v1.\n",
             "\n",
             "**Expected runtime:** ~30–45 min training + ~5 min eval\n",
         ],

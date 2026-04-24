@@ -184,11 +184,17 @@ peft_config = LoraConfig(
 # would upcast norms to fp32, causing OOM on Gemma-4-E2B's large embedding tensors).
 for p in model.parameters():
     p.requires_grad = False
-if hasattr(model, "enable_input_require_grads"):
-    model.enable_input_require_grads()
 
 model = get_peft_model(model, peft_config)
 model.print_trainable_parameters()
+
+# Fix #11: enable_input_require_grads AFTER get_peft_model, not before.
+# PEFT wrapping overrides the base model's forward(); a hook registered on the
+# base model before wrapping is lost. Must register on the PEFT-wrapped model so
+# gradients can flow back through frozen base layers to the LoRA adapters.
+# (v1 bug: called before get_peft_model → grad_norm=0.0 throughout, zero learning)
+if hasattr(model, "enable_input_require_grads"):
+    model.enable_input_require_grads()
 
 # ============================================================
 # CELL 5: Load dataset
@@ -212,7 +218,7 @@ print("\n" + "=" * 60)
 print("TRAINING")
 print("=" * 60)
 
-OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v1-adapter"
+OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v2-adapter"
 
 # Fix #10: fp16=False — THE showstopper for QLoRA. QLoRA + fp16=True triggers
 # GradScaler assertion because LoRA params (fp32) bypass GradScaler's inf hooks.
@@ -231,10 +237,14 @@ training_args = SFTConfig(
     fp16=False,                        # Fix #10: disable AMP with QLoRA
     bf16=False,                        # T4 has no native bf16
     gradient_checkpointing=True,       # saves ~3-5 GiB activations on T4
+    gradient_checkpointing_kwargs={"use_reentrant": False},  # Fix #12: use_reentrant=True
+    # (default) breaks gradient flow through frozen base layers to LoRA adapters.
+    # use_reentrant=False is the PEFT-recommended mode for QLoRA + grad checkpointing.
     remove_unused_columns=False,
     report_to="none",
     dataloader_num_workers=0,          # avoid multiprocessing issues on T4
-    max_seq_length=1024,               # goes into SFTConfig, not SFTTrainer
+    # max_seq_length excluded — removed from SFTTrainer in TRL >=0.12 AND from
+    # SFTConfig in later TRL versions. TRL infers from tokenizer.model_max_length.
 )
 
 # Fix #7: max_seq_length NOT in SFTTrainer kwargs (moved to SFTConfig in TRL >=0.12)
@@ -363,7 +373,7 @@ for name, res in eval_results.items():
 print(f"  Adapter: {OUTPUT_DIR}")
 
 summary = {
-    "version": "simsat-gemma4-v1",
+    "version": "simsat-gemma4-v2",
     "base_model": MODEL_ID,
     "training_loss": round(train_result.training_loss, 4),
     "training_steps": train_result.global_step,
