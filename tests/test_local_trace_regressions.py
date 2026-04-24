@@ -59,10 +59,14 @@ def test_local_submission_case_trace_and_outcomes_have_expected_shape():
 
 
 def test_review_backlog_mentions_current_shortlist_trace_ids():
+    # Note: trace IDs in this list reflect the current unlabelled shortlist.
+    # Update when new operator reviews label these traces out of the pending queue.
+    # trace_e9e45ad652ff4e74853f0c6d0c03a827 (Singapore) was labeled 2026-04-23 and
+    # is no longer in the pending shortlist; replaced by trace_da37bb431...
     backlog = BACKLOG_PATH.read_text(encoding="utf-8")
     for trace_id in [
-        "trace_cbe073faf8554afb986b632128204650",
-        "trace_e9e45ad652ff4e74853f0c6d0c03a827",
-        "trace_dbbe33015d04413082df17ba2f0c8d12",
+        "trace_cbe073faf8554afb986b632128204650",  # Houston (disaster)
+        "trace_da37bb4310014942a24d430ea238110a",   # Singapore Port (maritime, current unlabelled)
+        "trace_dbbe33015d04413082df17ba2f0c8d12",  # SF Bay (urban)
     ]:
         assert trace_id in backlog
