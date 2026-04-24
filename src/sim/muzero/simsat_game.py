@@ -222,6 +222,55 @@ class MuZeroConfig:
 
 
 # --------------------------------------------------------------------------- #
+# LFM2.5-VL encoder variant config                                            #
+# --------------------------------------------------------------------------- #
+
+class SimSatMuZeroConfigLFM(MuZeroConfig):
+    """MuZeroConfig variant for the LFM2.5-VL encoder path (Liquid Track).
+
+    LFM2.5-VL processes the Sentinel tile → (embed_dim,) embedding, which
+    feeds MuZero's h() representation function. This replaces the IMPALA CNN
+    (designed for raw pixel tiles) with a fully-connected network that accepts
+    pre-embedded observations.
+
+    Usage:
+        from sim.muzero.tile_encoder import build_encoder
+        enc = build_encoder("lfm2vl", embed_dim=768, lora_adapter_path="...")
+        env = SimSatEnv(records=records, tile_encoder=enc)
+        cfg = SimSatMuZeroConfigLFM(embed_dim=768)
+        # Pass cfg to muzero-general Trainer instead of MuZeroConfig()
+    """
+
+    def __init__(
+        self,
+        embed_dim: int = 768,
+        game_id: str = "simsat_lfm",
+        scenario_pack: str = "all",
+    ) -> None:
+        super().__init__(game_id=game_id, scenario_pack=scenario_pack)
+        self.embed_dim = embed_dim
+
+        # Switch from IMPALA CNN (pixel tiles) to fully-connected (embeddings)
+        self.network = "fullyconnected"
+        self.observation_shape = (embed_dim,)
+
+        # FC representation layers sized to match LFM2.5-VL embed dim
+        self.encoding_size = min(embed_dim, 256)
+        self.fc_representation_layers = [embed_dim, 512, self.encoding_size]
+        self.fc_dynamics_layers = [self.encoding_size + 4, 256, self.encoding_size]
+        self.fc_reward_layers = [self.encoding_size, 64]
+        self.fc_value_layers = [self.encoding_size, 64]
+        self.fc_policy_layers = [self.encoding_size, 64]
+
+        # IMPALA-specific fields not used in FC mode — set to None to avoid
+        # muzero-general using them inadvertently
+        self.impala_channels = None
+        self.impala_out_dim = None
+        self.blocks = 1
+        self.channels = self.encoding_size
+
+
+# --------------------------------------------------------------------------- #
 # Game adapter                                                                #
 # --------------------------------------------------------------------------- #
 

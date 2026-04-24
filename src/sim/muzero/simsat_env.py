@@ -172,9 +172,11 @@ class SimSatEnv:
         refine_cost: float = -0.05,
         skip_missed_penalty: float = -0.01,
         seed: Optional[int] = None,
+        tile_encoder=None,  # optional TileEncoder — when set, _tile_to_obs returns embedding
     ) -> None:
         self.backend = backend
         self.scenario_pack = scenario_pack
+        self.tile_encoder = tile_encoder
         self.api_base_url = api_base_url or "http://127.0.0.1:8000/sim"
         self.step_penalty = step_penalty
         self.materialize_not_useful_penalty = materialize_not_useful_penalty
@@ -313,7 +315,11 @@ class SimSatEnv:
         # Normalize to [0, 1]
         arr = arr / SENTINEL_NORM
         arr = np.clip(arr, 0.0, 1.0)
-        return arr.astype(np.float32)
+        arr = arr.astype(np.float32)
+        # LFM2.5-VL encoder path: returns (embed_dim,) embedding for MuZero FC network
+        if self.tile_encoder is not None and getattr(self.tile_encoder, "embed_dim", None) is not None:
+            return self.tile_encoder.encode(arr)
+        return arr
 
     def _compute_reward(self, record: EncounterRecord, action_int: int) -> float:
         """Reward shaping — placeholder values; tune during stage-1 pretraining."""

@@ -44,3 +44,6 @@ node_modules/
 .mypy_cache/
 *.pyc
 weights/
+
+# Large data files — too big for GitHub (>100 MB)
+src/sim/data/haic/stimuli.json
