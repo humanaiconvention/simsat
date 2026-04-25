@@ -24,27 +24,22 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      - name: Install minimal test dependencies
-        # Skip the full requirements.txt — torch + cartopy + odc-stac add 3+ GB
-        # and aren't needed for the 33 tests in src/sim/tests/. Install only
-        # what the unit tests actually import.
-        # Note: PyPI package `pydispatcher` provides the `pydispatch` module
-        # (different name) — required by simulator.py and pulled in via
-        # test_propagator.py's import chain.
+      - name: Install test dependencies
+        # Install requirements.txt minus the GPU/heavy items (torch,
+        # torchvision, cartopy, odc-stac). Pulls in fastapi, pydantic,
+        # numpy, pyorbital, Pillow, matplotlib, transformers, peft,
+        # accelerate, anthropic — everything needed for the 33-test
+        # unit suite without 3+ GB of CUDA wheels.
+        # Then add CPU-only torch from the PyTorch CPU wheel index
+        # (~200 MB) so transformers can import without crashing.
+        # Note: PyPI package `pydispatcher` provides the `pydispatch`
+        # module (different name) — required by simulator.py.
         run: |
           python -m pip install --upgrade pip
-          pip install \
-            "fastapi>=0.110,<0.120" \
-            "uvicorn>=0.27,<0.35" \
-            "pydantic>=2.6,<3" \
-            "httpx>=0.27" \
-            "requests>=2.31" \
-            "numpy>=1.26,<3" \
-            "pyorbital>=1.8" \
-            "pydispatcher>=2.0.7" \
-            "Pillow>=10.0" \
-            "pytest>=8.0" \
-            "pytest-mock>=3.12"
+          grep -vE '^(torch|torchvision|cartopy|odc-stac|pyqt|bitsandbytes)' requirements.txt > requirements-ci.txt
+          echo "pydispatcher>=2.0.7" >> requirements-ci.txt
+          pip install -r requirements-ci.txt
+          pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.5,<2.8"
 
       - name: Run unit tests
         run: |
