@@ -112,6 +112,46 @@
       "execution_status": "operator_reviewed",
       "utility_realized": 0.95,
       "notes": "Synchronized from operator_review observation outcome."
+    },
+    {
+      "outcome_id": "resp_out_658f5c7fcec246e2b2b0bb6bd6c62331",
+      "action_id": "resp_db7447909a8a4986a9f212269ea8acb0",
+      "executed_at": "2026-04-23T20:36:58Z",
+      "execution_status": "operator_reviewed",
+      "utility_realized": 0.88,
+      "notes": "Synchronized from operator_review observation outcome."
+    },
+    {
+      "outcome_id": "resp_out_8a1e1636999b42318ef3cbc0ec556405",
+      "action_id": "resp_fc184b9748e449f3b71e6e0e286b1beb",
+      "executed_at": "2026-04-23T20:36:58Z",
+      "execution_status": "operator_reviewed",
+      "utility_realized": 0.9,
+      "notes": "Synchronized from operator_review observation outcome."
+    },
+    {
+      "outcome_id": "resp_out_b33abb8032824915a3f5af106ccac349",
+      "action_id": "resp_19ff643d1de44be2b503fe4a3985ccf3",
+      "executed_at": "2026-04-23T20:36:59Z",
+      "execution_status": "operator_reviewed",
+      "utility_realized": 0.87,
+      "notes": "Synchronized from operator_review observation outcome."
+    },
+    {
+      "outcome_id": "resp_out_7e92e8a4126b4acc8fc41a12feb0efad",
+      "action_id": "resp_4716ab19e7c141da9ddf9cfe8ddfbc65",
+      "executed_at": "2026-04-23T20:40:18Z",
+      "execution_status": "operator_reviewed",
+      "utility_realized": 0.89,
+      "notes": "Synchronized from operator_review observation outcome."
+    },
+    {
+      "outcome_id": "resp_out_c1c339b86ac74aa093884d793bab1665",
+      "action_id": "resp_4716ab19e7c141da9ddf9cfe8ddfbc65",
+      "executed_at": "2026-04-23T21:42:15Z",
+      "execution_status": "operator_reviewed",
+      "utility_realized": 0.89,
+      "notes": "Synchronized from operator_review observation outcome."
     }
   ]
 }

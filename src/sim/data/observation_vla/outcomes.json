@@ -264,6 +264,116 @@
         "submission_case"
       ],
       "notes": "No observable cloud cover, user wouldn't know SF Bay at all but accepted as correct and useful."
+    },
+    {
+      "outcome_id": "out_26d9d482cb3a4c7787a653c8283e6750",
+      "trace_id": "trace_e9e45ad652ff4e74853f0c6d0c03a827",
+      "assessment_id": "asm_f855a14c3de0413ea689173cd6f0a353",
+      "decision_id": "dec_cde38e345c864bf0a3cc0dadc9714bde",
+      "registered_at": "2026-04-23T20:36:58Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.88,
+      "label_source": "operator_review",
+      "reviewer": "Codex local rehearsal",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "scenario_policy_replacement",
+        "pending_human_confirmation",
+        "operator_reviewed"
+      ],
+      "notes": "Assistant-generated maritime 48h replacement for scenario-policy rehearsal; pending human confirmation."
+    },
+    {
+      "outcome_id": "out_60d8d7effcc644e7b274b4ce0e7101b7",
+      "trace_id": "trace_f7c1153a370b4c828274566a2714a524",
+      "assessment_id": "asm_62bcc016f8444329a0565585353f7779",
+      "decision_id": "dec_f0265865c7484b9cbfc1f847e571bfdf",
+      "registered_at": "2026-04-23T20:36:58Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.9,
+      "label_source": "operator_review",
+      "reviewer": "Codex local rehearsal",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "scenario_policy_replacement",
+        "pending_human_confirmation",
+        "operator_reviewed"
+      ],
+      "notes": "Assistant-generated disaster 16h replacement for scenario-policy rehearsal; pending human confirmation."
+    },
+    {
+      "outcome_id": "out_625975908b7b4e95a99f207fadac26d4",
+      "trace_id": "trace_fccb18798b844f68b6d0ad583d1e3caf",
+      "assessment_id": "asm_27578d1da6e14fa78d40992fd70cb538",
+      "decision_id": "dec_c9a2053021e94ba38150212ed82cf56b",
+      "registered_at": "2026-04-23T20:36:58Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.87,
+      "label_source": "operator_review",
+      "reviewer": "Codex local rehearsal",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "scenario_policy_replacement",
+        "pending_human_confirmation",
+        "operator_reviewed"
+      ],
+      "notes": "Assistant-generated urban 8h replacement for scenario-policy rehearsal; pending human confirmation."
+    },
+    {
+      "outcome_id": "out_219acc6ccf984a4192c789c3f07e0311",
+      "trace_id": "trace_4f65355f5c954fbf8db3fc684bb377af",
+      "assessment_id": "asm_842884e0fef64f1b9c9ce00e0d20ead7",
+      "decision_id": "dec_6b473ac21b4b4075979e14d73fa021ed",
+      "registered_at": "2026-04-23T20:40:18Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.89,
+      "label_source": "operator_review",
+      "reviewer": "Codex local rehearsal",
+      "review_status": "superseded",
+      "is_current": false,
+      "supersedes_outcome_id": "out_824f60a0400241f48f3c01f3316239bb",
+      "outcome_tags": [
+        "scenario_policy_replacement",
+        "pending_human_confirmation",
+        "operator_reviewed"
+      ],
+      "notes": "Assistant-generated urban 8h replacement for scenario-policy rehearsal; clip_local candidate pending human confirmation."
+    },
+    {
+      "outcome_id": "out_824f60a0400241f48f3c01f3316239bb",
+      "trace_id": "trace_4f65355f5c954fbf8db3fc684bb377af",
+      "assessment_id": "asm_842884e0fef64f1b9c9ce00e0d20ead7",
+      "decision_id": "dec_6b473ac21b4b4075979e14d73fa021ed",
+      "registered_at": "2026-04-23T21:42:14Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.89,
+      "label_source": "operator_review",
+      "reviewer": "Ben Haslam",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": "out_219acc6ccf984a4192c789c3f07e0311",
+      "outcome_tags": [
+        "scenario_policy_replacement",
+        "human_review_confirmed",
+        "operator_reviewed"
+      ],
+      "notes": "Human reviewed confirmed Rotterdam challenge case."
     }
   ]
 }

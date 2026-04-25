@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 from encounter.schemas import EncounterRecord, TargetSpec
 from haic.schemas import GroundingStimulus
+from haic.viability import evaluate_ttt_viability
 
 from .assessor import ObservationAssessor
 from .dataset import ObservationDatasetBuilder
@@ -19,6 +21,8 @@ from .schemas import (
     SubmissionCasePin,
 )
 from .store import ObservationStore
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from encounter.service import EncounterService
@@ -55,7 +59,8 @@ class ObservationVLAService:
             response = self.mission_response_service.get_trace_response(trace.trace_id)
             action = response.get("action", {})
         except KeyError:
-            action = self.mission_response_service.propose_from_trace_id(trace.trace_id).to_dict()
+            proposed = self.mission_response_service.propose_from_trace_id(trace.trace_id)
+            action = proposed.to_dict() if proposed is not None else {}
         action_id = action.get("action_id")
         if not action_id:
             return
@@ -233,6 +238,9 @@ class ObservationVLAService:
     def get_submission_case(self, scenario_pack: str) -> SubmissionCasePin | None:
         return self.store.get_submission_case(scenario_pack)
 
+    def get_submission_case_by_trace(self, trace_id: str) -> SubmissionCasePin | None:
+        return self.store.get_submission_case_by_trace(trace_id)
+
     def list_submission_cases(self) -> list[SubmissionCasePin]:
         return self.store.list_submission_cases()
 
@@ -315,6 +323,15 @@ class ObservationVLAService:
                 learned_score=float(learned_score),
                 realized_utility=float(realized_utility),
             )
+            snapshot = trust_model.get_weight_snapshot()
+            ttt_gates = evaluate_ttt_viability(snapshot)
+            failed_gates = [g for g, ok in ttt_gates.items() if not ok]
+            if failed_gates:
+                logger.warning(
+                    "TTT viability gate failures after update #%d: %s",
+                    snapshot.get("update_count", 0),
+                    failed_gates,
+                )
         except Exception:
             pass  # never let TTT callback crash the outcome registration
 
@@ -447,8 +464,8 @@ class ObservationVLAService:
             except KeyError:
                 mission_response = None
 
-        submission_case = self.store.get_submission_case(trace.scenario_pack)
-        pinned_here = submission_case is not None and submission_case.trace_id == trace_id
+        submission_case = self.store.get_submission_case_by_trace(trace_id)
+        pinned_here = submission_case is not None
         current_label_source = outcome.label_source if outcome is not None else None
         ready_for_submission_case = outcome is not None and outcome.label_source == "operator_review"
 

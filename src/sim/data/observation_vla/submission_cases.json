@@ -10,9 +10,9 @@
       "outcome_id": "out_ac217093c0b246af886ebd3052252ed8",
       "label_source": "operator_review",
       "reviewer": "Ben Haslam",
-      "pinned_at": "2026-04-10T17:35:19Z",
+      "pinned_at": "2026-04-23T21:29:50Z",
       "pinned_by": "Ben Haslam",
-      "notes": "No observable cloud cover, user wouldn't know Suez canal but appears correct and useful."
+      "notes": "Re-pinned for visual legibility after reviewing assistant-generated Port of Singapore replacement."
     },
     {
       "scenario_pack": "disaster_response_weather",
@@ -23,22 +23,22 @@
       "outcome_id": "out_1e919a3d45104aeabf469fb00383a4da",
       "label_source": "operator_review",
       "reviewer": "Ben Haslam",
-      "pinned_at": "2026-04-10T17:35:19Z",
+      "pinned_at": "2026-04-23T21:29:50Z",
       "pinned_by": "Ben Haslam",
-      "notes": "No observable cloud cover, user wouldn't know Houston but appears correct and useful."
+      "notes": "Re-pinned for visual legibility after reviewing assistant-generated Fort Myers replacement."
     },
     {
       "scenario_pack": "urban_coastal_ambiguity",
-      "trace_id": "trace_a4e31b4c39224d8fbdb2c4bf0f444823",
-      "decision_id": "dec_ae382895c85a4aba9a73201ac8a1568f",
-      "target_id": "sf_bay",
-      "target_label": "San Francisco Bay",
-      "outcome_id": "out_4780e7859b1741f9a9ef7399e16968a8",
+      "trace_id": "trace_4f65355f5c954fbf8db3fc684bb377af",
+      "decision_id": "dec_6b473ac21b4b4075979e14d73fa021ed",
+      "target_id": "rotterdam",
+      "target_label": "Port of Rotterdam",
+      "outcome_id": "out_824f60a0400241f48f3c01f3316239bb",
       "label_source": "operator_review",
       "reviewer": "Ben Haslam",
-      "pinned_at": "2026-04-10T17:35:19Z",
+      "pinned_at": "2026-04-23T21:42:15Z",
       "pinned_by": "Ben Haslam",
-      "notes": "No observable cloud cover, user wouldn't know SF Bay at all but accepted as correct and useful."
+      "notes": "Human reviewed confirmed Rotterdam challenge case."
     }
   ]
 }

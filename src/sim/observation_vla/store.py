@@ -23,6 +23,7 @@ class ObservationStore:
         self._lock = threading.RLock()
         self.base_dir.mkdir(parents=True, exist_ok=True)
         self._ensure_schema()
+        self._migrate_submission_cases_pk()
         self._maybe_import_legacy_json()
 
     def _connect(self) -> sqlite3.Connection:
@@ -102,8 +103,8 @@ class ObservationStore:
                     ON observation_memory_states(scope, last_updated DESC);
 
                 CREATE TABLE IF NOT EXISTS observation_submission_cases (
-                    scenario_pack TEXT PRIMARY KEY,
-                    trace_id TEXT NOT NULL,
+                    trace_id TEXT PRIMARY KEY,
+                    scenario_pack TEXT NOT NULL,
                     pinned_at TEXT NOT NULL,
                     target_id TEXT NOT NULL,
                     target_label TEXT NOT NULL,
@@ -112,6 +113,8 @@ class ObservationStore:
                 );
                 CREATE INDEX IF NOT EXISTS idx_observation_submission_cases_pinned_at
                     ON observation_submission_cases(pinned_at DESC);
+                CREATE INDEX IF NOT EXISTS idx_observation_submission_cases_scenario_pack
+                    ON observation_submission_cases(scenario_pack, pinned_at DESC);
                 """
             )
 
@@ -125,9 +128,69 @@ class ObservationStore:
         items = payload.get(key, []) if isinstance(payload, dict) else []
         return list(items) if isinstance(items, list) else []
 
+    def _migrate_submission_cases_pk(self) -> None:
+        """Migrate observation_submission_cases from scenario_pack PK → trace_id PK.
+
+        Safe to call every startup — detects whether migration is needed via
+        PRAGMA table_info, and no-ops if already on the new schema.
+        """
+        with self._lock, closing(self._connect()) as connection, connection:
+            cols = {
+                row[1]
+                for row in connection.execute(
+                    "PRAGMA table_info(observation_submission_cases)"
+                ).fetchall()
+            }
+            if not cols:
+                return  # table not yet created
+            # Check if scenario_pack is still the primary key (pk column = 1)
+            pk_cols = {
+                row[1]
+                for row in connection.execute(
+                    "PRAGMA table_info(observation_submission_cases)"
+                ).fetchall()
+                if row[5] == 1  # pk flag
+            }
+            if "trace_id" in pk_cols:
+                return  # already migrated
+            # Need to migrate: old PK = scenario_pack, new PK = trace_id
+            connection.executescript(
+                """
+                ALTER TABLE observation_submission_cases
+                    RENAME TO observation_submission_cases_old;
+                CREATE TABLE observation_submission_cases (
+                    trace_id TEXT PRIMARY KEY,
+                    scenario_pack TEXT NOT NULL,
+                    pinned_at TEXT NOT NULL,
+                    target_id TEXT NOT NULL,
+                    target_label TEXT NOT NULL,
+                    outcome_id TEXT NOT NULL,
+                    raw_json TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS idx_observation_submission_cases_pinned_at
+                    ON observation_submission_cases(pinned_at DESC);
+                CREATE INDEX IF NOT EXISTS idx_observation_submission_cases_scenario_pack
+                    ON observation_submission_cases(scenario_pack, pinned_at DESC);
+                INSERT INTO observation_submission_cases
+                    SELECT trace_id, scenario_pack, pinned_at, target_id, target_label, outcome_id, raw_json
+                    FROM observation_submission_cases_old;
+                DROP TABLE observation_submission_cases_old;
+                """
+            )
+
+    _VALID_TABLES = frozenset({
+        "observation_assessments",
+        "observation_traces",
+        "observation_outcomes",
+        "observation_memory_states",
+        "observation_submission_cases",
+    })
+
     def _table_has_rows(self, table: str) -> bool:
+        if table not in self._VALID_TABLES:
+            raise ValueError(f"Unknown table: {table!r}")
         with closing(self._connect()) as connection, connection:
-            row = connection.execute(f"SELECT 1 FROM {table} LIMIT 1").fetchone()
+            row = connection.execute(f"SELECT 1 FROM {table} LIMIT 1").fetchone()  # noqa: S608
         return row is not None
 
     def _maybe_import_legacy_json(self) -> None:
@@ -407,8 +470,8 @@ class ObservationStore:
             connection.execute(
                 """
                 INSERT OR REPLACE INTO observation_submission_cases(
-                    scenario_pack,
                     trace_id,
+                    scenario_pack,
                     pinned_at,
                     target_id,
                     target_label,
@@ -418,8 +481,8 @@ class ObservationStore:
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
-                    pin.scenario_pack,
                     pin.trace_id,
+                    pin.scenario_pack,
                     pin.pinned_at,
                     pin.target_id,
                     pin.target_label,
@@ -429,10 +492,28 @@ class ObservationStore:
             )
         return pin
 
-    def get_submission_case(self, scenario_pack: str) -> SubmissionCasePin | None:
+    def get_submission_case_by_trace(self, trace_id: str) -> SubmissionCasePin | None:
+        """Look up a pinned case by its trace_id (exact match)."""
         with self._lock, closing(self._connect()) as connection, connection:
             row = connection.execute(
-                "SELECT raw_json FROM observation_submission_cases WHERE scenario_pack = ?",
+                "SELECT raw_json FROM observation_submission_cases WHERE trace_id = ?",
+                (trace_id,),
+            ).fetchone()
+        if row is None:
+            return None
+        return SubmissionCasePin.from_dict(json.loads(str(row["raw_json"])))
+
+    def get_submission_case(self, scenario_pack: str) -> SubmissionCasePin | None:
+        """Return the most-recently-pinned case for a scenario_pack.
+
+        Backward-compatible: callers that need pack-level lookup still work.
+        For exact trace lookup, use get_submission_case_by_trace(trace_id).
+        """
+        with self._lock, closing(self._connect()) as connection, connection:
+            row = connection.execute(
+                """SELECT raw_json FROM observation_submission_cases
+                   WHERE scenario_pack = ?
+                   ORDER BY pinned_at DESC LIMIT 1""",
                 (scenario_pack,),
             ).fetchone()
         if row is None:

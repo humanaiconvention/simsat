@@ -190,6 +190,6 @@ class Simulator:
         self.utcg_time = self.sim_t0
         self.currentTime_EpSec = 0
         self.start_time = None
-        print(f"[SIM COMMAND] Simulation start time set to: {datetime.datetime.fromtimestamp(self.sim_t0).isoformat()}")
+        print(f"[SIM COMMAND] Simulation start time set to: {datetime.datetime.fromtimestamp(self.sim_t0, tz=datetime.timezone.utc).isoformat().replace('+00:00', 'Z')}")
         return True
         

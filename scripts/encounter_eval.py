@@ -6,11 +6,7 @@ from typing import Iterable
 
 import requests
 
-KNOWN_SCENARIO_PACKS = [
-    "maritime_chokepoints",
-    "disaster_response_weather",
-    "urban_coastal_ambiguity",
-]
+from challenge_run_config import KNOWN_SCENARIO_PACKS, parse_scenario_hours, resolve_scenario_hours
 
 
 def run_evaluation(
@@ -121,6 +117,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Compare scaffold vs WCLI-trust encounter planners.")
     parser.add_argument("--base-url", default="http://127.0.0.1:8000/sim", help="Encounter API base URL")
     parser.add_argument("--hours", type=float, default=6.0)
+    parser.add_argument(
+        "--policy",
+        choices=["uniform", "smoke", "competition"],
+        default="uniform",
+        help="Use shared per-scenario run hours instead of one uniform horizon.",
+    )
+    parser.add_argument("--scenario-hours", action="append", default=[], help="Per-scenario override in the form scenario_pack=hours")
     parser.add_argument("--step-seconds", type=int, default=120)
     parser.add_argument("--top-k", type=int, default=10)
     parser.add_argument("--materialize-top-k", type=int, default=3)
@@ -131,10 +134,16 @@ def main() -> None:
 
     try:
         if args.scenario_sweep:
+            scenario_hours = resolve_scenario_hours(
+                scenarios=KNOWN_SCENARIO_PACKS,
+                default_hours=args.hours,
+                policy=None if args.policy == "uniform" else args.policy,
+                overrides=parse_scenario_hours(args.scenario_hours),
+            )
             evaluations = [
                 run_evaluation(
                     base_url=args.base_url,
-                    hours=args.hours,
+                    hours=scenario_hours[scenario_pack],
                     step_seconds=args.step_seconds,
                     top_k=args.top_k,
                     materialize_top_k=args.materialize_top_k,

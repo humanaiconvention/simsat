@@ -151,7 +151,7 @@ def _gate_participation_covenant(session: "ConventionSession") -> bool:
         )
         return False
 
-    total_words = sum(len(t["content"].split()) for t in user_turns)
+    total_words = sum(len(t.get("content", "").split()) for t in user_turns)
     if total_words < MIN_WORD_COUNT:
         logger.debug(
             "participation_covenant FAILED: only %d words (min %d)",
@@ -201,7 +201,7 @@ def _gate_epistemic_alignment(session: "ConventionSession") -> bool:
     # Check human vocabulary diversity across turns
     all_words = []
     for t in user_turns:
-        all_words.extend(t["content"].lower().split())
+        all_words.extend(t.get("content", "").lower().split())
     if len(all_words) > 0:
         unique_ratio = len(set(all_words)) / len(all_words)
         if unique_ratio < 0.3:
@@ -244,3 +244,106 @@ def _compute_extraction_risk(session: "ConventionSession") -> float:
         risk += 0.02
 
     return min(1.0, round(risk, 4))
+
+
+# ── TTT (Test-Time Training) Viability Gates ──────────────────────────────
+
+# Thresholds for trust-model online adaptation health
+MAX_TTT_WEIGHT_DRIFT = 0.30     # max absolute per-weight drift from policy default
+MAX_TTT_UPDATE_COUNT = 1000     # recommend manual reset above this update count
+TTT_BIAS_WINDOW = 10            # number of recent updates to inspect for systematic bias
+TTT_BIAS_THRESHOLD = 0.70       # fraction of same-sign errors = systematic bias
+
+
+def evaluate_ttt_viability(trust_snapshot: dict) -> Dict[str, bool]:
+    """
+    Evaluate 3 non-compensatory viability gates for the trust-layer TTT state.
+
+    Called after each trust_model.online_update() to detect adaptation drift,
+    saturation, or systematic error bias.  Returns a dict of gate_name → passed.
+    A failed gate does not stop adaptation (the update already ran), but triggers
+    a WARNING log so operators can intervene.
+
+    Args:
+        trust_snapshot: dict returned by WCLITrustModel.get_weight_snapshot()
+    """
+    gates: Dict[str, bool] = {}
+
+    gates["weight_drift"] = _gate_ttt_weight_drift(trust_snapshot)
+    gates["update_rate"] = _gate_ttt_update_rate(trust_snapshot)
+    gates["error_bias"] = _gate_ttt_error_bias(trust_snapshot)
+
+    passed = sum(gates.values())
+    logger.info(
+        "TTT viability check (update #%d): %d/3 gates — %s",
+        trust_snapshot.get("update_count", 0),
+        passed,
+        {k: ("✓" if v else "✗") for k, v in gates.items()},
+    )
+    return gates
+
+
+def _gate_ttt_weight_drift(trust_snapshot: dict) -> bool:
+    """TTT Gate 1: No single weight has drifted > MAX_TTT_WEIGHT_DRIFT from its policy default.
+
+    Excessive drift indicates the trust model is over-fitting to a short run of
+    operator labels, discarding policy priors.
+    """
+    drift = trust_snapshot.get("drift_from_policy_defaults", {})
+    if not drift:
+        return True  # No drift data — gate passes vacuously
+
+    for key, delta in drift.items():
+        if abs(delta) > MAX_TTT_WEIGHT_DRIFT:
+            logger.debug(
+                "ttt weight_drift FAILED: weight '%s' drifted %.4f > %.4f",
+                key, abs(delta), MAX_TTT_WEIGHT_DRIFT,
+            )
+            return False
+    return True
+
+
+def _gate_ttt_update_rate(trust_snapshot: dict) -> bool:
+    """TTT Gate 2: Total update count ≤ MAX_TTT_UPDATE_COUNT.
+
+    Above 1 000 updates, the model has been adapted through many operator sessions;
+    recommend a manual weight-snapshot review and reset.
+    """
+    count = trust_snapshot.get("update_count", 0)
+    passed = count <= MAX_TTT_UPDATE_COUNT
+    if not passed:
+        logger.debug(
+            "ttt update_rate FAILED: update_count=%d > %d — recommend weight reset",
+            count, MAX_TTT_UPDATE_COUNT,
+        )
+    return passed
+
+
+def _gate_ttt_error_bias(trust_snapshot: dict) -> bool:
+    """TTT Gate 3: No systematic error bias in the most recent TTT_BIAS_WINDOW updates.
+
+    If ≥ TTT_BIAS_THRESHOLD (70 %) of recent prediction errors share the same sign,
+    the trust model is systematically over- or under-estimating realized utility,
+    which invalidates its adaptation signal.
+    """
+    recent = trust_snapshot.get("recent_updates", [])
+    window = recent[-TTT_BIAS_WINDOW:] if len(recent) > TTT_BIAS_WINDOW else recent
+    if len(window) < 3:
+        return True  # Not enough history — pass by default
+
+    errors = [u.get("error", 0.0) for u in window if "error" in u]
+    if len(errors) < 3:
+        return True
+
+    positive = sum(1 for e in errors if e > 0)
+    negative = sum(1 for e in errors if e < 0)
+    total = len(errors)
+    frac_same_sign = max(positive, negative) / total
+
+    passed = frac_same_sign < TTT_BIAS_THRESHOLD
+    if not passed:
+        logger.debug(
+            "ttt error_bias FAILED: %.1f%% of last %d errors share same sign (threshold %.1f%%)",
+            frac_same_sign * 100, total, TTT_BIAS_THRESHOLD * 100,
+        )
+    return passed

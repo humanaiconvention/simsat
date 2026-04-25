@@ -3,7 +3,6 @@ from __future__ import annotations
 import base64
 import importlib.util
 import io
-import math
 import os
 from typing import Any
 

@@ -4,8 +4,12 @@ This folder ships two ObservationVLA backends:
 
 | Backend file | Class | `runtime_mode` | Purpose |
 |---|---|---|---|
-| `adapter.py` (existing) | `ObservationVLMAdapter` | `clip_local`, `http_endpoint`, `stub`, `stub_fallback` | Baseline CLIP + stub path |
-| `transformers_vlm_local.py` (NEW) | `TransformersVLMAdapter` | `transformers_vlm_local`, `stub_fallback` | **Model-agnostic template** for any transformers VLM or GGUF model |
+| `adapter.py` | `ObservationVLMAdapter` | `clip_local`, `http_endpoint`, `stub`, `stub_fallback` | Baseline CLIP + stub path |
+| `transformers_vlm_local.py` | `TransformersVLMAdapter` | `transformers_vlm_local`, `stub_fallback` | **Model-agnostic template** — any transformers VLM or GGUF |
+| `genesis_local.py` | `GenesisAdapter` | `genesis_local`, `stub_fallback` | Guilherme's Genesis model (collaborator seat) |
+| `tesseract_t3_local.py` | `TesseractT3Adapter` | `tesseract_t3_local`, `stub_fallback` | Garrett's Tesseract T3 (collaborator seat) |
+| `gemma4_haic_local.py` | `Gemma4HAICAdapter` | `gemma4_haic_local`, `stub_fallback` | HAIC v35-gov fine-tune (reference / legacy) |
+| `backend_factory.py` | `build_vla_adapter()` | — | **Factory** — reads `OBSERVATION_VLA_BACKEND`, returns the right adapter |
 
 Both classes expose the same public interface (`assess(prompt, images, response_schema)`, `.runtime_mode`, `.model_id`).
 
@@ -18,14 +22,18 @@ Both classes expose the same public interface (`assess(prompt, images, response_
 
 Why: the v35-gov HAIC Gemma-4 model is a human-interview / consent-governance fine-tune — it pivots on emotional user input, not satellite imagery. It was the wrong shape for SimSat Entry B. The scaffold is retained as a **template** so the same structure can host whichever model Entry A and Entry B actually ship.
 
-## Planned model assignments (as of 2026-04-21)
+## Model assignments (as of 2026-04-24)
 
-| Track | Entry | Model | Status |
-|---|---|---|---|
-| Liquid Track | Entry A | **LFM2-VL** or **LFM2.5-VL** (prefer 2.5-VL — newer generation, Lu.ma page explicitly lists both as eligible) | To be fine-tuned on Sentinel imagery |
-| General AI Track | Entry B | **Gemma-4-based fine-tune**, SimSat-specific (NOT v35-gov) | To be trained — new dataset & run scoped for this competition |
+| Track | Entry | Backend key | Model | Status |
+|---|---|---|---|---|
+| Liquid Track | Entry A | `transformers_vlm` | **LFM2.5-VL** encoder → MuZero `h()` | Encoder stub wired; weight loader pending |
+| General AI Track | Entry B (primary) | `gemma4` | **Gemma-4-E2B** SimSat fine-tune | Kernel v3 ready; GPU quota resets ~15:15 today |
+| General AI Track | Entry B (collaborator) | `genesis` | **Genesis** (Guilherme Mesquita) | Adapter wired; weights pending collaborator |
+| General AI Track | Entry B (collaborator) | `tesseract_t3` | **Tesseract T3** (Garrett Sutherland) | Adapter wired; weights pending collaborator |
 
-Both models will load through this same `TransformersVLMAdapter` by swapping env vars.
+All General AI Track backends load through `TransformersVLMAdapter` by swapping env vars.
+Model adaptability is an explicit part of the entry — the governed pipeline is
+the contribution, not any single model checkpoint.
 
 ## Env vars
 
@@ -92,17 +100,15 @@ services:
 
 ## Wire the factory
 
-Find wherever the sim service instantiates `ObservationVLMAdapter(...)` and add a dispatch:
+`backend_factory.py` ships the full dispatch. `runtime.py` already uses it:
 
 ```python
-def _make_adapter():
-    backend = os.environ.get("OBSERVATION_VLA_BACKEND", "auto").strip().lower()
-    if backend == "transformers_vlm_local":
-        from observation_vla.transformers_vlm_local import TransformersVLMAdapter
-        return TransformersVLMAdapter()
-    from observation_vla.adapter import ObservationVLMAdapter
-    return ObservationVLMAdapter()
+from observation_vla.backend_factory import build_vla_adapter
+adapter = build_vla_adapter()   # reads OBSERVATION_VLA_BACKEND env var
 ```
+
+Supported `OBSERVATION_VLA_BACKEND` values: `clip_local` (default), `gemma4`,
+`genesis`, `tesseract_t3`, `transformers_vlm`, `gemma4_haic`, `stub`.
 
 ## Payload contract (unchanged)
 

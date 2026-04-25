@@ -3758,7 +3758,7 @@
       "target_id": "rotterdam",
       "window_id": "enc_50596d542a49b54f",
       "stimulus_id": "2e926985-0b44-470e-86a7-59b73372f3f8",
-      "outcome_id": null,
+      "outcome_id": "out_824f60a0400241f48f3c01f3316239bb",
       "sample": {
         "sample_id": "obs_06222005fc474074a6a35ae44cb7faf6",
         "decision_id": "dec_6b473ac21b4b4075979e14d73fa021ed",
@@ -15467,7 +15467,7 @@
       "target_id": "singapore_port",
       "window_id": "enc_87f578f1b9ecf963",
       "stimulus_id": "d5e2dca1-c1f5-44b0-a653-4ae18dfb8f3f",
-      "outcome_id": null,
+      "outcome_id": "out_26d9d482cb3a4c7787a653c8283e6750",
       "sample": {
         "sample_id": "obs_f613b5c5c2bf48fa9a68a6bfb482f1e0",
         "decision_id": "dec_cde38e345c864bf0a3cc0dadc9714bde",
@@ -20280,7 +20280,7 @@
       "target_id": "rotterdam",
       "window_id": "enc_2771aa41b67d98cc",
       "stimulus_id": "13a77bcd-d542-41f9-bbc4-0b298da08f8e",
-      "outcome_id": null,
+      "outcome_id": "out_625975908b7b4e95a99f207fadac26d4",
       "sample": {
         "sample_id": "obs_990690dd15b646dd93617b950a587e0e",
         "decision_id": "dec_c9a2053021e94ba38150212ed82cf56b",
@@ -21039,7 +21039,7 @@
       "target_id": "fort_myers_coast",
       "window_id": "enc_c8b791762861b8b5",
       "stimulus_id": "8ea68e74-0f1f-4954-b35b-0b516fdedd94",
-      "outcome_id": null,
+      "outcome_id": "out_60d8d7effcc644e7b274b4ce0e7101b7",
       "sample": {
         "sample_id": "obs_30bba53f4ed64442b51e8f094ac31f34",
         "decision_id": "dec_f0265865c7484b9cbfc1f847e571bfdf",

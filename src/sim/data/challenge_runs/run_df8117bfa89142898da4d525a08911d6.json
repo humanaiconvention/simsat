@@ -1,0 +1,17 @@
+{
+  "run_id": "run_df8117bfa89142898da4d525a08911d6",
+  "created_at": "2026-04-23T22:44:42Z",
+  "runner": "challenge_offline_batch",
+  "scenario_policy": "competition",
+  "scenario_hours": {
+    "maritime_chokepoints": 48.0,
+    "disaster_response_weather": 16.0,
+    "urban_coastal_ambiguity": 8.0
+  },
+  "lanes": [
+    "matrix"
+  ],
+  "outputs": {},
+  "status": "running",
+  "notes": {}
+}

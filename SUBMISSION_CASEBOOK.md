@@ -1,8 +1,6 @@
 # SimSat Submission Casebook
 
-Generated on `2026-04-23T21:42:37Z` from pinned operator-reviewed submission cases.
-
-**Note:** The `disaster_response_weather` and `maritime_chokepoints` pinned traces carry `Observation runtime: stub` because they were labeled before the ObservationVLA backend was swapped to `clip_local`. The current backend's recommendation on the same imagery is tracked in `OBSERVATION_VLA_EVAL.md`; re-materialization under `clip_local` is shipped in `review/2026-04-21-phase-2/S3-rematerialize/`. The `urban_coastal_ambiguity` case (Rotterdam) was reviewed under `clip_local` and serves as the accept→refine demonstration case.
+Generated on `2026-04-25T15:34:13Z` from pinned operator-reviewed submission cases.
 
 ## disaster_response_weather
 
@@ -12,15 +10,15 @@ Generated on `2026-04-23T21:42:37Z` from pinned operator-reviewed submission cas
 - Operator action: `accept`
 - Useful: `True`
 - Usefulness score: `0.92`
-- Observation runtime: `stub`
+- Observation runtime: `clip_local`
 - Sentinel source: `sentinel-2c`
 - Cloud cover: `4.050763`
 - Review notes: No observable cloud cover, user wouldn't know Houston but appears correct and useful.
 - Mission response: action=`materialize_now`, utility_realized=`0.92`
 
-![Houston Ship Channel](submission_assets/disaster_response_weather_houston_ship_channel.png)
+![Houston Ship Channel](D:\SimSat\submission_assets\disaster_response_weather_houston_ship_channel.png)
 
-- Image asset: [submission_assets/disaster_response_weather_houston_ship_channel.png](submission_assets/disaster_response_weather_houston_ship_channel.png)
+- Image asset: [D:\SimSat\submission_assets\disaster_response_weather_houston_ship_channel.png](D:\SimSat\submission_assets\disaster_response_weather_houston_ship_channel.png)
 
 ## maritime_chokepoints
 
@@ -30,15 +28,33 @@ Generated on `2026-04-23T21:42:37Z` from pinned operator-reviewed submission cas
 - Operator action: `accept`
 - Useful: `True`
 - Usefulness score: `0.95`
-- Observation runtime: `stub`
+- Observation runtime: `clip_local`
 - Sentinel source: `sentinel-2a`
 - Cloud cover: `0.130026`
 - Review notes: No observable cloud cover, user wouldn't know Suez canal but appears correct and useful.
 - Mission response: action=`materialize_now`, utility_realized=`0.95`
 
-![Suez Canal](submission_assets/maritime_chokepoints_suez_canal.png)
+![Suez Canal](D:\SimSat\submission_assets\maritime_chokepoints_suez_canal.png)
 
-- Image asset: [submission_assets/maritime_chokepoints_suez_canal.png](submission_assets/maritime_chokepoints_suez_canal.png)
+- Image asset: [D:\SimSat\submission_assets\maritime_chokepoints_suez_canal.png](D:\SimSat\submission_assets\maritime_chokepoints_suez_canal.png)
+
+## urban_coastal_ambiguity
+
+- Target: `San Francisco Bay`
+- Trace: `trace_a4e31b4c39224d8fbdb2c4bf0f444823`
+- Reviewer: `Ben Haslam`
+- Operator action: `accept`
+- Useful: `True`
+- Usefulness score: `0.9`
+- Observation runtime: `clip_local`
+- Sentinel source: `sentinel-2b`
+- Cloud cover: `6.890936`
+- Review notes: No observable cloud cover, user wouldn't know SF Bay at all but accepted as correct and useful.
+- Mission response: action=`materialize_now`, utility_realized=`0.9`
+
+![San Francisco Bay](D:\SimSat\submission_assets\urban_coastal_ambiguity_san_francisco_bay.png)
+
+- Image asset: [D:\SimSat\submission_assets\urban_coastal_ambiguity_san_francisco_bay.png](D:\SimSat\submission_assets\urban_coastal_ambiguity_san_francisco_bay.png)
 
 ## urban_coastal_ambiguity
 
@@ -52,9 +68,8 @@ Generated on `2026-04-23T21:42:37Z` from pinned operator-reviewed submission cas
 - Sentinel source: `sentinel-2c`
 - Cloud cover: `48.782516`
 - Review notes: Human reviewed confirmed Rotterdam challenge case.
-- **Planner delta: scaffold `accept` → trust `refine` (reason: `cloud_risk`, 48.78% cover)**
 - Mission response: action=`escalate_operator`, utility_realized=`0.89`
 
-![Port of Rotterdam](submission_assets/urban_coastal_ambiguity_port_of_rotterdam.png)
+![Port of Rotterdam](D:\SimSat\submission_assets\urban_coastal_ambiguity_port_of_rotterdam.png)
 
-- Image asset: [submission_assets/urban_coastal_ambiguity_port_of_rotterdam.png](submission_assets/urban_coastal_ambiguity_port_of_rotterdam.png)
+- Image asset: [D:\SimSat\submission_assets\urban_coastal_ambiguity_port_of_rotterdam.png](D:\SimSat\submission_assets\urban_coastal_ambiguity_port_of_rotterdam.png)

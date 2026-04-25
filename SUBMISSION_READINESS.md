@@ -21,7 +21,7 @@
 | --- | --- | --- | --- | --- | --- |
 | disaster_response_weather | True | trace_1926b646ee4b48478913681a33fcdfb1 | Ben Haslam | True | True |
 | maritime_chokepoints | True | trace_2507337b7939460ebf01cbc9fcef8055 | Ben Haslam | True | True |
-| urban_coastal_ambiguity | True | trace_a4e31b4c39224d8fbdb2c4bf0f444823 | Ben Haslam | True | True |
+| urban_coastal_ambiguity | True | trace_4f65355f5c954fbf8db3fc684bb377af | Ben Haslam | True | True |
 
 ## Honesty Boundary
 

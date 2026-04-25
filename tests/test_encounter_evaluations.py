@@ -201,3 +201,30 @@ def test_evaluation_summary_order_and_round_trip(tmp_path):
     assert second.evaluation_id in ids
     assert all(evaluation.window_count == 2 for evaluation in evaluations[:2])
     assert all(evaluation.parameters["scenario_pack"] == "scope-1" for evaluation in evaluations[:2])
+
+
+def test_evaluate_reuses_cached_result_for_identical_parameters(tmp_path):
+    service = _encounter_service(tmp_path)
+    probe_service = service.probe_service
+
+    first = service.evaluate(
+        start_time="2026-03-10T12:00:00Z",
+        hours=1.0,
+        step_seconds=30,
+        top_k=5,
+        materialize_top_k=0,
+        scenario_pack="scope-1",
+    )
+    first_call_count = len(probe_service.calls)
+
+    second = service.evaluate(
+        start_time="2026-03-10T12:00:00Z",
+        hours=1.0,
+        step_seconds=30,
+        top_k=5,
+        materialize_top_k=0,
+        scenario_pack="scope-1",
+    )
+
+    assert second.evaluation_id == first.evaluation_id
+    assert len(probe_service.calls) == first_call_count

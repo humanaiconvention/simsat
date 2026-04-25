@@ -31,10 +31,10 @@ class TargetSpec:
     @classmethod
     def from_dict(cls, raw: Mapping[str, Any]) -> "TargetSpec":
         return cls(
-            target_id=str(raw["target_id"]),
-            label=str(raw["label"]),
-            lon=float(raw["lon"]),
-            lat=float(raw["lat"]),
+            target_id=str(raw.get("target_id", "")),
+            label=str(raw.get("label", "")),
+            lon=float(raw.get("lon", 0.0)),
+            lat=float(raw.get("lat", 0.0)),
             priority=float(raw.get("priority", 0.5)),
             size_km=float(raw.get("size_km", 5.0)),
             tags=list(raw.get("tags", [])),
@@ -89,12 +89,12 @@ class EncounterWindow:
     @classmethod
     def from_dict(cls, raw: Mapping[str, Any]) -> "EncounterWindow":
         return cls(
-            window_id=str(raw["window_id"]),
-            target_id=str(raw["target_id"]),
+            window_id=str(raw.get("window_id", "")),
+            target_id=str(raw.get("target_id", "")),
             encounter_type=str(raw.get("encounter_type", "imaging_window")),
-            start_time=str(raw["start_time"]),
-            end_time=str(raw["end_time"]),
-            peak_time=str(raw["peak_time"]),
+            start_time=str(raw.get("start_time", "")),
+            end_time=str(raw.get("end_time", "")),
+            peak_time=str(raw.get("peak_time", "")),
             satellite_position_peak=[float(v) for v in raw.get("satellite_position_peak", [0.0, 0.0, 0.0])],
             target_position=[float(v) for v in raw.get("target_position", [0.0, 0.0])],
             geometry=EncounterGeometry.from_dict(raw.get("geometry", {})),
@@ -120,8 +120,8 @@ class EncounterProbeResult:
     @classmethod
     def from_dict(cls, raw: Mapping[str, Any]) -> "EncounterProbeResult":
         return cls(
-            window_id=str(raw["window_id"]),
-            target_id=str(raw["target_id"]),
+            window_id=str(raw.get("window_id", "")),
+            target_id=str(raw.get("target_id", "")),
             mapbox_feasible=bool(raw.get("mapbox_feasible", False)),
             sentinel_available=raw.get("sentinel_available"),
             sentinel_cloud_cover=float(raw["sentinel_cloud_cover"]) if raw.get("sentinel_cloud_cover") is not None else None,
@@ -150,8 +150,8 @@ class EncounterFeatures:
     @classmethod
     def from_dict(cls, raw: Mapping[str, Any]) -> "EncounterFeatures":
         return cls(
-            window_id=str(raw["window_id"]),
-            target_id=str(raw["target_id"]),
+            window_id=str(raw.get("window_id", "")),
+            target_id=str(raw.get("target_id", "")),
             duration_seconds=float(raw.get("duration_seconds", 0.0)),
             peak_elevation_degrees=float(raw.get("peak_elevation_degrees", 0.0)),
             off_nadir_degrees=float(raw.get("off_nadir_degrees", 0.0)),
@@ -251,16 +251,16 @@ class DecisionArtifact:
     @classmethod
     def from_dict(cls, raw: Mapping[str, Any]) -> "DecisionArtifact":
         return cls(
-            artifact_id=str(raw["artifact_id"]),
-            decision_id=str(raw["decision_id"]),
-            created_at=str(raw["created_at"]),
-            model_id=str(raw["model_id"]),
-            policy_hash=str(raw["policy_hash"]),
-            window_hash=str(raw["window_hash"]),
-            feature_hash=str(raw["feature_hash"]),
-            decision_hash=str(raw["decision_hash"]),
-            merkle_root=str(raw["merkle_root"]),
-            action=str(raw["action"]),
+            artifact_id=str(raw.get("artifact_id", "")),
+            decision_id=str(raw.get("decision_id", "")),
+            created_at=str(raw.get("created_at", "")),
+            model_id=str(raw.get("model_id", "")),
+            policy_hash=str(raw.get("policy_hash", "")),
+            window_hash=str(raw.get("window_hash", "")),
+            feature_hash=str(raw.get("feature_hash", "")),
+            decision_hash=str(raw.get("decision_hash", "")),
+            merkle_root=str(raw.get("merkle_root", "")),
+            action=str(raw.get("action", "skip")),
         )
 
 
@@ -335,6 +335,9 @@ class EncounterPolicy:
         }
     )
     trust_refine_threshold: float = 0.55
+    trust_refine_margin: float = 0.15
+    trust_refine_combined_cap: float = 0.72
+    trust_compound_risk_min: int = 2
     trust_accept_min: float = 0.45
     agreement_scale: float = 0.35
     residual_scale: float = 0.12
@@ -467,6 +470,55 @@ class EncounterEvaluation:
             trust_summary=PlannerEvaluationSummary.from_dict(trust) if trust else None,
             action_transition_counts={str(k): int(v) for k, v in dict(raw.get("action_transition_counts", {})).items()},
             decision_deltas=[DecisionDelta.from_dict(raw_delta) for raw_delta in raw.get("decision_deltas", [])],
+        )
+
+
+@dataclass
+class EncounterEvaluationPrimitive:
+    primitive_id: str = field(default_factory=lambda: f"eprim_{uuid.uuid4().hex}")
+    cache_key: str = ""
+    created_at: str = ""
+    policy_version: str = ""
+    scenario_pack: str = "all"
+    parameters: dict[str, Any] = field(default_factory=dict)
+    window_count: int = 0
+    sample_window_ids: list[str] = field(default_factory=list)
+    scaffold_records: list[EncounterRecord] = field(default_factory=list)
+    trust_records: list[EncounterRecord] = field(default_factory=list)
+    action_transition_counts: dict[str, int] = field(default_factory=dict)
+    decision_deltas: list[DecisionDelta] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "primitive_id": self.primitive_id,
+            "cache_key": self.cache_key,
+            "created_at": self.created_at,
+            "policy_version": self.policy_version,
+            "scenario_pack": self.scenario_pack,
+            "parameters": self.parameters,
+            "window_count": self.window_count,
+            "sample_window_ids": self.sample_window_ids,
+            "scaffold_records": [record.to_dict() for record in self.scaffold_records],
+            "trust_records": [record.to_dict() for record in self.trust_records],
+            "action_transition_counts": self.action_transition_counts,
+            "decision_deltas": [delta.to_dict() for delta in self.decision_deltas],
+        }
+
+    @classmethod
+    def from_dict(cls, raw: Mapping[str, Any]) -> "EncounterEvaluationPrimitive":
+        return cls(
+            primitive_id=str(raw.get("primitive_id", f"eprim_{uuid.uuid4().hex}")),
+            cache_key=str(raw.get("cache_key", "")),
+            created_at=str(raw.get("created_at", "")),
+            policy_version=str(raw.get("policy_version", "")),
+            scenario_pack=str(raw.get("scenario_pack", "all")),
+            parameters=dict(raw.get("parameters", {})),
+            window_count=int(raw.get("window_count", 0)),
+            sample_window_ids=[str(v) for v in raw.get("sample_window_ids", [])],
+            scaffold_records=[EncounterRecord.from_dict(item) for item in raw.get("scaffold_records", [])],
+            trust_records=[EncounterRecord.from_dict(item) for item in raw.get("trust_records", [])],
+            action_transition_counts={str(k): int(v) for k, v in dict(raw.get("action_transition_counts", {})).items()},
+            decision_deltas=[DecisionDelta.from_dict(item) for item in raw.get("decision_deltas", [])],
         )
 
 

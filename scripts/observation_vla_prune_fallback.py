@@ -9,7 +9,7 @@ import shutil
 import sys
 
 
-ROOT = Path("D:/SimSat")
+ROOT = Path(__file__).resolve().parents[1]
 OBS_DIR = ROOT / "src" / "sim" / "data" / "observation_vla"
 MISSION_DIR = ROOT / "src" / "sim" / "data" / "mission_response"
 

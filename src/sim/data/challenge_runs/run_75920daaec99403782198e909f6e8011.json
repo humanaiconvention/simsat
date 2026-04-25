@@ -1,0 +1,19 @@
+{
+  "run_id": "run_75920daaec99403782198e909f6e8011",
+  "created_at": "2026-04-23T22:49:03Z",
+  "runner": "challenge_offline_batch",
+  "scenario_policy": "competition",
+  "scenario_hours": {
+    "maritime_chokepoints": 48.0,
+    "disaster_response_weather": 16.0,
+    "urban_coastal_ambiguity": 8.0
+  },
+  "lanes": [
+    "matrix"
+  ],
+  "outputs": {
+    "matrix": "D:\\SimSat\\CHALLENGE_TEST_STATUS.md"
+  },
+  "status": "completed",
+  "notes": {}
+}

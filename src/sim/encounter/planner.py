@@ -78,6 +78,8 @@ class AnalyticPlanner:
         action = "skip"
         if refinement_reason is not None:
             action = "refine"
+            if refinement_reason not in reason_codes:
+                reason_codes.append(refinement_reason)
         elif combined_score >= self.policy.accept_threshold and trust_score >= self.policy.trust_accept_min:
             action = "accept"
         elif combined_score >= self.policy.defer_threshold:
