@@ -1,0 +1,38 @@
+# SimSat pre-commit hooks.
+# Install once per clone:
+#   pip install pre-commit
+#   pre-commit install
+#
+# Hooks run on `git commit`. To run manually across all files:
+#   pre-commit run --all-files
+
+repos:
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.7.1
+    hooks:
+      - id: nbstripout
+        name: Strip notebook outputs (keeps diffs small)
+        files: \.ipynb$
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: \.ipynb$
+      - id: end-of-file-fixer
+        exclude: \.ipynb$
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+        exclude: '^(notebooks/.*\.ipynb|src/sim/data/.*\.json|.*\.png)$'
+      - id: check-merge-conflict
+      - id: detect-private-key
+
+  - repo: local
+    hooks:
+      - id: no-hardcoded-paths
+        name: Reject hardcoded D:/SimSat or C:/Users/benja in code
+        entry: python -c "import re,sys; bad=[(f,l+1,line) for f in sys.argv[1:] for l,line in enumerate(open(f,encoding='utf-8',errors='ignore').readlines()) if re.search(r'D:[/\\\\]SimSat|C:[/\\\\]Users[/\\\\]benja', line)]; sys.exit(0 if not bad else (print('Hardcoded path:',*bad,sep='\\n') or 1))"
+        language: system
+        files: \.(py|toml|yaml|yml)$
+        exclude: '^(KNOWN_ISSUES\.md|CONTRIBUTING\.md|\.github/.*)$'

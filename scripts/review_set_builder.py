@@ -414,9 +414,10 @@ def main() -> None:
     parser.add_argument("--target-quota", type=int, default=3)
     parser.add_argument("--max-quality-skips-per-target", type=int, default=12)
     parser.add_argument("--queue-limit-per-scenario", type=int, default=8)
-    parser.add_argument("--queue-output", default=str(Path("D:/SimSat/REVIEW_QUEUE.md")))
-    parser.add_argument("--queue-assets-dir", default=str(Path("D:/SimSat/review_queue_assets")))
-    parser.add_argument("--summary-output", default=str(Path("D:/SimSat/REVIEW_SET_BUILD.md")))
+    _repo_root = Path(__file__).resolve().parents[1]
+    parser.add_argument("--queue-output", default=str(_repo_root / "REVIEW_QUEUE.md"))
+    parser.add_argument("--queue-assets-dir", default=str(_repo_root / "review_queue_assets"))
+    parser.add_argument("--summary-output", default=str(_repo_root / "REVIEW_SET_BUILD.md"))
     args = parser.parse_args()
 
     client = None

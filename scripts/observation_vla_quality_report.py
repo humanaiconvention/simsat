@@ -247,8 +247,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Summarize ObservationVLA corpus quality and emit a model-backed review shortlist.")
     parser.add_argument("--base-url", default="http://127.0.0.1:8000/sim")
     parser.add_argument("--inprocess", action="store_true")
-    parser.add_argument("--output", default=str(Path("D:/SimSat/OBSERVATION_VLA_QUALITY.md")))
-    parser.add_argument("--assets-dir", default=str(Path("D:/SimSat/review_queue_assets")))
+    _repo_root = Path(__file__).resolve().parents[1]
+    parser.add_argument("--output", default=str(_repo_root / "OBSERVATION_VLA_QUALITY.md"))
+    parser.add_argument("--assets-dir", default=str(_repo_root / "review_queue_assets"))
     args = parser.parse_args()
 
     client = None

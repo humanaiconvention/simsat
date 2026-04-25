@@ -1,54 +1,42 @@
+from contextlib import asynccontextmanager
+import logging
 from fastapi import FastAPI, HTTPException, Query, Response
 from typing import List, Literal, Optional
 import base64
 import json
 from datetime import datetime, timezone
-from ImagingProviders.sentinel_provider import SentinelProvider
-from ImagingProviders.mapbox_provider import MapboxlProvider
 from encounter import api_router as encounter_router
-from encounter.ephemeris import EphemerisService
-from encounter.features import FeatureBuilder
-from encounter.materialize import StimulusMaterializer
-from encounter.planner import AnalyticPlanner
-from encounter.policy import build_default_policy
-from encounter.probes import ImagingProbeService
-from encounter.service import EncounterService
-from encounter.store import get_encounter_store
-from encounter.targets import get_target_repository
-from encounter.trust_model import WCLITrustModel
-from encounter.windows import WindowDetector
 from haic.api_router import router as haic_router
 import haic.api_router as _haic_api
-from haic.stimulus_store import get_stimulus_store
 from mission_response import api_router as mission_response_router
-from mission_response.planner import MissionResponsePlanner
-from mission_response.policy import build_default_policy as build_mission_response_policy
-from mission_response.service import MissionResponseService
-from mission_response.store import MissionResponseStore
-from mission_response.utility import MissionUtilityModel
 from observation_vla import api_router as observation_vla_router
-from observation_vla.adapter import ObservationVLMAdapter
-from observation_vla.assessor import ObservationAssessor
-from observation_vla.dataset import ObservationDatasetBuilder
-from observation_vla.memory import ObservationTTTMemory
-from observation_vla.residual import ObservationResidualBuilder
-from observation_vla.service import ObservationVLAService
-from observation_vla.store import ObservationStore
-from orbit_config import DEFAULT_TLE, SATELLITE_NAME
+from runtime import build_runtime_bundle, build_runtime_capabilities
 
-api = FastAPI(title="SimSat API", description="Satellite simulation + HAIC convention layer")
+logger = logging.getLogger(__name__)
 
-sentinel = SentinelProvider()
 
-# Mapbox is optional — requires MAPBOX_ACCESS_TOKEN
-try:
-    mapbox = MapboxlProvider()
-except ValueError:
-    import logging as _logging
-    _logging.getLogger(__name__).warning(
-        "MAPBOX_ACCESS_TOKEN not set — Mapbox imagery disabled"
-    )
-    mapbox = None
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Inject providers into sub-routers after shared_data is available."""
+    from haic.prism_loop import get_prism_loop
+
+    shared = getattr(app.state, "shared_data", {})
+    runtime_bundle = build_runtime_bundle(shared)
+    app.state.runtime_bundle = runtime_bundle
+    bridge = runtime_bundle.encounter_service.materializer.bridge
+    app.state.haic_bridge = bridge
+    prism = get_prism_loop()
+    _haic_api.init(bridge, prism)
+    app.state.observation_vla_service = runtime_bundle.observation_vla_service
+    app.state.mission_response_service = runtime_bundle.mission_response_service
+    app.state.encounter_service = runtime_bundle.encounter_service
+    observation_vla_router.init(runtime_bundle.observation_vla_service)
+    mission_response_router.init(runtime_bundle.mission_response_service)
+    encounter_router.init(runtime_bundle.encounter_service)
+    yield
+
+
+api = FastAPI(title="SimSat API", description="Satellite simulation + HAIC convention layer", lifespan=lifespan)
 
 # Mount HAIC router
 api.include_router(haic_router)
@@ -98,80 +86,26 @@ def format_timestamp_utc(timestamp):
     return dt.replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
-def _build_encounter_service(
-    shared_data,
-    sentinel_provider: SentinelProvider,
-    mapbox_provider: MapboxlProvider | None,
-    observation_vla_service: ObservationVLAService,
-) -> EncounterService:
-    policy = build_default_policy()
-    bridge = api.state.haic_bridge
-    return EncounterService(
-        shared_data=shared_data,
-        target_repo=get_target_repository(),
-        ephemeris=EphemerisService(SATELLITE_NAME, DEFAULT_TLE),
-        window_detector=WindowDetector(
-            min_elevation_degrees=policy.min_elevation_degrees,
-            min_window_seconds=policy.min_window_seconds,
-        ),
-        probe_service=ImagingProbeService(
-            sentinel_provider=sentinel_provider,
-            mapbox_provider=mapbox_provider,
-        ),
-        feature_builder=FeatureBuilder(),
-        planner=AnalyticPlanner(policy, trust_model=WCLITrustModel(policy)),
-        store=get_encounter_store(),
-        materializer=StimulusMaterializer(bridge, get_stimulus_store()),
-        policy=policy,
-        observation_vla=observation_vla_service,
-    )
-
-
-def _build_observation_vla_service() -> ObservationVLAService:
-    adapter = ObservationVLMAdapter()
-    assessor = ObservationAssessor(adapter=adapter, model_id=adapter.model_id)
-    residual_builder = ObservationResidualBuilder()
-    store = ObservationStore()
-    memory = ObservationTTTMemory(store)
-    dataset_builder = ObservationDatasetBuilder()
-    return ObservationVLAService(
-        assessor=assessor,
-        residual_builder=residual_builder,
-        memory=memory,
-        dataset_builder=dataset_builder,
-        store=store,
-    )
-
-
-def _build_mission_response_service(
-    observation_vla_service: ObservationVLAService,
-) -> MissionResponseService:
-    policy = build_mission_response_policy()
-    return MissionResponseService(
-        planner=MissionResponsePlanner(policy),
-        utility_model=MissionUtilityModel(),
-        store=MissionResponseStore(),
-        policy=policy,
-        observation_vla=observation_vla_service,
-    )
-
-
 def get_runtime_capabilities() -> dict:
-    observation_vla_service = getattr(api.state, "observation_vla_service", None)
-    runtime_mode = "uninitialised"
-    model_id = None
-    if observation_vla_service is not None:
-        runtime_mode = observation_vla_service.assessor.adapter.runtime_mode
-        model_id = observation_vla_service.assessor.adapter.model_id
-    return {
-        "sentinel_enabled": sentinel is not None,
-        "mapbox_enabled": mapbox is not None,
-        "challenge_no_mapbox_safe": True,
-        "sentinel_first_challenge_scoring": True,
-        "high_res_perspective_optional": True,
-        "observation_vla_runtime_mode": runtime_mode,
-        "observation_vla_model_id": model_id,
-    }
+    runtime_bundle = getattr(api.state, "runtime_bundle", None)
+    if runtime_bundle is None:
+        return {
+            "sentinel_enabled": False,
+            "mapbox_enabled": False,
+            "challenge_no_mapbox_safe": True,
+            "sentinel_first_challenge_scoring": True,
+            "high_res_perspective_optional": True,
+            "observation_vla_runtime_mode": "uninitialised",
+            "observation_vla_model_id": None,
+        }
+    return build_runtime_capabilities(runtime_bundle)
+
+
+def _get_runtime_bundle():
+    runtime_bundle = getattr(api.state, "runtime_bundle", None)
+    if runtime_bundle is None:
+        raise HTTPException(status_code=503, detail="Runtime not initialised")
+    return runtime_bundle
 
 @api.get("/data/current/position")
 async def get_metrics():
@@ -194,6 +128,7 @@ async def get_sentinel_image(
     timestamp = getattr(api.state, "shared_data", {}).get("last_updated", None)
     if data is None:
         raise HTTPException(status_code=500, detail="Error fetching satellite position from shared data - is the simulator running?")
+    sentinel = _get_runtime_bundle().sentinel_provider
     sentinel_data = sentinel.get_single_image_lon_lat(
         data[0],
         data[1],
@@ -252,6 +187,8 @@ async def get_mapbox_image(
         satellite_position = getattr(api.state, "shared_data", {}).get("satellite_position", None)
         timestamp = getattr(api.state, "shared_data", {}).get("last_updated", None)
 
+        runtime_bundle = getattr(api.state, "runtime_bundle", None)
+        mapbox = runtime_bundle.mapbox_provider if runtime_bundle is not None else None
         if mapbox is None:
             raise HTTPException(status_code=503, detail="Mapbox imagery disabled — MAPBOX_ACCESS_TOKEN not set")
 
@@ -290,7 +227,7 @@ async def get_mapbox_image(
     except HTTPException:
         raise
     except Exception as e:
-        print(e)
+        logger.exception("Error fetching Mapbox image")
         raise HTTPException(status_code=500, detail="Error fetching Mapbox image: " + str(e))
 
 
@@ -304,6 +241,7 @@ async def get_sentinel_image_lon_lat(
     window_seconds: float = Query(default=10 * 24 * 60 * 60, gt=0),
     return_type: Literal["array", "png"] = "png"
 ):
+    sentinel = _get_runtime_bundle().sentinel_provider
     sentinel_data = sentinel.get_single_image_lon_lat(
         lon,
         lat,
@@ -359,6 +297,8 @@ async def get_mapbox_image_lon_lat(
     alt_satellite: float = Query(..., description="The altitude of the satellite", ge=0),
 ):
     try:
+        runtime_bundle = getattr(api.state, "runtime_bundle", None)
+        mapbox = runtime_bundle.mapbox_provider if runtime_bundle is not None else None
         if mapbox is None:
             raise HTTPException(status_code=503, detail="Mapbox imagery disabled — MAPBOX_ACCESS_TOKEN not set")
         mapbox_data = mapbox.get_target_image(lon_satellite, lat_satellite, alt_satellite, lon_target, lat_target)
@@ -382,7 +322,7 @@ async def get_mapbox_image_lon_lat(
     except HTTPException:
         raise
     except Exception as e:
-        print(e)
+        logger.exception("Error fetching Mapbox image")
         raise HTTPException(status_code=500, detail="Error fetching Mapbox image: " + str(e))
 
 
@@ -396,31 +336,3 @@ async def capabilities():
     return get_runtime_capabilities()
 
 
-@api.on_event("startup")
-async def _startup():
-    """Inject providers into the HAIC router after shared_data is available."""
-    from haic.bridge import StimulusBridge
-    from haic.prism_loop import get_prism_loop
-
-    shared = getattr(api.state, "shared_data", {})
-    bridge = StimulusBridge(
-        shared_data=shared,
-        sentinel_provider=sentinel,
-        mapbox_provider=mapbox,
-    )
-    api.state.haic_bridge = bridge
-    prism = get_prism_loop()
-    _haic_api.init(bridge, prism)
-    observation_vla_service = _build_observation_vla_service()
-    api.state.observation_vla_service = observation_vla_service
-    observation_vla_router.init(observation_vla_service)
-    mission_response_service = _build_mission_response_service(observation_vla_service)
-    api.state.mission_response_service = mission_response_service
-    mission_response_router.init(mission_response_service)
-    encounter_service = _build_encounter_service(shared, sentinel, mapbox, observation_vla_service)
-    api.state.encounter_service = encounter_service
-    observation_vla_service.attach_context(
-        encounter_service=encounter_service,
-        mission_response_service=mission_response_service,
-    )
-    encounter_router.init(encounter_service)

@@ -386,7 +386,7 @@ def main() -> None:
     parser.add_argument("--top-k", type=int, default=8)
     parser.add_argument("--materialize-top-k", type=int, default=2)
     parser.add_argument("--review-limit", type=int, default=10)
-    parser.add_argument("--output", default=str(Path("D:/SimSat/CHALLENGE_TEST_STATUS.md")))
+    parser.add_argument("--output", default=str(Path(__file__).resolve().parents[1] / "CHALLENGE_TEST_STATUS.md"))
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parents[1]

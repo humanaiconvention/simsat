@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import logging
 from copy import deepcopy
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, Mapping
+
+logger = logging.getLogger(__name__)
 
 from .artifacts import build_artifact
 from .ephemeris import EphemerisService
@@ -14,6 +17,7 @@ from .schemas import (
     DecisionDelta,
     EncounterDecision,
     EncounterEvaluation,
+    EncounterEvaluationPrimitive,
     EncounterPolicy,
     EncounterRecord,
     EncounterWindow,
@@ -111,11 +115,7 @@ class EncounterService:
         return evaluations[0]
 
     def list_evaluations(self, limit: int = 20, scenario_pack: str | None = None) -> list[EncounterEvaluation]:
-        evaluations = self.store.list_evaluations(limit=None if scenario_pack not in {None, "", "all"} else max(limit * 4, limit))
-        if scenario_pack is None or scenario_pack in {"", "all"}:
-            return evaluations[:limit]
-        filtered = [evaluation for evaluation in evaluations if evaluation.scenario_pack == scenario_pack]
-        return filtered[:limit]
+        return self.store.list_evaluations(limit=limit, scenario_pack=scenario_pack)
 
     def build_scenario_evidence(
         self,
@@ -135,11 +135,11 @@ class EncounterService:
                 delta_highlights=evaluation.decision_deltas[:case_limit] if evaluation else [],
             )
 
-        traces = [
-            trace for trace in self.observation_vla.list_traces(limit=trace_limit)
-            if trace.scenario_pack == scenario_pack
-        ]
-        outcomes = self.observation_vla.list_outcomes(limit=max(trace_limit * 2, trace_limit))
+        traces = self.observation_vla.list_traces(limit=trace_limit, scenario_pack=scenario_pack)
+        outcomes = self.observation_vla.list_outcomes(
+            limit=max(trace_limit * 2, trace_limit),
+            scenario_pack=scenario_pack,
+        )
         outcomes_by_trace = {outcome.trace_id: outcome for outcome in outcomes if outcome.trace_id}
         labelled_traces = [trace for trace in traces if trace.trace_id in outcomes_by_trace]
         unlabelled_traces = [trace for trace in traces if trace.trace_id not in outcomes_by_trace]
@@ -386,6 +386,10 @@ class EncounterService:
                 if has_imagery:
                     successes += 1
             except Exception:
+                logger.exception(
+                    "Materialization failed for decision %s (record skipped)",
+                    record.decision.decision_id,
+                )
                 continue
         return attempts, successes, attempted_ids
 
@@ -440,58 +444,116 @@ class EncounterService:
         materialize_top_k: int = 3,
         scenario_pack: str | None = None,
     ) -> EncounterEvaluation:
-        created_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-        windows = self.preview_windows(
-            start_time=start_time,
+        resolved_start_time = self._resolve_start_time(start_time)
+        scenario_key = scenario_pack or "all"
+        primitive_cache_key = self.store.build_primitive_cache_key(
+            policy_version=self.policy.policy_id,
+            scenario_pack=scenario_key,
+            start_time=resolved_start_time,
             hours=hours,
             step_seconds=step_seconds,
             top_k=top_k,
-            scenario_pack=scenario_pack,
         )
+        evaluation_cache_key = self.store.build_full_cache_key(
+            policy_version=self.policy.policy_id,
+            scenario_pack=scenario_key,
+            start_time=resolved_start_time,
+            hours=hours,
+            step_seconds=step_seconds,
+            top_k=top_k,
+            materialize_top_k=materialize_top_k,
+        )
+        cached_evaluation = self.store.get_evaluation_by_cache_key(evaluation_cache_key)
+        if cached_evaluation is not None:
+            return cached_evaluation
+
         targets_by_id = self._targets_by_id()
-
-        scaffold_records: list[EncounterRecord] = []
-        trust_records: list[EncounterRecord] = []
-        transition_counts: dict[str, int] = {}
-        decision_deltas: list[DecisionDelta] = []
-
-        for window in windows:
-            target = targets_by_id.get(window.target_id)
-            if target is None:
-                continue
-            probe = self.probe_service.probe(window, target)
-            features = self.feature_builder.build(window, target, probe, self.policy)
-
-            scaffold_decision = self.scaffold_planner.decide(window, features)
-            trust_decision = self.planner.decide(window, features)
-
-            scaffold_records.append(self._build_record(scaffold_decision, window, probe, features))
-            trust_records.append(self._build_record(trust_decision, window, probe, features))
-            decision_deltas.append(
-                self._build_decision_delta(
-                    target=target,
-                    window=window,
-                    scaffold_decision=scaffold_decision,
-                    trust_decision=trust_decision,
-                )
+        primitive = self.store.get_evaluation_primitive(primitive_cache_key)
+        if primitive is not None:
+            scaffold_records = primitive.scaffold_records
+            trust_records = primitive.trust_records
+            transition_counts = primitive.action_transition_counts
+            decision_deltas = primitive.decision_deltas
+            window_count = primitive.window_count
+            sample_window_ids = primitive.sample_window_ids
+            created_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+        else:
+            created_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+            windows = self.preview_windows(
+                start_time=resolved_start_time,
+                hours=hours,
+                step_seconds=step_seconds,
+                top_k=top_k,
+                scenario_pack=scenario_pack,
             )
 
-            transition_key = f"{scaffold_decision.action}->{trust_decision.action}"
-            transition_counts[transition_key] = transition_counts.get(transition_key, 0) + 1
+            scaffold_records = []
+            trust_records = []
+            transition_counts = {}
+            decision_deltas = []
+
+            for window in windows:
+                target = targets_by_id.get(window.target_id)
+                if target is None:
+                    continue
+                probe = self.probe_service.probe(window, target)
+                features = self.feature_builder.build(window, target, probe, self.policy)
+
+                scaffold_decision = self.scaffold_planner.decide(window, features)
+                trust_decision = self.planner.decide(window, features)
+
+                scaffold_records.append(self._build_record(scaffold_decision, window, probe, features))
+                trust_records.append(self._build_record(trust_decision, window, probe, features))
+                decision_deltas.append(
+                    self._build_decision_delta(
+                        target=target,
+                        window=window,
+                        scaffold_decision=scaffold_decision,
+                        trust_decision=trust_decision,
+                    )
+                )
+
+                transition_key = f"{scaffold_decision.action}->{trust_decision.action}"
+                transition_counts[transition_key] = transition_counts.get(transition_key, 0) + 1
+
+            primitive = EncounterEvaluationPrimitive(
+                cache_key=primitive_cache_key,
+                created_at=created_at,
+                policy_version=self.policy.policy_id,
+                scenario_pack=scenario_key,
+                parameters={
+                    "start_time": resolved_start_time,
+                    "hours": hours,
+                    "step_seconds": step_seconds,
+                    "top_k": top_k,
+                    "scenario_pack": scenario_key,
+                    "policy_version": self.policy.policy_id,
+                },
+                window_count=len(windows),
+                sample_window_ids=[window.window_id for window in windows[: min(10, len(windows))]],
+                scaffold_records=scaffold_records,
+                trust_records=trust_records,
+                action_transition_counts=transition_counts,
+                decision_deltas=self._rank_decision_deltas(decision_deltas),
+            )
+            self.store.save_evaluation_primitive(primitive)
+
+        ranked_deltas = self._rank_decision_deltas(decision_deltas)
 
         evaluation = EncounterEvaluation(
             created_at=created_at,
             parameters={
-                "start_time": self._resolve_start_time(start_time),
+                "start_time": resolved_start_time,
                 "hours": hours,
                 "step_seconds": step_seconds,
                 "top_k": top_k,
                 "materialize_top_k": materialize_top_k,
-                "scenario_pack": scenario_pack or "all",
+                "scenario_pack": scenario_key,
+                "policy_version": self.policy.policy_id,
             },
-            scenario_pack=scenario_pack or "all",
-            window_count=len(windows),
-            sample_window_ids=[window.window_id for window in windows[: min(10, len(windows))]],
+            scenario_pack=scenario_key,
+            window_count=primitive.window_count if primitive is not None else 0,
+            sample_window_ids=list(primitive.sample_window_ids if primitive is not None else []),
             scaffold_summary=self._summarize_planner(
                 planner_id="scaffold",
                 model_id="analytic-scaffold-v1",
@@ -507,9 +569,9 @@ class EncounterService:
                 materialize_top_k=materialize_top_k,
             ),
             action_transition_counts=transition_counts,
-            decision_deltas=self._rank_decision_deltas(decision_deltas),
+            decision_deltas=ranked_deltas,
         )
-        self.store.save_evaluation(evaluation)
+        self.store.save_evaluation(evaluation, full_cache_key=evaluation_cache_key)
         return evaluation
 
     def plan(

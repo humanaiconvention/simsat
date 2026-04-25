@@ -98,7 +98,7 @@ async def create_stimulus(req: StimulusRequest) -> Dict[str, Any]:
             target_lat=req.target_lat,
         )
     except ValueError as e:
-        raise HTTPException(503, str(e))
+        raise HTTPException(400, str(e))
     except Exception as e:
         logger.exception("Stimulus build failed")
         raise HTTPException(500, f"Stimulus build failed: {e}")

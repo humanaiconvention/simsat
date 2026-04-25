@@ -2,7 +2,7 @@
 """
 Prepare SimSat Gemma-4 v1 training dataset for Kaggle upload.
 
-Reads from D:/SimSat/exports/gemma4_v3/ and writes into this directory:
+Reads from <repo_root>/exports/gemma4_v3/ and writes into this directory:
   simsat_train.jsonl       — merged train split in ChatML messages format
   simsat_eval_reviewed.jsonl  — 3 reviewed holdout cases (raw fields + messages)
   simsat_eval_shortlist.jsonl — 10 per-target shortlist cases (raw fields + messages)
@@ -19,7 +19,7 @@ import math
 import os
 from pathlib import Path
 
-EXPORT_DIR = Path(r"D:\SimSat\exports\gemma4_v3")
+EXPORT_DIR = Path(__file__).resolve().parents[2] / "exports" / "gemma4_v3"
 OUT_DIR = Path(__file__).parent
 
 SYSTEM_PROMPT = (

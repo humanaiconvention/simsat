@@ -149,7 +149,7 @@ def main() -> None:
     parser.add_argument("--inprocess", action="store_true", help="Run against an in-process FastAPI app instead of a live server.")
     parser.add_argument("--scenario-pack", default="all")
     parser.add_argument("--limit", type=int, default=50)
-    parser.add_argument("--output", default=str(Path("D:/SimSat/OBSERVATION_VLA_EVAL.md")))
+    parser.add_argument("--output", default=str(Path(__file__).resolve().parents[1] / "OBSERVATION_VLA_EVAL.md"))
     args = parser.parse_args()
 
     client = None

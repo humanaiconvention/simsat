@@ -1,0 +1,52 @@
+# SimSat — top-level Python dependencies for collaborators.
+# Pinned to ranges that are known-working as of 2026-04-25.
+# Last verified versions noted in comments. For Kaggle T4 fine-tuning,
+# see notebooks/kaggle-simsat-gemma4-v1/notebook.ipynb (separate pin set).
+
+# --- Web / API ---
+fastapi>=0.110,<0.120
+uvicorn[standard]>=0.27,<0.35
+pydantic>=2.6,<3
+python-multipart>=0.0.9          # FastAPI form/file upload
+httpx>=0.27                      # Required by fastapi.testclient.TestClient
+
+# --- HTTP / utilities ---
+requests>=2.31
+click>=8.1
+pydispatcher>=2.0.7
+
+# --- Numerics / scientific ---
+numpy>=1.26,<3
+matplotlib>=3.8
+xarray>=2024.1                   # Sentinel tile dataset wrapper
+
+# --- Earth observation ---
+pyorbital>=1.8                   # Orbit propagation
+pystac-client>=0.7               # Sentinel-2 STAC API
+odc-stac>=0.3                    # STAC -> xarray loader
+Pillow>=10.0
+cartopy>=0.22                    # Map projections (matplotlib backend)
+
+# --- Vision-language model stack (clip_local + collaborator backends) ---
+torch>=2.5,<2.8                  # Last verified: 2.7.0+cu118
+torchvision>=0.20,<0.23          # Last verified: 0.22.0+cu118 (avoids _meta_registrations circular import)
+transformers>=4.45,<4.55
+peft>=0.12                       # LoRA adapters (Genesis / Tesseract / Gemma collaborator slots)
+accelerate>=0.30                 # Required by transformers for device_map
+
+# --- HAIC convention layer (optional remote LLM adapter) ---
+anthropic>=0.25.0
+
+# --- Testing ---
+pytest>=8.0
+pytest-mock>=3.12
+pytest-cov>=5.0
+
+# --- Notes ---
+# - PyQt6 is intentionally NOT listed: only the desktop GUI uses it; the API
+#   and eval scripts run headless. Install separately if you need the GUI.
+# - bitsandbytes (4-bit quantization) is intentionally NOT listed: it broke
+#   Gemma-4's backward pass in our T4 runs (see KNOWN_ISSUES item #13).
+#   If you need it for inference-only memory savings, install separately.
+# - For Kaggle Gemma-4 fine-tuning, use trl>=0.12.0,<0.15.0 (see Fix #15).
+#   The top-level scripts here don't import trl, so we don't pin it globally.

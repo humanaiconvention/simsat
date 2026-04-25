@@ -41,9 +41,35 @@ node_modules/
 **/node_modules/
 .pytest_cache/
 .pytest_tmp/
+.pytest_tmp*/
+.pytest_run/
+.ptmp/
 .mypy_cache/
 *.pyc
 weights/
 
 # Large data files — too big for GitHub (>100 MB)
 src/sim/data/haic/stimuli.json
+
+# --- Secrets / env (added 2026-04-25 collaborator-readiness pass) ---
+.env
+.env.local
+.env.*.local
+.envrc
+
+# --- Local databases / runtime state ---
+*.sqlite
+*.sqlite3
+*.db
+data/lattices/*.json
+data/security_log/
+
+# --- Generated training exports (large, regenerable from lattice pool) ---
+exports/
+
+# --- Notebook state ---
+**/.ipynb_checkpoints/
+
+# Submission markdown reports are intentionally tracked — collaborators read
+# the committed snapshot. They will show as modified after regeneration; that's
+# expected. Use `git checkout -- <file>` to discard regen noise before commits.

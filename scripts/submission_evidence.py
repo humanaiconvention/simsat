@@ -6,6 +6,8 @@ import sys
 
 import requests
 
+from challenge_run_config import parse_scenario_hours, resolve_scenario_hours
+
 
 class HttpClient:
     def __init__(self, base_url: str) -> None:
@@ -105,6 +107,34 @@ def select_case_decision(planned: dict, evaluation: dict) -> dict:
         reverse=True,
     )
     return ranked[0]
+
+
+def rank_case_decisions(planned: dict, evaluation: dict) -> list[dict]:
+    decisions = list(planned.get("decisions", []))
+    if not decisions:
+        return []
+    by_window = {decision.get("window_id"): decision for decision in decisions}
+    ranked: list[dict] = []
+    for delta in evaluation.get("decision_deltas", []):
+        if delta.get("action_changed") and delta.get("window_id") in by_window:
+            ranked.append(by_window[delta["window_id"]])
+    fallback = sorted(
+        decisions,
+        key=lambda decision: (
+            1 if decision.get("action") in {"accept", "refine", "defer"} else 0,
+            float(decision.get("combined_score", 0.0)),
+        ),
+        reverse=True,
+    )
+    seen: set[str] = set()
+    ordered: list[dict] = []
+    for decision in ranked + fallback:
+        decision_id = str(decision.get("decision_id", ""))
+        if decision_id in seen:
+            continue
+        seen.add(decision_id)
+        ordered.append(decision)
+    return ordered
 
 
 def simulate_outcome_payload(assessed: dict, scenario_pack: str) -> dict:
@@ -253,22 +283,48 @@ def ensure_case_for_scenario(
     decisions = planned.get("decisions", [])
     historical_only = False
     if decisions and not reviewed_only:
-        decision = select_case_decision(planned, evaluation)
-        assessed = client.post_json(f"/encounter/decision/{decision['decision_id']}/assess")
-        outcome_payload = simulate_outcome_payload(assessed, scenario_pack=scenario_pack)
-        outcome = client.post_json(
-            f"/observation-vla/trace/{assessed['trace_id']}/outcome",
-            outcome_payload,
-        )
-        mission_action = client.post_json(f"/mission-response/from-trace/{assessed['trace_id']}")
-        mission_outcome = client.post_json(
-            f"/mission-response/action/{mission_action['action_id']}/outcome",
-            {
-                "utility_realized": simulate_mission_response_utility(mission_action, outcome_payload),
-                "execution_status": "simulated",
-                "notes": "Auto-generated mission response outcome for submission evidence.",
-            },
-        )
+        last_assess_error: Exception | None = None
+        decision = {}
+        assessed = {}
+        outcome = {}
+        mission_action = {}
+        mission_outcome = {}
+        for candidate_decision in rank_case_decisions(planned, evaluation):
+            try:
+                assessed_candidate = client.post_json(f"/encounter/decision/{candidate_decision['decision_id']}/assess")
+            except Exception as exc:
+                last_assess_error = exc
+                continue
+            outcome_payload = simulate_outcome_payload(assessed_candidate, scenario_pack=scenario_pack)
+            outcome = client.post_json(
+                f"/observation-vla/trace/{assessed_candidate['trace_id']}/outcome",
+                outcome_payload,
+            )
+            mission_action = client.post_json(f"/mission-response/from-trace/{assessed_candidate['trace_id']}")
+            mission_outcome = client.post_json(
+                f"/mission-response/action/{mission_action['action_id']}/outcome",
+                {
+                    "utility_realized": simulate_mission_response_utility(mission_action, outcome_payload),
+                    "execution_status": "simulated",
+                    "notes": "Auto-generated mission response outcome for submission evidence.",
+                },
+            )
+            decision = candidate_decision
+            assessed = assessed_candidate
+            break
+        if not assessed:
+            if evidence.get("case_summaries"):
+                historical_only = True
+                decision = {}
+                assessed = {}
+                outcome = {}
+                mission_action = {}
+                mission_outcome = {}
+            else:
+                raise RuntimeError(
+                    f"Unable to produce an image-backed assessed case for scenario {scenario_pack}"
+                    + (f": {last_assess_error}" if last_assess_error is not None else "")
+                )
     else:
         historical_only = True
         decision = {}
@@ -288,13 +344,12 @@ def ensure_case_for_scenario(
         "used_hours": used_hours,
         "historical_only": historical_only,
     }
-
-
 def build_report(
     client,
     scenarios: list[str],
     capabilities: dict,
     scenario_artifacts: dict[str, dict],
+    scenario_hours: dict[str, float],
     reviewed_only: bool = False,
 ) -> str:
     lines: list[str] = []
@@ -354,6 +409,8 @@ def build_report(
         lines.append("")
         evaluation_id = evaluation.get("evaluation_id") or evidence.get("evaluation_id")
         lines.append(f"- Evaluation: `{evaluation_id}`")
+        if scenario in scenario_hours:
+            lines.append(f"- Policy horizon: `{scenario_hours[scenario]}` hour(s)")
         lines.append(
             f"- Horizon used: `{artifact.get('used_hours')}` hour(s)"
             + (" (expanded from requested horizon)" if artifact.get("used_hours") != artifact.get("requested_hours") else "")
@@ -429,11 +486,18 @@ def main() -> None:
     parser.add_argument("--inprocess", action="store_true", help="Run against an in-process FastAPI app instead of a live server.")
     parser.add_argument("--scenario-pack", default="all")
     parser.add_argument("--hours", type=float, default=8.0)
+    parser.add_argument(
+        "--policy",
+        choices=["uniform", "smoke", "competition"],
+        default="competition",
+        help="Use shared per-scenario challenge hours instead of one uniform horizon.",
+    )
+    parser.add_argument("--scenario-hours", action="append", default=[], help="Per-scenario override in the form scenario_pack=hours")
     parser.add_argument("--step-seconds", type=int, default=120)
     parser.add_argument("--top-k", type=int, default=8)
     parser.add_argument("--materialize-top-k", type=int, default=2)
     parser.add_argument("--reviewed-only", action="store_true")
-    parser.add_argument("--output", default=str(Path("D:/SimSat/SUBMISSION_PACKET.md")))
+    parser.add_argument("--output", default=str(Path(__file__).resolve().parents[1] / "SUBMISSION_PACKET.md"))
     args = parser.parse_args()
 
     client = None
@@ -446,18 +510,24 @@ def main() -> None:
             if args.scenario_pack == "all"
             else [args.scenario_pack]
         )
+        scenario_hours = resolve_scenario_hours(
+            scenarios=scenarios,
+            default_hours=args.hours,
+            policy=None if args.policy == "uniform" else args.policy,
+            overrides=parse_scenario_hours(args.scenario_hours),
+        )
         scenario_artifacts: dict[str, dict] = {}
         for scenario in scenarios:
             scenario_artifacts[scenario] = ensure_case_for_scenario(
                 client,
                 scenario_pack=scenario,
-                hours=args.hours,
+                hours=scenario_hours.get(scenario, args.hours),
                 step_seconds=args.step_seconds,
                 top_k=args.top_k,
                 materialize_top_k=args.materialize_top_k,
                 reviewed_only=args.reviewed_only,
             )
-        report = build_report(client, scenarios, capabilities, scenario_artifacts, reviewed_only=args.reviewed_only)
+        report = build_report(client, scenarios, capabilities, scenario_artifacts, scenario_hours, reviewed_only=args.reviewed_only)
         output_path = Path(args.output)
         output_path.write_text(report, encoding="utf-8")
         print(f"Submission packet written to {output_path}")

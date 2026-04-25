@@ -1,5 +1,40 @@
 # SimSat
+
+[![tests](https://github.com/benhaslam/SimSat/actions/workflows/tests.yml/badge.svg)](./.github/workflows/tests.yml)
+[![python](https://img.shields.io/badge/python-3.11%20%7C%203.13-blue)](./requirements.txt)
+[![track](https://img.shields.io/badge/AI%20in%20Space-Liquid%20%2B%20General%20AI-orange)](./CHALLENGE_ENTRY.md)
+[![status](https://img.shields.io/badge/status-Tier%201%E2%80%933%20complete%20%7C%20v6%20reference-brightgreen)](./KNOWN_ISSUES.md)
+[![kaggle](https://img.shields.io/badge/Kaggle-simsat--gemma4--v1-20BEFF)](https://www.kaggle.com/code/benhaslam/simsat-gemma4-v1-training)
+[![license](https://img.shields.io/badge/license-see%20LICENSE-lightgrey)](./LICENSE)
+
 This tool simulates the accessibility of Earth imagery from a satellite. An orbit propagator calculates the satellite position over time and an API serves as an interface to on-board users, sharing the current position, timestamp and providing satellite imagery from that location. A web-based dashboard controls and visualizes the simulation.
+
+---
+
+## For collaborators — start here
+
+If you are plugging a model into SimSat (Genesis, Tesseract T3, or any other VLM):
+
+1. **Read [`COLLABORATOR_GUIDE.md`](./COLLABORATOR_GUIDE.md)** — JSON contract,
+   env vars, what the viability gates do to your output. ~10 minutes.
+2. **Wire the smoke path:**
+   ```bash
+   git clone <repo>
+   cd SimSat
+   cp .env.example .env
+   pip install -r requirements.txt
+   python scripts/quickstart.py
+   ```
+   That runs 33 tests + the eval against 4 pinned reviewed cases using the
+   `clip_local` baseline. If it exits 0, your clone is wired correctly.
+3. **Plug in your backend** by setting `OBSERVATION_VLA_BACKEND=<your_backend>`
+   in `.env` and re-running `quickstart.py`. Your backend's action-agreement
+   and MAE numbers are what we'll compare.
+
+For PRs, branching, and CI: see [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+For known limitations and live status: see [`KNOWN_ISSUES.md`](./KNOWN_ISSUES.md).
+
+---
 
 ## Challenge Entry
 
@@ -11,7 +46,7 @@ The compact submission note and reproducible demo flow are in [CHALLENGE_ENTRY.m
 The shortest judge-facing handoff is in [SUBMISSION_BRIEF.md](./SUBMISSION_BRIEF.md).
 The current reviewed ObservationVLA evaluation is in [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md).
 
-This repo is submitted to both tracks of the AI in Space hackathon — the Liquid Track (LFM2-VL / LFM2.5-VL backend) and the General AI Track (SimSat-specific Gemma-4 fine-tune). See the Two-Track Submission section of [CHALLENGE_ENTRY.md](./CHALLENGE_ENTRY.md) for per-track model details.
+This repo is submitted to both tracks of the AI in Space hackathon — the Liquid Track (LFM2.5-VL encoder → MuZero) and the General AI Track (Gemma-4-E2B fine-tune, plus Genesis and Tesseract T3 collaborator seats). See [CHALLENGE_ENTRY.md](./CHALLENGE_ENTRY.md) for per-track details and [COLLABORATOR_GUIDE.md](./COLLABORATOR_GUIDE.md) for plugging in a new model backend.
 
 The challenge path is explicitly `no-Mapbox-safe`: Sentinel imagery plus orbital geometry are sufficient for the encounter planner, WCLI trust/refine flow, ObservationVLA traces, and evaluation scripts. Mapbox remains an optional high-resolution perspective source, not a requirement.
 
@@ -59,7 +94,7 @@ python scripts/review_queue_casebook.py --inprocess
 python scripts/operator_review.py --base-url http://127.0.0.1:8000/sim --scenario-pack maritime_chokepoints
 ```
 
-The review queue writes [REVIEW_QUEUE.md](./REVIEW_QUEUE.md) plus per-case images so the next human-review pass can compare the stored trace assessment with the current `clip_local` backend recommendation on the same imagery.
+The review queue writes per-case images so the next human-review pass can compare the stored trace assessment with the current `clip_local` backend recommendation on the same imagery.
 
 For a specific trace, you can inspect the full review bundle first:
 
@@ -91,18 +126,23 @@ To generate a low-compute readiness checklist for the current submission artifac
 python scripts/submission_readiness.py --base-url http://127.0.0.1:8000/sim
 ```
 
-### Review Phases
+### Multi-Model VLA Backends
 
-The 2026-04-21 full-repo code review is preserved in the repo so judges can audit the work we found and shipped:
+The ObservationVLA lane is model-agnostic by design. Select a backend via `OBSERVATION_VLA_BACKEND`:
 
-- `review/2026-04-21-phase-1/` — Tier-1 correctness fixes (tzinfo bug, hygiene). **Apply first.**
-- `review/2026-04-21-phase-2/` — Tier-2 thesis/calibration work (accept→refine sweep, MAE calibration reframe, re-materialization scripts).
-- `review/2026-04-21-phase-3/` — Entry B backend scaffold (`entry-b/backend` branch) and Google Drive recon block.
-- `review/2026-04-21-phase-4/` — Submission-doc refresh + frontend brand-hide patch.
+| Value | Model | Owner |
+|---|---|---|
+| `clip_local` | CLIP ViT-Base/32 (default baseline) | — |
+| `gemma4` | Gemma-4-E2B SimSat fine-tune | Ben |
+| `genesis` | Genesis model | Guilherme Mesquita |
+| `tesseract_t3` | Tesseract T3 | Garrett Sutherland |
+| `transformers_vlm` | Any HuggingFace VLM | — |
+
+All backends speak the same eight-key JSON contract and pass through the same WCLI trust layer, viability gates, and TTT loop. See `COLLABORATOR_GUIDE.md` for integration details.
 
 ### Known Issues
 
-See `KNOWN_ISSUES.md` at the repo root for the consolidated list with status per item. Short version: the Phase 1 tzinfo bug in `src/sim/simulator.py:111` is the only known Tier-1 correctness issue; the rest are rigor/polish items disclosed in the submission docs rather than hidden.
+See `KNOWN_ISSUES.md` at the repo root for the consolidated issue tracker with current status per item. The tzinfo bug in `src/sim/simulator.py:111` (item 1) is the only open Tier-1 correctness item; remaining items are rigor/polish or pending-collaborator work.
 
 ## Upcoming Hackathon: AI in Space | Liquid AI x DPhi Space
 

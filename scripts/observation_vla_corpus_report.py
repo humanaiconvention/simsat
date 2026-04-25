@@ -262,7 +262,7 @@ def main() -> None:
     parser.add_argument("--base-url", default="http://127.0.0.1:8000/sim")
     parser.add_argument("--inprocess", action="store_true", help="Run against an in-process FastAPI app instead of a live server.")
     parser.add_argument("--limit", type=int, default=100)
-    parser.add_argument("--output", default=str(Path("D:/SimSat/OBSERVATION_VLA_CORPUS.md")))
+    parser.add_argument("--output", default=str(Path(__file__).resolve().parents[1] / "OBSERVATION_VLA_CORPUS.md"))
     args = parser.parse_args()
 
     client = None

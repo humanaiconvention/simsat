@@ -142,8 +142,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Generate a visual casebook from pinned SimSat submission cases.")
     parser.add_argument("--base-url", default="http://127.0.0.1:8000/sim")
     parser.add_argument("--inprocess", action="store_true", help="Run against an in-process FastAPI app instead of a live server.")
-    parser.add_argument("--output", default=str(Path("D:/SimSat/SUBMISSION_CASEBOOK.md")))
-    parser.add_argument("--assets-dir", default=str(Path("D:/SimSat/submission_assets")))
+    _repo_root = Path(__file__).resolve().parents[1]
+    parser.add_argument("--output", default=str(_repo_root / "SUBMISSION_CASEBOOK.md"))
+    parser.add_argument("--assets-dir", default=str(_repo_root / "submission_assets"))
     args = parser.parse_args()
 
     client = None

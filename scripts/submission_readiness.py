@@ -1,10 +1,16 @@
 from __future__ import annotations
 
 import argparse
+import re
 from pathlib import Path
 import sys
 
 import requests
+
+
+def _slug(value: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "_", value.lower()).strip("_")
+    return slug or "case"
 
 
 class HttpClient:
@@ -82,6 +88,8 @@ def build_readiness_report(
 
     packet_text = packet_path.read_text(encoding="utf-8") if packet_path.exists() else ""
     casebook_text = casebook_path.read_text(encoding="utf-8") if casebook_path.exists() else ""
+    packet_text_lower = packet_text.lower()
+    casebook_text_lower = casebook_text.lower()
 
     for scenario_pack in scenario_packs:
         evidence = client.get_json(
@@ -92,17 +100,27 @@ def build_readiness_report(
         )
         pinned_case = submission_cases_by_scenario.get(scenario_pack, {})
         target_label = pinned_case.get("target_label", "")
-        packet_case = target_label in packet_text if target_label else False
+        trace_id = str(pinned_case.get("trace_id", ""))
+        packet_case = False
+        if target_label:
+            packet_case = target_label.lower() in packet_text_lower
+        if trace_id and not packet_case:
+            packet_case = trace_id.lower() in packet_text_lower
+
         image_slug = "_".join(
             [
-                scenario_pack.lower(),
-                target_label.lower().replace(" ", "_").replace("/", "_"),
+                _slug(scenario_pack),
+                _slug(target_label),
             ]
         ).strip("_")
         matching_assets = list(assets_dir.glob(f"{image_slug}*.png")) if assets_dir.exists() and image_slug else []
         if not matching_assets and target_label:
-            matching_assets = list(assets_dir.glob(f"*{target_label.lower().replace(' ', '_')}*.png"))
-        image_asset = bool(matching_assets) and (target_label in casebook_text if casebook_text else True)
+            matching_assets = list(assets_dir.glob(f"*{_slug(target_label)}*.png"))
+        image_asset = bool(matching_assets)
+        if image_asset and casebook_text:
+            has_target_ref = bool(target_label) and target_label.lower() in casebook_text_lower
+            has_trace_ref = bool(trace_id) and trace_id.lower() in casebook_text_lower
+            image_asset = has_target_ref or has_trace_ref
         lines.append(
             "| "
             + " | ".join(
@@ -136,11 +154,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Generate a low-compute submission-readiness checklist for SimSat.")
     parser.add_argument("--base-url", default="http://127.0.0.1:8000/sim")
     parser.add_argument("--inprocess", action="store_true", help="Run against an in-process FastAPI app instead of a live server.")
-    parser.add_argument("--packet", default=str(Path("D:/SimSat/SUBMISSION_PACKET.md")))
-    parser.add_argument("--casebook", default=str(Path("D:/SimSat/SUBMISSION_CASEBOOK.md")))
-    parser.add_argument("--assets-dir", default=str(Path("D:/SimSat/submission_assets")))
-    parser.add_argument("--observation-eval", default=str(Path("D:/SimSat/OBSERVATION_VLA_EVAL.md")))
-    parser.add_argument("--output", default=str(Path("D:/SimSat/SUBMISSION_READINESS.md")))
+    _repo_root = Path(__file__).resolve().parents[1]
+    parser.add_argument("--packet", default=str(_repo_root / "SUBMISSION_PACKET.md"))
+    parser.add_argument("--casebook", default=str(_repo_root / "SUBMISSION_CASEBOOK.md"))
+    parser.add_argument("--assets-dir", default=str(_repo_root / "submission_assets"))
+    parser.add_argument("--observation-eval", default=str(_repo_root / "OBSERVATION_VLA_EVAL.md"))
+    parser.add_argument("--output", default=str(_repo_root / "SUBMISSION_READINESS.md"))
     args = parser.parse_args()
 
     client = None
