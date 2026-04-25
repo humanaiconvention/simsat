@@ -42,6 +42,7 @@ jobs:
             "numpy>=1.26,<3" \
             "pyorbital>=1.8" \
             "pydispatcher>=2.0.7" \
+            "Pillow>=10.0" \
             "pytest>=8.0" \
             "pytest-mock>=3.12"
 
