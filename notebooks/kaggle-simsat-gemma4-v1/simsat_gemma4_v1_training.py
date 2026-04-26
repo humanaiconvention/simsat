@@ -209,6 +209,27 @@ dataset = load_dataset("json", data_files=TRAIN_PATH, split="train")
 print(f"Dataset: {len(dataset)} examples")
 print(f"Columns: {dataset.column_names}")
 
+# Fix #16: SFTTrainer's default dataset_text_field="text" raised KeyError on
+# v4 because the ChatML 'messages' column has no 'text' field. Pre-format
+# each row by applying the chat template; the resulting 'text' column is
+# what DataCollatorForCompletionOnlyLM masks against.
+def _apply_chat_template(example):
+    return {
+        "text": tokenizer.apply_chat_template(
+            example["messages"],
+            tokenize=False,
+            add_generation_prompt=False,
+        )
+    }
+
+dataset = dataset.map(
+    _apply_chat_template,
+    remove_columns=[c for c in dataset.column_names if c != "weight"],
+)
+print(f"Post-template columns: {dataset.column_names}")
+print(f"Sample text head: {dataset[0]['text'][:200]}...")
+assert "text" in dataset.column_names, "Fix #16 failed: 'text' column not produced"
+
 # ============================================================
 # CELL 6: Train
 # ============================================================
@@ -218,7 +239,7 @@ print("\n" + "=" * 60)
 print("TRAINING")
 print("=" * 60)
 
-OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v2-adapter"
+OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v5-adapter"
 
 # Fix #10: fp16=False — THE showstopper for QLoRA. QLoRA + fp16=True triggers
 # GradScaler assertion because LoRA params (fp32) bypass GradScaler's inf hooks.
@@ -373,7 +394,7 @@ for name, res in eval_results.items():
 print(f"  Adapter: {OUTPUT_DIR}")
 
 summary = {
-    "version": "simsat-gemma4-v2",
+    "version": "simsat-gemma4-v5",
     "base_model": MODEL_ID,
     "training_loss": round(train_result.training_loss, 4),
     "training_steps": train_result.global_step,
@@ -406,7 +427,7 @@ summary = {
     },
 }
 
-summary_path = "/kaggle/working/simsat_gemma4_v1_summary.json"
+summary_path = "/kaggle/working/simsat_gemma4_v5_summary.json"
 with open(summary_path, "w") as f:
     json.dump(summary, f, indent=2)
 print(f"\nSummary saved: {summary_path}")
