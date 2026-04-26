@@ -36,7 +36,7 @@ jobs:
         # module (different name) — required by simulator.py.
         run: |
           python -m pip install --upgrade pip
-          grep -vE '^(torch|torchvision|cartopy|odc-stac|pyqt|bitsandbytes)' requirements.txt > requirements-ci.txt
+          grep -vE '^(torch|torchvision|cartopy|pyqt|bitsandbytes)' requirements.txt > requirements-ci.txt
           echo "pydispatcher>=2.0.7" >> requirements-ci.txt
           pip install -r requirements-ci.txt
           pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.5,<2.8"
