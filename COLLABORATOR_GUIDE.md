@@ -174,6 +174,25 @@ Run again with your backend, compare:
 - Materialization yield on top-k candidates
 - MAE vs. pinned operator usefulness scores
 
+**5. (Gemma-4 / fine-tune contributors) Triage your trained checkpoint
+before wiring it into the eval:**
+
+```bash
+# Masking-only check — no GPU, no adapter required, ~30s
+python scripts/diagnose_gemma4_checkpoint.py --check masking
+
+# Full check — loads adapter onto base model, runs forward pass
+python scripts/diagnose_gemma4_checkpoint.py \
+    --check both \
+    --adapter-path ./weights/your-adapter-dir
+```
+
+Emits one of: `MASKING_OK_LOSS_DESCENDED` (ship it), `MASKING_OK_LOSS_FLAT`
+(hyperparameter problem), `MASKING_BROKEN` (response_template doesn't match
+your chat format), `MASKING_TOO_AGGRESSIVE` (template matches multiple
+positions), or `INCONCLUSIVE`. Each verdict prints the next concrete step
+inline.
+
 ---
 
 ## What the viability gates do to your output
