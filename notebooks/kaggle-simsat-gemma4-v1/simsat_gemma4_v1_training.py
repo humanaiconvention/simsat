@@ -210,26 +210,38 @@ dataset = load_dataset("json", data_files=TRAIN_PATH, split="train")
 print(f"Dataset: {len(dataset)} examples")
 print(f"Columns: {dataset.column_names}")
 
-# Fix #16: SFTTrainer's default dataset_text_field="text" raised KeyError on
-# v4 because the ChatML 'messages' column has no 'text' field. Pre-format
-# each row by applying the chat template; the resulting 'text' column is
-# what DataCollatorForCompletionOnlyLM masks against.
-def _apply_chat_template(example):
+# Fix #16 + #18: pre-format AND pre-tokenize. SFTTrainer skips its own
+# auto-tokenization when a custom data_collator is provided (we use
+# DataCollatorForCompletionOnlyLM). That collator expects each row to have
+# `input_ids` (list of ints), not raw `text`. Build both in one map pass so
+# the dataset gives the collator exactly what it needs.
+def _format_and_tokenize(example):
+    text = tokenizer.apply_chat_template(
+        example["messages"],
+        tokenize=False,
+        add_generation_prompt=False,
+    )
+    enc = tokenizer(
+        text,
+        truncation=True,
+        max_length=1024,                # matches SFTConfig.max_seq_length
+        padding=False,                  # collator pads per-batch
+        add_special_tokens=False,       # apply_chat_template already added them
+    )
     return {
-        "text": tokenizer.apply_chat_template(
-            example["messages"],
-            tokenize=False,
-            add_generation_prompt=False,
-        )
+        "input_ids": enc["input_ids"],
+        "attention_mask": enc["attention_mask"],
     }
 
 dataset = dataset.map(
-    _apply_chat_template,
+    _format_and_tokenize,
     remove_columns=[c for c in dataset.column_names if c != "weight"],
 )
-print(f"Post-template columns: {dataset.column_names}")
-print(f"Sample text head: {dataset[0]['text'][:200]}...")
-assert "text" in dataset.column_names, "Fix #16 failed: 'text' column not produced"
+print(f"Post-tokenize columns: {dataset.column_names}")
+print(f"Sample input_ids head ({len(dataset[0]['input_ids'])} tokens):"
+      f" {dataset[0]['input_ids'][:25]}...")
+assert "input_ids" in dataset.column_names, "Fix #18 failed: 'input_ids' column missing"
+assert "attention_mask" in dataset.column_names, "Fix #18 failed: 'attention_mask' column missing"
 
 # ============================================================
 # CELL 6: Train
@@ -240,7 +252,7 @@ print("\n" + "=" * 60)
 print("TRAINING")
 print("=" * 60)
 
-OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v6-adapter"
+OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v7-adapter"
 
 # Fix #10: fp16=False — THE showstopper for QLoRA. QLoRA + fp16=True triggers
 # GradScaler assertion because LoRA params (fp32) bypass GradScaler's inf hooks.
@@ -396,7 +408,7 @@ for name, res in eval_results.items():
 print(f"  Adapter: {OUTPUT_DIR}")
 
 summary = {
-    "version": "simsat-gemma4-v6",
+    "version": "simsat-gemma4-v7",
     "base_model": MODEL_ID,
     "training_loss": round(train_result.training_loss, 4),
     "training_steps": train_result.global_step,
@@ -429,7 +441,7 @@ summary = {
     },
 }
 
-summary_path = "/kaggle/working/simsat_gemma4_v6_summary.json"
+summary_path = "/kaggle/working/simsat_gemma4_v7_summary.json"
 with open(summary_path, "w") as f:
     json.dump(summary, f, indent=2)
 print(f"\nSummary saved: {summary_path}")
