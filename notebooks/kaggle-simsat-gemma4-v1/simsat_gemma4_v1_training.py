@@ -252,7 +252,7 @@ print("\n" + "=" * 60)
 print("TRAINING")
 print("=" * 60)
 
-OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v7-adapter"
+OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v8-adapter"
 
 # Fix #10: fp16=False — THE showstopper for QLoRA. QLoRA + fp16=True triggers
 # GradScaler assertion because LoRA params (fp32) bypass GradScaler's inf hooks.
@@ -408,7 +408,7 @@ for name, res in eval_results.items():
 print(f"  Adapter: {OUTPUT_DIR}")
 
 summary = {
-    "version": "simsat-gemma4-v7",
+    "version": "simsat-gemma4-v8",
     "base_model": MODEL_ID,
     "training_loss": round(train_result.training_loss, 4),
     "training_steps": train_result.global_step,
@@ -441,7 +441,7 @@ summary = {
     },
 }
 
-summary_path = "/kaggle/working/simsat_gemma4_v7_summary.json"
+summary_path = "/kaggle/working/simsat_gemma4_v8_summary.json"
 with open(summary_path, "w") as f:
     json.dump(summary, f, indent=2)
 print(f"\nSummary saved: {summary_path}")

@@ -82,18 +82,18 @@ def _check_masking(
     response_template: str,
     n_samples: int,
 ) -> tuple[float, dict]:
-    """Apply chat template + collator; report mask ratio statistics.
+    """Apply chat template + manual completion-only masking; report mask ratio.
+
+    Manually replicates DataCollatorForCompletionOnlyLM's logic so this works
+    on any TRL version (the class was removed in TRL 0.15+). For each example:
+      1. Apply chat template + tokenize.
+      2. Locate the response_template token sequence inside the input_ids.
+      3. Set labels = input_ids, then mask positions [0, response_end) with -100.
+      4. Mask ratio = (#-100 positions) / (#non-pad positions).
 
     Returns (mean_mask_ratio, details_dict).
     """
     from transformers import AutoTokenizer
-    try:
-        from trl import DataCollatorForCompletionOnlyLM
-    except ImportError:
-        try:
-            from trl.trainer.utils import DataCollatorForCompletionOnlyLM
-        except ImportError:
-            from trl.data_utils import DataCollatorForCompletionOnlyLM
 
     print(f"Loading tokenizer for {base_model} (no model weights downloaded)...")
     tokenizer = AutoTokenizer.from_pretrained(base_model)
@@ -105,8 +105,24 @@ def _check_masking(
         raise ValueError(f"No rows loaded from {dataset_path}")
     print(f"Loaded {len(rows)} sample row(s) from {dataset_path.name}")
 
-    # Apply chat template per row and tokenize. We mimic SFTTrainer's pipeline.
-    examples = []
+    # Tokenize the response_template for substring search inside the example
+    # input_ids. Use add_special_tokens=False because we're searching INSIDE
+    # an already-templated sequence — the BOS/EOS are not part of the marker.
+    response_token_ids = tokenizer.encode(response_template, add_special_tokens=False)
+    if not response_token_ids:
+        raise ValueError(f"Tokenized response_template is empty: {response_template!r}")
+
+    def _find_subseq(haystack: list[int], needle: list[int]) -> int:
+        """Return start index of `needle` in `haystack`, or -1."""
+        n = len(needle)
+        for i in range(len(haystack) - n + 1):
+            if haystack[i:i + n] == needle:
+                return i
+        return -1
+
+    per_example_ratios = []
+    examples_processed = 0
+    no_template_match = 0
     for row in rows:
         messages = row.get("messages") or row.get("conversation") or []
         if not messages:
@@ -115,50 +131,35 @@ def _check_masking(
             messages, tokenize=False, add_generation_prompt=False
         )
         encoded = tokenizer(text, truncation=True, max_length=2048, return_tensors=None)
-        examples.append(
-            {"input_ids": encoded["input_ids"], "attention_mask": encoded["attention_mask"]}
-        )
+        input_ids = encoded["input_ids"]
+        examples_processed += 1
 
-    if not examples:
-        raise ValueError("No examples produced — dataset rows may be missing 'messages' key")
-
-    collator = DataCollatorForCompletionOnlyLM(
-        response_template=response_template,
-        tokenizer=tokenizer,
-        mlm=False,
-    )
-
-    batch = collator(examples)
-    labels = batch["labels"]  # tensor of shape (B, T)
-    input_ids = batch["input_ids"]
-
-    # For each example, mask ratio = (#positions == -100) / (total non-pad positions)
-    import torch
-    per_example_ratios = []
-    for i in range(labels.shape[0]):
-        lbl = labels[i]
-        ids = input_ids[i]
-        non_pad = (ids != tokenizer.pad_token_id)
-        total = int(non_pad.sum().item())
-        if total == 0:
+        idx = _find_subseq(input_ids, response_token_ids)
+        if idx < 0:
+            no_template_match += 1
+            # If template never matches, EVERYTHING would be masked (ratio = 1.0).
+            # Record that as MASKING_TOO_AGGRESSIVE rather than crashing.
+            per_example_ratios.append(1.0)
             continue
-        masked = int(((lbl == -100) & non_pad).sum().item())
+
+        # Mimic DataCollatorForCompletionOnlyLM: mask positions [0, idx + len(template))
+        end_of_template = idx + len(response_token_ids)
+        total = len(input_ids)
+        masked = end_of_template
         per_example_ratios.append(masked / total)
 
     if not per_example_ratios:
-        raise RuntimeError("Collator produced no usable batches")
+        raise RuntimeError("No usable examples after templating")
 
     mean_ratio = sum(per_example_ratios) / len(per_example_ratios)
     details = {
-        "n_examples": len(per_example_ratios),
+        "n_examples_processed": examples_processed,
+        "n_examples_no_template_match": no_template_match,
         "mean_mask_ratio": mean_ratio,
         "min_mask_ratio": min(per_example_ratios),
         "max_mask_ratio": max(per_example_ratios),
         "response_template": response_template,
-        "first_example_unmasked_token_count": int(
-            ((labels[0] != -100) & (input_ids[0] != tokenizer.pad_token_id)).sum().item()
-        ),
-        "first_example_total_tokens": int((input_ids[0] != tokenizer.pad_token_id).sum().item()),
+        "response_template_token_count": len(response_token_ids),
     }
 
     return mean_ratio, details
