@@ -131,46 +131,143 @@ class DummyEncoder:
         return base
 
 
-class LFM2VLEncoderStub:
-    """Scaffold for the real LFM2.5-VL observation encoder.
+class HFVisionTowerEncoder:
+    """Real-weights tile encoder backed by any HuggingFace vision-language model.
 
-    This stub does NOT load model weights. Calling `encode()` raises
-    NotImplementedError with guidance. Replace the body during the LFM2.5
-    integration phase (T4c / Phase 6).
+    Default is SigLIP-base (768-dim, ~370 MB). The class is the LFM2.5-VL
+    integration seat — when Liquid AI ships weights, swap `model_id` and
+    `embed_dim`; nothing else changes.
 
-    The constructor signature previews the config the real implementation will
-    need; it intentionally accepts overrides via kwargs so the integration can
-    plug in new params without breaking callers.
+    Substitution rationale (KNOWN_ISSUES item #24):
+        LFM2.5-VL was the planned encoder but weights were not publicly
+        accessible by the May 8 deadline. SigLIP-base provides a real
+        vision tower with comparable embedding shape and serves as a
+        defensible substitute for the Liquid Track demo. The integration
+        contract (encode signature, MuZero env hook, build_encoder factory)
+        is unchanged.
+
+    Network access required at first use to download the model. After the
+    initial download HuggingFace caches it under ~/.cache/huggingface/.
+    Offline operation works once the cache is populated.
+
+    Performance notes:
+        * SigLIP-base on CPU: ~150ms / tile (sufficient for offline replay).
+        * SigLIP-base on CUDA: ~10ms / tile.
+        * Output is float32 numpy of shape (embed_dim,).
     """
 
     def __init__(
         self,
-        model_id: str = "liquid/lfm2.5-vl",
-        embed_dim: int = 768,
-        device: str = "cuda",
+        model_id: str = "google/siglip-base-patch16-224",
+        device: str = "cpu",
+        embed_dim: int | None = None,
         lora_adapter_path: str | None = None,
         **extra_kwargs,
     ):
+        # Imports are deferred so that simply importing this module
+        # doesn't require torch/transformers/PIL to be installed (CI
+        # smoke tests use Identity/Dummy encoders).
+        from transformers import AutoModel, AutoProcessor
+        import torch
+
         self.model_id = model_id
-        self.embed_dim = embed_dim
         self.device = device
         self.lora_adapter_path = lora_adapter_path
         self._extra_kwargs = extra_kwargs
-        logger.warning(
-            "LFM2VLEncoderStub instantiated for model %s (device=%s, embed_dim=%d). "
-            "This is a scaffold; encode() raises NotImplementedError. Replace the body "
-            "when LFM2.5-VL is being integrated.",
-            model_id, device, embed_dim,
+        self._torch = torch
+
+        self.model = AutoModel.from_pretrained(model_id).to(device).eval()
+        self.processor = AutoProcessor.from_pretrained(model_id)
+
+        if lora_adapter_path:
+            try:
+                from peft import PeftModel
+                self.model = PeftModel.from_pretrained(self.model, lora_adapter_path)
+                logger.info("Loaded LoRA adapter %s onto %s", lora_adapter_path, model_id)
+            except ImportError:
+                logger.warning(
+                    "lora_adapter_path=%s ignored — `peft` not installed.",
+                    lora_adapter_path,
+                )
+
+        if embed_dim is None:
+            # Infer from model config — fields differ per architecture.
+            cfg = self.model.config
+            inferred = (
+                getattr(cfg, "projection_dim", None)
+                or getattr(getattr(cfg, "vision_config", None), "hidden_size", None)
+                or getattr(cfg, "hidden_size", None)
+            )
+            if inferred is None:
+                raise ValueError(
+                    f"Could not infer embed_dim from {model_id!r} config. "
+                    "Pass embed_dim= explicitly."
+                )
+            embed_dim = int(inferred)
+        self.embed_dim = embed_dim
+
+        logger.info(
+            "HFVisionTowerEncoder ready: model=%s device=%s embed_dim=%d lora=%s",
+            model_id, device, embed_dim, lora_adapter_path or "<none>",
         )
 
     def encode(self, tile: np.ndarray) -> np.ndarray:
-        raise NotImplementedError(
-            "LFM2VLEncoderStub.encode() is not yet wired. Integration tasks:\n"
-            "  1. Load LFM2.5-VL base weights + LoRA adapter via transformers.\n"
-            "  2. Pass tile through vision tower (expects 3-channel or preprocessed).\n"
-            "  3. Extract pooled embedding (shape (embed_dim,)).\n"
-            "  4. Return as numpy float32.\n"
-            "See the module docstring for integration notes."
+        """Convert a (1, H, W) or (C, H, W) float32-in-[0,1] tile into an embedding."""
+        from PIL import Image
+
+        arr = np.asarray(tile, dtype=np.float32)
+        if arr.ndim == 3 and arr.shape[0] == 1:
+            # Grayscale → 3-channel by replication
+            arr = np.repeat(arr, 3, axis=0)
+        if arr.ndim != 3 or arr.shape[0] != 3:
+            raise ValueError(
+                f"Expected tile shape (1,H,W) or (3,H,W); got {arr.shape}"
+            )
+        # CHW float32 [0,1] → HWC uint8 for PIL
+        hwc = (np.clip(arr, 0.0, 1.0) * 255.0).astype(np.uint8).transpose(1, 2, 0)
+        img = Image.fromarray(hwc)
+
+        inputs = self.processor(images=img, return_tensors="pt").to(self.device)
+        with self._torch.no_grad():
+            if hasattr(self.model, "get_image_features"):
+                # CLIP / SigLIP path
+                out = self.model.get_image_features(**inputs)
+            else:
+                # Generic VLM path — run the vision tower directly
+                out = self.model.vision_model(**inputs)
+
+        # Normalize to a flat tensor across (transformers version, model type).
+        # Different transformers releases return either a raw tensor or a
+        # ModelOutput dataclass; cover both.
+        if self._torch.is_tensor(out):
+            features = out
+        elif hasattr(out, "image_embeds") and out.image_embeds is not None:
+            features = out.image_embeds
+        elif hasattr(out, "pooler_output") and out.pooler_output is not None:
+            features = out.pooler_output
+        elif hasattr(out, "last_hidden_state"):
+            features = out.last_hidden_state.mean(dim=1)
+        else:
+            raise RuntimeError(
+                f"HFVisionTowerEncoder could not extract an embedding from "
+                f"{type(out).__name__} for model {self.model_id!r}"
+            )
+        return features.squeeze(0).detach().cpu().numpy().astype(np.float32)
+
+
+# Back-compat alias — `LFM2VLEncoderStub` was the documented integration seat
+# before SigLIP substitution. Keeping the name preserves any callers that
+# imported it directly. The stub is now a thin shim over the real encoder.
+class LFM2VLEncoderStub(HFVisionTowerEncoder):
+    """Deprecated alias retained for back-compat. Use HFVisionTowerEncoder."""
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("model_id", "google/siglip-base-patch16-224")
+        super().__init__(*args, **kwargs)
+        logger.info(
+            "LFM2VLEncoderStub is deprecated; backed by HFVisionTowerEncoder "
+            "(model=%s). Update callers to instantiate HFVisionTowerEncoder "
+            "directly.", self.model_id,
         )
 
 
@@ -181,7 +278,16 @@ class LFM2VLEncoderStub:
 def build_encoder(kind: str = "identity", **kwargs) -> TileEncoder:
     """Build an encoder by kind string.
 
-    Valid kinds: "identity", "dummy", "lfm2vl" (or "lfm25vl").
+    Valid kinds:
+      * "identity"        — pass-through (no encoder)
+      * "dummy"           — deterministic fake (no model load; for tests)
+      * "hf_vision_tower" — any HuggingFace VLM via HFVisionTowerEncoder
+                            (default model: SigLIP-base)
+      * "lfm2vl" (or "lfm25vl", "lfm2.5vl", "lfm2.5-vl") — LFM2.5-VL slot;
+                            currently substituted by HFVisionTowerEncoder
+                            with SigLIP-base default until Liquid AI ships
+                            public weights. Pass model_id= to override.
+
     kwargs are forwarded to the concrete encoder's __init__.
     """
     kind_lower = kind.lower().strip()
@@ -189,6 +295,13 @@ def build_encoder(kind: str = "identity", **kwargs) -> TileEncoder:
         return IdentityEncoder()
     if kind_lower == "dummy":
         return DummyEncoder(**kwargs)
+    if kind_lower in ("hf_vision_tower", "vision_tower", "hf_vlm"):
+        return HFVisionTowerEncoder(**kwargs)
     if kind_lower in ("lfm2vl", "lfm25vl", "lfm2.5vl", "lfm2.5-vl"):
-        return LFM2VLEncoderStub(**kwargs)
-    raise ValueError(f"Unknown encoder kind {kind!r}; expected identity | dummy | lfm2vl")
+        # LFM2.5-VL substitution path. When Liquid AI ships public weights,
+        # change the default model_id below to the real LFM2.5-VL HF id.
+        return HFVisionTowerEncoder(**kwargs)
+    raise ValueError(
+        f"Unknown encoder kind {kind!r}; expected "
+        "identity | dummy | hf_vision_tower | lfm2vl"
+    )
