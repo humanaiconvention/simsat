@@ -394,6 +394,7 @@ class TransformersVLMAdapter:
             chat_prompt = prompt
 
         inputs = self._tokenizer(chat_prompt, return_tensors="pt").to(self.device)
+        prompt_len = inputs["input_ids"].shape[1]
         with self._torch.no_grad():
             out = self._model.generate(
                 **inputs,
@@ -402,8 +403,13 @@ class TransformersVLMAdapter:
                 temperature=0.0,
                 pad_token_id=getattr(self._tokenizer, "eos_token_id", None),
             )
-        full_text = self._tokenizer.decode(out[0], skip_special_tokens=True)
-        return full_text[len(chat_prompt):] if full_text.startswith(chat_prompt) else full_text
+        # Slice on token IDs (not string-startswith) — skip_special_tokens=True
+        # strips <|turn> et al from decoded output but NOT from chat_prompt,
+        # so the previous string-startswith check failed and the function
+        # returned the entire prompt+response. The parser then saw the user
+        # prompt itself instead of the model's reply.
+        new_tokens = out[0, prompt_len:]
+        return self._tokenizer.decode(new_tokens, skip_special_tokens=True)
 
     def _generate_vlm(self, prompt: str, image: Image.Image) -> str:
         """Vision-language path — interleaves the image into the chat template."""
@@ -431,6 +437,7 @@ class TransformersVLMAdapter:
             return_tensors="pt",
         )
         inputs = {k: v.to(self.device) if hasattr(v, "to") else v for k, v in inputs.items()}
+        prompt_len = inputs["input_ids"].shape[1] if "input_ids" in inputs else None
 
         with self._torch.no_grad():
             out = self._model.generate(
@@ -441,6 +448,11 @@ class TransformersVLMAdapter:
                 pad_token_id=getattr(self._tokenizer, "eos_token_id", None),
             )
         decoder = self._tokenizer or self._processor
+        # See _generate_text — slice on token IDs, not string-startswith.
+        if prompt_len is not None:
+            new_tokens = out[0, prompt_len:]
+            return decoder.decode(new_tokens, skip_special_tokens=True)
+        # Fallback if processor didn't expose input_ids (older API).
         full_text = decoder.decode(out[0], skip_special_tokens=True)
         return full_text[len(chat_prompt):] if full_text.startswith(chat_prompt) else full_text
 
