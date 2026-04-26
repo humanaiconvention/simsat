@@ -193,6 +193,31 @@ your chat format), `MASKING_TOO_AGGRESSIVE` (template matches multiple
 positions), or `INCONCLUSIVE`. Each verdict prints the next concrete step
 inline.
 
+When the verdict is `MASKING_OK_LOSS_DESCENDED`, wire the adapter:
+
+```bash
+export OBSERVATION_VLA_BACKEND=gemma4                        # NOT gemma4_haic_local!
+export OBSERVATION_VLM_BASE_MODEL=google/gemma-4-e2b-it
+export OBSERVATION_VLM_LORA_PATH=./weights/your-adapter-dir
+export OBSERVATION_VLM_MODE=lora
+python scripts/observation_vla_eval.py --inprocess
+```
+
+> **Backend gotcha:** `gemma4_haic_local` routes to the legacy HAIC v35-gov
+> Gemma-4 (human-interview model). For a fresh SimSat fine-tune use
+> `gemma4` (which routes to `TransformersVLMAdapter` with the
+> `OBSERVATION_VLM_*` env vars above).
+
+For a one-command download + diagnose + eval roundtrip after the Kaggle
+kernel finishes:
+
+```bash
+python scripts/sync_kaggle_adapter.py --version 7 --wait
+```
+
+`--wait` polls the kernel status every 60s until it's COMPLETE, then
+downloads, diagnoses, and runs the eval automatically.
+
 ---
 
 ## What the viability gates do to your output

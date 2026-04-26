@@ -110,8 +110,15 @@ def _diagnose(adapter_path: Path, check: str) -> int:
 
 def _eval(adapter_path: Path) -> int:
     env = os.environ.copy()
-    env["HAIC_GEMMA4_LORA_PATH"] = str(adapter_path)
-    env["OBSERVATION_VLA_BACKEND"] = "gemma4_haic_local"
+    # IMPORTANT: backend='gemma4' (NOT 'gemma4_haic_local'). The latter routes
+    # to the legacy HAIC v35-gov model. 'gemma4' routes to TransformersVLMAdapter
+    # with model_label='gemma4-simsat', which uses the OBSERVATION_VLM_* env vars
+    # below to load the freshly-trained SimSat adapter.
+    env["OBSERVATION_VLA_BACKEND"] = "gemma4"
+    env["OBSERVATION_VLM_BASE_MODEL"] = env.get("OBSERVATION_VLM_BASE_MODEL", "google/gemma-4-e2b-it")
+    env["OBSERVATION_VLM_LORA_PATH"] = str(adapter_path)
+    env["OBSERVATION_VLM_MODE"] = "lora"
+    env["OBSERVATION_VLM_MODEL_LABEL"] = env.get("OBSERVATION_VLM_MODEL_LABEL", "gemma4-simsat")
     return _run(
         [sys.executable, str(REPO_ROOT / "scripts" / "observation_vla_eval.py"), "--inprocess"],
         env=env,
@@ -206,8 +213,10 @@ def main() -> int:
     print("Sync complete.")
     print(f"Adapter at: {adapter_path}")
     print("To re-run the eval against this backend manually:")
-    print(f"  set HAIC_GEMMA4_LORA_PATH={adapter_path}")
-    print(f"  set OBSERVATION_VLA_BACKEND=gemma4_haic_local")
+    print(f"  set OBSERVATION_VLA_BACKEND=gemma4")
+    print(f"  set OBSERVATION_VLM_BASE_MODEL=google/gemma-4-e2b-it")
+    print(f"  set OBSERVATION_VLM_LORA_PATH={adapter_path}")
+    print(f"  set OBSERVATION_VLM_MODE=lora")
     print(f"  python scripts/observation_vla_eval.py --inprocess")
     print("=" * 72)
     return 0

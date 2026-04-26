@@ -94,9 +94,13 @@ class TestNextStepRouting:
     def test_descended_verdict_includes_eval_command(self, tmp_path):
         adapter_dir = tmp_path / "adapter_v4"
         msg = self.mod._next_step_for("MASKING_OK_LOSS_DESCENDED", adapter_dir)
-        assert "OBSERVATION_VLA_BACKEND=gemma4_haic_local" in msg
+        # Routes to the SimSat fine-tune backend (NOT the legacy gemma4_haic_local).
+        assert "OBSERVATION_VLA_BACKEND=gemma4" in msg
+        assert "OBSERVATION_VLM_LORA_PATH" in msg
         assert "observation_vla_eval.py" in msg
         assert str(adapter_dir) in msg
+        # Sanity: the warning about the legacy backend is included.
+        assert "gemma4_haic_local" in msg.lower() or "v35-gov" in msg.lower()
 
     def test_broken_verdict_recommends_fix_16(self):
         msg = self.mod._next_step_for("MASKING_BROKEN", None)

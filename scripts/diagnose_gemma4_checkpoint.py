@@ -247,10 +247,14 @@ def _next_step_for(verdict: str, adapter_path: Path | None) -> str:
         path_hint = str(adapter_path) if adapter_path else "<your adapter path>"
         return (
             "Ship it. Wire the adapter into the local backend:\n"
-            f"  export HAIC_GEMMA4_LORA_PATH={path_hint}\n"
-            "  export OBSERVATION_VLA_BACKEND=gemma4_haic_local\n"
+            f"  export OBSERVATION_VLM_LORA_PATH={path_hint}\n"
+            "  export OBSERVATION_VLM_BASE_MODEL=google/gemma-4-e2b-it\n"
+            "  export OBSERVATION_VLM_MODE=lora\n"
+            "  export OBSERVATION_VLA_BACKEND=gemma4\n"
             "  python scripts/observation_vla_eval.py --inprocess\n"
-            "Compare action-agreement and MAE numbers against the clip_local baseline."
+            "Compare action-agreement and MAE numbers against the clip_local baseline.\n"
+            "(NOTE: backend='gemma4' routes to TransformersVLMAdapter w/ the SimSat\n"
+            " fine-tune. Don't use 'gemma4_haic_local' — that's the legacy v35-gov model.)"
         )
     if verdict == "MASKING_OK_LOSS_FLAT":
         return (
