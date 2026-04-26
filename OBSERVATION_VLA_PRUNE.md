@@ -1,6 +1,6 @@
 # ObservationVLA Fallback Prune Report
 
-- Generated: `2026-04-25T15:34:30Z`
+- Generated: `2026-04-26T16:06:52Z`
 - Total traces: `86`
 - Runtime distribution: `clip_local=55, stub=11, stub_fallback=20`
 - Protected trace references: `15`

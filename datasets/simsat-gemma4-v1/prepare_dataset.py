@@ -11,6 +11,10 @@ Training weight → repetition count (rounded, capped at 10):
   format_train:        weight=1.5 → 2 repeats
   multimodal_weak:     weight=2.0 → 2 repeats (text-only, no image column)
   multimodal_reviewed: weight=6-8 → 6-8 repeats
+
+Set REFINE_BOOST=<float> env var (default 1.0) to upweight `refine` action rows.
+Example: REFINE_BOOST=2.0 doubles the repeat count for every refine case.
+Use this to address accept-bias in v9 (model over-selects accept on borderline refine).
 """
 from __future__ import annotations
 
@@ -21,6 +25,8 @@ from pathlib import Path
 
 EXPORT_DIR = Path(__file__).resolve().parents[2] / "exports" / "gemma4_v3"
 OUT_DIR = Path(__file__).parent
+
+REFINE_BOOST = float(os.environ.get("REFINE_BOOST", "1.0"))
 
 SYSTEM_PROMPT = (
     "You are a satellite encounter-assessment AI. "
@@ -79,6 +85,9 @@ def main() -> None:
         records = load_jsonl(EXPORT_DIR / filename)
         for rec in records:
             weight = rec.get("training_weight", 1.0)
+            action = rec.get("target_json", {}).get("recommended_action", "")
+            if action == "refine" and REFINE_BOOST != 1.0:
+                weight = weight * REFINE_BOOST
             repeat = max(1, min(10, round(weight)))
             messages = to_messages(rec)
             # One JSONL row per repeat — SFTTrainer sees each as an independent example
@@ -120,7 +129,8 @@ def main() -> None:
     for row in train_rows:
         a = row.get("_action", "?")
         action_counts[a] = action_counts.get(a, 0) + 1
-    print(f"  simsat_train.jsonl:          {len(train_rows)} rows (weighted repeats)")
+    refine_boost_str = f" (REFINE_BOOST={REFINE_BOOST})" if REFINE_BOOST != 1.0 else ""
+    print(f"  simsat_train.jsonl:          {len(train_rows)} rows (weighted repeats{refine_boost_str})")
     print(f"  action distribution:         {action_counts}")
     for fname in OUT_DIR.glob("*.jsonl"):
         size = fname.stat().st_size

@@ -25,7 +25,7 @@ os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 # Fix #3: uninstall Unsloth if left from a prior warm session.
 # Even without `import unsloth`, it monkey-patches SFTTrainer globally.
-get_ipython().system("pip uninstall -y unsloth unsloth_zoo 2>&1 | tail -3")  # noqa: F821
+get_ipython().system("pip uninstall -y unsloth unsloth_zoo torchao 2>&1 | tail -3")  # noqa: F821
 
 # Purge warm-kernel module state so next imports are clean.
 for _m in list(sys.modules):
@@ -39,7 +39,7 @@ shutil.rmtree("/kaggle/working/unsloth_compiled_cache", ignore_errors=True)
 get_ipython().system(  # noqa: F821
     "pip install -q -U "
     "'transformers>=4.51.0' "
-    "'trl>=0.12.0' "
+    "'trl>=0.12.0,<0.15.0' "  # Fix #15: 0.15.0 removed DataCollatorForCompletionOnlyLM
     "'peft>=0.12.0' "
     "'accelerate>=0.33.0' "
     "'bitsandbytes>=0.44.0' "
@@ -247,16 +247,24 @@ assert "attention_mask" in dataset.column_names, "Fix #18 failed: 'attention_mas
 # CELL 6: Train
 # ============================================================
 from trl import SFTTrainer, SFTConfig
+# Fix #15: defensive import — TRL ≥0.15 moved/removed the collator from top-level.
+try:
+    from trl import DataCollatorForCompletionOnlyLM
+except ImportError:
+    try:
+        from trl.trainer.utils import DataCollatorForCompletionOnlyLM
+    except ImportError:
+        from trl.data_utils import DataCollatorForCompletionOnlyLM
 
 print("\n" + "=" * 60)
 print("TRAINING")
 print("=" * 60)
 
-OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v8-adapter"
+OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v9-adapter"
 
-# Fix #10: fp16=False — THE showstopper for QLoRA. QLoRA + fp16=True triggers
-# GradScaler assertion because LoRA params (fp32) bypass GradScaler's inf hooks.
-# The model already computes in fp16 via bnb_4bit_compute_dtype — AMP not needed.
+# Fix #10: fp16=False — do NOT enable AMP. The model is in bfloat16; enabling fp16
+# AMP triggers GradScaler which conflicts with bfloat16 LoRA params. bf16=False
+# because T4 (SM7.5) has no native bfloat16 ALUs — AMP adds no benefit.
 training_args = SFTConfig(
     output_dir=OUTPUT_DIR,
     per_device_train_batch_size=1,
@@ -268,8 +276,8 @@ training_args = SFTConfig(
     save_strategy="epoch",
     logging_steps=5,
     num_train_epochs=2,
-    fp16=False,                        # Fix #10: disable AMP with QLoRA
-    bf16=False,                        # T4 has no native bf16
+    fp16=False,                        # Fix #10: no fp16 AMP (bfloat16 model)
+    bf16=False,                        # T4 has no native bf16 ALUs
     gradient_checkpointing=True,       # saves ~3-5 GiB activations on T4
     gradient_checkpointing_kwargs={"use_reentrant": False},  # Fix #12: use_reentrant=True
     # (default) breaks gradient flow through frozen base layers to LoRA adapters.
@@ -282,12 +290,31 @@ training_args = SFTConfig(
     dataloader_num_workers=0,          # avoid multiprocessing issues on T4
 )
 
+# Fix #14: DataCollatorForCompletionOnlyLM — compute loss ONLY on assistant tokens.
+#
+# Root cause of v2 flat loss (3.94 throughout, 0/3 reviewed eval accuracy):
+#   Default SFTTrainer computes cross-entropy over ALL sequence tokens.
+#   Each example has ~650 prompt tokens (system + user) and ~75 response tokens.
+#   Task-specific signal is diluted by 650/725 ≈ 90% non-signal tokens →
+#   effective gradient ≈ near-zero → model memorises prompt format, never learns
+#   the recommended_action discrimination → flat loss, majority-class output.
+#
+# Fix: mask prompt tokens with -100 (CrossEntropyLoss ignores them). Only the
+# assistant turn contributes to loss. response_template must exactly match Gemma-4's
+# chat format: "<start_of_turn>model\n" is the delimiter after the user turn.
+collator = DataCollatorForCompletionOnlyLM(
+    response_template="<|turn>model\n",  # Fix #19: Gemma-4 uses <|turn> special token (id 105), not <start_of_turn>
+    tokenizer=tokenizer,
+    mlm=False,
+)
+
 # Fix #7: max_seq_length NOT in SFTTrainer kwargs (moved to SFTConfig in TRL >=0.12)
 # Fix #8: processing_class= (not deprecated tokenizer= in TRL >=0.16)
 trainer = SFTTrainer(
     model=model,
     train_dataset=dataset,
     processing_class=tokenizer,        # Fix #8: processing_class=, NOT tokenizer=
+    data_collator=collator,            # Fix #14: response-only loss masking
     args=training_args,
     # peft_config=None because we pre-wrapped with get_peft_model above
 )
@@ -399,7 +426,7 @@ if eval_shortlist:
 # CELL 8: Summary + save results
 # ============================================================
 print("\n" + "=" * 60)
-print("SIMSAT GEMMA-4-E2B v1 COMPLETE")
+print("SIMSAT GEMMA-4-E2B v9 COMPLETE")
 print("=" * 60)
 print(f"  Training loss: {train_result.training_loss:.4f}")
 print(f"  Training steps: {train_result.global_step}")
@@ -408,7 +435,7 @@ for name, res in eval_results.items():
 print(f"  Adapter: {OUTPUT_DIR}")
 
 summary = {
-    "version": "simsat-gemma4-v8",
+    "version": "simsat-gemma4-v9",
     "base_model": MODEL_ID,
     "training_loss": round(train_result.training_loss, 4),
     "training_steps": train_result.global_step,
@@ -436,12 +463,12 @@ summary = {
         "learning_rate": 2e-4,
         "epochs": 2,
         "fp16": False,
-        "bnb_compute_dtype": "float16",
+        "precision": "bfloat16_full",
         "single_t4": True,
     },
 }
 
-summary_path = "/kaggle/working/simsat_gemma4_v8_summary.json"
+summary_path = "/kaggle/working/simsat_gemma4_v9_summary.json"
 with open(summary_path, "w") as f:
     json.dump(summary, f, indent=2)
 print(f"\nSummary saved: {summary_path}")
