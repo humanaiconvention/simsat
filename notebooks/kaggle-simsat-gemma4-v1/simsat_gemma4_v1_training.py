@@ -142,6 +142,7 @@ bnb_config = BitsAndBytesConfig(
 tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
 if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
+tokenizer.padding_side = "right"  # Fix #17: SFTTrainer expects right-padding for half-precision training
 
 # Fix #9: use `dtype=` (not deprecated `torch_dtype=`) in from_pretrained.
 model = AutoModelForCausalLM.from_pretrained(
@@ -239,7 +240,7 @@ print("\n" + "=" * 60)
 print("TRAINING")
 print("=" * 60)
 
-OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v5-adapter"
+OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v6-adapter"
 
 # Fix #10: fp16=False — THE showstopper for QLoRA. QLoRA + fp16=True triggers
 # GradScaler assertion because LoRA params (fp32) bypass GradScaler's inf hooks.
@@ -262,10 +263,11 @@ training_args = SFTConfig(
     # (default) breaks gradient flow through frozen base layers to LoRA adapters.
     # use_reentrant=False is the PEFT-recommended mode for QLoRA + grad checkpointing.
     remove_unused_columns=False,
+    max_seq_length=1024,               # Fix #17: Gemma's model_max_length is effectively infinity;
+                                       # SFTTrainer needs an explicit cap or batches end up ragged
+                                       # and the collator's tensor conversion fails.
     report_to="none",
     dataloader_num_workers=0,          # avoid multiprocessing issues on T4
-    # max_seq_length excluded — removed from SFTTrainer in TRL >=0.12 AND from
-    # SFTConfig in later TRL versions. TRL infers from tokenizer.model_max_length.
 )
 
 # Fix #7: max_seq_length NOT in SFTTrainer kwargs (moved to SFTConfig in TRL >=0.12)
@@ -394,7 +396,7 @@ for name, res in eval_results.items():
 print(f"  Adapter: {OUTPUT_DIR}")
 
 summary = {
-    "version": "simsat-gemma4-v5",
+    "version": "simsat-gemma4-v6",
     "base_model": MODEL_ID,
     "training_loss": round(train_result.training_loss, 4),
     "training_steps": train_result.global_step,
@@ -427,7 +429,7 @@ summary = {
     },
 }
 
-summary_path = "/kaggle/working/simsat_gemma4_v5_summary.json"
+summary_path = "/kaggle/working/simsat_gemma4_v6_summary.json"
 with open(summary_path, "w") as f:
     json.dump(summary, f, indent=2)
 print(f"\nSummary saved: {summary_path}")
