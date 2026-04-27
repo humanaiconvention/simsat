@@ -159,6 +159,11 @@ class TesseractT3Adapter:
         if "tesseract_t3_local" not in tags:
             tags = ["tesseract_t3_local"] + [t for t in tags if t != "transformers_vlm_local"]
             payload["rationale_tags"] = list(dict.fromkeys(tags))
+        # Rewrite delegate-leaked OBSERVATION_VLM_* env-var names in error tags
+        # so users see the TESSERACT_T3_* equivalent they actually configure.
+        payload["rationale_tags"] = [
+            t.replace("OBSERVATION_VLM_", "TESSERACT_T3_") for t in payload["rationale_tags"]
+        ]
         raw = payload.get("raw_response_text", "")
         if raw.startswith("transformers_vlm_local:"):
             payload["raw_response_text"] = "tesseract_t3_local:" + raw[len("transformers_vlm_local:"):]

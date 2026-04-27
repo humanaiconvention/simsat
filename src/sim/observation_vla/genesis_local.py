@@ -60,11 +60,14 @@ See CHALLENGE_ENTRY.md and COLLABORATOR_GUIDE.md for the full framing.
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
 import sys
 from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 _REQUIRED_KEYS = {
     "usable_observation",
@@ -143,6 +146,10 @@ class GenesisAdapter:
             self._load_error = str(exc)
             if not allow_fallback:
                 raise
+            logger.warning(
+                "GenesisAdapter load failed — falling back to stub. Reason: %s",
+                exc,
+            )
 
     @staticmethod
     def _cuda_available() -> bool:
