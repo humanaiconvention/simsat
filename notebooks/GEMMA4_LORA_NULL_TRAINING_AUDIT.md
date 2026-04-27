@@ -123,3 +123,50 @@ LoRA modules to inherit weights into.
 - Diagnostic: `D:\SimSat\weights\diloco-round0-continued\diloco_continued_adapter\v5_diagnostic.json`
 - Notebook: `D:\SimSat\notebooks\kaggle-simsat-diloco-round0\notebook.ipynb`
 - Audit commit: see git log on branch `codex/runtime-test-baseline`
+
+---
+
+## Follow-up: v11 partial save (2026-04-27)
+
+After the target_modules fix (commit `12bf0ab`), v11 produced a real fine-tune
+but the saved adapter has a structured gap. Per-layer audit of
+`D:\SimSat\weights\simsat-gemma4-v11-adapter\simsat-gemma4-v9-adapter\adapter_model.safetensors`:
+
+- **Layers 0-14:** all 7 LoRA modules saved (q, k, v, o, gate, up, down) ✓
+- **Layers 15-34:** only 5 saved (q, o, gate, up, down) — **k_proj and v_proj missing** ✗
+
+Total saved: 410 / 490 expected (84%). Local PEFT verification with
+`init_empty_weights` + `get_peft_model` matches all 245 expected target
+modules across all 35 layers — so config-time matching is fine. The drop
+happens at **Kaggle save time**.
+
+Most-likely cause: Gemma-4-E2B has `num_key_value_heads=1` (GQA), and the
+loaded 4-bit model calls `tie_weights()` which shares the k_proj/v_proj
+parameter pool across some layers. PEFT's `state_dict` dedupes by tensor
+identity at save, so the second-half LoRA pairs collapse into the first-half
+entries.
+
+Symptom (load-time warning seen in the v11 eval):
+```
+UserWarning: Found missing adapter keys while loading the checkpoint: [
+  'base_model.model.model.language_model.layers.15.self_attn.k_proj.lora_A.default.weight',
+  ...
+  'base_model.model.model.language_model.layers.34.self_attn.v_proj.lora_B.default.weight',
+]
+```
+
+PEFT zero-fills the missing keys at load, so the v11 adapter is functional
+but partially trained. Eval at N=37 still shows a massive jump over base
+Gemma-4-E2B (exact 0.41 → 0.86). The missing k/v on the second half MAY be
+load-bearing and a v12 with the missing keys preserved could lift metrics
+further — or they may have received zero gradient anyway.
+
+**Cheap diagnostic (one T4 run):** v12 with `peft>=0.20` (which has
+better `state_dict` handling for tied parameters) and an in-script
+sanity check that fails if any layer is missing k/v LoRA. Compare v12 eval
+to v11 to see whether the missing weights mattered.
+
+**Sanity gate** added in `simsat_gemma4_v1_training.py` (commit `12bf0ab`)
+catches the no-language-LoRA case but does NOT catch this partial-save case.
+A follow-up commit could tighten it to require all 35 layers × 7 modules =
+245 LoRA pairs, not just "any language LoRA".
