@@ -48,14 +48,11 @@ import re
 from pathlib import Path
 from typing import Any
 
-import numpy as np
 from PIL import Image
 
+from ._utils import clamp as _clamp
+
 logger = logging.getLogger(__name__)
-
-
-def _clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:
-    return max(low, min(high, value))
 
 
 def _weights_base_dir() -> Path:
@@ -306,7 +303,8 @@ class Gemma4HAICAdapter:
         messages = [{"role": "user", "content": prompt}]
         try:
             chat_prompt = self._tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-        except Exception:
+        except Exception as e:
+            logger.warning(f"apply_chat_template failed, falling back to raw prompt: {e}")
             chat_prompt = prompt
 
         inputs = self._tokenizer(chat_prompt, return_tensors="pt").to(self.device)
@@ -452,6 +450,7 @@ class Gemma4HAICAdapter:
                 image_bytes = base64.b64decode(image_b64)
                 image = Image.open(io.BytesIO(image_bytes))
                 return image.convert("RGB")
-            except Exception:
+            except Exception as e:
+                logger.debug(f"Failed to decode image: {e}, trying next candidate")
                 continue
         return None
