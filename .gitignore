@@ -67,6 +67,10 @@ data/security_log/
 # --- Generated training exports (large, regenerable from lattice pool) ---
 exports/
 
+# --- Generated review queue artifacts (regenerable; change with every label) ---
+REVIEW_BACKLOG.md
+review_queue.txt
+
 # --- Notebook state ---
 **/.ipynb_checkpoints/
 
