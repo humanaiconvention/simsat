@@ -161,10 +161,12 @@ curl http://localhost:8000/sim/capabilities | python -m json.tool
 # Look for: "observation_vla_runtime_mode": "genesis_local"
 ```
 
-**2. Eval against the 4 pinned reviewed cases:**
+**2. Eval against the 37 operator-reviewed cases:**
 ```bash
 python scripts/observation_vla_eval.py --inprocess
-# Shows: action agreement, MAE vs. operator usefulness scores
+# Shows: exact action agreement, bucketed agreement, useful agreement,
+# MAE vs. operator usefulness scores. The reference numbers to beat
+# (v11 SimSat fine-tune): exact 0.86, bucketed 0.86, useful 0.97, MAE 0.13.
 ```
 
 **3. Full planner comparison:**

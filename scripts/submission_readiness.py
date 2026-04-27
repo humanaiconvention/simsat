@@ -140,9 +140,14 @@ def build_readiness_report(
     lines.append("## Honesty Boundary")
     lines.append("")
     lines.append(
-        "- ObservationVLA is now image-model-backed via the configured runtime, "
-        "but the reviewed evaluation is still low-N and the current local backend "
-        "should be treated as an evidence scorer rather than a trusted autonomous action policy."
+        "- ObservationVLA is now image-model-backed via the configured runtime. "
+        "The reviewed evaluation pool grew from N=8 to N=37 on 2026-04-27 via "
+        "`scripts/batch_review.py`; v11 (the first SimSat Gemma-4 fine-tune to "
+        "actually train language-model parameters — see "
+        "`notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md`) reaches exact action "
+        "agreement 0.86 and useful agreement 0.97 over those 37 cases. "
+        "The local backend should still be treated as an evidence scorer rather "
+        "than a trusted autonomous action policy."
     )
     lines.append("- Mission-response actions are policy outputs with logged utility, not live spacecraft actuation.")
     lines.append("- The reviewed packet is Sentinel-first and does not depend on Mapbox.")
