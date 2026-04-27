@@ -25,14 +25,37 @@ src = re.sub(r"^#!.*?\n", "", src)
 src = re.sub(r'^"""[\s\S]*?"""\n', "", src, count=1)
 
 # ── Validation checks (print on build so CI can spot regressions) ───────────
+# Strip line/block comments first so heuristics don't match strings inside
+# explanatory prose (e.g. the audit reference at line 173).
+_code_only = re.sub(r"#[^\n]*", "", src)
+_code_only = re.sub(r'""".*?"""', "", _code_only, flags=re.DOTALL)
+
 checks = {
     "CUDA_VISIBLE_DEVICES=0": "CUDA_VISIBLE_DEVICES" in src,
     "float16 compute dtype": "bnb_4bit_compute_dtype=torch.float16" in src,
-    "no bfloat16 in code": "bfloat16" not in re.sub(r"#[^\n]*", "", src),
+    "no bfloat16 in code": "bfloat16" not in _code_only,
     "fp16=False": "fp16=False" in src,
-    "inner .linear targets": '"q_proj.linear"' in src,
+    # Fix #6 (corrected 2026-04-27): language_model.layers regex, NOT q_proj.linear.
+    # The .linear suffix matched only multimodal towers. See
+    # GEMMA4_LORA_NULL_TRAINING_AUDIT.md.
+    "language_model.layers regex target": (
+        "language_model" in _code_only
+        and "layers" in _code_only
+        and 'target_modules=r"' in _code_only
+    ),
+    "no .linear target in code (would re-introduce bug)": (
+        '"q_proj.linear"' not in _code_only
+    ),
     "processing_class=": "processing_class=tokenizer" in src,
-    "no tokenizer= kwarg": "tokenizer=tokenizer" not in src,
+    # Fix #8: SFTTrainer must use processing_class=, not tokenizer=.
+    # DataCollator legitimately uses tokenizer=tokenizer (Fix #14), so look for
+    # tokenizer= specifically inside the SFTTrainer( ... ) block.
+    "no tokenizer= kwarg in SFTTrainer": (
+        "tokenizer=tokenizer," not in (
+            re.search(r"SFTTrainer\((.*?)\)", _code_only, flags=re.DOTALL)
+            or type("X", (), {"group": lambda *_: ""})
+        ).group(1)
+    ),
     "no Unsloth import": "from unsloth" not in src.lower(),
     "SFTConfig (not TrainingArguments)": "SFTConfig" in src,
     "adamw_torch": '"adamw_torch"' in src,
@@ -41,6 +64,8 @@ checks = {
         < src.index("enable_input_require_grads")
     ),
     "use_reentrant=False": '"use_reentrant": False' in src,
+    # Sanity gate added 2026-04-27 — must not silently strip out.
+    "post-save adapter sanity gate": "Adapter sanity check" in src,
 }
 print("Build checks:")
 all_pass = True

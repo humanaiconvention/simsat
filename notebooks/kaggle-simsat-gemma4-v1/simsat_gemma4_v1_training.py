@@ -266,7 +266,7 @@ print("\n" + "=" * 60)
 print("TRAINING")
 print("=" * 60)
 
-OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v9-adapter"
+OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v11-adapter"
 
 # Fix #10: fp16=False — do NOT enable AMP. The model is in bfloat16; enabling fp16
 # AMP triggers GradScaler which conflicts with bfloat16 LoRA params. bf16=False
@@ -490,7 +490,7 @@ if eval_shortlist:
 # CELL 8: Summary + save results
 # ============================================================
 print("\n" + "=" * 60)
-print("SIMSAT GEMMA-4-E2B v9 COMPLETE")
+print("SIMSAT GEMMA-4-E2B v11 COMPLETE")
 print("=" * 60)
 print(f"  Training loss: {train_result.training_loss:.4f}")
 print(f"  Training steps: {train_result.global_step}")
@@ -499,7 +499,7 @@ for name, res in eval_results.items():
 print(f"  Adapter: {OUTPUT_DIR}")
 
 summary = {
-    "version": "simsat-gemma4-v9",
+    "version": "simsat-gemma4-v11",
     "base_model": MODEL_ID,
     "training_loss": round(train_result.training_loss, 4),
     "training_steps": train_result.global_step,
@@ -524,12 +524,12 @@ summary = {
         "learning_rate": 2e-4,
         "epochs": 2,
         "fp16": False,
-        "precision": "bfloat16_full",
+        "precision": "float16_full",
         "single_t4": True,
     },
 }
 
-summary_path = "/kaggle/working/simsat_gemma4_v9_summary.json"
+summary_path = "/kaggle/working/simsat_gemma4_v11_summary.json"
 with open(summary_path, "w") as f:
     json.dump(summary, f, indent=2)
 print(f"\nSummary saved: {summary_path}")
