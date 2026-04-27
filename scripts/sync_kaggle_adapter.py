@@ -108,7 +108,7 @@ def _diagnose(adapter_path: Path, check: str) -> int:
     ])
 
 
-def _eval(adapter_path: Path, refine_boost: float | None = None) -> int:
+def _eval(adapter_path: Path) -> int:
     env = os.environ.copy()
     # IMPORTANT: backend='gemma4' (NOT 'gemma4_haic_local'). The latter routes
     # to the legacy HAIC v35-gov model. 'gemma4' routes to TransformersVLMAdapter
@@ -119,8 +119,6 @@ def _eval(adapter_path: Path, refine_boost: float | None = None) -> int:
     env["OBSERVATION_VLM_LORA_PATH"] = str(adapter_path)
     env["OBSERVATION_VLM_MODE"] = "lora"
     env["OBSERVATION_VLM_MODEL_LABEL"] = env.get("OBSERVATION_VLM_MODEL_LABEL", "gemma4-simsat")
-    if refine_boost is not None:
-        env["REFINE_BOOST"] = str(refine_boost)
     return _run(
         [sys.executable, str(REPO_ROOT / "scripts" / "observation_vla_eval.py"), "--inprocess"],
         env=env,
@@ -151,8 +149,6 @@ def main() -> int:
                         help="Polling interval when --wait is set (default: 60).")
     parser.add_argument("--allow-error-status", action="store_true",
                         help="Download even if status is ERROR (sometimes there's a partial adapter).")
-    parser.add_argument("--refine-boost", type=float, default=None,
-                        help="REFINE_BOOST env var for eval (upweight refine cases; default: 1.0).")
     args = parser.parse_args()
 
     if args.download_only:
@@ -208,7 +204,7 @@ def main() -> int:
 
     # 5. Eval
     if not args.skip_eval:
-        rc = _eval(adapter_path, refine_boost=args.refine_boost)
+        rc = _eval(adapter_path)
         if rc != 0:
             print("Eval step failed.")
             return rc
