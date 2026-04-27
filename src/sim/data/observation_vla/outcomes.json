@@ -2,207 +2,6 @@
   "schema_version": 1,
   "outcomes": [
     {
-      "outcome_id": "out_a2e8b729c62a4528b102615a47ae8134",
-      "trace_id": "trace_e5a00b774bcf410fafe9944b8a4cc4f8",
-      "assessment_id": "asm_62c028a95d4345cd91357b9e4a799b41",
-      "decision_id": "dec_da8f5231491f45a5ae9abfddcb4f173d",
-      "registered_at": "2026-04-10T15:49:13Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.92,
-      "outcome_tags": [
-        "simulated_submission_case",
-        "scenario:disaster_response_weather"
-      ],
-      "notes": "Auto-generated submission case label for reproducible challenge evidence."
-    },
-    {
-      "outcome_id": "out_317427fcab5949d9bba849103ba3442d",
-      "trace_id": "trace_f889dbec218e45039cbf63c5b092aa60",
-      "assessment_id": "asm_bae0a49b534e43f993599aab5eafbb2c",
-      "decision_id": "dec_10d9cf6da2ae411abe5495f286cca55d",
-      "registered_at": "2026-04-10T15:49:16Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.92,
-      "outcome_tags": [
-        "simulated_submission_case",
-        "scenario:maritime_chokepoints"
-      ],
-      "notes": "Auto-generated submission case label for reproducible challenge evidence."
-    },
-    {
-      "outcome_id": "out_929e3ed5797147de9934d449fdb10749",
-      "trace_id": "trace_ba0e1a1a2b744cdf94f76fd990fec3f8",
-      "assessment_id": "asm_0fc58efb6ac2476babfdba95dc1116a6",
-      "decision_id": "dec_b00bca25801f4cd08472626e93370fdd",
-      "registered_at": "2026-04-10T15:49:21Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.92,
-      "outcome_tags": [
-        "simulated_submission_case",
-        "scenario:urban_coastal_ambiguity"
-      ],
-      "notes": "Auto-generated submission case label for reproducible challenge evidence."
-    },
-    {
-      "outcome_id": "out_7843d44964694d909aab32a3ed94b3d1",
-      "trace_id": "trace_d886c4872e1047d8b3f50b3563448968",
-      "assessment_id": "asm_c5206f606b7b4e18bb2cb8a2bf5d1979",
-      "decision_id": "dec_d300f2ea1c4d47588749d06ff6abc484",
-      "registered_at": "2026-04-10T15:50:56Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.92,
-      "outcome_tags": [
-        "simulated_submission_case",
-        "scenario:disaster_response_weather"
-      ],
-      "notes": "Auto-generated submission case label for reproducible challenge evidence."
-    },
-    {
-      "outcome_id": "out_306e495fae204705ae28cf0c883b2fad",
-      "trace_id": "trace_46c71a07326648039517d0a736b3ba31",
-      "assessment_id": "asm_1dcebbd3203a408c93bca0679856adcd",
-      "decision_id": "dec_0c584980333340efa07c6da4f1851749",
-      "registered_at": "2026-04-10T15:50:58Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.92,
-      "outcome_tags": [
-        "simulated_submission_case",
-        "scenario:maritime_chokepoints"
-      ],
-      "notes": "Auto-generated submission case label for reproducible challenge evidence."
-    },
-    {
-      "outcome_id": "out_2cd12b12e58d497895016f32a03566ab",
-      "trace_id": "trace_26f2081882cf46ba94e10b53ca5c2707",
-      "assessment_id": "asm_c6af0ce3d49d4debb01e5686c98f11aa",
-      "decision_id": "dec_3a78834c56e5408391e63d244ea4d78c",
-      "registered_at": "2026-04-10T15:51:03Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.92,
-      "outcome_tags": [
-        "simulated_submission_case",
-        "scenario:urban_coastal_ambiguity"
-      ],
-      "notes": "Auto-generated submission case label for reproducible challenge evidence."
-    },
-    {
-      "outcome_id": "out_61231247d81d458e91e8cd18c8e1f57c",
-      "trace_id": "trace_103f989c13d1437a8927fc031cfefc56",
-      "assessment_id": "asm_e00825f08d704f7b877b405e5437b0df",
-      "decision_id": "dec_ec674cf5de604c0cb9fcd4c8681d8a51",
-      "registered_at": "2026-04-10T16:03:52Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.92,
-      "label_source": "simulated",
-      "reviewer": null,
-      "review_status": "provisional",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "simulated_submission_case",
-        "scenario:maritime_chokepoints"
-      ],
-      "notes": "Auto-generated submission case label for reproducible challenge evidence."
-    },
-    {
-      "outcome_id": "out_d139c5c41743416ba012f8bd72c6eb98",
-      "trace_id": "trace_67918155fd3e47b8a207ae1bf635269c",
-      "assessment_id": "asm_0744fc5168d04ca3bcf4da6b97c84495",
-      "decision_id": "dec_8fc9a3b1674941a0a66bf87749f083e0",
-      "registered_at": "2026-04-10T16:03:57Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.92,
-      "label_source": "simulated",
-      "reviewer": null,
-      "review_status": "provisional",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "simulated_submission_case",
-        "scenario:urban_coastal_ambiguity"
-      ],
-      "notes": "Auto-generated submission case label for reproducible challenge evidence."
-    },
-    {
-      "outcome_id": "out_d5ec1307477f42cd8e27292e906b9fa0",
-      "trace_id": "trace_1926b646ee4b48478913681a33fcdfb1",
-      "assessment_id": "asm_7b5ccfcb93794fb196210be69e2f1c2d",
-      "decision_id": "dec_3d45e15388db4282a6efcf646694346b",
-      "registered_at": "2026-04-10T16:38:14Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.92,
-      "label_source": "simulated",
-      "reviewer": null,
-      "review_status": "superseded",
-      "is_current": false,
-      "supersedes_outcome_id": "out_1e919a3d45104aeabf469fb00383a4da",
-      "outcome_tags": [
-        "simulated_submission_case",
-        "scenario:disaster_response_weather"
-      ],
-      "notes": "Auto-generated submission case label for reproducible challenge evidence."
-    },
-    {
-      "outcome_id": "out_c07070b47db34f89bb4a7aa75a3db9e1",
-      "trace_id": "trace_2507337b7939460ebf01cbc9fcef8055",
-      "assessment_id": "asm_20ff1b5828654ec9bae3d8101054daaa",
-      "decision_id": "dec_f850b25e2f5e42708a3dfe0ec2298de2",
-      "registered_at": "2026-04-10T16:38:18Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.92,
-      "label_source": "simulated",
-      "reviewer": null,
-      "review_status": "superseded",
-      "is_current": false,
-      "supersedes_outcome_id": "out_ac217093c0b246af886ebd3052252ed8",
-      "outcome_tags": [
-        "simulated_submission_case",
-        "scenario:maritime_chokepoints"
-      ],
-      "notes": "Auto-generated submission case label for reproducible challenge evidence."
-    },
-    {
-      "outcome_id": "out_939554bedfc44c7681e60cd7f92fe6cb",
-      "trace_id": "trace_a4e31b4c39224d8fbdb2c4bf0f444823",
-      "assessment_id": "asm_27760e63af514efeab5fea9fde71f62f",
-      "decision_id": "dec_ae382895c85a4aba9a73201ac8a1568f",
-      "registered_at": "2026-04-10T16:38:25Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.92,
-      "label_source": "simulated",
-      "reviewer": null,
-      "review_status": "superseded",
-      "is_current": false,
-      "supersedes_outcome_id": "out_4780e7859b1741f9a9ef7399e16968a8",
-      "outcome_tags": [
-        "simulated_submission_case",
-        "scenario:urban_coastal_ambiguity"
-      ],
-      "notes": "Auto-generated submission case label for reproducible challenge evidence."
-    },
-    {
       "outcome_id": "out_ac217093c0b246af886ebd3052252ed8",
       "trace_id": "trace_2507337b7939460ebf01cbc9fcef8055",
       "assessment_id": "asm_20ff1b5828654ec9bae3d8101054daaa",
@@ -332,28 +131,6 @@
       "notes": "Assistant-generated urban 8h replacement for scenario-policy rehearsal; pending human confirmation."
     },
     {
-      "outcome_id": "out_219acc6ccf984a4192c789c3f07e0311",
-      "trace_id": "trace_4f65355f5c954fbf8db3fc684bb377af",
-      "assessment_id": "asm_842884e0fef64f1b9c9ce00e0d20ead7",
-      "decision_id": "dec_6b473ac21b4b4075979e14d73fa021ed",
-      "registered_at": "2026-04-23T20:40:18Z",
-      "mission_id": "default",
-      "operator_action": "refine",
-      "useful": true,
-      "usefulness_score": 0.89,
-      "label_source": "operator_review",
-      "reviewer": "Codex local rehearsal",
-      "review_status": "superseded",
-      "is_current": false,
-      "supersedes_outcome_id": "out_824f60a0400241f48f3c01f3316239bb",
-      "outcome_tags": [
-        "scenario_policy_replacement",
-        "pending_human_confirmation",
-        "operator_reviewed"
-      ],
-      "notes": "Assistant-generated urban 8h replacement for scenario-policy rehearsal; clip_local candidate pending human confirmation."
-    },
-    {
       "outcome_id": "out_824f60a0400241f48f3c01f3316239bb",
       "trace_id": "trace_4f65355f5c954fbf8db3fc684bb377af",
       "assessment_id": "asm_842884e0fef64f1b9c9ce00e0d20ead7",
@@ -374,6 +151,606 @@
         "operator_reviewed"
       ],
       "notes": "Human reviewed confirmed Rotterdam challenge case."
+    },
+    {
+      "outcome_id": "out_8f9bf6e3ec9448f8931e901de2bae699",
+      "trace_id": "trace_e5a00b774bcf410fafe9944b8a4cc4f8",
+      "assessment_id": "asm_62c028a95d4345cd91357b9e4a799b41",
+      "decision_id": "dec_da8f5231491f45a5ae9abfddcb4f173d",
+      "registered_at": "2026-04-27T16:56:29Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": "out_a2e8b729c62a4528b102615a47ae8134",
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=a"
+    },
+    {
+      "outcome_id": "out_4a1b3c867c1b4b649a8ce7b367d5116d",
+      "trace_id": "trace_f889dbec218e45039cbf63c5b092aa60",
+      "assessment_id": "asm_bae0a49b534e43f993599aab5eafbb2c",
+      "decision_id": "dec_10d9cf6da2ae411abe5495f286cca55d",
+      "registered_at": "2026-04-27T16:56:43Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": "out_317427fcab5949d9bba849103ba3442d",
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=a"
+    },
+    {
+      "outcome_id": "out_aea6f25f260241e3a7812771f9d2c5e9",
+      "trace_id": "trace_ba0e1a1a2b744cdf94f76fd990fec3f8",
+      "assessment_id": "asm_0fc58efb6ac2476babfdba95dc1116a6",
+      "decision_id": "dec_b00bca25801f4cd08472626e93370fdd",
+      "registered_at": "2026-04-27T16:56:54Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": "out_929e3ed5797147de9934d449fdb10749",
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=a"
+    },
+    {
+      "outcome_id": "out_72c481c8bc094efaa51ed4a60dcea180",
+      "trace_id": "trace_d886c4872e1047d8b3f50b3563448968",
+      "assessment_id": "asm_c5206f606b7b4e18bb2cb8a2bf5d1979",
+      "decision_id": "dec_d300f2ea1c4d47588749d06ff6abc484",
+      "registered_at": "2026-04-27T16:57:01Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": "out_7843d44964694d909aab32a3ed94b3d1",
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=a"
+    },
+    {
+      "outcome_id": "out_76da1acdf4e6469c82458ef81dfbbf03",
+      "trace_id": "trace_46c71a07326648039517d0a736b3ba31",
+      "assessment_id": "asm_1dcebbd3203a408c93bca0679856adcd",
+      "decision_id": "dec_0c584980333340efa07c6da4f1851749",
+      "registered_at": "2026-04-27T16:57:07Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": "out_306e495fae204705ae28cf0c883b2fad",
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=a"
+    },
+    {
+      "outcome_id": "out_7ec137dbc29842db8374fa8003328a50",
+      "trace_id": "trace_26f2081882cf46ba94e10b53ca5c2707",
+      "assessment_id": "asm_c6af0ce3d49d4debb01e5686c98f11aa",
+      "decision_id": "dec_3a78834c56e5408391e63d244ea4d78c",
+      "registered_at": "2026-04-27T16:57:11Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": "out_2cd12b12e58d497895016f32a03566ab",
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=a"
+    },
+    {
+      "outcome_id": "out_f2430864432c41f3a2b7cfc1f4a113f9",
+      "trace_id": "trace_103f989c13d1437a8927fc031cfefc56",
+      "assessment_id": "asm_e00825f08d704f7b877b405e5437b0df",
+      "decision_id": "dec_ec674cf5de604c0cb9fcd4c8681d8a51",
+      "registered_at": "2026-04-27T16:57:15Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": "out_61231247d81d458e91e8cd18c8e1f57c",
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=a"
+    },
+    {
+      "outcome_id": "out_8c5d36b267c94cdab216c501cf425dfe",
+      "trace_id": "trace_67918155fd3e47b8a207ae1bf635269c",
+      "assessment_id": "asm_0744fc5168d04ca3bcf4da6b97c84495",
+      "decision_id": "dec_8fc9a3b1674941a0a66bf87749f083e0",
+      "registered_at": "2026-04-27T16:57:18Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": "out_d139c5c41743416ba012f8bd72c6eb98",
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=a"
+    },
+    {
+      "outcome_id": "out_c5a5ad88d7d04b81add67e0934cc2f35",
+      "trace_id": "trace_04e08f0b4c4c42869a7663c3cb8bf641",
+      "assessment_id": "asm_22fc2cb069ab44c486b22343dccc56ac",
+      "decision_id": "dec_73c40418a57048e1b34164ca87c0d03f",
+      "registered_at": "2026-04-27T16:57:51Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=r"
+    },
+    {
+      "outcome_id": "out_05cb4ba4e93040d2b8c32a1a76d976a6",
+      "trace_id": "trace_c6da2e5391a8418c9ec2f379436509f2",
+      "assessment_id": "asm_26b05d9e9ab84932a0d49c0479b60be1",
+      "decision_id": "dec_08fc8c838ab7446b8e120b652b2dd0ab",
+      "registered_at": "2026-04-27T16:57:58Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=r"
+    },
+    {
+      "outcome_id": "out_1c9913d14e2f4f448ba871357330906d",
+      "trace_id": "trace_9afbbc332a96426abd0629fc019d395e",
+      "assessment_id": "asm_95def716f1c84e2ca47ef3de97631973",
+      "decision_id": "dec_5cbde90ff6f54cd8aeba8fbf5b19531f",
+      "registered_at": "2026-04-27T16:58:05Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=a"
+    },
+    {
+      "outcome_id": "out_5bf46ec0f1de4d68983c01530dc8d6dd",
+      "trace_id": "trace_7edbad05378b45eb88f8fedf7a71331c",
+      "assessment_id": "asm_3cd38f30030347569decb232549a7b01",
+      "decision_id": "dec_105d4a888ba84d4cb6f5bc5d7ec99366",
+      "registered_at": "2026-04-27T16:58:10Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=r"
+    },
+    {
+      "outcome_id": "out_f2b4c698120045d892f9ab11da363ace",
+      "trace_id": "trace_f77a115170574657ba4228ed818ec68d",
+      "assessment_id": "asm_5c09d40afd8042efaadba0ba159f1e68",
+      "decision_id": "dec_1210d1ba47fd40a990c9238431ab27e3",
+      "registered_at": "2026-04-27T16:58:14Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=a"
+    },
+    {
+      "outcome_id": "out_11945d05a25a48898f19e69d557f079f",
+      "trace_id": "trace_ecb6521c521446838ea9035d9631f4ca",
+      "assessment_id": "asm_bf20e0ba4e2a40d884953de679b93f86",
+      "decision_id": "dec_cd73a91ca92f44abb4fd6aa3ec53e00c",
+      "registered_at": "2026-04-27T16:58:17Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=r"
+    },
+    {
+      "outcome_id": "out_09e9bf4935e94528a6b120d221566bbc",
+      "trace_id": "trace_ae1998677df5406093334f1fcf0abc66",
+      "assessment_id": "asm_2fb5c9da1f27402f940bf2ed631f1ba5",
+      "decision_id": "dec_69ead4656e094ea4af78ea122ba81b6f",
+      "registered_at": "2026-04-27T16:58:21Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=r"
+    },
+    {
+      "outcome_id": "out_52d3c09ee96041728be5b3b782756862",
+      "trace_id": "trace_599f94be68e14eccb19ce49bac32d609",
+      "assessment_id": "asm_6e260ae75ab9437fb3d5eff0e1c9e91e",
+      "decision_id": "dec_5400ecdb5f8d43848de098b5c81c3310",
+      "registered_at": "2026-04-27T16:58:25Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=r"
+    },
+    {
+      "outcome_id": "out_a66c926df76f4fc891dca06a2116c8d6",
+      "trace_id": "trace_03147bb1b2234f489ce01208d11bbf4a",
+      "assessment_id": "asm_c78c170e13084ec0820e6dc1a46f87fe",
+      "decision_id": "dec_2531b68931734835b07ade08a7fc83b2",
+      "registered_at": "2026-04-27T16:58:38Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=a"
+    },
+    {
+      "outcome_id": "out_db8ce81cc55f4c4e82c51963717df7b8",
+      "trace_id": "trace_1f00711c8db6433f9e1f7a79691c23d3",
+      "assessment_id": "asm_6b08b0ddd55448acb18bfa89905e8ab5",
+      "decision_id": "dec_553bff0593bd4c019047241156d601f4",
+      "registered_at": "2026-04-27T16:58:44Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=r"
+    },
+    {
+      "outcome_id": "out_1f02537c3d94431e9c680e05d64ff6ff",
+      "trace_id": "trace_0725ba13314d4aec8e695ed0fe2130dd",
+      "assessment_id": "asm_a4cbbd23056746f78060d5af0440a089",
+      "decision_id": "dec_8f6a79f77a7f4246ac5a4a8e1969bf2f",
+      "registered_at": "2026-04-27T16:58:48Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=r"
+    },
+    {
+      "outcome_id": "out_fad7dd519fea40ccb61727b2717d871c",
+      "trace_id": "trace_d5b4d837f3d0444f89633ec10766d73a",
+      "assessment_id": "asm_77cbb5d864154ed89799ff722e91a5fa",
+      "decision_id": "dec_84a49bd0db0548928880811fec6b4a7e",
+      "registered_at": "2026-04-27T16:58:52Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=r"
+    },
+    {
+      "outcome_id": "out_0ab91228080149ca834b158a320e4c63",
+      "trace_id": "trace_58951351d068471c81106c7d029e2c81",
+      "assessment_id": "asm_1d69bdc905664d38b46f1a26eb311cb6",
+      "decision_id": "dec_0ac42ca100864e26aed7e7fb3d7c0195",
+      "registered_at": "2026-04-27T16:58:55Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=a"
+    },
+    {
+      "outcome_id": "out_d67abb1125ff4308aacdf1681d4ab112",
+      "trace_id": "trace_212662f658bd48028077bc23fb87c442",
+      "assessment_id": "asm_9b37a6f0f94f4168afb923e1ca881e39",
+      "decision_id": "dec_abc01362aee740528c3236c67d871ab1",
+      "registered_at": "2026-04-27T16:58:58Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=r"
+    },
+    {
+      "outcome_id": "out_ea9a90c012664fe7bab55c84285aa600",
+      "trace_id": "trace_b992766137e2419e8b1575e8b4ae3fc2",
+      "assessment_id": "asm_1c27af5d1603439e8e18f9675d3f7395",
+      "decision_id": "dec_b34684a215db4821a1e72459ced1ee47",
+      "registered_at": "2026-04-27T16:59:01Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=r"
+    },
+    {
+      "outcome_id": "out_6cfd4c54730c41fa8918304be5cb259b",
+      "trace_id": "trace_e0aa6488d0b541f2819fcf257006b636",
+      "assessment_id": "asm_26a3e73886fb4c41890d1ea293bd6250",
+      "decision_id": "dec_839eb461e63244afbec6ff6b34ccebf9",
+      "registered_at": "2026-04-27T16:59:04Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=r"
+    },
+    {
+      "outcome_id": "out_83119aea9dd14339b66560093baeb6db",
+      "trace_id": "trace_ad3890a1998d4d90950201e048708cb4",
+      "assessment_id": "asm_37a78b5351d7455e9793421bb3185ee7",
+      "decision_id": "dec_f33faf38506e4ca2baf37a99e571221f",
+      "registered_at": "2026-04-27T16:59:07Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=a"
+    },
+    {
+      "outcome_id": "out_796425f004d245cd8e4ca89149dfe048",
+      "trace_id": "trace_a4f965f9fce642b9ac42059907c41bd8",
+      "assessment_id": "asm_c34dd90f443f4fccab42994889347af6",
+      "decision_id": "dec_a9df79a2af5c4684b845b71a4dbf61fc",
+      "registered_at": "2026-04-27T16:59:11Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=a"
+    },
+    {
+      "outcome_id": "out_24b52ad8b8aa46c0b1296179cdf4bd86",
+      "trace_id": "trace_88c56a41ee64478b94257e26df7f5f77",
+      "assessment_id": "asm_736d64fbfa644591b6e37a7658971d13",
+      "decision_id": "dec_f0265865c7484b9cbfc1f847e571bfdf",
+      "registered_at": "2026-04-27T16:59:14Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=r"
+    },
+    {
+      "outcome_id": "out_1bec870dc2584eb5a386e05830de3e2e",
+      "trace_id": "trace_777833d1ce0847259cfbac033b271266",
+      "assessment_id": "asm_bd261ba3021e4c209aa6c6a6ff8da347",
+      "decision_id": "dec_c4628846eac74676952b1f35267ba85f",
+      "registered_at": "2026-04-27T16:59:18Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=r"
+    },
+    {
+      "outcome_id": "out_8419269974e64fd2bae40bd316a5bb6b",
+      "trace_id": "trace_cdcc2a7023d1433e9d4e0edc6bddf10e",
+      "assessment_id": "asm_b548c42c5cbe4515ba4d1c89b13685f8",
+      "decision_id": "dec_a43f2e1b33bc4a0399227657477c4bca",
+      "registered_at": "2026-04-27T16:59:29Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=r"
+    },
+    {
+      "outcome_id": "out_2f1a12aad9e844d78b990c98c4c2899c",
+      "trace_id": "trace_da37bb4310014942a24d430ea238110a",
+      "assessment_id": "asm_9ed3a2e2ff7a4e4faf8e13c7dbc40566",
+      "decision_id": "dec_4478c6da06e4424a9d609439abe94f14",
+      "registered_at": "2026-04-27T17:00:01Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": "batch_review: keystroke=r"
     }
   ]
 }

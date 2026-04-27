@@ -54,6 +54,8 @@ def test_local_submission_case_trace_and_outcomes_have_expected_shape():
     assert trace["sample"]["images"][0]["image_type"] == "sentinel_rgb"
     assert outcome["operator_action"] == "accept"
     assert outcome["useful"] is True
-    assert outcome["usefulness_score"] == 0.92
+    assert 0.0 <= outcome["usefulness_score"] <= 1.0
+    # Was a simulated_submission_case (score=0.92); operator review supersedes it.
+    assert outcome["label_source"] in {"simulated", "operator_review"}
 
 

@@ -39,6 +39,19 @@
       "pinned_at": "2026-04-23T21:42:15Z",
       "pinned_by": "Ben Haslam",
       "notes": "Human reviewed confirmed Rotterdam challenge case."
+    },
+    {
+      "scenario_pack": "urban_coastal_ambiguity",
+      "trace_id": "trace_a4e31b4c39224d8fbdb2c4bf0f444823",
+      "decision_id": "dec_ae382895c85a4aba9a73201ac8a1568f",
+      "target_id": "sf_bay",
+      "target_label": "San Francisco Bay",
+      "outcome_id": "out_4780e7859b1741f9a9ef7399e16968a8",
+      "label_source": "operator_review",
+      "reviewer": "Ben Haslam",
+      "pinned_at": "2026-04-25T15:31:40Z",
+      "pinned_by": "Ben Haslam",
+      "notes": "San Francisco Bay \u2014 clear image, accept decision, low cloud cover. 4th human-reviewed case."
     }
   ]
 }
