@@ -149,43 +149,53 @@ agreement print as usual.
 
 ## Concerns
 
-### 1. This round will not fix accept-bias on its own.
+### 1. Bias-improvement is plausible but unguaranteed.
 
-The training data is the same 294-row v9/v10 dataset (~70% refine in row
-count, but only 8 operator-reviewed cases drive the high-weight signal,
-and 4 of those have no PNG asset). 120 steps of continuation training
-on the same data, starting from a v10 seed, will not move the decision
-boundary in a meaningful way. **Treat this as a wiring-validation round**:
-prove the seed-adapter-load → continue-train → outbox-export pipeline
-works end-to-end. Eval numbers will be approximately v10's
-(MAE≈0.16, bucketed≈0.57).
+(Updated 2026-04-27 after the human-review pass landed 30 new operator-reviewed
+outcomes.) The training set just grew 294 → 713 rows, and `multimodal_reviewed`
+(weight 6-8) jumped from 4 → 34. The high-weight refine signal is now ~6x v10's.
+**This is the first dataset where round-0 continuation could meaningfully shift
+the accept-bias.** It is still a single 120-step continuation from a v10 seed
+that learned the old bias, so don't expect bias to vanish — but bucketed-agreement
+moving meaningfully above v10's 0.57 is a reasonable hypothesis. If it doesn't
+move, the next lever is round 1 with more aggressive `REFINE_BOOST` (2.0+) and
+more reviewed cases (target: >50 reviewed, expand from the unlabeled backlog).
 
-### 2. Eval coverage is unchanged and remains the headline weakness.
+### 2. Eval coverage is still the headline weakness.
 
 The pinned eval set (`simsat_eval_reviewed.jsonl`, n=3 +
-`simsat_eval_shortlist.jsonl`, n=10) is small. After this round, do
-**not** make accept/refine claims based on eval-only numbers. The
-review-queue labeling work in flight (`D:\SimSat\review_queue.txt`,
-30 candidates) is the prerequisite for a meaningful v11 retraining
-round on broader, refine-balanced ground truth.
+`simsat_eval_shortlist.jsonl`, n=10) did not grow with the train set —
+new operator reviews flowed into train, not eval. Treat round-0 eval
+numbers as directional, not authoritative. A larger pinned eval split
+(carved from a held-out subset of the new reviewed pool) is a follow-up.
 
-### 3. The `--dataset-id simsat-gemma4-v3-reviewed` label overstates current state.
+### 3. Dataset-id label is now accurate.
 
-The Kaggle dataset is still `benhaslam/simsat-gemma4-v1` (294 rows, v9
-composition). The `-v3-reviewed` suffix in the manifest will appear in
-the outbox provenance and could be misread as "this learner trained on
-a refreshed reviewed-only dataset". After the review-queue labeling
-session, regenerate the JSONL (`REFINE_BOOST=1.5 python
-datasets/simsat-gemma4-v1/prepare_dataset.py`), bump the Kaggle dataset
-version, and **then** the manifest label will accurately reflect the
-underlying data. For round 0, accept the slight provenance noise —
-do not rename the seed adapter or re-export.
+`benhaslam/simsat-gemma4-v1` slug is unchanged, but its committed contents
+(`simsat_train.jsonl`, 713 rows) now reflect the reviewed-refresh + REFINE_BOOST=1.5.
+The `--dataset-id simsat-gemma4-v3-reviewed` manifest label is no longer
+ahead of reality. **You must `kaggle datasets version` the dataset before
+running the Kaggle cell**, otherwise the kernel will pull the previous
+v9/v10 composition. See "Pushing the refreshed dataset" below.
 
 ### 4. Adapters
 
 Per constraints: this run writes to `/kaggle/working/diloco_continued_adapter`
 on Kaggle and `D:\SimSat\weights\diloco-round0-continued\` locally.
 Existing `D:\SimSat\weights\simsat-gemma4-v10-adapter\` is untouched.
+
+---
+
+## Pushing the refreshed dataset (do before the Kaggle cell)
+
+```powershell
+cd D:\SimSat\datasets\simsat-gemma4-v1
+kaggle datasets version -p . -m "review-refreshed (37 operator_review, 34 multimodal_reviewed) + REFINE_BOOST=1.5"
+```
+
+Wait for the upload to complete and the new version to show as live in the
+Kaggle UI before running the notebook cell. Otherwise the `_auto_train_path`
+glob in `continue_gemma4_adapter.py` will still pick up the prior version.
 
 ---
 
