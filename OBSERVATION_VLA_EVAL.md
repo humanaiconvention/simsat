@@ -3,7 +3,7 @@
 ## Runtime
 
 - ObservationVLA runtime: `transformers_vlm_local`
-- ObservationVLA model: `transformers_vlm:lora:gemma4-simsat`
+- ObservationVLA model: `transformers_vlm:lora:simsat-gemma4-v10`
 - Reviewed sample size: `7`
 
 ## Summary
@@ -27,5 +27,5 @@
 
 ## Tight Claim
 
-- Current claim: the ObservationVLA lane runs the SimSat Gemma-4-E2B v9 fine-tune (LoRA r=64) and shows usefulness-score MAE `0.16` and bucketed action agreement `0.57` over `7` operator-reviewed Sentinel cases. All `3` ground-truth `accept` cases (Suez Canal, Houston Ship Channel, San Francisco Bay) were identified with predicted score within `0.05` of operator score.
-- Conservative claim: this is a low-N benchmark; the model is over-confident on the borderline `refine` cases (Rotterdam, Fort Myers) — a training-data weighting issue, not an architectural one. MAE improved from `0.27` (clip_local baseline) → `0.16` (gemma4 v9).
+- Current claim: the ObservationVLA lane is now image-model-backed and shows `0.43` exact action agreement over `7` operator-reviewed Sentinel cases.
+- Conservative claim: this is an early, low-N validation of image-conditioned usefulness scoring, not a broad benchmark.
