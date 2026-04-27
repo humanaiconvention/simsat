@@ -91,22 +91,31 @@ the metadata alone.
 
 ## Setup — Genesis (Guilherme)
 
+Genesis uses a **native loader** — it does not delegate to `TransformersVLMAdapter`.
+The model architecture is custom (GLA+FoX hybrid, NeoX tokenizer, ChatML format).
+
 ```bash
-# In your .env or shell
+# Step 1 — clone your genesis repo and point to it
+export GENESIS_REPO_PATH=/path/to/orchOSModel-genesis-v3
+
+# Step 2 — point to your weights file
+export GENESIS_WEIGHTS_PATH=/path/to/genesis_152m_instruct.safetensors
+
+# Step 3 — select the backend and run
 export OBSERVATION_VLA_BACKEND=genesis
-export GENESIS_MODE=merged               # or lora / gguf
-export GENESIS_MERGED_PATH=/path/to/genesis-weights   # or HF repo id
 export OBSERVATION_VLA_DEVICE=cuda
+python scripts/observation_vla_eval.py --inprocess
+# You should see: runtime_mode=genesis_local in the output
 ```
 
-For LoRA mode:
-```bash
-export GENESIS_MODE=lora
-export GENESIS_BASE_MODEL=your-hf-org/genesis-152m
-export GENESIS_LORA_PATH=/path/to/simsat-adapter/
-```
+Full setup details and architecture context: `src/sim/observation_vla/genesis_local.py`.
 
-Config is read from: `genesis_local.py` → `GenesisAdapter` → `TransformersVLMAdapter`.
+**Note on zero-shot JSON quality:** the 152M base model generates narrative text rather
+than structured JSON in zero-shot. Fine-tuning on `benhaslam/simsat-gemma4-v1` (same
+ChatML format) is recommended before connecting to the eval. The Gemma-4 adapter and
+training notebook at `notebooks/kaggle-simsat-gemma4-v1/` are the reference.
+
+Config is read from: `genesis_local.py` → `GenesisAdapter` (native, no HF AutoModel).
 
 ---
 
@@ -152,7 +161,7 @@ curl http://localhost:8000/sim/capabilities | python -m json.tool
 # Look for: "observation_vla_runtime_mode": "genesis_local"
 ```
 
-**2. Eval against the 3 pinned reviewed cases:**
+**2. Eval against the 4 pinned reviewed cases:**
 ```bash
 python scripts/observation_vla_eval.py --inprocess
 # Shows: action agreement, MAE vs. operator usefulness scores
@@ -212,7 +221,7 @@ For a one-command download + diagnose + eval roundtrip after the Kaggle
 kernel finishes:
 
 ```bash
-python scripts/sync_kaggle_adapter.py --version 7 --wait
+python scripts/sync_kaggle_adapter.py --version 10 --wait
 ```
 
 `--wait` polls the kernel status every 60s until it's COMPLETE, then

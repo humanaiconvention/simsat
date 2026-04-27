@@ -1,9 +1,9 @@
 # SimSat
 
-[![tests](https://github.com/benhaslam/SimSat/actions/workflows/tests.yml/badge.svg)](./.github/workflows/tests.yml)
+[![tests](https://github.com/humanaiconvention/SimSat-1/actions/workflows/tests.yml/badge.svg)](./.github/workflows/tests.yml)
 [![python](https://img.shields.io/badge/python-3.11%20%7C%203.13-blue)](./requirements.txt)
 [![track](https://img.shields.io/badge/AI%20in%20Space-Liquid%20%2B%20General%20AI-orange)](./CHALLENGE_ENTRY.md)
-[![status](https://img.shields.io/badge/status-Tier%201%E2%80%933%20complete%20%7C%20v6%20reference-brightgreen)](./KNOWN_ISSUES.md)
+[![status](https://img.shields.io/badge/status-all%20tiers%20complete%20%7C%20Gemma--4%20v10-brightgreen)](./KNOWN_ISSUES.md)
 [![kaggle](https://img.shields.io/badge/Kaggle-simsat--gemma4--v1-20BEFF)](https://www.kaggle.com/code/benhaslam/simsat-gemma4-v1-training)
 [![license](https://img.shields.io/badge/license-see%20LICENSE-lightgrey)](./LICENSE)
 
@@ -33,6 +33,7 @@ If you are plugging a model into SimSat (Genesis, Tesseract T3, or any other VLM
 
 For PRs, branching, and CI: see [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 For known limitations and live status: see [`KNOWN_ISSUES.md`](./KNOWN_ISSUES.md).
+All Tier-1 correctness items are resolved. Open items are rigor/polish or pending-collaborator work (Genesis fine-tune, Tesseract T3 weights).
 
 ---
 
@@ -85,7 +86,7 @@ For the current ObservationVLA backend evaluation against operator-reviewed trac
 python scripts/observation_vla_eval.py --inprocess
 ```
 
-That generates [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md). Today the stack is honest-but-early: the local `clip_local` backend is image-model-backed, shows useful/not-useful alignment on the reviewed Sentinel cases, but does not yet match operator actions closely enough to treat as an autonomous action policy.
+That generates [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md). The current backend is the Gemma-4-E2B SimSat fine-tune (`OBSERVATION_VLA_BACKEND=gemma4`), which achieves usefulness MAE **0.16** and bucketed action agreement **0.57** over 7 operator-reviewed Sentinel cases. The `clip_local` CLIP baseline remains available as a zero-weight-download reference.
 
 To replace a simulated label with a real operator-reviewed outcome:
 
@@ -142,7 +143,7 @@ All backends speak the same eight-key JSON contract and pass through the same WC
 
 ### Known Issues
 
-See `KNOWN_ISSUES.md` at the repo root for the consolidated issue tracker with current status per item. The tzinfo bug in `src/sim/simulator.py:111` (item 1) is the only open Tier-1 correctness item; remaining items are rigor/polish or pending-collaborator work.
+See `KNOWN_ISSUES.md` at the repo root for the consolidated issue tracker with current status per item. All Tier-1 correctness items are resolved. Remaining open items are rigor/polish or pending-collaborator work (Genesis fine-tune, Tesseract T3 weights).
 
 ## Upcoming Hackathon: AI in Space | Liquid AI x DPhi Space
 

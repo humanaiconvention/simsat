@@ -95,14 +95,17 @@ Each evaluation logs:
 The most challenge-relevant artifact is the delta list: it makes the WCLI trust layer falsifiable instead of rhetorical.
 
 ## ObservationVLA Reality Check
-The ObservationVLA lane is now image-model-backed via a local `clip_local` backend rather than a pure stub. That is real progress, but the current reviewed evaluation is intentionally presented with tight claims:
+The ObservationVLA lane is backed by the Gemma-4-E2B SimSat fine-tune (`OBSERVATION_VLA_BACKEND=gemma4`). The current reviewed evaluation is intentionally presented with tight claims:
 
-- the reviewed set is still very small (N=3 pinned cases)
-- useful/not-useful alignment is strong on the reviewed set (1.00 action and usefulness agreement)
-- magnitude calibration is weak: usefulness-score MAE is 0.27, with the model systematically under-confident vs. the human operator (model ~0.66, operator 0.90–0.95)
-- downstream actions consume the binary agreement, not the raw magnitude — so the MAE does not change planner behaviour, but it is a rigor gap we are not hiding
-- the visual model should currently be treated as an image-conditioned evidence lane, not a trusted autonomous action policy
-- the `clip_local` baseline is a reference backend; the track-specific LFM2.5 and Gemma-4 fine-tunes replace it in their respective entries and will show a measurable improvement over the baseline per the Liquid Track eligibility rules
+- reviewed set: N=7 (4 pinned operator-reviewed cases across all 3 scenario packs + 3 additional reviewed traces)
+- useful/not-useful agreement: **0.86**
+- usefulness-score MAE: **0.16** (vs 0.27 `clip_local` baseline — 41% improvement)
+- bucketed action agreement: **0.57**; exact action agreement: 0.43
+- 3/3 ground-truth `accept` cases identified within 0.05 of operator usefulness score
+- known miss: Fort Myers Coast (`defer` predicted, `refine` actual, abs_error=0.71) — model under-confident on partial-cloud borderline windows
+- known accept-bias: Rotterdam `refine` cases still over-predicted as `accept`; not corrected by additional training epochs (v10 = v9 on all metrics)
+- the model should be treated as a calibrated evidence lane, not a trusted autonomous action policy
+- the `clip_local` CLIP baseline remains available as a zero-weight-download reference
 
 For the latest reviewed check:
 
@@ -231,11 +234,12 @@ The full in-repo code review from 2026-04-21 is preserved under `review/`:
 - `review/2026-04-21-phase-3/` — Entry B backend scaffold (`entry-b/backend` branch; model-agnostic VLM adapter) and the Google Drive recon block.
 - `review/2026-04-21-phase-4/` — This submission-doc refresh, TTT + viability thesis lock-in, and frontend brand-hide patch.
 
-Known open gaps at submission time (disclosed, not hidden):
-- The `accept→refine` thesis is now demonstrated on a pinned case: `urban_coastal_ambiguity` (Port of Rotterdam, `trace_4f65355f5c954fbf8db3fc684bb377af`) — scaffold `accept`, trust `refine`, operator confirmed `refine`, driven by cloud risk (48.78% cover). The remaining two pinned cases (`maritime_chokepoints`, `disaster_response_weather`) are `accept→accept`.
-- Sweep generation (`REVIEW_SET_BUILD.md`) reported `quality_skips=60, added_distinct=0`: root-caused to `_is_model_backed()` in `review_set_builder.py` requiring `runtime_mode="clip_local"` while the server was running a different real backend. Fixed — the check now accepts any non-stub runtime mode, matching `is_image_backed_assessment()` semantics. A fresh sweep should produce `added_distinct > 0`.
-- Two of three pinned casebook traces show `Observation runtime: stub`; current backend is `clip_local`. Re-materialization under `clip_local` is in-progress (see `review/2026-04-21-phase-2/S3`). The Rotterdam case runs `clip_local`.
-- Stacked TTT is described architecturally in this entry. Live on-orbit demonstration requires the hackathon prize hardware (NVIDIA Orin 16GB in-space compute); local demonstration shows the wiring and the gating logic but not a full on-orbit drift trajectory.
+Known open gaps (disclosed, not hidden):
+- The `accept→refine` thesis is demonstrated on the Port of Rotterdam pinned case (`urban_coastal_ambiguity`, `trace_4f65355f5c954fbf8db3fc684bb377af`) — scaffold `accept`, trust `refine`, operator confirmed `refine`, driven by cloud risk (48.78% cover).
+- Accept-bias in the Gemma-4 fine-tune: Rotterdam refine cases still over-predicted as `accept`. Additional training epochs (v10 = 4 epochs) did not change this — requires dataset-level rebalancing.
+- Fort Myers Coast miss: model predicts `defer` (score 0.20), operator says `refine` (score 0.90) — large abs_error on borderline partial-cloud windows.
+- Stacked TTT is described architecturally. Live on-orbit demonstration requires the hackathon prize hardware (NVIDIA Orin 16GB); local demonstration shows the wiring and gating logic but not a full on-orbit drift trajectory.
+- Genesis (Guilherme) and Tesseract T3 (Garrett) collaborator backends are wired and ready; waiting on collaborator fine-tuning / weights.
 
 ## Submission Framing
 Use this wording in the pitch:
