@@ -54,13 +54,14 @@ jobs:
         run: |
           set -e
           # Allow KNOWN_ISSUES / collaborator notes to mention paths in prose,
-          # but reject hardcoded D:/SimSat or C:/Users/benja in code.
-          if grep -RInE '(D:[/\\]SimSat|C:[/\\]Users[/\\]benja)' \
+          # but reject hardcoded Windows drive paths or user-home references in code.
+          # Catches D:/SimSat, D:/prism, D:/humanai-convention, C:/Users/<name>, etc.
+          if grep -RInE '(D:[/\\][A-Za-z][A-Za-z0-9_-]+|C:[/\\]Users[/\\][A-Za-z])' \
                 --include='*.py' --include='*.toml' --include='*.yaml' --include='*.yml' \
                 src/ scripts/ tests/ ; then
             echo ""
             echo "ERROR: hardcoded developer-machine paths found above."
-            echo "Use Path(__file__).resolve().parents[N] / 'subpath' instead."
+            echo "Use Path(__file__).resolve().parents[N] / 'subpath' or an env var instead."
             exit 1
           fi
           echo "OK — no hardcoded paths in source/scripts/tests."

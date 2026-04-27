@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import re
 import sys
 import time
@@ -20,7 +21,8 @@ if sys.platform == "win32":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 # ── Paths ──────────────────────────────────────────────────────────────────
-HAIC          = Path("D:/humanai-convention")
+# HAIC sister-repo path. Override via HAIC_REPO_PATH for non-default layouts.
+HAIC          = Path(os.environ.get("HAIC_REPO_PATH", str(Path.home() / "humanai-convention")))
 AGENTS        = HAIC / "agents"
 STAMP_FILE    = Path("/tmp/beast_last_open")
 
