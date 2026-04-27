@@ -167,18 +167,24 @@ print("CONFIGURING LoRA")
 print("=" * 60)
 
 # Fix #6: target inner `.linear` module, NOT the outer Gemma4ClippableLinear wrapper.
-# PEFT can only inject LoRA into torch.nn.Linear / Linear4bit, not the Gemma-4 custom
-# outer class. Targeting `q_proj` directly raises ValueError from PEFT.
+# Gemma-4 architecture: vision_tower and audio_tower wrap their projections in
+# `Gemma4ClippableLinear` which has a `.linear` sub-module. The language model
+# decoder layers do NOT — they expose q_proj/k_proj/etc as direct nn.Linear.
+# Earlier versions of this script used target_modules=["q_proj.linear", ...]
+# which matched ONLY the towers; text-only training never traverses them, so
+# every adapter v1->v10 trained zero language-model parameters (audit
+# 2026-04-27: notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md).
+#
+# Use an anchored regex that matches ONLY language_model.layers.X.{self_attn,mlp}.<proj>:
+#   verified locally with PEFT init_empty_weights: 245 LoRA modules, 100% language,
+#   0 vision, 0 audio.
 peft_config = LoraConfig(
     r=64,
     lora_alpha=128,
     lora_dropout=0.05,
     bias="none",
     task_type="CAUSAL_LM",
-    target_modules=[
-        "q_proj.linear", "k_proj.linear", "v_proj.linear", "o_proj.linear",
-        "gate_proj.linear", "up_proj.linear", "down_proj.linear",
-    ],
+    target_modules=r"model\.language_model\.layers\.\d+\.(self_attn|mlp)\.(q|k|v|o|gate|up|down)_proj$",
 )
 
 # Custom kbit prep: freeze base WITHOUT fp32 upcast (prepare_model_for_kbit_training
@@ -332,6 +338,64 @@ trainer.model.save_pretrained(OUTPUT_DIR)
 tokenizer.save_pretrained(OUTPUT_DIR)
 print(f"Adapter saved: {OUTPUT_DIR}")
 
+# ===========================================================================
+# Sanity gate (added 2026-04-27 after the v1->v10 null-LoRA audit):
+# Confirm the saved adapter actually trained the language model. Fails loudly
+# rather than silently shipping another no-op adapter. See:
+#   notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md
+# ===========================================================================
+import json as _json
+from collections import Counter as _Counter
+from safetensors import safe_open as _safe_open
+
+_adapter_safetensors = None
+for _candidate in ("adapter_model.safetensors", "adapter_model.bin"):
+    _p = f"{OUTPUT_DIR}/{_candidate}"
+    try:
+        with open(_p, "rb"):
+            _adapter_safetensors = _p
+            break
+    except FileNotFoundError:
+        continue
+if _adapter_safetensors is None:
+    raise RuntimeError(f"No adapter weights file found under {OUTPUT_DIR}")
+
+_buckets = _Counter()
+_lora_b_nonzero = 0
+_lora_b_total = 0
+with _safe_open(_adapter_safetensors, framework="numpy") as _f:
+    for _k in _f.keys():
+        if "vision_tower" in _k:
+            _buckets["vision"] += 1
+        elif "audio_tower" in _k:
+            _buckets["audio"] += 1
+        elif "language_model" in _k:
+            _buckets["language"] += 1
+        else:
+            _buckets["other"] += 1
+        if "lora_B" in _k:
+            _lora_b_total += 1
+            _t = _f.get_tensor(_k)
+            if (_t != 0).any():
+                _lora_b_nonzero += 1
+
+print(f"\nAdapter sanity check: tensor distribution = {dict(_buckets)}")
+print(f"  lora_B with non-zero values: {_lora_b_nonzero}/{_lora_b_total}")
+
+if _buckets.get("language", 0) == 0:
+    raise RuntimeError(
+        f"FAIL: adapter has NO language_model LoRA tensors (buckets={dict(_buckets)}). "
+        "target_modules pattern is matching only multimodal towers. See "
+        "notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md."
+    )
+if _lora_b_nonzero == 0:
+    raise RuntimeError(
+        f"FAIL: adapter has language_model LoRA tensors but every lora_B is exactly 0.0 "
+        f"({_lora_b_nonzero}/{_lora_b_total} non-zero). Training did not update the adapter. "
+        "Inspect gradient flow (model.train() called? gradient checkpointing kwargs?)."
+    )
+print(f"OK: language_model LoRA present and updated by training.")
+
 # ============================================================
 # CELL 7: Evaluate — action accuracy on holdout cases
 # ============================================================
@@ -451,10 +515,7 @@ summary = {
     "lora_config": {
         "r": 64,
         "lora_alpha": 128,
-        "target_modules": [
-            "q_proj.linear", "k_proj.linear", "v_proj.linear", "o_proj.linear",
-            "gate_proj.linear", "up_proj.linear", "down_proj.linear",
-        ],
+        "target_modules": r"model\.language_model\.layers\.\d+\.(self_attn|mlp)\.(q|k|v|o|gate|up|down)_proj$",
     },
     "training_config": {
         "batch_size": 1,

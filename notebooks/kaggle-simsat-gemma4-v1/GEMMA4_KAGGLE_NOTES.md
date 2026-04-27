@@ -43,15 +43,31 @@ bnb_config = BitsAndBytesConfig(
 )
 ```
 
-### 6. Target inner `.linear` module for LoRA
-Gemma-4 wraps each projection in `Gemma4ClippableLinear` containing an inner `Linear4bit`.
-PEFT can't LoRA-wrap the outer class. Targeting `q_proj` raises `ValueError`.
+### 6. Use a regex anchored to `language_model.layers` for LoRA
+**SUPERSEDED 2026-04-27.** The original advice — `target_modules=["q_proj.linear", ...]` —
+matches only Gemma-4-E2B-it's `vision_tower` and `audio_tower`, NOT the language model
+decoder layers, because only the towers wrap projections in `Gemma4ClippableLinear`
+(which has a `.linear` sub-module). The language model exposes q_proj/k_proj/etc as
+direct `nn.Linear`. The original advice silently produced no-op adapters from v1
+through v10 (224 vision + 72 audio + 0 language LoRA tensors, every `lora_B`=0.0).
+See `notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md` for the audit.
+
+Correct pattern (verified locally with `init_empty_weights` + PEFT: 245 LoRA
+modules, 100% language, 0 towers):
 ```python
-target_modules=[
-    "q_proj.linear", "k_proj.linear", "v_proj.linear", "o_proj.linear",
-    "gate_proj.linear", "up_proj.linear", "down_proj.linear",
-]
+target_modules = r"model\.language_model\.layers\.\d+\.(self_attn|mlp)\.(q|k|v|o|gate|up|down)_proj$"
 ```
+
+PEFT accepts `target_modules` as a regex string; the anchored `$` and explicit
+`language_model.layers.N` prefix exclude the towers.
+
+Targeting bare `q_proj` (without the regex anchor) still raises `ValueError`
+because PEFT can't wrap the outer `Gemma4ClippableLinear` class on the towers
+even when matched. The regex bypass works because it skips them entirely.
+
+The training script also adds a post-save sanity gate that fails loudly if the
+adapter has zero language-model LoRA tensors or all `lora_B = 0.0`, so this
+class of bug can never silently ship again.
 
 ### 7. Drop `max_seq_length` from both SFTTrainer and SFTConfig
 TRL ≥0.12 moved it to `SFTConfig`; later TRL versions removed it entirely.
