@@ -6,7 +6,7 @@ import numpy as np
 EARTH_RADIUS_KM = 6371.0
 EPS = 1e-12
 
-class MapboxlProvider:
+class MapboxProvider:
 
     def __init__(self):
         self.api_token = os.environ.get("MAPBOX_ACCESS_TOKEN")
@@ -107,7 +107,7 @@ class MapboxlProvider:
 
 
 if __name__ == "__main__":
-    provider = MapboxlProvider()
+    provider = MapboxProvider()
     lausanne = {'lon': 6.6322734, 'lat': 46.5218266}
     lausanne_north = {'lon': 6.6322734, 'lat': 46.5318266}
     paris = {'lon': 2.3522219, 'lat': 48.856614}

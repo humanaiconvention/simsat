@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from ImagingProviders.mapbox_provider import MapboxlProvider
+from ImagingProviders.mapbox_provider import MapboxProvider
 from ImagingProviders.sentinel_provider import SentinelProvider
 
 from .schemas import EncounterProbeResult, EncounterWindow, TargetSpec
 
 
 class ImagingProbeService:
-    def __init__(self, sentinel_provider: SentinelProvider | None, mapbox_provider: MapboxlProvider | None) -> None:
+    def __init__(self, sentinel_provider: SentinelProvider | None, mapbox_provider: MapboxProvider | None) -> None:
         self.sentinel_provider = sentinel_provider
         self.mapbox_provider = mapbox_provider
 

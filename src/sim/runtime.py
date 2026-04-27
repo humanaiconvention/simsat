@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping
 
-from ImagingProviders.mapbox_provider import MapboxlProvider
+from ImagingProviders.mapbox_provider import MapboxProvider
 from ImagingProviders.sentinel_provider import SentinelProvider
 from encounter.ephemeris import EphemerisService
 from encounter.features import FeatureBuilder
@@ -37,7 +37,7 @@ from orbit_config import DEFAULT_TLE, SATELLITE_NAME
 class RuntimeBundle:
     shared_data: dict[str, Any]
     sentinel_provider: SentinelProvider
-    mapbox_provider: MapboxlProvider | None
+    mapbox_provider: MapboxProvider | None
     encounter_service: EncounterService
     observation_vla_service: ObservationVLAService
     mission_response_service: MissionResponseService
@@ -63,7 +63,7 @@ def build_runtime_bundle(shared_data: Mapping[str, Any] | None = None) -> Runtim
     shared = dict(shared_data or {})
     sentinel = SentinelProvider()
     try:
-        mapbox = MapboxlProvider()
+        mapbox = MapboxProvider()
     except ValueError:
         _logging.getLogger(__name__).warning(
             "MAPBOX_ACCESS_TOKEN not set — Mapbox imagery disabled"

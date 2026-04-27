@@ -61,8 +61,7 @@ from PIL import Image
 logger = logging.getLogger(__name__)
 
 
-def _clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:
-    return max(low, min(high, value))
+from ._utils import clamp as _clamp
 
 
 def _weights_root() -> Path:

@@ -11,8 +11,7 @@ import requests
 from PIL import Image
 
 
-def _clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:
-    return max(low, min(high, value))
+from ._utils import clamp as _clamp
 
 
 def _normalize_cosine(similarity: float) -> float:

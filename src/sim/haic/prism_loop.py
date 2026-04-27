@@ -57,7 +57,9 @@ class PRISMLoop:
         """Attempt to load PRISM + model for full mechanistic measurement."""
         try:
             import sys
-            sys.path.insert(0, r"D:\prism\src")
+            _prism_src = os.environ.get("PRISM_SRC_PATH", "")
+            if _prism_src and _prism_src not in sys.path:
+                sys.path.insert(0, _prism_src)
             from prism import SpectralMicroscope
             self._microscope = SpectralMicroscope(max_tokens=64, window_size=32)
             logger.info("PRISM SpectralMicroscope loaded")

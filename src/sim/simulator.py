@@ -1,10 +1,12 @@
 ﻿import datetime
-from time import time
-from pyorbital.orbital import Orbital, astronomy
-
-from pydispatch import dispatcher
+import logging
 import time
+
 import numpy as np
+from pydispatch import dispatcher
+from pyorbital.orbital import Orbital
+
+logger = logging.getLogger(__name__)
 
 TOPIC_SIMULATION_COMMAND = "simulation.command"
 TOPIC_SATELLITE_GROUND_POSITION = "satellite.ground_position"
@@ -67,7 +69,7 @@ class Simulator:
         self.tick()
 
         if self.sim_is_running:
-            print(f"[SIM] Advancing simulation by {self.time_step} seconds.")
+            logger.debug("Advancing simulation by %s seconds.", self.time_step)
             if not self.start_time:
                 self.start_time = time.time()
             if self.timing_mode: 
@@ -116,32 +118,26 @@ class Simulator:
     def on_command(self, sender, data):
         command = data.get('command', '')
         parameters = data.get('parameters', {})
-        print(f"[SIM COMMAND] Command received: {command}")
+        logger.info("Command received: %s", command)
         if command == 'start':
-            print("[SIM COMMAND] Start simulation command received.")
             if "start_time" in parameters:
                 self.set_start_time(parameters.get("start_time"))
             self.set_sim_speed(step_size=parameters.get('step_size_seconds', 10),
                                replay_speed=parameters.get('replay_speed', 1.0))
             self.sim_is_running = True
         elif command == 'set_start_time':
-            print("[SIM COMMAND] Set start time command received.")
             self.set_start_time(parameters.get("start_time"))
         elif command == 'set_step_size':
-            print("[SIM COMMAND] Set step size command received.")
             self.set_sim_speed(step_size=parameters.get('step_size_seconds'))
         elif command == 'set_replay_speed':
-            print("[SIM COMMAND] Set replay speed command received.")
             self.set_sim_speed(replay_speed=parameters.get('replay_speed'))
         elif command == 'pause':
-            print("[SIM COMMAND] Pause simulation command received.")
             self.sim_is_running = False
         elif command == 'reset':
-            print("[SIM COMMAND] Reset simulation command received.")
             self.sim_is_running = False
             self.sim_outstanding_rewind_command = True
         else:
-            print(f"[SIM COMMAND] Unknown command received: {command}")
+            logger.warning("Unknown command: %s", command)
 
     def set_sim_speed(self, step_size=None, replay_speed=None):
         if step_size is None:
@@ -183,13 +179,16 @@ class Simulator:
     def set_start_time(self, start_time):
         start_ts = self._parse_start_time(start_time)
         if start_ts is None:
-            print(f"[SIM WARNING] Invalid start_time '{start_time}'. Expected ISO-8601 UTC (e.g. 2026-03-12T12:34:56Z).")
+            logger.warning("Invalid start_time %r — expected ISO-8601 UTC (e.g. 2026-03-12T12:34:56Z).", start_time)
             return False
 
         self.sim_t0 = start_ts
         self.utcg_time = self.sim_t0
         self.currentTime_EpSec = 0
         self.start_time = None
-        print(f"[SIM COMMAND] Simulation start time set to: {datetime.datetime.fromtimestamp(self.sim_t0, tz=datetime.timezone.utc).isoformat().replace('+00:00', 'Z')}")
+        logger.info(
+            "Simulation start time set to: %s",
+            datetime.datetime.fromtimestamp(self.sim_t0, tz=datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
+        )
         return True
         
