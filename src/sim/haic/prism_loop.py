@@ -32,6 +32,14 @@ PRISM_MODEL_ID = os.environ.get("HAIC_PRISM_MODEL", "")
 EPSILON_THRESHOLD = float(os.environ.get("HAIC_EPSILON", "0.01"))
 
 
+def _ensure_prism_on_path() -> None:
+    """Insert PRISM_SRC_PATH into sys.path if set and not already present."""
+    import sys
+    src = os.environ.get("PRISM_SRC_PATH", "")
+    if src and src not in sys.path:
+        sys.path.insert(0, src)
+
+
 class PRISMLoop:
     """
     Manages PRISM measurements across a HAIC session lifecycle.
@@ -56,10 +64,7 @@ class PRISMLoop:
     def _init_full(self) -> None:
         """Attempt to load PRISM + model for full mechanistic measurement."""
         try:
-            import sys
-            _prism_src = os.environ.get("PRISM_SRC_PATH", "")
-            if _prism_src and _prism_src not in sys.path:
-                sys.path.insert(0, _prism_src)
+            _ensure_prism_on_path()
             from prism import SpectralMicroscope
             self._microscope = SpectralMicroscope(max_tokens=64, window_size=32)
             logger.info("PRISM SpectralMicroscope loaded")
@@ -163,8 +168,7 @@ class PRISMLoop:
         """Run SpectralMicroscope.full_scan() and extract snapshot fields."""
         prompt = context or "Describe what you observe in this satellite image."
         try:
-            import sys
-            sys.path.insert(0, r"D:\prism\src")
+            _ensure_prism_on_path()
             from prism.telemetry.snapshot import take_snapshot
 
             snap = take_snapshot(
