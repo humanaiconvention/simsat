@@ -1,0 +1,29 @@
+{
+  "id": "benhaslam/simsat-diloco-round0-learner",
+  "title": "SimSat DiLoCo Round 0 Learner",
+  "code_file": "notebook.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_tpu": false,
+  "enable_internet": true,
+  "keywords": [
+    "gpu",
+    "simsat",
+    "gemma4",
+    "diloco",
+    "satellite"
+  ],
+  "dataset_sources": [
+    "benhaslam/simsat-gemma4-v1",
+    "benhaslam/diloco-lab-src",
+    "benhaslam/diloco-global-round-000000"
+  ],
+  "kernel_sources": [],
+  "competition_sources": [],
+  "model_sources": [
+    "google/gemma-4/Transformers/gemma-4-e2b-it/1"
+  ],
+  "machine_shape": "NvidiaTeslaT4"
+}
