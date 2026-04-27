@@ -86,7 +86,7 @@ For the current ObservationVLA backend evaluation against operator-reviewed trac
 python scripts/observation_vla_eval.py --inprocess
 ```
 
-That generates [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md). The current backend is the Gemma-4-E2B SimSat fine-tune (`OBSERVATION_VLA_BACKEND=gemma4`), which achieves usefulness MAE **0.16** and bucketed action agreement **0.57** over 7 operator-reviewed Sentinel cases. The `clip_local` CLIP baseline remains available as a zero-weight-download reference.
+That generates [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md). The current backend is the Gemma-4-E2B SimSat fine-tune **v11** (`OBSERVATION_VLA_BACKEND=gemma4`), which achieves usefulness MAE **0.13**, exact action agreement **0.86**, and useful/not-useful agreement **0.97** over 37 operator-reviewed Sentinel cases. (Note: v1-v10 silently trained zero language-model parameters due to a `target_modules` config bug — see [`notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md`](./notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md). v11 is the first run with actual language-model LoRA training.) The `clip_local` CLIP baseline remains available as a zero-weight-download reference.
 
 To replace a simulated label with a real operator-reviewed outcome:
 

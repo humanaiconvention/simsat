@@ -52,7 +52,7 @@ Every candidate adaptation — whether a VLA-layer weight update or a trust-laye
 This repo is submitted to both tracks of the AI in Space hackathon. The scaffold, WCLI trust layer, mission-response layer, propagator, viability gates, and TTT infrastructure are identical across tracks — only the VLA backend changes.
 
 - **Liquid Track (LFM2.5 + MuZero)** — A vision-language model serves as the Sentinel tile encoder: it processes each raw tile into a dense `(embed_dim,)` embedding vector that feeds MuZero's `h()` representation function. MuZero + MCTS then plans over encounter windows using that embedding. The hybrid is deliberate: MuZero's ResNet weighs a few MB and fits the satellite's 5 MB uplink budget; the encoder is LoRA fine-tuned on SimSat Sentinel tiles and runs locally for its single encoder pass per window. Training follows the ARC3 three-stage chain — (1) pretrain on the 86-trace Sentinel tile corpus, (2) fine-tune with SimSat scenario-pack augmentation, (3) two-scope TTT per live pass using the `TTTScope1` / `TTTScope2` budget schedules ported from `arc3_game.py`. The MuZero game adapter (`SimSatGame`), gym environment (`SimSatEnv`), FC-network config (`SimSatMuZeroConfigLFM`), and encoder protocol (`TileEncoder` / `build_encoder("lfm2vl")`) are all in `src/sim/muzero/`. The encoder slot is filled by `HFVisionTowerEncoder` — default `google/siglip-base-patch16-224` (768-dim, ~370 MB, real weights, verified end-to-end). LFM2.5-VL was the planned encoder but Liquid AI did not publish public weights by the deadline; the contract is unchanged so the LFM2.5-VL drop-in is a one-line `model_id` swap when those weights ship. **Liquid Track eval** (`scripts/muzero_lfm_eval.py`, 75 matched Sentinel tiles, all 3 scenario packs): encoder latency **18.5 ms/tile avg** (p95 24.3 ms) on RTX 2080; embed_dim=768; action distribution accept=17%, refine=68%, defer=5%, skip=9%. Full results in [MUZERO_LFM_EVAL.md](./MUZERO_LFM_EVAL.md).
-- **General AI Track (Gemma-4 + open collaborator seats)** — ObservationVLA backed by a new Gemma-4-E2B fine-tune scoped specifically to SimSat's encounter-triage task (accept / defer / skip / refine over Sentinel-style tiles). Training code and dataset at `notebooks/kaggle-simsat-gemma4-v1/`; Kaggle kernel `benhaslam/simsat-gemma4-v1-training` (v9 trained successfully after a 21-fix T4 train); dataset `benhaslam/simsat-gemma4-v1` (294 weighted ChatML rows). On the 7-case operator-reviewed eval: usefulness-score MAE **0.16** (vs 0.27 `clip_local` baseline), bucketed action agreement **0.57**, all 3 ground-truth `accept` cases identified within 0.05 of operator score (see [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md)). This is **not** the `v35-gov` Gemma-4 fine-tune — `v35-gov` targets human-interview and consent-governance prompts, wrong task shape for satellite imagery. The VLA adapter is model-agnostic (`src/sim/observation_vla/transformers_vlm_local.py`); swapping backends is an env-var change, not a refactor. Two additional collaborator backends are wired and ready: **Genesis** (Guilherme Mesquita's model, `OBSERVATION_VLA_BACKEND=genesis`) and **Tesseract T3** (Garrett Sutherland's model, `OBSERVATION_VLA_BACKEND=tesseract_t3`). Any model that speaks the eight-key ObservationVLA JSON contract can plug into the same scaffold, trust layer, viability gates, and TTT loop without code changes. The competitive claim extends to this: the SimSat pipeline is model-agnostic by design — the governed continual-learning architecture is the contribution, not any one model weight checkpoint. See `COLLABORATOR_GUIDE.md` for integration instructions.
+- **General AI Track (Gemma-4 + open collaborator seats)** — ObservationVLA backed by a Gemma-4-E2B fine-tune scoped specifically to SimSat's encounter-triage task (accept / defer / skip / refine over Sentinel-style tiles). Training code and dataset at `notebooks/kaggle-simsat-gemma4-v1/`; Kaggle kernel `benhaslam/simsat-gemma4-v1-training` (**v11** = first run with corrected target_modules — see [`GEMMA4_LORA_NULL_TRAINING_AUDIT.md`](./notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md) for why v1-v10 trained nothing); dataset `benhaslam/simsat-gemma4-v1` v2 (713 weighted ChatML rows, 37 operator-reviewed). On the 37-case operator-reviewed eval: usefulness-score MAE **0.13**, exact action agreement **0.86**, bucketed action agreement **0.86**, useful agreement **0.97** (see [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md)). This is **not** the `v35-gov` Gemma-4 fine-tune — `v35-gov` targets human-interview and consent-governance prompts, wrong task shape for satellite imagery. The VLA adapter is model-agnostic (`src/sim/observation_vla/transformers_vlm_local.py`); swapping backends is an env-var change, not a refactor. Two additional collaborator backends are wired and ready: **Genesis** (Guilherme Mesquita's model, `OBSERVATION_VLA_BACKEND=genesis`) and **Tesseract T3** (Garrett Sutherland's model, `OBSERVATION_VLA_BACKEND=tesseract_t3`). Any model that speaks the eight-key ObservationVLA JSON contract can plug into the same scaffold, trust layer, viability gates, and TTT loop without code changes. The competitive claim extends to this: the SimSat pipeline is model-agnostic by design — the governed continual-learning architecture is the contribution, not any one model weight checkpoint. See `COLLABORATOR_GUIDE.md` for integration instructions.
 
 **Per-track pitch thesis (one sentence each):**
 
@@ -95,17 +95,28 @@ Each evaluation logs:
 The most challenge-relevant artifact is the delta list: it makes the WCLI trust layer falsifiable instead of rhetorical.
 
 ## ObservationVLA Reality Check
-The ObservationVLA lane is backed by the Gemma-4-E2B SimSat fine-tune (`OBSERVATION_VLA_BACKEND=gemma4`). The current reviewed evaluation is intentionally presented with tight claims:
+The ObservationVLA lane is backed by the Gemma-4-E2B SimSat fine-tune **v11** (`OBSERVATION_VLA_BACKEND=gemma4`). The current reviewed evaluation:
 
-- reviewed set: N=7 (4 pinned operator-reviewed cases across all 3 scenario packs + 3 additional reviewed traces)
-- useful/not-useful agreement: **0.86**
-- usefulness-score MAE: **0.16** (vs 0.27 `clip_local` baseline — 41% improvement)
-- bucketed action agreement: **0.57**; exact action agreement: 0.43
-- 3/3 ground-truth `accept` cases identified within 0.05 of operator usefulness score
-- known miss: Fort Myers Coast (`defer` predicted, `refine` actual, abs_error=0.71) — model under-confident on partial-cloud borderline windows
-- known accept-bias: Rotterdam `refine` cases still over-predicted as `accept`; not corrected by additional training epochs (v10 = v9 on all metrics)
+- reviewed set: **N=37** (operator_reviewed traces; pool grew via batch_review.py session 2026-04-27)
+- exact action agreement: **0.86** (32 of 37 traces match the operator's recommended action)
+- bucketed action agreement: **0.86**
+- useful / not-useful agreement: **0.97**
+- usefulness-score MAE: **0.13**
 - the model should be treated as a calibrated evidence lane, not a trusted autonomous action policy
 - the `clip_local` CLIP baseline remains available as a zero-weight-download reference
+
+**Version note (2026-04-27).** v1 through v10 of the SimSat fine-tune all
+shared a `target_modules` config bug — the `.linear` suffix matched only
+Gemma-4's vision/audio towers, not the language model decoder layers. Those
+adapters trained zero language-model parameters; every prior eval number
+described stock `google/gemma-4-E2B-it`, not a fine-tune. The bug, the
+audit, and the corrected regex are documented in
+[`notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md`](./notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md).
+v11 is the first run with actual language-model LoRA training (410 LoRA
+tensors, 100% on `language_model`, all `lora_B` non-zero), and a post-save
+sanity gate now fails the kernel loudly if a future run regresses to a
+no-op adapter. Prior numbers (MAE 0.16, bucketed 0.57 on N=7) measured
+the base model and overstated the fine-tune's contribution.
 
 For the latest reviewed check:
 
