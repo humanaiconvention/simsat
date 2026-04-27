@@ -1,8 +1,32 @@
 # SimSat — DiLoCo Round 0 Learner Run Note
 
-**Status as of 2026-04-27.** First real DiLoCo continuation run on Kaggle T4.
-Switches the SimSat training path from "fresh QLoRA from scratch" to
-"continue from DiLoCo global adapter, export adapter-fragment deltas".
+**Status as of 2026-04-27 (LATE).** Use **round 1**, not round 0, for any new
+continuation. Round 0 was seeded from the v10 adapter, which the v5 DiLoCo
+diagnostic exposed as null-trained (LoRA on multimodal towers only, every
+lora_B = 0.0). Round 0 fragments are zero-deltas and the adapter is
+effectively stock Gemma-4-E2B. See `notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md`.
+
+**Round 1 (the real seed):**
+
+| Item | Value |
+|---|---|
+| State dir | `D:\diloco_lab\state\global_round_000001` |
+| Source | v11 adapter (`D:\SimSat\weights\simsat-gemma4-v11-adapter\simsat-gemma4-v9-adapter`) |
+| Kaggle dataset | `benhaslam/diloco-global-round-000001` (private, 346 MB) |
+| Tensor count | 410 (100% language_model; lora_B 205/205 non-zero) |
+| Eval at N=37 | exact 0.86, bucketed 0.86, useful 0.97, MAE 0.13 |
+
+To continue from round 1 on Kaggle, swap `diloco-global-round-000000` for
+`diloco-global-round-000001` in the kernel inputs and update the cell's
+`zip_name` arg if the runner notebook expects a literal filename. The
+notebook helper `_resolve_source('global_adapter', 'global_round_000001.zip',
+'adapter_config.json')` finds the extracted contents the same way as round 0.
+The `--round-id` flag passed to `continue_gemma4_adapter.py` should be `1`.
+
+The notes below document the original (now-historical) round 0 setup. Kept
+for forensic value — they're how we discovered the null-LoRA bug.
+
+---
 
 This is a **plumbing-validation round.** Do not expect it to fix the v9/v10
 accept-bias by itself — see "Concerns" at the bottom.
