@@ -303,8 +303,8 @@ class Gemma4HAICAdapter:
         messages = [{"role": "user", "content": prompt}]
         try:
             chat_prompt = self._tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-        except Exception as e:
-            logger.warning(f"apply_chat_template failed, falling back to raw prompt: {e}")
+        except Exception as exc:
+            logger.warning("apply_chat_template failed, falling back to raw prompt: %s", exc)
             chat_prompt = prompt
 
         inputs = self._tokenizer(chat_prompt, return_tensors="pt").to(self.device)
@@ -450,7 +450,7 @@ class Gemma4HAICAdapter:
                 image_bytes = base64.b64decode(image_b64)
                 image = Image.open(io.BytesIO(image_bytes))
                 return image.convert("RGB")
-            except Exception as e:
-                logger.debug(f"Failed to decode image: {e}, trying next candidate")
+            except Exception as exc:
+                logger.debug("Failed to decode image (trying next candidate): %s", exc)
                 continue
         return None

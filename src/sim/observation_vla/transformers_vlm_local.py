@@ -389,7 +389,8 @@ class TransformersVLMAdapter:
         messages = [{"role": "user", "content": prompt}]
         try:
             chat_prompt = self._apply_chat_template(messages)
-        except Exception:
+        except Exception as exc:
+            logger.warning("apply_chat_template (text-only) failed, falling back to raw prompt: %s", exc)
             chat_prompt = prompt
 
         inputs = self._tokenizer(chat_prompt, return_tensors="pt").to(self.device)
@@ -426,8 +427,9 @@ class TransformersVLMAdapter:
         ]
         try:
             chat_prompt = self._apply_chat_template(messages)
-        except Exception:
+        except Exception as exc:
             # Fallback: some VLMs (older) want text only and consume image separately.
+            logger.warning("apply_chat_template (multimodal) failed, falling back to text-only: %s", exc)
             chat_prompt = prompt
 
         inputs = self._processor(
@@ -601,6 +603,7 @@ class TransformersVLMAdapter:
                 image_bytes = base64.b64decode(image_b64)
                 image = Image.open(io.BytesIO(image_bytes))
                 return image.convert("RGB")
-            except Exception:
+            except Exception as exc:
+                logger.debug("Failed to decode image (trying next candidate): %s", exc)
                 continue
         return None

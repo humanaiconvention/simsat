@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import importlib.util
 import io
+import logging
 import os
 from typing import Any
 
@@ -12,6 +13,8 @@ from PIL import Image
 
 
 from ._utils import clamp as _clamp
+
+logger = logging.getLogger(__name__)
 
 
 def _normalize_cosine(similarity: float) -> float:
@@ -203,7 +206,8 @@ class ObservationVLMAdapter:
                 image_bytes = base64.b64decode(image_b64)
                 image = Image.open(io.BytesIO(image_bytes))
                 return image.convert("RGB")
-            except Exception:
+            except Exception as exc:
+                logger.debug("Failed to decode image (trying next candidate): %s", exc)
                 continue
         return None
 
@@ -509,9 +513,10 @@ class ObservationVLMAdapter:
         if self.runtime_mode == "http_endpoint":
             try:
                 return self._assess_endpoint(prompt, images, response_schema)
-            except Exception:
+            except Exception as exc:
                 if not self.allow_fallback:
                     raise
+                logger.warning("HTTP endpoint assess failed, falling through: %s", exc)
 
         if self.runtime_mode == "clip_local":
             try:

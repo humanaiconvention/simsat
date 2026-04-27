@@ -332,8 +332,9 @@ class ObservationVLAService:
                     snapshot.get("update_count", 0),
                     failed_gates,
                 )
-        except Exception:
-            pass  # never let TTT callback crash the outcome registration
+        except Exception as exc:
+            # Never let TTT callback crash the outcome registration; log for triage.
+            logger.debug("Trust-layer TTT update raised (suppressed): %s", exc)
 
     def _apply_vla_ttt(
         self,
@@ -359,8 +360,9 @@ class ObservationVLAService:
                 confidence=confidence,
                 realized_utility=float(realized_utility),
             )
-        except Exception:
-            pass  # never crash outcome registration
+        except Exception as exc:
+            # Never let VLA online update crash outcome registration; log for triage.
+            logger.debug("VLA online update raised (suppressed): %s", exc)
 
     def register_operator_review(
         self,
