@@ -71,6 +71,9 @@ exports/
 REVIEW_BACKLOG.md
 review_queue.txt
 
+# --- Local Kaggle dataset staging (zip + metadata copies for `kaggle datasets create/version`) ---
+diloco_kaggle_staging/
+
 # --- Notebook state ---
 **/.ipynb_checkpoints/
 

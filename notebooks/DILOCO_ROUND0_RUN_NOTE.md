@@ -59,16 +59,18 @@ load-time fix the SimSat v3 kernel learned the hard way.
 
 ## Exact Kaggle inputs to attach
 
-In the Kaggle notebook editor → "Add data" → attach all four:
+All four datasets are uploaded and ready (2026-04-27). In the Kaggle notebook
+editor → "Add data" → search and attach each:
 
-1. **Gemma-4 model** — `google/gemma-4` (transformers variant, e2b-it/1)
-   resolves to `/kaggle/input/models/google/gemma-4/transformers/gemma-4-e2b-it/1`
-2. **DiLoCo source bundle** — upload `D:\diloco_lab\dist\diloco_lab_source.zip`
-   as a private dataset (e.g. `benhaslam/diloco-lab-src`)
-3. **DiLoCo round-0 adapter** — upload `D:\diloco_lab\dist\global_round_000000.zip`
-   as a private dataset (e.g. `benhaslam/diloco-global-round-000000`)
-4. **SimSat training JSONL** — `benhaslam/simsat-gemma4-v1` (existing, has
-   `simsat_train.jsonl`)
+1. **Gemma-4 model** — `google/gemma-4` (transformers variant, e2b-it/1).
+   Resolves to `/kaggle/input/models/google/gemma-4/transformers/gemma-4-e2b-it/1`.
+2. **DiLoCo source bundle** — `benhaslam/diloco-lab-src` (private, 30 KB).
+   Contains `diloco_lab_source.zip`.
+3. **DiLoCo round-0 adapter** — `benhaslam/diloco-global-round-000000`
+   (private, 23 MB). Contains `global_round_000000.zip`.
+4. **SimSat training JSONL** — `benhaslam/simsat-gemma4-v1` (private; refreshed
+   2026-04-27 to 120 KB / 713 ChatML rows + REFINE_BOOST=1.5). Contains
+   `simsat_train.jsonl` and the two eval splits.
 
 ## Exact Kaggle cell
 
