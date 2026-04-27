@@ -2,7 +2,8 @@ from contextlib import asynccontextmanager
 import logging
 import os
 from fastapi import FastAPI, HTTPException, Query, Response, Request
-from slowapi import Limiter
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from typing import List, Literal, Optional
 import base64
@@ -18,9 +19,9 @@ from runtime import build_runtime_bundle, build_runtime_capabilities
 logger = logging.getLogger(__name__)
 
 # Rate limiter for external API endpoints (Sentinel/Mapbox)
-# Default: 30 requests per minute per client IP
-_rate_limit_spec = os.environ.get("SENTINEL_MAPBOX_RATE_LIMIT", "30/minute")
-limiter = Limiter(key_func=get_remote_address, default_limits=[_rate_limit_spec])
+# Default: 30 requests per minute per client IP. Override via SENTINEL_MAPBOX_RATE_LIMIT.
+SENTINEL_MAPBOX_RATE_LIMIT = os.environ.get("SENTINEL_MAPBOX_RATE_LIMIT", "30/minute")
+limiter = Limiter(key_func=get_remote_address)
 
 
 @asynccontextmanager
@@ -46,6 +47,7 @@ async def lifespan(app: FastAPI):
 
 api = FastAPI(title="SimSat API", description="Satellite simulation + HAIC convention layer", lifespan=lifespan)
 api.state.limiter = limiter
+api.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Mount HAIC router
 api.include_router(haic_router)
@@ -127,7 +129,7 @@ async def get_metrics():
 
 
 @api.get("/data/current/image/sentinel")
-@limiter.limit("30/minute")
+@limiter.limit(SENTINEL_MAPBOX_RATE_LIMIT)
 async def get_sentinel_image(
     request: Request,
     spectral_bands: List[str] = Query(default=["red", "green", "blue"]),
@@ -190,7 +192,7 @@ async def get_sentinel_image(
         raise HTTPException(status_code=400, detail="Invalid return_type specified")
 
 @api.get("/data/current/image/mapbox")
-@limiter.limit("30/minute")
+@limiter.limit(SENTINEL_MAPBOX_RATE_LIMIT)
 async def get_mapbox_image(
     request: Request,
     lon: Optional[float] = Query(default=None, description="Target longitude (defaults to current satellite longitude)", ge=-180, le=180),
@@ -245,7 +247,7 @@ async def get_mapbox_image(
 
 
 @api.get("/data/image/sentinel")
-@limiter.limit("30/minute")
+@limiter.limit(SENTINEL_MAPBOX_RATE_LIMIT)
 async def get_sentinel_image_lon_lat(
     request: Request,
     lon: float = Query(..., description="The longitude of the location", ge=-180, le=180),
@@ -304,7 +306,7 @@ async def get_sentinel_image_lon_lat(
 
 
 @api.get("/data/image/mapbox")
-@limiter.limit("30/minute")
+@limiter.limit(SENTINEL_MAPBOX_RATE_LIMIT)
 async def get_mapbox_image_lon_lat(
     request: Request,
     lon_target: float = Query(..., description="The longitude of the target location", ge=-180, le=180),
