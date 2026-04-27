@@ -134,25 +134,27 @@ class DummyEncoder:
 class HFVisionTowerEncoder:
     """Real-weights tile encoder backed by any HuggingFace vision-language model.
 
-    Default is SigLIP-base (768-dim, ~370 MB). The class is the LFM2.5-VL
-    integration seat — when Liquid AI ships weights, swap `model_id` and
-    `embed_dim`; nothing else changes.
+    Default is SigLIP-base (768-dim, ~370 MB). Now also handles
+    `LiquidAI/LFM2.5-VL-450M` and `LiquidAI/LFM2.5-VL-1.6B` directly —
+    the loader detects the `lfm2_vl` model type, falls back to
+    `AutoModelForImageTextToText`, and routes the encode pass through
+    `model.model.vision_tower` (a `Siglip2VisionModel` under the LFM
+    wrapper) instead of `model.vision_model`. Same `(embed_dim,)` numpy
+    output, same MuZero env hook.
 
-    Substitution rationale (KNOWN_ISSUES item #24):
-        LFM2.5-VL was the planned encoder but weights were not publicly
-        accessible by the May 8 deadline. SigLIP-base provides a real
-        vision tower with comparable embedding shape and serves as a
-        defensible substitute for the Liquid Track demo. The integration
-        contract (encode signature, MuZero env hook, build_encoder factory)
-        is unchanged.
+    Liquid Track integration: `LiquidAI/LFM2.5-VL-450M` is now public
+    (released 2026-04-11) and is the recommended choice for the on-orbit
+    framing — 450M params, sub-250ms edge inference per Liquid AI's
+    benchmarks, vision tower is SigLIP-2 NaFlex shape-optimized 86M.
 
     Network access required at first use to download the model. After the
     initial download HuggingFace caches it under ~/.cache/huggingface/.
     Offline operation works once the cache is populated.
 
-    Performance notes:
-        * SigLIP-base on CPU: ~150ms / tile (sufficient for offline replay).
-        * SigLIP-base on CUDA: ~10ms / tile.
+    Performance notes (BEAST RTX 2080):
+        * SigLIP-base CPU: ~150 ms / tile (offline replay budget).
+        * SigLIP-base CUDA: ~10 ms / tile (verified end-to-end).
+        * LFM2.5-VL-450M CUDA: TBD — measure after first eval.
         * Output is float32 numpy of shape (embed_dim,).
     """
 
@@ -167,7 +169,7 @@ class HFVisionTowerEncoder:
         # Imports are deferred so that simply importing this module
         # doesn't require torch/transformers/PIL to be installed (CI
         # smoke tests use Identity/Dummy encoders).
-        from transformers import AutoModel, AutoProcessor
+        from transformers import AutoConfig, AutoModel, AutoModelForImageTextToText, AutoProcessor
         import torch
 
         self.model_id = model_id
@@ -176,7 +178,17 @@ class HFVisionTowerEncoder:
         self._extra_kwargs = extra_kwargs
         self._torch = torch
 
-        self.model = AutoModel.from_pretrained(model_id).to(device).eval()
+        # Decide loader by model_type. Standalone vision encoders (clip,
+        # siglip, siglip2) load via AutoModel; full VL wrappers (lfm2_vl,
+        # gemma3, etc.) need AutoModelForImageTextToText so the wrapper's
+        # vision_tower submodule is reachable.
+        cfg = AutoConfig.from_pretrained(model_id)
+        self._model_type = getattr(cfg, "model_type", "")
+        wrapper_types = {"lfm2_vl", "gemma3", "llava", "paligemma"}
+        if self._model_type in wrapper_types:
+            self.model = AutoModelForImageTextToText.from_pretrained(model_id).to(device).eval()
+        else:
+            self.model = AutoModel.from_pretrained(model_id).to(device).eval()
         self.processor = AutoProcessor.from_pretrained(model_id)
 
         if lora_adapter_path:
@@ -233,8 +245,27 @@ class HFVisionTowerEncoder:
                 # CLIP / SigLIP path
                 out = self.model.get_image_features(**inputs)
             else:
-                # Generic VLM path — run the vision tower directly
-                out = self.model.vision_model(**inputs)
+                # Generic VLM path — run the vision tower directly. Wrapper
+                # classes (Lfm2VlForConditionalGeneration etc.) expose the
+                # vision tower at .model.vision_tower; standalone vision
+                # towers expose it as .vision_model on the top object.
+                vision_tower = (
+                    getattr(self.model, "vision_model", None)
+                    or getattr(getattr(self.model, "model", None), "vision_tower", None)
+                    or getattr(self.model, "vision_tower", None)
+                )
+                if vision_tower is None:
+                    raise RuntimeError(
+                        f"HFVisionTowerEncoder could not locate a vision tower on "
+                        f"{type(self.model).__name__} (model_id={self.model_id!r}, "
+                        f"model_type={self._model_type!r})"
+                    )
+                # Some VL wrappers' processors return text + vision keys; keep
+                # only the vision inputs (pixel_values / pixel_attention_mask /
+                # spatial_shapes for SigLIP-2 NaFlex).
+                vision_keys = {"pixel_values", "pixel_attention_mask", "spatial_shapes"}
+                vision_inputs = {k: v for k, v in inputs.items() if k in vision_keys}
+                out = vision_tower(**vision_inputs)
 
         # Normalize to a flat tensor across (transformers version, model type).
         # Different transformers releases return either a raw tensor or a
@@ -283,10 +314,13 @@ def build_encoder(kind: str = "identity", **kwargs) -> TileEncoder:
       * "dummy"           — deterministic fake (no model load; for tests)
       * "hf_vision_tower" — any HuggingFace VLM via HFVisionTowerEncoder
                             (default model: SigLIP-base)
-      * "lfm2vl" (or "lfm25vl", "lfm2.5vl", "lfm2.5-vl") — LFM2.5-VL slot;
-                            currently substituted by HFVisionTowerEncoder
-                            with SigLIP-base default until Liquid AI ships
-                            public weights. Pass model_id= to override.
+      * "lfm2vl" (or "lfm25vl", "lfm2.5vl", "lfm2.5-vl") — LFM2.5-VL slot.
+                            Defaults to `LiquidAI/LFM2.5-VL-450M` (public
+                            since 2026-04-11). HFVisionTowerEncoder
+                            auto-detects the `lfm2_vl` model_type and routes
+                            the encode pass through `model.model.vision_tower`
+                            (Siglip2VisionModel, 768-dim). Pass model_id=
+                            "LiquidAI/LFM2.5-VL-1.6B" for the larger variant.
 
     kwargs are forwarded to the concrete encoder's __init__.
     """
@@ -298,8 +332,7 @@ def build_encoder(kind: str = "identity", **kwargs) -> TileEncoder:
     if kind_lower in ("hf_vision_tower", "vision_tower", "hf_vlm"):
         return HFVisionTowerEncoder(**kwargs)
     if kind_lower in ("lfm2vl", "lfm25vl", "lfm2.5vl", "lfm2.5-vl"):
-        # LFM2.5-VL substitution path. When Liquid AI ships public weights,
-        # change the default model_id below to the real LFM2.5-VL HF id.
+        kwargs.setdefault("model_id", "LiquidAI/LFM2.5-VL-450M")
         return HFVisionTowerEncoder(**kwargs)
     raise ValueError(
         f"Unknown encoder kind {kind!r}; expected "
