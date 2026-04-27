@@ -1,5 +1,5 @@
 {
-  "id": "benhaslam/simsat-diloco-round0-learner",
+  "id": "benhaslam/simsat-diloco-round-0-learner",
   "title": "SimSat DiLoCo Round 0 Learner",
   "code_file": "notebook.ipynb",
   "language": "python",
@@ -9,11 +9,7 @@
   "enable_tpu": false,
   "enable_internet": true,
   "keywords": [
-    "gpu",
-    "simsat",
-    "gemma4",
-    "diloco",
-    "satellite"
+    "gpu"
   ],
   "dataset_sources": [
     "benhaslam/simsat-gemma4-v1",
