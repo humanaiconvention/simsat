@@ -72,6 +72,14 @@ def build_vla_adapter(backend: str | None = None) -> Any:
         from .heatmap_local import HeatmapAdapter
         return HeatmapAdapter()
 
+    if key in {"heatmap", "heatmap_local"}:
+        # Generic insertion seat for any model that emits a per-pixel
+        # heatmap rather than a JSON assessment. See
+        # heatmap_local.py module docstring for the integration contract
+        # (two stubs to implement: _load_model + _predict_heatmap).
+        from .heatmap_local import HeatmapAdapter
+        return HeatmapAdapter()
+
     raise ValueError(
         f"Unknown OBSERVATION_VLA_BACKEND: {key!r}. "
         "Valid values: clip_local, gemma4, genesis, tesseract_t3, "
