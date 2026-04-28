@@ -75,9 +75,40 @@ Encoder swap: change `TILE_ENCODER_MODEL` env var or pass `--model-id` to `build
 | `LiquidAI/LFM2.5-VL-1.6B` | 1152 | 246 | 248 | Matches Liquid AI's "sub-250ms edge inference" claim; opt-in via `model_id=` |
 
 Action distribution and mean episode reward are identical across encoders
-because the policy is the stored VLA `recommended_action`, not a function
-of the encoder embedding. The encoder rows above isolate the encode-pass
-latency cost — the metric that matters for the on-orbit budget. Once
-MuZero is actually trained (rather than playing back stored actions),
-the encoder choice will start influencing reward via the representation
-the planner sees.
+because the eval here uses the stored VLA `recommended_action` as the
+policy, not a learned head. The encoder rows above isolate the encode-pass
+latency cost — the metric that matters for the on-orbit budget.
+
+## Stage 1 BC pretrain (2026-04-27)
+
+`scripts/muzero_stage1_pretrain.py` trains a small MLP policy head on top
+of LFM2.5-VL-450M embeddings, supervised by the per-trace label
+(`operator_action` when `label_source == "operator_review"`, else the
+stored `assessment.recommended_action`). This is the first stage of the
+three-stage Liquid Track training chain (pretrain → scenario-pack
+fine-tune → two-scope TTT) and the first time the encoder embedding
+actually drives an action prediction in this codebase.
+
+Training: 75 (trace, label, asset) rows (33 reviewed + 42 simulated),
+stratified 80/20 split, AdamW, 80 epochs (~30s on RTX 2080 after
+encoding):
+
+| Metric | Value |
+|---|---|
+| embed_dim | 768 (LFM2.5-VL-450M vision tower) |
+| Train accuracy | 0.917 |
+| Best val accuracy | **0.800** (12/15 at epoch 3) |
+| Val per-action: accept | 2/3 (0.667) |
+| Val per-action: refine | 10/10 (1.000) |
+| Val per-action: defer | 0/1 (corpus only has 3 defer total) |
+| Val per-action: skip | 0/1 (corpus only has 7 skip total) |
+
+Saved at `weights/muzero/stage1_bc/policy_head.pt` (gitignored). Val
+defer/skip zeros aren't meaningful signal — N=1 each. Train→val gap of
+~0.12 reflects modest overfit on the small dataset; Stage 2's scenario
+augmentation is the next lever rather than additional Stage 1 tuning.
+
+Re-running `muzero_lfm_eval.py` with this BC head wired in as the
+policy (instead of stored-action playback) is the next step that would
+break the per-encoder-equivalence above and produce encoder-dependent
+rewards.

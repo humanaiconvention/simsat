@@ -129,3 +129,23 @@ class TestHFVisionTowerEncoderReal:
         emb_bright = enc.encode(tile_bright)
         # Different inputs should produce different embeddings
         assert not np.allclose(emb_dark, emb_bright, atol=1e-3)
+
+    def test_lfm2vl_450m_load_and_encode(self):
+        """LFM2.5-VL-450M is the default of build_encoder('lfm2vl').
+
+        Exercises the wrapper-aware code path (model_type=lfm2_vl,
+        AutoModelForImageTextToText loader, image_processor sub-attr,
+        vision_tower direct call, bf16 -> fp32 cast). Adds ~900 MB to
+        the cache on first run.
+        """
+        enc = HFVisionTowerEncoder(
+            model_id="LiquidAI/LFM2.5-VL-450M",
+            device="cpu",
+        )
+        assert enc.embed_dim == 768
+        tile = np.random.rand(1, 64, 64).astype(np.float32)
+        emb = enc.encode(tile)
+        assert emb.shape == (enc.embed_dim,)
+        assert emb.dtype == np.float32
+        assert np.isfinite(emb).all()
+        assert (emb != 0).any()

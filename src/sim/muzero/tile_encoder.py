@@ -296,9 +296,16 @@ class HFVisionTowerEncoder:
                 f"HFVisionTowerEncoder could not extract an embedding from "
                 f"{type(out).__name__} for model {self.model_id!r}"
             )
+        # SigLIP-2 NaFlex (the LFM2.5-VL vision tower) splits a single
+        # image into multiple shape-optimized sub-tiles, so the output's
+        # leading dim can be > 1 even for a single input image. Pool
+        # across that dim to keep the (embed_dim,) output contract.
+        features = features.detach().to(self._torch.float32)
+        while features.dim() > 1:
+            features = features.mean(dim=0)
         # Cast to float32 BEFORE numpy() — numpy does not natively support
         # bfloat16, and modern VL wrappers default to bf16 on CUDA.
-        return features.squeeze(0).detach().to(self._torch.float32).cpu().numpy().astype(np.float32)
+        return features.cpu().numpy().astype(np.float32)
 
 
 # Back-compat alias — `LFM2VLEncoderStub` was the documented integration seat
