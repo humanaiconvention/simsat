@@ -70,12 +70,12 @@ of the encoder choice.
 
 ## BC policy (Stage 1 head)
 
-`--policy bc` loads `weights/muzero/stage1_bc/policy_head.pt` and predicts
-each action from the LFM-450M embedding via the trained head. **First
-end-to-end Liquid Track measurement where the encoder embedding actually
-drives the reward.**
+`--policy bc --policy-head weights/muzero/stage1_bc/policy_head.pt` loads
+the Stage 1 head and predicts each action from the LFM-450M embedding.
+First end-to-end Liquid Track measurement where the encoder embedding
+actually drove the reward.
 
-### All Packs (BC)
+### All Packs (Stage 1 BC)
 
 | Metric | Value |
 |---|---|
@@ -87,31 +87,61 @@ drives the reward.**
 | skip   | 0 (0%) |
 | Mean episode reward | -0.0600 ± 0.0000 |
 
-### Lesson — class collapse on borderline cases
+### Stage 1 lesson — class collapse on borderline cases
 
-The BC head trained to **val_acc 0.800** on a 15-sample stratified split
-(refine 10/10, accept 2/3; defer/skip have N=1 each). When deployed on
-the full 75-trace eval, predictions collapse to refine for every case.
-Diagnostic on individual traces shows softmax outputs cluster around
+The Stage 1 head trained to **val_acc 0.800** on a 15-sample stratified
+split (refine 10/10, accept 2/3; defer/skip have N=1 each). When deployed
+on the full 75-trace eval, predictions collapsed to refine for every case.
+Diagnostic showed softmax outputs cluster around
 `[accept=0.43, refine=0.47, defer=0.03, skip=0.06]` — the head learned
-the right relative ordering but the **margin between accept and refine
-is too thin for argmax to break the majority-class prior**.
+the right relative ordering but the margin between accept and refine
+was too thin for argmax to break the majority-class prior.
 
-Two reinforcing causes:
-- **Corpus class imbalance**: 64% refine, 23% accept, 13% defer+skip.
-  Standard cross-entropy on imbalanced data biases logits toward the
-  majority class — the head's "uncertain" output defaults to refine.
-- **Best-state selection by val_acc**: the saved checkpoint was the
-  epoch with the highest 15-sample val accuracy (epoch 3). Later
-  epochs had higher train accuracy (0.917) and might have produced
-  sharper margins on minority classes, but `early_stopping_by_val`
-  picked the safer choice.
+This is exactly the gap **Stage 2 (scenario-pack augmentation)** closes
+below. With ~2.5x more (tile, action) pairs from per-class augmentation
+of accept/defer/skip, the imbalance softens and the BC head's margins
+widen.
 
-This is exactly the gap **Stage 2 (scenario-pack augmentation)** is
-meant to close. With ~3-5x more (tile, action) pairs from per-pack
-synthetic perturbation — especially of accept/defer/skip cases — the
-imbalance softens and the BC head's margins widen. Stage 1 numbers
-above are the legitimate baseline to beat.
+## BC policy (Stage 2 head)
+
+`--policy bc --policy-head weights/muzero/stage2_bc/policy_head.pt` loads
+the Stage 2 head trained on the augmented dataset (192 examples,
+class-balanced 48/48/48/48 via flips, ±12° rotations, brightness/contrast/
+saturation jitter on 75 originals).
+
+### All Packs (Stage 2 BC)
+
+| Metric | Value |
+|---|---|
+| Episodes | 75 |
+| Encoder latency mean / p95 | 63.6 ms / 64.4 ms |
+| accept | 2 (3%) |
+| refine | 46 (61%) |
+| defer  | 0 (0%) |
+| skip   | 27 (36%) |
+| Mean episode reward | **-0.0396** ± 0.0233 |
+
+### Stage 2 lesson — collapse fixed on accept/skip, defer needs more originals
+
+Stage 2 trained to **val_acc 0.950** on a 40-sample stratified split
+(accept 10/10, defer 10/10, refine 10/10, skip 8/10). Per-class
+diversity in eval predictions:
+
+| Action | Playback | Stage 1 BC | Stage 2 BC | Notes |
+|---|---|---|---|---|
+| accept | 13 (17%) | 0 | 2 (3%) | Recovered from collapse but conservative |
+| refine | 51 (68%) | 75 (100%) | 46 (61%) | Closer to the playback prior |
+| defer  | 4 (5%) | 0 | 0 | Only 3 original defer cases — augmentation overfits to those 3 |
+| skip   | 7 (9%) | 0 | 27 (36%) | Over-predicted; aug ratio ~7x on 7 originals was too aggressive |
+| Mean reward | -0.0441 | -0.0600 | **-0.0396** | Stage 2 best (less-negative reward) |
+
+**The headline:** Stage 2 broke the all-refine collapse, val_acc jumped
+0.80 → 0.95, and mean episode reward beats both playback and Stage 1
+across all three scenario packs. Defer is still 0/75 because only 3
+original defer cases exist — augmenting those 16x apiece taught the head
+"defer-flavored synthetic features" that don't generalize to the real
+corpus. The fix is more *real* defer cases via batch-review, not more
+augmentation.
 
 ## Variant comparison — encoder-only latency (RTX 2080)
 
