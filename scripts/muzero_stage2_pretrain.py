@@ -112,10 +112,19 @@ def _build_augmented_dataset(
     encoder,
     *,
     target_per_class: int,
+    max_aug_ratio: float,
     seed: int,
 ) -> tuple[np.ndarray, np.ndarray, list[dict]]:
-    """Encode original tile + K augmentations per row so each class has
-    `target_per_class` (encoded) examples.
+    """Encode original tile + K augmentations per row.
+
+    Each class is amplified up to `target_per_class` examples, but
+    `max_aug_ratio` caps how many augmentations a class can produce
+    relative to its original count. This prevents over-amplifying classes
+    with very few originals (which produces synthetic features that don't
+    generalize — the Stage 2-v1 lesson, where 7 skip originals were
+    augmented ~7x and skip got over-predicted in eval).
+
+    Effective target per class = min(target_per_class, ceil(originals * (1 + max_aug_ratio))).
 
     Returns (embeddings, labels, per_row_meta).
     """
@@ -127,23 +136,27 @@ def _build_augmented_dataset(
         by_class.setdefault(row["label_idx"], []).append(row)
     print(f"  pre-augmentation per-class: {{ {', '.join(f'{ACTIONS[k]}: {len(v)}' for k, v in sorted(by_class.items()))} }}")
     aug_plan: list[dict] = []  # one entry per encoded sample
+    effective_targets: dict[int, int] = {}
     for label_idx, class_rows in by_class.items():
         if not class_rows:
             continue
+        # Apply per-class cap on augmentation
+        cap = int(np.ceil(len(class_rows) * (1.0 + max_aug_ratio)))
+        effective = min(target_per_class, cap)
+        effective_targets[label_idx] = effective
         # First include each original row exactly once.
         for r in class_rows:
             aug_plan.append({"row": r, "aug_seed": -1, "is_aug": False})
-        # Then pad with augmentations until we reach target_per_class.
-        needed = max(0, target_per_class - len(class_rows))
+        needed = max(0, effective - len(class_rows))
         if needed == 0:
             continue
-        # Round-robin through class_rows with unique aug seeds.
         seeds = rng.integers(0, 2**31 - 1, size=needed)
         for i, s in enumerate(seeds):
             r = class_rows[i % len(class_rows)]
             aug_plan.append({"row": r, "aug_seed": int(s), "is_aug": True})
 
-    print(f"  augmented dataset size: {len(aug_plan)} (target_per_class={target_per_class})")
+    print(f"  effective per-class targets (cap-applied): {{ {', '.join(f'{ACTIONS[k]}: {effective_targets[k]}' for k in sorted(effective_targets))} }}")
+    print(f"  augmented dataset size: {len(aug_plan)} (max_aug_ratio={max_aug_ratio})")
 
     embeds = np.zeros((len(aug_plan), encoder.embed_dim), dtype=np.float32)
     labels = np.zeros(len(aug_plan), dtype=np.int64)
@@ -284,7 +297,17 @@ def main() -> int:
     parser.add_argument("--out-dir", type=Path,
                         default=REPO_ROOT / "weights/muzero/stage2_bc")
     parser.add_argument("--target-per-class", type=int, default=48,
-                        help="After augmentation, each class has this many samples.")
+                        help="Upper bound on per-class samples after augmentation.")
+    parser.add_argument("--max-aug-ratio", type=float, default=4.0,
+                        help=("Per-class cap: a class with N originals "
+                              "produces at most N*(1+max_aug_ratio) total "
+                              "examples. Default 4.0 means a class with 7 "
+                              "originals tops out at 35, not 48 — a modest "
+                              "cap on over-amplification of minority classes. "
+                              "Set higher (e.g. 999) to disable the cap. The "
+                              "right fix for too-few minority originals is "
+                              "more real reviews via build_defer_queue.py + "
+                              "batch_review.py, not larger ratios here."))
     parser.add_argument("--epochs", type=int, default=60)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--hidden", type=int, default=256)
@@ -318,7 +341,10 @@ def main() -> int:
 
     print("\nBuilding augmented dataset...")
     embeds, labels, aug_plan = _build_augmented_dataset(
-        rows, encoder, target_per_class=args.target_per_class, seed=args.seed,
+        rows, encoder,
+        target_per_class=args.target_per_class,
+        max_aug_ratio=args.max_aug_ratio,
+        seed=args.seed,
     )
     final_per_class = Counter(int(l) for l in labels)
     print(f"  post-aug per-class: {{ {', '.join(f'{ACTIONS[k]}: {final_per_class[k]}' for k in sorted(final_per_class))} }}")
@@ -374,6 +400,7 @@ def main() -> int:
         "n_originals": len(aug_plan) - n_aug,
         "n_augmentations": n_aug,
         "target_per_class": args.target_per_class,
+        "max_aug_ratio": args.max_aug_ratio,
         "n_train": len(train_idx),
         "n_val": len(val_idx),
         "best_val_acc": train_stats["best_val_acc"],

@@ -105,11 +105,33 @@ widen.
 ## BC policy (Stage 2 head)
 
 `--policy bc --policy-head weights/muzero/stage2_bc/policy_head.pt` loads
-the Stage 2 head trained on the augmented dataset (192 examples,
-class-balanced 48/48/48/48 via flips, ±12° rotations, brightness/contrast/
-saturation jitter on 75 originals).
+the Stage 2 head trained on the augmented dataset (75 originals + capped
+augmentation per class). Stage 2 has been iterated twice — both versions
+documented below for trade-off transparency.
 
-### All Packs (Stage 2 BC)
+### Stage 2 v2 (default, --max-aug-ratio 4.0)
+
+136 examples (75 originals + 61 augs). Per-class cap prevents minority
+classes with very few originals from being amplified into pure synthetic
+noise. Class composition: accept=48, defer=12 (capped from 48), refine=48,
+skip=28 (capped from 48).
+
+| Metric | Value |
+|---|---|
+| Episodes | 75 |
+| Encoder latency mean / p95 | 82.6 ms / 106.8 ms |
+| accept | 9 (12%) |
+| refine | 53 (71%) |
+| defer  | 0 (0%) |
+| skip   | 13 (17%) |
+| Mean episode reward | -0.0438 ± 0.0191 |
+| **Best val acc** | **0.967** (28 stratified, accept 10/10, defer 3/3, refine 10/10, skip 6/7) |
+
+### Stage 2 v1 (--max-aug-ratio 999, uncapped)
+
+192 examples (75 originals + 117 augs). Hard target of 48 per class even
+when minority classes had to be amplified ~7x. Reached higher reward but
+over-predicted skip due to too-many synthetic skip features.
 
 | Metric | Value |
 |---|---|
@@ -120,28 +142,35 @@ saturation jitter on 75 originals).
 | defer  | 0 (0%) |
 | skip   | 27 (36%) |
 | Mean episode reward | **-0.0396** ± 0.0233 |
+| Best val acc | 0.950 (40 stratified, accept 10/10, defer 10/10, refine 10/10, skip 8/10) |
 
-### Stage 2 lesson — collapse fixed on accept/skip, defer needs more originals
+### Stage 2 lesson — augmentation cap matters; more real minority data matters more
 
-Stage 2 trained to **val_acc 0.950** on a 40-sample stratified split
-(accept 10/10, defer 10/10, refine 10/10, skip 8/10). Per-class
-diversity in eval predictions:
+| Action | Playback | Stage 1 | Stage 2 v1 (cap=∞) | **Stage 2 v2 (cap=4)** | Notes |
+|---|---|---|---|---|---|
+| accept | 13 (17%) | 0 | 2 (3%) | **9 (12%)** | v2 closest to operator distribution |
+| refine | 51 (68%) | 75 (100%) | 46 (61%) | 53 (71%) | both Stage 2s near playback |
+| defer  | 4 (5%) | 0 | 0 | 0 | unchanged: 3 originals can't fabricate signal |
+| skip   | 7 (9%) | 0 | 27 (36%) | **13 (17%)** | v2 over-pred halved (27 → 13) |
+| Reward | -0.0441 | -0.0600 | **-0.0396** | -0.0438 | v1 happened lower (skip-heavy can avoid materialization cost) |
+| Val acc | n/a | 0.800 | 0.950 | **0.967** | v2 highest |
 
-| Action | Playback | Stage 1 BC | Stage 2 BC | Notes |
-|---|---|---|---|---|
-| accept | 13 (17%) | 0 | 2 (3%) | Recovered from collapse but conservative |
-| refine | 51 (68%) | 75 (100%) | 46 (61%) | Closer to the playback prior |
-| defer  | 4 (5%) | 0 | 0 | Only 3 original defer cases — augmentation overfits to those 3 |
-| skip   | 7 (9%) | 0 | 27 (36%) | Over-predicted; aug ratio ~7x on 7 originals was too aggressive |
-| Mean reward | -0.0441 | -0.0600 | **-0.0396** | Stage 2 best (less-negative reward) |
-
-**The headline:** Stage 2 broke the all-refine collapse, val_acc jumped
-0.80 → 0.95, and mean episode reward beats both playback and Stage 1
-across all three scenario packs. Defer is still 0/75 because only 3
-original defer cases exist — augmenting those 16x apiece taught the head
-"defer-flavored synthetic features" that don't generalize to the real
-corpus. The fix is more *real* defer cases via batch-review, not more
-augmentation.
+**Headlines:**
+- Stage 2 v2 (cap=4.0) is the canonical default: highest val_acc, accept
+  recovered, skip over-prediction halved, predictions closest to the
+  operator distribution.
+- v1's slightly better reward is an artifact: predicting skip on borderline
+  refine cases avoids the refine cost (-0.05) and pays only the skip
+  penalty (-0.01 step). v2 makes more accept calls — those carry the risk
+  of materialize-not-useful but match what an operator would do.
+- **Defer remains 0/75 in both configs.** This is a fundamental data
+  shortage (only 3 original defer cases) that no augmentation ratio can
+  fix. The robust solution is `scripts/build_defer_queue.py` — it generates
+  a focused review queue of 20 high-cloud-cover-but-visible candidates
+  (current label distribution: mostly refine/skip), which the operator
+  triages with the standard `batch_review.py` flow. Adding ~10 real defer
+  reviews would let Stage 2 produce a meaningful per-class boundary for
+  defer instead of marginalizing it.
 
 ## Variant comparison — encoder-only latency (RTX 2080)
 

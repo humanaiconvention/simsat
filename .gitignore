@@ -70,6 +70,7 @@ exports/
 # --- Generated review queue artifacts (regenerable; change with every label) ---
 REVIEW_BACKLOG.md
 review_queue.txt
+review_queue_defer.txt
 
 # --- Local Kaggle dataset staging (zip + metadata copies for `kaggle datasets create/version`) ---
 diloco_kaggle_staging/
