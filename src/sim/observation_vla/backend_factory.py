@@ -64,8 +64,15 @@ def build_vla_adapter(backend: str | None = None) -> Any:
         from .tesseract_t3_local import TesseractT3Adapter
         return TesseractT3Adapter()
 
+    if key in {"tesseract_t3_heatmap", "tesseract-t3-heatmap", "t3_heatmap"}:
+        # Heatmap-output variant (Garrett's actual model contract — see
+        # tesseract_t3_heatmap.py module docstring for the integration
+        # contract Garrett needs to fill in).
+        from .tesseract_t3_heatmap import TesseractT3HeatmapAdapter
+        return TesseractT3HeatmapAdapter()
+
     raise ValueError(
         f"Unknown OBSERVATION_VLA_BACKEND: {key!r}. "
         "Valid values: clip_local, gemma4, genesis, tesseract_t3, "
-        "transformers_vlm, gemma4_haic, stub"
+        "tesseract_t3_heatmap, transformers_vlm, gemma4_haic, stub"
     )

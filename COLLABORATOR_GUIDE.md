@@ -121,6 +121,15 @@ Config is read from: `genesis_local.py` → `GenesisAdapter` (native, no HF Auto
 
 ## Setup — Tesseract T3 (Garrett)
 
+Two backends are wired for T3 — pick the one that matches your model's
+output format.
+
+### Option A — JSON-output VLM (LLM-style, returns 8-key assessment)
+
+Use this if your T3 variant produces a structured JSON assessment directly
+(same contract as the Gemma-4 fine-tune). Routed through the generic
+TransformersVLMAdapter:
+
 ```bash
 export OBSERVATION_VLA_BACKEND=tesseract_t3
 export TESSERACT_T3_MODE=merged
@@ -128,7 +137,49 @@ export TESSERACT_T3_MERGED_PATH=/path/to/tesseract-t3-weights
 export OBSERVATION_VLA_DEVICE=cuda
 ```
 
-Config is read from: `tesseract_t3_local.py` → `TesseractT3Adapter` → `TransformersVLMAdapter`.
+Config: `tesseract_t3_local.py` → `TesseractT3Adapter` → `TransformersVLMAdapter`.
+
+### Option B — Heatmap-output model (recommended for the DOFA-backbone T³)
+
+Use this if your model emits a per-pixel alarm/anomaly heatmap (the
+output format Garrett demoed 2026-04-27: 89M params, DOFA backbone
+transfer, ~40 ms inference, alarm heatmap with peak/concentration stats
+mapped semantically to ObservationVLA's 8-key payload). No retraining
+required — the adapter pools your heatmap into stats and rule-maps to
+the assessment fields.
+
+```bash
+export OBSERVATION_VLA_BACKEND=tesseract_t3_heatmap
+export TESSERACT_T3_WEIGHTS_PATH=/path/to/tesseract-t3.<format>
+export TESSERACT_T3_DEVICE=cuda
+# Optional tuning of stats→action thresholds:
+# export TESSERACT_T3_PEAK_ACCEPT=0.80
+# export TESSERACT_T3_PEAK_REFINE=0.45
+# export TESSERACT_T3_PEAK_DEFER=0.20
+```
+
+**Garrett: this is your insertion point.** Two functions in
+`src/sim/observation_vla/tesseract_t3_heatmap.py` ship as stubs and need
+your implementation:
+
+1. `_load_tesseract_t3(weights_path, device)` — load your model from
+   the path, return whatever object your forward pass expects
+2. `_predict_heatmap(model, tile, device)` — run forward on a
+   `(3, H, W)` float32 [0,1] tile; return `(H', W')` float32 numpy
+   alarm heatmap
+
+Everything downstream (stats extraction, mapping to the 8-key
+ObservationVLA payload, action ladder, fallback path) is concrete and
+tested. The `(H, W)` heatmap → `(scene_match, salience, change_or_event,
+recommended_action, ...)` mapping is documented in `_stats_to_payload()`.
+
+Until your loader is plugged in, the adapter falls back to a stub
+payload (`action=skip`, `runtime_mode=stub_fallback`) so the service
+stays alive during integration. Stub mode logs the underlying load
+failure so you can diagnose without grepping.
+
+13 unit tests cover the stats and payload paths in
+`tests/test_tesseract_t3_heatmap.py`.
 
 ---
 
