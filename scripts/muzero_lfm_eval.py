@@ -303,6 +303,56 @@ def write_markdown(stats_list: list[dict]) -> None:
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 
+def _load_bc_head(path: Path, device: str):
+    """Load the Stage 1 BC policy head produced by muzero_stage1_pretrain.py."""
+    import torch
+    import torch.nn as nn
+
+    ckpt = torch.load(str(path), map_location=device, weights_only=True)
+    head = nn.Sequential(
+        nn.Linear(ckpt["embed_dim"], ckpt["hidden"]),
+        nn.GELU(),
+        nn.Dropout(0.1),
+        nn.Linear(ckpt["hidden"], ckpt["n_actions"]),
+    ).to(device).eval()
+    head.load_state_dict(ckpt["state_dict"])
+    return head, list(ckpt["actions"])
+
+
+def _bc_policy_actions(records, encoder, head, action_names, device):
+    """Encode each record's tile and predict an action via the BC head.
+
+    Critical: the BC head was trained on embeddings from full-resolution PNG
+    assets in review_queue_assets/, not the 64x64 downsampled tiles the env
+    holds. Loading the full-res PNG here matches the train-time distribution.
+    Falls back to the in-record tile if the asset isn't on disk.
+    """
+    import torch
+    from PIL import Image
+
+    assets_dir = Path(__file__).resolve().parents[1] / "review_queue_assets"
+    actions: list[str] = []
+    for rec in records:
+        emb = None
+        # Prefer the full-res PNG asset matched by trace/window_id.
+        tid = rec.window_id
+        matches = list(assets_dir.glob(f"*{tid}*.png")) if assets_dir.exists() else []
+        if matches:
+            img = Image.open(matches[0]).convert("RGB")
+            arr = np.asarray(img, dtype=np.float32).transpose(2, 0, 1) / 255.0
+            emb = encoder.encode(arr)
+        else:
+            tile = np.asarray(rec.tile, dtype=np.float32)
+            if tile.ndim == 2:
+                tile = tile[np.newaxis, :, :]
+            emb = encoder.encode(tile)
+        with torch.no_grad():
+            logits = head(torch.from_numpy(emb).to(device).unsqueeze(0))
+            idx = int(logits.argmax(dim=1).item())
+        actions.append(action_names[idx])
+    return actions
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="LFM Track eval — MuZero + tile encoder")
     parser.add_argument("--scenario", default="all",
@@ -312,6 +362,15 @@ def main() -> None:
                         help="Print markdown table output")
     parser.add_argument("--write-md", action="store_true",
                         help="Write MUZERO_LFM_EVAL.md to repo root")
+    parser.add_argument("--policy", choices=("playback", "bc"), default="playback",
+                        help=("playback (default) replays the stored VLA "
+                              "recommended_action — encoder embedding is "
+                              "decorative. bc loads the Stage 1 BC head and "
+                              "predicts actions from the LFM embedding, so "
+                              "encoder choice influences reward."))
+    parser.add_argument("--policy-head", type=Path,
+                        default=Path(__file__).resolve().parents[1] / "weights/muzero/stage1_bc/policy_head.pt",
+                        help="Path to the Stage 1 BC head (used when --policy bc).")
     args = parser.parse_args()
 
     if os.environ.get("RUN_HF_TILE_ENCODER_TESTS") != "1":
@@ -319,6 +378,22 @@ def main() -> None:
         print("Set RUN_HF_TILE_ENCODER_TESTS=1 to suppress this message.\n")
 
     encoder = _build_encoder()
+
+    bc_head = None
+    bc_actions = None
+    if args.policy == "bc":
+        if not args.policy_head.exists():
+            raise SystemExit(
+                f"--policy bc requires {args.policy_head}. "
+                "Run `python scripts/muzero_stage1_pretrain.py` first."
+            )
+        device = os.environ.get("TILE_ENCODER_DEVICE")
+        if device is None:
+            import torch as _torch
+            device = "cuda" if _torch.cuda.is_available() else "cpu"
+        print(f"Loading BC head: {args.policy_head}")
+        bc_head, bc_actions = _load_bc_head(args.policy_head, device)
+        print(f"  BC head ready (action vocab: {bc_actions})")
 
     packs = (
         ["maritime_chokepoints", "disaster_response_weather", "urban_coastal_ambiguity"]
@@ -328,11 +403,20 @@ def main() -> None:
 
     all_stats: list[dict] = []
     for pack in packs:
-        records, policy_actions = build_records(pack)
+        records, playback_actions = build_records(pack)
         if not records:
             print(f"  No matched tiles for {pack}, skipping.")
             continue
+        if args.policy == "bc":
+            device = os.environ.get("TILE_ENCODER_DEVICE")
+            if device is None:
+                import torch as _torch
+                device = "cuda" if _torch.cuda.is_available() else "cpu"
+            policy_actions = _bc_policy_actions(records, encoder, bc_head, bc_actions, device)
+        else:
+            policy_actions = playback_actions
         stats = run_episodes(records, policy_actions, encoder, pack)
+        stats["policy"] = args.policy
         print_results(stats, markdown=args.markdown)
         all_stats.append(stats)
 

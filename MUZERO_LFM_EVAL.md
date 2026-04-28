@@ -1,10 +1,17 @@
 # LFM Track Eval — MuZero + LFM2.5-VL-450M Tile Encoder
 
-Pipeline: `Sentinel PNG → LFM2.5-VL-450M (768-dim) → SimSatEnv → trust action → reward`  
-Policy: stored VLA `recommended_action` from the 86-trace corpus.  
-Encoder swap: change `TILE_ENCODER_MODEL` env var or pass `--model-id` to `build_encoder("lfm2vl", ...)`.  
+Pipeline: `Sentinel PNG → LFM2.5-VL-450M (768-dim) → SimSatEnv → trust action → reward`
+Encoder swap: change `TILE_ENCODER_MODEL` env var or pass `--model-id` to
+`build_encoder("lfm2vl", ...)`. Policy swap: `--policy {playback,bc}` on
+`scripts/muzero_lfm_eval.py`.
 
-## Maritime Chokepoints
+## Playback policy (stored VLA `recommended_action`)
+
+This is the encoder-decorative baseline: the encoder runs (latency captured)
+but the action comes from the stored VLA assessment, so reward is independent
+of the encoder choice.
+
+### Maritime Chokepoints
 
 | Metric | Value |
 |---|---|
@@ -19,14 +26,14 @@ Encoder swap: change `TILE_ENCODER_MODEL` env var or pass `--model-id` to `build
 | Materialization yield | 0.00 |
 | Mean episode reward | -0.0441 ± 0.0233 |
 
-## Disaster / Weather
+### Disaster / Weather
 
 | Metric | Value |
 |---|---|
 | Encoder | `LiquidAI/LFM2.5-VL-450M` |
 | Embed dim | 768 |
 | Episodes (matched tiles) | 23 |
-| Encoder latency mean / p95 | 73.2 ms / 77.1 ms |
+| Encoder latency mean / p95 | 76.5 ms / 79.1 ms |
 | accept | 3 (13%) |
 | refine | 16 (70%) |
 | defer  | 1 (4%) |
@@ -34,14 +41,14 @@ Encoder swap: change `TILE_ENCODER_MODEL` env var or pass `--model-id` to `build
 | Materialization yield | 0.00 |
 | Mean episode reward | -0.0448 ± 0.0230 |
 
-## Urban Coastal Ambiguity
+### Urban Coastal Ambiguity
 
 | Metric | Value |
 |---|---|
 | Encoder | `LiquidAI/LFM2.5-VL-450M` |
 | Embed dim | 768 |
 | Episodes (matched tiles) | 30 |
-| Encoder latency mean / p95 | 77.8 ms / 77.3 ms |
+| Encoder latency mean / p95 | 75.0 ms / 78.0 ms |
 | accept | 4 (13%) |
 | refine | 20 (67%) |
 | defer  | 3 (10%) |
@@ -49,20 +56,62 @@ Encoder swap: change `TILE_ENCODER_MODEL` env var or pass `--model-id` to `build
 | Materialization yield | 0.00 |
 | Mean episode reward | -0.0433 ± 0.0236 |
 
-## All Packs
+### All Packs (playback)
 
 | Metric | Value |
 |---|---|
-| Encoder | `LiquidAI/LFM2.5-VL-450M` |
-| Embed dim | 768 |
-| Episodes (matched tiles) | 75 |
+| Episodes | 75 |
 | Encoder latency mean / p95 | 75.2 ms / 77.3 ms |
 | accept | 13 (17%) |
 | refine | 51 (68%) |
-| defer  | 4 (5%) |
-| skip   | 7 (9%) |
-| Materialization yield | 0.00 |
+| defer  | 4  (5%) |
+| skip   | 7  (9%) |
 | Mean episode reward | -0.0441 ± 0.0233 |
+
+## BC policy (Stage 1 head)
+
+`--policy bc` loads `weights/muzero/stage1_bc/policy_head.pt` and predicts
+each action from the LFM-450M embedding via the trained head. **First
+end-to-end Liquid Track measurement where the encoder embedding actually
+drives the reward.**
+
+### All Packs (BC)
+
+| Metric | Value |
+|---|---|
+| Episodes | 75 |
+| Encoder latency mean / p95 | 74.1 ms / 75.4 ms |
+| accept | 0 (0%) |
+| refine | 75 (100%) |
+| defer  | 0 (0%) |
+| skip   | 0 (0%) |
+| Mean episode reward | -0.0600 ± 0.0000 |
+
+### Lesson — class collapse on borderline cases
+
+The BC head trained to **val_acc 0.800** on a 15-sample stratified split
+(refine 10/10, accept 2/3; defer/skip have N=1 each). When deployed on
+the full 75-trace eval, predictions collapse to refine for every case.
+Diagnostic on individual traces shows softmax outputs cluster around
+`[accept=0.43, refine=0.47, defer=0.03, skip=0.06]` — the head learned
+the right relative ordering but the **margin between accept and refine
+is too thin for argmax to break the majority-class prior**.
+
+Two reinforcing causes:
+- **Corpus class imbalance**: 64% refine, 23% accept, 13% defer+skip.
+  Standard cross-entropy on imbalanced data biases logits toward the
+  majority class — the head's "uncertain" output defaults to refine.
+- **Best-state selection by val_acc**: the saved checkpoint was the
+  epoch with the highest 15-sample val accuracy (epoch 3). Later
+  epochs had higher train accuracy (0.917) and might have produced
+  sharper margins on minority classes, but `early_stopping_by_val`
+  picked the safer choice.
+
+This is exactly the gap **Stage 2 (scenario-pack augmentation)** is
+meant to close. With ~3-5x more (tile, action) pairs from per-pack
+synthetic perturbation — especially of accept/defer/skip cases — the
+imbalance softens and the BC head's margins widen. Stage 1 numbers
+above are the legitimate baseline to beat.
 
 ## Variant comparison — encoder-only latency (RTX 2080)
 
@@ -74,24 +123,16 @@ Encoder swap: change `TILE_ENCODER_MODEL` env var or pass `--model-id` to `build
 | `LiquidAI/LFM2.5-VL-450M` | 768 | 69 | 78 | Default of `build_encoder("lfm2vl")`; recommended for the on-orbit framing |
 | `LiquidAI/LFM2.5-VL-1.6B` | 1152 | 246 | 248 | Matches Liquid AI's "sub-250ms edge inference" claim; opt-in via `model_id=` |
 
-Action distribution and mean episode reward are identical across encoders
-because the eval here uses the stored VLA `recommended_action` as the
-policy, not a learned head. The encoder rows above isolate the encode-pass
-latency cost — the metric that matters for the on-orbit budget.
-
-## Stage 1 BC pretrain (2026-04-27)
+## Stage 1 BC pretrain — training run details (2026-04-27)
 
 `scripts/muzero_stage1_pretrain.py` trains a small MLP policy head on top
 of LFM2.5-VL-450M embeddings, supervised by the per-trace label
 (`operator_action` when `label_source == "operator_review"`, else the
-stored `assessment.recommended_action`). This is the first stage of the
-three-stage Liquid Track training chain (pretrain → scenario-pack
-fine-tune → two-scope TTT) and the first time the encoder embedding
-actually drives an action prediction in this codebase.
+stored `assessment.recommended_action`). First stage of the three-stage
+Liquid Track training chain (pretrain → scenario-pack fine-tune → two-scope TTT).
 
 Training: 75 (trace, label, asset) rows (33 reviewed + 42 simulated),
-stratified 80/20 split, AdamW, 80 epochs (~30s on RTX 2080 after
-encoding):
+stratified 80/20 split, AdamW, 80 epochs (~30s on RTX 2080 after encoding):
 
 | Metric | Value |
 |---|---|
@@ -100,15 +141,7 @@ encoding):
 | Best val accuracy | **0.800** (12/15 at epoch 3) |
 | Val per-action: accept | 2/3 (0.667) |
 | Val per-action: refine | 10/10 (1.000) |
-| Val per-action: defer | 0/1 (corpus only has 3 defer total) |
-| Val per-action: skip | 0/1 (corpus only has 7 skip total) |
+| Val per-action: defer | 0/1 (corpus has 3 defer total) |
+| Val per-action: skip | 0/1 (corpus has 7 skip total) |
 
-Saved at `weights/muzero/stage1_bc/policy_head.pt` (gitignored). Val
-defer/skip zeros aren't meaningful signal — N=1 each. Train→val gap of
-~0.12 reflects modest overfit on the small dataset; Stage 2's scenario
-augmentation is the next lever rather than additional Stage 1 tuning.
-
-Re-running `muzero_lfm_eval.py` with this BC head wired in as the
-policy (instead of stored-action playback) is the next step that would
-break the per-encoder-equivalence above and produce encoder-dependent
-rewards.
+Saved at `weights/muzero/stage1_bc/policy_head.pt` (gitignored).
