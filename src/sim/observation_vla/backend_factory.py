@@ -64,12 +64,13 @@ def build_vla_adapter(backend: str | None = None) -> Any:
         from .tesseract_t3_local import TesseractT3Adapter
         return TesseractT3Adapter()
 
-    if key in {"tesseract_t3_heatmap", "tesseract-t3-heatmap", "t3_heatmap"}:
-        # Heatmap-output variant for the Tesseract T3 collaborator slot.
-        # See tesseract_t3_heatmap.py module docstring for the integration
-        # contract (two stubs to implement: _load_tesseract_t3 + _predict_heatmap).
-        from .tesseract_t3_heatmap import TesseractT3HeatmapAdapter
-        return TesseractT3HeatmapAdapter()
+    if key in {"heatmap", "heatmap_local"}:
+        # Generic insertion seat for any model that emits a per-pixel
+        # heatmap rather than a JSON assessment. See
+        # heatmap_local.py module docstring for the integration contract
+        # (two stubs to implement: _load_model + _predict_heatmap).
+        from .heatmap_local import HeatmapAdapter
+        return HeatmapAdapter()
 
     if key in {"heatmap", "heatmap_local"}:
         # Generic insertion seat for any model that emits a per-pixel
@@ -82,5 +83,5 @@ def build_vla_adapter(backend: str | None = None) -> Any:
     raise ValueError(
         f"Unknown OBSERVATION_VLA_BACKEND: {key!r}. "
         "Valid values: clip_local, gemma4, genesis, tesseract_t3, "
-        "tesseract_t3_heatmap, heatmap, transformers_vlm, gemma4_haic, stub"
+        "heatmap, transformers_vlm, gemma4_haic, stub"
     )
