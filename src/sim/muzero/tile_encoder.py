@@ -239,9 +239,22 @@ class HFVisionTowerEncoder:
         hwc = (np.clip(arr, 0.0, 1.0) * 255.0).astype(np.uint8).transpose(1, 2, 0)
         img = Image.fromarray(hwc)
 
-        inputs = self.processor(images=img, return_tensors="pt").to(self.device)
+        # Some VL processors (Lfm2VlProcessor, others) raise when called
+        # with images-only because the chat-template expects a text prompt
+        # too. For pure embedding use, prefer the inner image_processor
+        # if present so we don't need to fabricate a placeholder prompt.
+        image_only_processor = getattr(self.processor, "image_processor", None) or self.processor
+        inputs = image_only_processor(images=img, return_tensors="pt").to(self.device)
+
+        # Wrapper VL models (lfm2_vl, gemma3, llava, paligemma) expose
+        # `get_image_features` but it returns a list (one per image, NaFlex
+        # style) and is meant for downstream multimodal generation, not
+        # standalone embedding. For wrappers we always call the vision
+        # tower directly. For standalone CLIP/SigLIP, get_image_features
+        # is the canonical pooled-embedding path and we use it.
+        wrapper_types = {"lfm2_vl", "gemma3", "llava", "paligemma"}
         with self._torch.no_grad():
-            if hasattr(self.model, "get_image_features"):
+            if self._model_type not in wrapper_types and hasattr(self.model, "get_image_features"):
                 # CLIP / SigLIP path
                 out = self.model.get_image_features(**inputs)
             else:
@@ -283,7 +296,9 @@ class HFVisionTowerEncoder:
                 f"HFVisionTowerEncoder could not extract an embedding from "
                 f"{type(out).__name__} for model {self.model_id!r}"
             )
-        return features.squeeze(0).detach().cpu().numpy().astype(np.float32)
+        # Cast to float32 BEFORE numpy() — numpy does not natively support
+        # bfloat16, and modern VL wrappers default to bf16 on CUDA.
+        return features.squeeze(0).detach().to(self._torch.float32).cpu().numpy().astype(np.float32)
 
 
 # Back-compat alias — `LFM2VLEncoderStub` was the documented integration seat

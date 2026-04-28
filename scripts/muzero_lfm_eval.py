@@ -262,11 +262,16 @@ def print_results(stats: dict, markdown: bool = False) -> None:
 
 def write_markdown(stats_list: list[dict]) -> None:
     out = Path("MUZERO_LFM_EVAL.md")
+    # Header reflects the actual encoder used (taken from the first
+    # stats block — all packs share one encoder per run).
+    encoder_id = stats_list[0]["encoder_model"] if stats_list else "<unknown>"
+    embed_dim = stats_list[0]["embed_dim"] if stats_list else "?"
+    short_name = encoder_id.split("/")[-1]
     lines = [
-        "# LFM Track Eval — MuZero + SigLIP Tile Encoder\n",
-        "Pipeline: `Sentinel PNG → SigLIP-base (768-dim) → SimSatEnv → trust action → reward`  ",
+        f"# LFM Track Eval — MuZero + {short_name} Tile Encoder\n",
+        f"Pipeline: `Sentinel PNG → {short_name} ({embed_dim}-dim) → SimSatEnv → trust action → reward`  ",
         "Policy: stored VLA `recommended_action` from the 86-trace corpus.  ",
-        f"LFM2.5-VL encoder slot: one-line `model_id` swap in `build_encoder(\"lfm2vl\", model_id=...)`.  ",
+        f"Encoder swap: change `TILE_ENCODER_MODEL` env var or pass `--model-id` to `build_encoder(\"lfm2vl\", ...)`.  ",
         "",
     ]
     for s in stats_list:
