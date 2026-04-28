@@ -183,6 +183,58 @@ failure so you can diagnose without grepping.
 
 ---
 
+## Setup — Heatmap-output models (any collaborator)
+
+If your model emits a per-pixel alarm / anomaly / salience heatmap rather
+than a JSON assessment, plug into the **generic heatmap backend**. The
+adapter pools your heatmap into stats and rule-maps to ObservationVLA's
+8-key payload — no JSON-output head required, no retraining when you ship
+updated weights.
+
+```bash
+export OBSERVATION_VLA_BACKEND=heatmap
+export HEATMAP_WEIGHTS_PATH=/path/to/your/weights.<format>
+export HEATMAP_DEVICE=cuda
+# Optional tuning of the action ladder (peak ≥ accept → accept,
+# peak ≥ refine → refine, peak ≥ defer → defer, else → skip):
+# export HEATMAP_PEAK_ACCEPT=0.80
+# export HEATMAP_PEAK_REFINE=0.45
+# export HEATMAP_PEAK_DEFER=0.20
+# Optional: override the rationale_tag for your backend (default: "heatmap")
+# export HEATMAP_BACKEND_TAG=my_model
+```
+
+**Two functions to implement** in `src/sim/observation_vla/heatmap_local.py`:
+
+1. `_load_model(weights_path, device)` — load your model from the path,
+   return whatever object your forward pass expects
+2. `_predict_heatmap(model, tile, device)` — run forward on a
+   `(3, H, W)` float32 [0,1] tile; return `(H', W')` float32 numpy
+   alarm heatmap (higher = stronger signal). Output spatial dims need
+   not match input.
+
+Everything downstream is concrete and tested:
+
+| Heatmap stat | ObservationVLA field |
+|---|---|
+| `peak` | `salience_score`, `change_or_event_score` |
+| `hotspot_concentration + (1-center_offset)` | `scene_match_score` |
+| `peak * concentration` | `confidence` |
+| `probe.sentinel_cloud_cover` | `occlusion_or_cloud_risk` |
+| `peak` ladder | `recommended_action` |
+
+Until your loader is plugged in, the adapter falls back to a stub payload
+(`action=skip`, `runtime_mode=stub_fallback`) so the service stays alive
+during integration. Stub mode logs the underlying load failure so you can
+diagnose without grepping.
+
+11 unit tests cover the stats and payload paths in
+`tests/test_heatmap_adapter.py`. Module docstring at
+`src/sim/observation_vla/heatmap_local.py` has the full integration
+contract.
+
+---
+
 ## Docker Compose snippet
 
 Add to `docker-compose.yaml` under the `sim` service environment:
