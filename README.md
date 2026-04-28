@@ -1,6 +1,6 @@
 # SimSat
 
-[![tests](https://github.com/humanaiconvention/SimSat-1/actions/workflows/tests.yml/badge.svg)](./.github/workflows/tests.yml)
+[![tests](https://github.com/humanaiconvention/simsat/actions/workflows/tests.yml/badge.svg)](./.github/workflows/tests.yml)
 [![python](https://img.shields.io/badge/python-3.11%20%7C%203.13-blue)](./requirements.txt)
 [![track](https://img.shields.io/badge/AI%20in%20Space-Liquid%20%2B%20General%20AI-orange)](./CHALLENGE_ENTRY.md)
 [![status](https://img.shields.io/badge/status-all%20tiers%20complete%20%7C%20Gemma--4%20v10-brightgreen)](./KNOWN_ISSUES.md)
