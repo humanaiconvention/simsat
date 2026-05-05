@@ -3,7 +3,7 @@
 [![tests](https://github.com/humanaiconvention/simsat/actions/workflows/tests.yml/badge.svg)](./.github/workflows/tests.yml)
 [![python](https://img.shields.io/badge/python-3.11%20%7C%203.13-blue)](./requirements.txt)
 [![track](https://img.shields.io/badge/AI%20in%20Space-Liquid%20%2B%20General%20AI-orange)](./CHALLENGE_ENTRY.md)
-[![status](https://img.shields.io/badge/status-all%20tiers%20complete%20%7C%20Gemma--4%20v11-brightgreen)](./KNOWN_ISSUES.md)
+[![status](https://img.shields.io/badge/status-all%20tiers%20complete%20%7C%20Gemma--4%20v12-brightgreen)](./KNOWN_ISSUES.md)
 [![kaggle](https://img.shields.io/badge/Kaggle-simsat--gemma4--v1-20BEFF)](https://www.kaggle.com/code/benhaslam/simsat-gemma4-v1-training)
 [![license](https://img.shields.io/badge/license-see%20LICENSE-lightgrey)](./LICENSE)
 
@@ -87,7 +87,7 @@ For the current ObservationVLA backend evaluation against operator-reviewed trac
 python scripts/observation_vla_eval.py --inprocess
 ```
 
-That generates [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md). The current backend is the Gemma-4-E2B SimSat fine-tune **v11** (`OBSERVATION_VLA_BACKEND=gemma4`), which achieves usefulness MAE **0.13**, exact action agreement **0.86**, and useful/not-useful agreement **0.97** over 37 operator-reviewed Sentinel cases. (Note: v1-v10 silently trained zero language-model parameters due to a `target_modules` config bug — see [`notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md`](./notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md). v11 is the first run with actual language-model LoRA training.) The `clip_local` CLIP baseline remains available as a zero-weight-download reference.
+That generates [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md). The current backend is the Gemma-4-E2B SimSat fine-tune **v12** (`OBSERVATION_VLA_BACKEND=gemma4`), which achieves usefulness MAE **0.13**, exact action agreement **0.86**, and useful/not-useful agreement **0.97** over 37 operator-reviewed Sentinel cases. v12 fixes the GQA k/v LoRA partial-save bug from v11 (490/490 tensors, strict sanity gate). The `clip_local` CLIP baseline remains available as a zero-weight-download reference. See [`notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md`](./notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md) for the v1-v10 null-training audit.
 
 To replace a simulated label with a real operator-reviewed outcome:
 
