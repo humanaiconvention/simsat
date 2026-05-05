@@ -204,3 +204,37 @@ stratified 80/20 split, AdamW, 80 epochs (~30s on RTX 2080 after encoding):
 | Val per-action: skip | 0/1 (corpus has 7 skip total) |
 
 Saved at `weights/muzero/stage1_bc/policy_head.pt` (gitignored).
+
+## BC policy (Stage 2 v3 — pending run)
+
+Stage 2 v3 is ready to run. The training script is unchanged; what changed is the corpus:
+
+**Defer corpus expansion (2026-05-05):** 10 auto-labeled defer outcomes added to `outcomes.json` via the cloud_cover≥80% AND target_visible heuristic (targets: singapore_port ×4, houston_ship ×3, fort_myers_coast, sf_bay, shenzhen_bay). Defer originals: **3 → 13**.
+
+With `max_aug_ratio=4.0` and `target_per_class=48`:
+
+| Action | v2 originals | v2 effective | v3 originals | v3 effective |
+|---|---|---|---|---|
+| accept | ~17 | 48 | ~17 | 48 |
+| defer | **3** | **15** | **13** | **48** |
+| refine | ~48 | 48 | ~48 | 48 |
+| skip | ~7 | 35 | ~7 | 35 |
+
+Defer goes from severely under-represented (15 examples, minority class) to fully at target (48 examples, on par with accept and refine). This is the first run where the head has enough defer signal to learn a meaningful decision boundary.
+
+**Run:**
+```bash
+bash scripts/muzero_run_stage2_v3.sh
+```
+
+**Evaluate:**
+```bash
+python scripts/muzero_lfm_eval.py --policy bc \
+    --policy-head weights/muzero/stage2_bc_v3/policy_head.pt
+```
+
+Watch for defer > 0/75. If defer recall materialises, update this section with the eval numbers and promote v3 as the new canonical checkpoint by symlinking:
+```bash
+cp weights/muzero/stage2_bc_v3/policy_head.pt weights/muzero/stage2_bc/policy_head.pt
+```
+(Keep v2 at `weights/muzero/stage2_bc_v2/` for comparison.)
