@@ -3,10 +3,12 @@
 ## Claim
 SimSat is a governed on-orbit continual-learning loop. It treats mission operations as a sequence of encounter windows rather than continuous propagation. A deterministic scaffold ranks windows cheaply, then a WCLI-style trust layer decides whether to accept, defer, skip, or refine before expensive imagery materialization. A Sentinel-first ObservationVLA lane performs image-conditioned reassessment, and a mission-response layer converts those judgments into explicit downstream actions with logged utility. **Test-time training runs at two layers simultaneously** — the VLA backend adapts on streaming Sentinel tiles, and the trust layer tunes online from realized-utility feedback — with **both adaptation streams gated by six non-compensatory viability checks** before any update is allowed to persist.
 
+Scenario packs span two observational registers: **geometric/structural** (maritime chokepoints, disaster response, urban coastal) and **spectral-biochemical** (pedospheric integrity — soil health via NDVI, SWIR ratio B11/B12, and EVI over active degradation sites). The same architecture operates identically across both registers.
+
 ## Why this must run in orbit
 Three stacked constraints force the full pipeline to the spacecraft, in priority order:
 
-1. **Distribution shift without a ground-truth validator.** A satellite streaming imagery hits real drift — new geographies, seasonal variation, cloud and sensor conditions — and cannot call home for a label. SimSat's answer is six non-compensatory viability gates that every candidate observation must pass before updating system state: entropy reduction (must decrease uncertainty), extraction risk (no bulk scraping), PRISM consistency (claimed metadata matches measured properties), participation covenant (real stimulus, minimum operator participation), federated exchange (raw imagery stays at edge), and epistemic alignment (updates reduce uncertainty rather than reinforce bias). Without these gates, on-orbit TTT is uncontrolled drift; with them, it is a governed continual-learning loop. This is the mechanism the rest of the competition will not have.
+1. **Distribution shift without a ground-truth validator.** A satellite streaming imagery hits real drift — new geographies, seasonal variation, cloud and sensor conditions — and cannot call home for a label. SimSat's answer is six non-compensatory viability gates that every candidate observation must pass before updating system state: entropy reduction (must decrease uncertainty), extraction risk (no bulk scraping), PRISM consistency (claimed metadata matches measured properties), participation covenant (real stimulus, minimum operator participation), federated exchange (raw imagery stays at edge), and epistemic alignment (updates reduce uncertainty rather than reinforce bias). Without these gates, on-orbit TTT is uncontrolled drift; with them, it is a governed continual-learning loop. Formally, the gates enforce `C_eff(t) ≥ E(t)` — the viability condition for a learning system under recursive updating — by ensuring every accepted update carries non-redundant information about the external world before it touches model state. This is the mechanism the rest of the competition will not have.
 2. **Bandwidth.** A 5 MB uplink and 10 MB downlink cannot ship model weight updates to ground and back at any useful cadence. TTT that tracks drift must happen on the satellite itself.
 3. **Latency.** The next encounter window arrives in minutes. Adaptations must be usable in the very next pass; there is no round-trip budget for ground re-training and re-upload.
 
@@ -29,18 +31,19 @@ Current reviewed cases:
 - `maritime_chokepoints` → Suez Canal, reviewer `Ben Haslam`, usefulness `0.95`
 - `disaster_response_weather` → Houston Ship Channel, reviewer `Ben Haslam`, usefulness `0.92`
 - `urban_coastal_ambiguity` → Port of Rotterdam, reviewer `Ben Haslam`, usefulness `0.90`
+- `pedospheric_integrity` → Mato Grosso Agricultural Frontier, reviewer `Ben Haslam`, outcome `defer` (trust below refine threshold; window not useful — honest result for a low-quality pass)
 
 ## Runtime Truth
-- Sentinel is the primary observation source.
+- Sentinel is the primary observation source. Spectral bands used: B04, B08 (NDVI), B11, B12 (SWIR ratio, soil moisture/organic proxy), B08A/B05 (EVI, canopy structure) for the pedospheric register; RGB/NIR/SWIR composite for geometric registers.
 - Mapbox is optional and disabled in the current submission flow.
-- ObservationVLA runs in `clip_local` mode with `openai/clip-vit-base-patch32` as the baseline backend during local testing; the track-specific backends (LFM2.5, Gemma-4) plug into the same adapter interface.
+- ObservationVLA current runtime is `transformers_vlm_local` (Gemma-4-E2B SimSat fine-tune v11). `clip_local` (CLIP ViT-B/32) remains available as a zero-weight-download reference backend. Stored case assessments in the packet reflect the runtime active at review time; see the packet Notes section.
 - **TTT is active at two layers:** VLA weights / adapters adapt on streaming tiles; the WCLI trust layer thresholds and priors update from realized-utility feedback. Both adaptation streams flow through the six viability gates before persistence.
 - The reviewed eval pool was expanded from 8 → 37 operator-reviewed cases via `scripts/batch_review.py` on 2026-04-27. v11 fine-tune over those 37 produces useful/not-useful agreement 0.97 and magnitude MAE 0.13. See `OBSERVATION_VLA_EVAL.md` for the per-case breakdown.
 - Mission-response is a policy-and-utility layer, not live spacecraft actuation.
 
 ## Demo Order
 1. Open [SUBMISSION_PACKET.md](./SUBMISSION_PACKET.md) for the scorecard and reviewed cases.
-2. Open [SUBMISSION_CASEBOOK.md](./SUBMISSION_CASEBOOK.md) for the three pinned visual examples.
+2. Open [SUBMISSION_CASEBOOK.md](./SUBMISSION_CASEBOOK.md) for the four pinned visual examples (one per scenario pack, plus a second urban_coastal case).
 3. Use [CHALLENGE_ENTRY.md](./CHALLENGE_ENTRY.md) for the spoken walkthrough — architecture framing, TTT + viability mechanics, per-track model notes.
 
 ## Known Issues
@@ -54,7 +57,7 @@ Code-review findings and their patch bundles live in-repo under `review/`:
 
 ## Reproduce
 ```bash
-python scripts/submission_evidence.py --base-url http://127.0.0.1:8000/sim --reviewed-only
-python scripts/submission_casebook.py --base-url http://127.0.0.1:8000/sim
-python scripts/submission_readiness.py --base-url http://127.0.0.1:8000/sim
+python scripts/submission_evidence.py --base-url http://127.0.0.1:8000 --reviewed-only
+python scripts/submission_casebook.py --base-url http://127.0.0.1:8000
+python scripts/submission_readiness.py --base-url http://127.0.0.1:8000
 ```

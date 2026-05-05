@@ -3,6 +3,8 @@
 ## Thesis
 SimSat is a governed on-orbit continual-learning loop. It reframes mission operations as a sequence of encounter windows, runs stacked test-time training at the vision-language and trust-layer levels, and gates every adaptation through six non-compensatory viability checks. The result is a pipeline that demonstrably improves with every pass instead of drifting, with no ground-truth validator required — which is why it has to run in orbit.
 
+The system spans two structurally different observational registers: geometric and structural (maritime chokepoints, disaster response, urban coastal scenes) and spectral-biochemical (pedospheric integrity — soil health expressed through NDVI, SWIR ratio, and vegetation indices over active degradation sites). The same encounter planner, trust layer, viability gates, and TTT loop operate across both registers without architectural modification.
+
 Two planners compete over the same ranked windows:
 - `Scaffold`: deterministic geometry-and-availability scoring
 - `WCLI Trust`: scaffold plus a trust-gated support layer that can `accept`, `defer`, `skip`, or `refine`
@@ -48,6 +50,24 @@ The WCLI gate tunes itself online from realized-utility feedback. When the plann
 ### Viability gate as the common filter
 Every candidate adaptation — whether a VLA-layer weight update or a trust-layer threshold change — passes through the six-gate filter before persistence. The architectural claim: stacked TTT is only safe on-orbit because the gates screen out bad updates that a human-in-the-loop would otherwise catch, and a human is precisely what is not available on orbit.
 
+The six gates operationalize a formal condition: a learning system remains viable when `C_eff(t) ≥ E(t)`, where E(t) is the expected per-iteration increase in divergence from the external world and C_eff(t) is the corrective capacity of independent grounding signal. A candidate update contributes to C_eff only if it carries non-redundant information about the external world not already in the current model state — formally, I(P; G | M_t) > 0. Entropy reduction (G1) and epistemic alignment (G6) enforce this directly; PRISM consistency (G3) and participation covenant (G4) ensure the claimed information is real; extraction risk (G2) and federated exchange (G5) prevent the loop from feeding on itself. Without the gates, on-orbit TTT violates the condition by construction. With them, every accepted update must clear it before touching model state. SimSat is the first production operationalization of this condition in a satellite learning loop.
+
+## Observational Scope — Two Registers
+
+The four scenario packs span two structurally different signal types.
+
+The first three packs operate in the **geometric register**. The signal of interest is structural: ship positions at a chokepoint, storm-damage extent along a coastline, port-complex geometry at a dense logistics hub. The trust layer learns when geometric confidence justifies commit versus refine or defer; the VLA backend learns to distinguish genuine structure from clutter, perspective ambiguity, and sensor noise.
+
+The `pedospheric_integrity` pack operates in the **spectral-biochemical register**. The signal of interest is soil health expressed through Sentinel-2's multi-spectral bands:
+
+- **NDVI** `(B08 − B04) / (B08 + B04)` — vegetation density and stress. Declining NDVI over irrigated farmland signals salinization or waterlogging before visible bare-soil emergence.
+- **SWIR ratio** `B11 / B12` — clay content, soil moisture, and organic matter proxy. Rising SWIR ratio tracks the loss of soil carbon and moisture retention as forest-to-agriculture conversion advances.
+- **EVI** — canopy structure indicator, less susceptible to saturation than NDVI in high-biomass scenes, sensitive to early-stage canopy thinning at deforestation boundaries.
+
+Degradation at the three target sites manifests as spectral shift rather than geometric pattern: salinization at the Nile Delta pushes NDVI down while SWIR ratio rises; active deforestation at the Mato Grosso boundary produces sharp EVI and NDVI edges that advance between passes; groundwater depletion at Punjab compresses the seasonal NDVI amplitude over successive crop cycles. The accept/refine/defer pressure comes from agricultural cycle timing, monsoon and wet-season cloud cover, and the difficulty of distinguishing chronic degradation from reversible seasonal stress in multi-pass temporal sequences — structurally different from the geometry-driven ambiguity in the other three packs.
+
+This distinction matters architecturally. A system that works only in the geometric register could succeed through structural heuristics without genuine image-conditioned spectral reasoning. A system that handles both registers — under the same encounter planner, trust layer, viability gates, and TTT loop — demonstrates that the governed continual-learning architecture generalizes across observational domains. That is the claim the pedospheric pack tests.
+
 ## Two-Track Submission
 This repo is submitted to both tracks of the AI in Space hackathon. The scaffold, WCLI trust layer, mission-response layer, propagator, viability gates, and TTT infrastructure are identical across tracks — only the VLA backend changes.
 
@@ -61,7 +81,8 @@ This repo is submitted to both tracks of the AI in Space hackathon. The scaffold
 
 ## What Is New
 - Real future encounter windows from the live TLE-backed propagator
-- Scenario packs for challenge evaluation
+- Scenario packs for challenge evaluation spanning **two observational registers**: geometric/structural (maritime chokepoints, disaster response, urban coastal) and spectral-biochemical (pedospheric integrity)
+- **Pedospheric integrity monitoring** via NDVI, SWIR ratio (B11/B12), and EVI over three active degradation sites — Nile Delta salinization, Mato Grosso deforestation boundary, Punjab groundwater depletion — demonstrating the same architecture operates across structurally different signal types without modification
 - Decision-level deltas between scaffold and WCLI-trust planners
 - Materialization-yield comparison across the same ranked windows
 - ObservationVLA lane with image-conditioned assessment, labeled trace capture, and lightweight pass/scenario/mission calibration hooks
@@ -82,6 +103,9 @@ Core implementation lives in:
 - `maritime_chokepoints`: Suez, Panama, Singapore
 - `disaster_response_weather`: flood/storm-sensitive coastal and industrial targets
 - `urban_coastal_ambiguity`: dense mixed-use port and shoreline scenes where tempting windows may still deserve refinement
+- `pedospheric_integrity`: soil-health and land-degradation monitoring — Nile Delta salinization, Mato Grosso deforestation frontier, Punjab high-intensity agriculture
+
+The first three packs exercise accept/refine/defer decisions under geometric and cloud ambiguity in maritime and urban contexts. The `pedospheric_integrity` pack tests the same planner and trust layer in a different observational register: the signal of interest is soil health expressed through NDVI, SWIR, and Red Edge spectral bands rather than structural geometry. Seasonal cloud cover (Mato Grosso wet season, Punjab monsoon) and agricultural cycle timing (Nile Delta) create genuine defer and refine pressure that is structurally different from the geometry-driven ambiguity in the other packs. Adding this pack validates that the architecture generalises across observational domains without modification — the same encounter planner, trust layer, viability gates, and TTT loop operate identically regardless of what the satellite is looking at or why.
 
 These packs are encoded directly in [targets.json](./src/sim/data/encounter/targets.json) for reproducibility.
 
@@ -130,7 +154,7 @@ That writes [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md) with the curren
 For a compact, reproducible scorecard that can drop straight into notes or a submission draft:
 
 ```bash
-python scripts/encounter_eval.py --base-url http://127.0.0.1:8000/sim --scenario-sweep --top-k 8 --materialize-top-k 2 --markdown
+python scripts/encounter_eval.py --base-url http://127.0.0.1:8000 --scenario-sweep --top-k 8 --materialize-top-k 2 --markdown
 ```
 
 This prints one row per scenario pack with:
@@ -148,7 +172,7 @@ That scorecard is the quickest way to show operational benefit without a long li
 For a concrete scenario-by-scenario evidence report built from the latest evaluation plus any labelled ObservationVLA traces:
 
 ```bash
-python scripts/submission_evidence.py --base-url http://127.0.0.1:8000/sim
+python scripts/submission_evidence.py --base-url http://127.0.0.1:8000
 ```
 
 This generates [SUBMISSION_PACKET.md](./SUBMISSION_PACKET.md) with one section per scenario pack containing:
@@ -162,7 +186,7 @@ To replace a simulated label with a real operator-reviewed outcome:
 
 ```bash
 python scripts/review_queue_casebook.py --inprocess
-python scripts/operator_review.py --base-url http://127.0.0.1:8000/sim --scenario-pack maritime_chokepoints
+python scripts/operator_review.py --base-url http://127.0.0.1:8000 --scenario-pack maritime_chokepoints
 ```
 
 The review queue writes [REVIEW_QUEUE.md](./REVIEW_QUEUE.md) plus per-case images so the next human-review pass can compare the stored trace assessment with the current `clip_local` backend recommendation on the same imagery.
@@ -170,19 +194,19 @@ The review queue writes [REVIEW_QUEUE.md](./REVIEW_QUEUE.md) plus per-case image
 For a specific trace, inspect the full review bundle first:
 
 ```bash
-python scripts/operator_review.py --base-url http://127.0.0.1:8000/sim --trace-id <trace_id> --show-bundle-only
+python scripts/operator_review.py --base-url http://127.0.0.1:8000 --trace-id <trace_id> --show-bundle-only
 ```
 
 Then replace the current label and pin it as the canonical submission case for that scenario:
 
 ```bash
-python scripts/operator_review.py --base-url http://127.0.0.1:8000/sim --trace-id <trace_id> --reviewer "Your Name" --operator-action accept --useful true --usefulness-score 0.95 --pin-submission-case --pinned-by "Your Name"
+python scripts/operator_review.py --base-url http://127.0.0.1:8000 --trace-id <trace_id> --reviewer "Your Name" --operator-action accept --useful true --usefulness-score 0.95 --pin-submission-case --pinned-by "Your Name"
 ```
 
 Once one reviewed case is pinned per scenario pack, generate a strict reviewed-only packet:
 
 ```bash
-python scripts/submission_evidence.py --base-url http://127.0.0.1:8000/sim --reviewed-only
+python scripts/submission_evidence.py --base-url http://127.0.0.1:8000 --reviewed-only
 ```
 
 That mode fails loudly if any scenario pack still lacks a pinned operator-reviewed submission case.
@@ -190,7 +214,7 @@ That mode fails loudly if any scenario pack still lacks a pinned operator-review
 For a visual companion built from those pinned cases and their stored images:
 
 ```bash
-python scripts/submission_casebook.py --base-url http://127.0.0.1:8000/sim
+python scripts/submission_casebook.py --base-url http://127.0.0.1:8000
 ```
 
 That generates [SUBMISSION_CASEBOOK.md](./SUBMISSION_CASEBOOK.md) plus local image assets for the pinned cases.
@@ -198,21 +222,22 @@ That generates [SUBMISSION_CASEBOOK.md](./SUBMISSION_CASEBOOK.md) plus local ima
 For a low-compute readiness check across the packet, casebook, pinned traces, and runtime honesty boundary:
 
 ```bash
-python scripts/submission_readiness.py --base-url http://127.0.0.1:8000/sim
+python scripts/submission_readiness.py --base-url http://127.0.0.1:8000
 ```
 
 ## Reproducible Demo
 1. Start SimSat:
 ```bash
-docker compose up
+cd src/sim
+python main.py
 ```
 2. Run the challenge demo:
 ```bash
-python scripts/challenge_demo.py --base-url http://127.0.0.1:8000/sim --scenario-pack maritime_chokepoints
+python scripts/challenge_demo.py --base-url http://127.0.0.1:8000 --scenario-pack maritime_chokepoints
 ```
 3. Compare planners directly:
 ```bash
-python scripts/encounter_eval.py --base-url http://127.0.0.1:8000/sim --scenario-pack disaster_response_weather --top-k 10
+python scripts/encounter_eval.py --base-url http://127.0.0.1:8000 --scenario-pack disaster_response_weather --top-k 10
 ```
 4. Open the dashboard and use the Encounter Planner panel to switch scenario packs, run evaluation, and inspect the top decision deltas.
 
@@ -222,7 +247,7 @@ You do not need `MAPBOX_ACCESS_TOKEN` for this flow. If Mapbox is disabled, the 
 If local GPU and CPU are busy, stick to the evaluation route rather than a long interactive sim session:
 
 ```bash
-python scripts/encounter_eval.py --base-url http://127.0.0.1:8000/sim --scenario-pack maritime_chokepoints --top-k 8 --materialize-top-k 2
+python scripts/encounter_eval.py --base-url http://127.0.0.1:8000 --scenario-pack maritime_chokepoints --top-k 8 --materialize-top-k 2
 ```
 
 That path exercises the challenge thesis with minimal load and still gives you transition counts, yield, and top changed decisions.
@@ -235,7 +260,8 @@ It is also the recommended path if you do not want to enable Mapbox billing at a
 3. Highlight at least one `accept -> refine` delta and explain the trust reason.
 4. Switch to `disaster_response_weather` and show that cloud or limited imagery support raises refine pressure.
 5. Materialize one high-confidence `accept` and one trust-gated `refine` candidate to illustrate why the refine path exists.
-6. Close on the architectural claim: the same pipeline is running stacked TTT under six non-compensatory viability gates — the minimum safe configuration for on-orbit continual learning without a ground-truth validator.
+6. Switch to `pedospheric_integrity` and show the spectral register: Sentinel B08/B04 (NDVI), B11/B12 (SWIR ratio) driving defer and refine pressure at the Mato Grosso and Nile Delta targets. The same encounter planner, trust layer, and viability gates handle this without modification — the architecture generalises across registers.
+7. Close on the architectural claim: the same pipeline is running stacked TTT under six non-compensatory viability gates — the minimum safe configuration for on-orbit continual learning without a ground-truth validator.
 
 ## Known Issues and Review Bundles
 The full in-repo code review from 2026-04-21 is preserved under `review/`:
@@ -251,6 +277,7 @@ Known open gaps (disclosed, not hidden):
 - Fort Myers Coast miss: model predicts `defer` (score 0.20), operator says `refine` (score 0.90) — large abs_error on borderline partial-cloud windows.
 - Stacked TTT is described architecturally. Live on-orbit demonstration requires the hackathon prize hardware (NVIDIA Orin 16GB); local demonstration shows the wiring and gating logic but not a full on-orbit drift trajectory.
 - Genesis (Guilherme) and Tesseract T3 (Garrett) collaborator backends are wired and ready; waiting on collaborator fine-tuning / weights.
+- Large Sentinel tiles (full-resolution multi-spectral composites) caused the VLM processor to hang before inference. Fixed by capping image input to 448px before the processor call (`OBSERVATION_VLM_MAX_IMAGE_SIZE` env var, default 448). The pedospheric pinned trace was reviewed under the simulated backend prior to this fix; the resize path is exercised on any fresh encounter evaluation with the gemma4 backend active.
 
 ## Submission Framing
 Use this wording in the pitch:

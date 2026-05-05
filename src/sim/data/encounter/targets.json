@@ -8,11 +8,7 @@
       "lat": 37.7749,
       "priority": 0.95,
       "size_km": 8.0,
-      "tags": [
-        "coastal",
-        "urban",
-        "port"
-      ],
+      "tags": ["coastal", "urban", "port"],
       "metadata": {
         "scenario_pack": "urban_coastal_ambiguity",
         "scenario_role": "dense_mixed_scene",
@@ -26,11 +22,7 @@
       "lat": 33.7405,
       "priority": 0.9,
       "size_km": 8.0,
-      "tags": [
-        "port",
-        "logistics",
-        "urban"
-      ],
+      "tags": ["port", "logistics", "urban"],
       "metadata": {
         "scenario_pack": "urban_coastal_ambiguity",
         "scenario_role": "high_value_port",
@@ -44,11 +36,7 @@
       "lat": 29.7314,
       "priority": 0.78,
       "size_km": 7.0,
-      "tags": [
-        "industrial",
-        "port",
-        "weather_fragile"
-      ],
+      "tags": ["industrial", "port", "weather_fragile"],
       "metadata": {
         "scenario_pack": "disaster_response_weather",
         "scenario_role": "industrial_corridor",
@@ -62,10 +50,7 @@
       "lat": 30.0055,
       "priority": 0.92,
       "size_km": 10.0,
-      "tags": [
-        "shipping",
-        "chokepoint"
-      ],
+      "tags": ["shipping", "chokepoint"],
       "metadata": {
         "scenario_pack": "maritime_chokepoints",
         "scenario_role": "global_chokepoint",
@@ -79,11 +64,7 @@
       "lat": 1.3521,
       "priority": 0.88,
       "size_km": 8.0,
-      "tags": [
-        "port",
-        "maritime",
-        "chokepoint"
-      ],
+      "tags": ["port", "maritime", "chokepoint"],
       "metadata": {
         "scenario_pack": "maritime_chokepoints",
         "scenario_role": "traffic_dense_hub",
@@ -97,11 +78,7 @@
       "lat": 51.9244,
       "priority": 0.81,
       "size_km": 8.0,
-      "tags": [
-        "port",
-        "europe",
-        "urban"
-      ],
+      "tags": ["port", "europe", "urban"],
       "metadata": {
         "scenario_pack": "urban_coastal_ambiguity",
         "scenario_role": "large_port_complex",
@@ -115,11 +92,7 @@
       "lat": 9.080,
       "priority": 0.91,
       "size_km": 9.0,
-      "tags": [
-        "shipping",
-        "canal",
-        "chokepoint"
-      ],
+      "tags": ["shipping", "canal", "chokepoint"],
       "metadata": {
         "scenario_pack": "maritime_chokepoints",
         "scenario_role": "alternate_chokepoint",
@@ -133,11 +106,7 @@
       "lat": 26.6406,
       "priority": 0.84,
       "size_km": 10.0,
-      "tags": [
-        "coastal",
-        "storm_response",
-        "weather_fragile"
-      ],
+      "tags": ["coastal", "storm_response", "weather_fragile"],
       "metadata": {
         "scenario_pack": "disaster_response_weather",
         "scenario_role": "storm_damage_screening",
@@ -151,11 +120,7 @@
       "lat": 29.153,
       "priority": 0.86,
       "size_km": 11.0,
-      "tags": [
-        "floodplain",
-        "delta",
-        "weather_fragile"
-      ],
+      "tags": ["floodplain", "delta", "weather_fragile"],
       "metadata": {
         "scenario_pack": "disaster_response_weather",
         "scenario_role": "flood_monitoring",
@@ -169,15 +134,53 @@
       "lat": 22.5014,
       "priority": 0.83,
       "size_km": 8.5,
-      "tags": [
-        "urban",
-        "coastal",
-        "logistics"
-      ],
+      "tags": ["urban", "coastal", "logistics"],
       "metadata": {
         "scenario_pack": "urban_coastal_ambiguity",
         "scenario_role": "dense_coastal_mixture",
         "challenge_note": "Dense mixed-use coastal scene that rewards geometry but punishes overconfident acceptance."
+      }
+    },
+    {
+      "target_id": "nile_delta_agri",
+      "label": "Nile Delta Agricultural Zone",
+      "lon": 31.15,
+      "lat": 30.98,
+      "priority": 0.87,
+      "size_km": 12.0,
+      "tags": ["agricultural", "soil_stress", "pedospheric_integrity"],
+      "metadata": {
+        "scenario_pack": "pedospheric_integrity",
+        "scenario_role": "salinization_stress",
+        "challenge_note": "Heavily irrigated delta under active salinization and subsidence; NDVI and SWIR bands reveal soil health directly, but seasonal haze and agricultural cycle timing create real accept/refine tension."
+      }
+    },
+    {
+      "target_id": "mato_grosso_frontier",
+      "label": "Mato Grosso Agricultural Frontier",
+      "lon": -55.33,
+      "lat": -13.05,
+      "priority": 0.89,
+      "size_km": 15.0,
+      "tags": ["deforestation", "soil_carbon", "pedospheric_integrity"],
+      "metadata": {
+        "scenario_pack": "pedospheric_integrity",
+        "scenario_role": "deforestation_boundary",
+        "challenge_note": "Active forest-to-agriculture conversion front where intact and degraded soil are spectrally adjacent; high cloud cover during wet season makes defer and refine the defensible choices for most windows."
+      }
+    },
+    {
+      "target_id": "punjab_agricultural",
+      "label": "Punjab Indo-Gangetic Plain",
+      "lon": 75.34,
+      "lat": 30.72,
+      "priority": 0.83,
+      "size_km": 10.0,
+      "tags": ["agriculture", "groundwater_stress", "pedospheric_integrity"],
+      "metadata": {
+        "scenario_pack": "pedospheric_integrity",
+        "scenario_role": "high_intensity_agriculture",
+        "challenge_note": "World's most intensively farmed soil system under severe groundwater depletion; crop cycle timing is the dominant signal and distinguishing seasonal stress from chronic degradation requires multi-pass temporal consistency."
       }
     }
   ]

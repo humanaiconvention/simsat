@@ -3,7 +3,7 @@
 [![tests](https://github.com/humanaiconvention/simsat/actions/workflows/tests.yml/badge.svg)](./.github/workflows/tests.yml)
 [![python](https://img.shields.io/badge/python-3.11%20%7C%203.13-blue)](./requirements.txt)
 [![track](https://img.shields.io/badge/AI%20in%20Space-Liquid%20%2B%20General%20AI-orange)](./CHALLENGE_ENTRY.md)
-[![status](https://img.shields.io/badge/status-all%20tiers%20complete%20%7C%20Gemma--4%20v10-brightgreen)](./KNOWN_ISSUES.md)
+[![status](https://img.shields.io/badge/status-all%20tiers%20complete%20%7C%20Gemma--4%20v11-brightgreen)](./KNOWN_ISSUES.md)
 [![kaggle](https://img.shields.io/badge/Kaggle-simsat--gemma4--v1-20BEFF)](https://www.kaggle.com/code/benhaslam/simsat-gemma4-v1-training)
 [![license](https://img.shields.io/badge/license-see%20LICENSE-lightgrey)](./LICENSE)
 
@@ -25,7 +25,7 @@ If you are plugging a model into SimSat (Genesis, Tesseract T3, or any other VLM
    pip install -r requirements.txt
    python scripts/quickstart.py
    ```
-   That runs 33 tests + the eval against 4 pinned reviewed cases using the
+   That runs 33 tests + the eval against 5 pinned reviewed cases using the
    `clip_local` baseline. If it exits 0, your clone is wired correctly.
 3. **Plug in your backend** by setting `OBSERVATION_VLA_BACKEND=<your_backend>`
    in `.env` and re-running `quickstart.py`. Your backend's action-agreement
@@ -56,26 +56,27 @@ The challenge path is explicitly `no-Mapbox-safe`: Sentinel imagery plus orbital
 For a low-compute, judge-friendly comparison run:
 
 ```bash
-python scripts/encounter_eval.py --base-url http://127.0.0.1:8000/sim --scenario-sweep --top-k 8 --materialize-top-k 2 --markdown
+python scripts/encounter_eval.py --base-url http://127.0.0.1:8000 --scenario-sweep --top-k 8 --materialize-top-k 2 --markdown
 ```
 
-That prints a compact scorecard across the seeded scenario packs:
+That prints a compact scorecard across all four scenario packs:
 - `maritime_chokepoints`
 - `disaster_response_weather`
 - `urban_coastal_ambiguity`
+- `pedospheric_integrity`
 
 This works even when `MAPBOX_ACCESS_TOKEN` is unset.
 
 For a narrated single-scenario walkthrough:
 
 ```bash
-python scripts/challenge_demo.py --base-url http://127.0.0.1:8000/sim --scenario-pack maritime_chokepoints
+python scripts/challenge_demo.py --base-url http://127.0.0.1:8000 --scenario-pack maritime_chokepoints
 ```
 
 For a markdown-ready submission evidence report built from stored evaluations and labelled traces:
 
 ```bash
-python scripts/submission_evidence.py --base-url http://127.0.0.1:8000/sim
+python scripts/submission_evidence.py --base-url http://127.0.0.1:8000
 ```
 
 That generates [SUBMISSION_PACKET.md](./SUBMISSION_PACKET.md) with one curated case per scenario pack. By default the packet uses Sentinel-first evidence, prefers operator-reviewed labels when they exist, and otherwise falls back to `simulated_submission_case`.
@@ -92,39 +93,39 @@ To replace a simulated label with a real operator-reviewed outcome:
 
 ```bash
 python scripts/review_queue_casebook.py --inprocess
-python scripts/operator_review.py --base-url http://127.0.0.1:8000/sim --scenario-pack maritime_chokepoints
+python scripts/operator_review.py --base-url http://127.0.0.1:8000 --scenario-pack maritime_chokepoints
 ```
 
-The review queue writes per-case images so the next human-review pass can compare the stored trace assessment with the current `clip_local` backend recommendation on the same imagery.
+The review queue writes per-case images so the next human-review pass can compare the stored trace assessment with the current backend recommendation on the same imagery.
 
 For a specific trace, you can inspect the full review bundle first:
 
 ```bash
-python scripts/operator_review.py --base-url http://127.0.0.1:8000/sim --trace-id <trace_id> --show-bundle-only
+python scripts/operator_review.py --base-url http://127.0.0.1:8000 --trace-id <trace_id> --show-bundle-only
 ```
 
 Then replace the current label and pin it as the canonical submission case for that scenario:
 
 ```bash
-python scripts/operator_review.py --base-url http://127.0.0.1:8000/sim --trace-id <trace_id> --reviewer "Your Name" --operator-action accept --useful true --usefulness-score 0.95 --pin-submission-case --pinned-by "Your Name"
+python scripts/operator_review.py --base-url http://127.0.0.1:8000 --trace-id <trace_id> --reviewer "Your Name" --operator-action accept --useful true --usefulness-score 0.95 --pin-submission-case --pinned-by "Your Name"
 ```
 
 Once one reviewed case is pinned per scenario pack, generate a strict reviewed-only packet:
 
 ```bash
-python scripts/submission_evidence.py --base-url http://127.0.0.1:8000/sim --reviewed-only
+python scripts/submission_evidence.py --base-url http://127.0.0.1:8000 --reviewed-only
 ```
 
 To generate a visual companion with the pinned case images:
 
 ```bash
-python scripts/submission_casebook.py --base-url http://127.0.0.1:8000/sim
+python scripts/submission_casebook.py --base-url http://127.0.0.1:8000
 ```
 
 To generate a low-compute readiness checklist for the current submission artifacts:
 
 ```bash
-python scripts/submission_readiness.py --base-url http://127.0.0.1:8000/sim
+python scripts/submission_readiness.py --base-url http://127.0.0.1:8000
 ```
 
 ### Multi-Model VLA Backends
