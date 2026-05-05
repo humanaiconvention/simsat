@@ -1,0 +1,20 @@
+{
+  "gpu": "Tesla T4",
+  "vram_gb": 15.6,
+  "image_size": 448,
+  "dtype": "float16",
+  "timed_passes": 100,
+  "warmup_passes": 3,
+  "mean_output_tokens": 121,
+  "latency_mean_ms": 9455.7,
+  "latency_std_ms": 90.2,
+  "latency_p50_ms": 9445.0,
+  "latency_p90_ms": 9569.7,
+  "latency_p95_ms": 9620.8,
+  "latency_p99_ms": 9744.9,
+  "tokens_per_sec": 12.8,
+  "model": "google/gemma-4-E2B-it",
+  "max_new_tokens": 512,
+  "contract": "simsat_observe_assess_v1",
+  "note": "N=100, float16, T4. Token count from generation output shape. Kaggle notebook67b4186434."
+}

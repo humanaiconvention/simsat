@@ -1,0 +1,17 @@
+{
+  "gpu": "Tesla T4",
+  "vram_gb": 15.6,
+  "image_size": 448,
+  "timed_passes": 20,
+  "mean_output_tokens": 147,
+  "latency_mean_ms": 11207.8,
+  "latency_p50_ms": 11201.4,
+  "latency_p95_ms": 11301.5,
+  "tokens_per_sec": 13.1,
+  "model": "google/gemma-4-E2B-it",
+  "dtype": "float16",
+  "warmup_passes": 3,
+  "max_new_tokens": 512,
+  "contract": "simsat_observe_assess_v1",
+  "note": "Verified on two independent T4 runs (Kaggle + Colab). Numbers match to <0.1%."
+}

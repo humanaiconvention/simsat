@@ -26,6 +26,7 @@ Per-track thesis statements for the pitch are finalized in [CHALLENGE_ENTRY.md](
 - Visual casebook: [SUBMISSION_CASEBOOK.md](./SUBMISSION_CASEBOOK.md)
 - Readiness checklist: [SUBMISSION_READINESS.md](./SUBMISSION_READINESS.md)
 - ObservationVLA reviewed eval: [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md)
+- Inference benchmarks + scenario assessment: [benchmark_results/BENCHMARK_RESULTS.md](./benchmark_results/BENCHMARK_RESULTS.md)
 
 Current reviewed cases:
 - `maritime_chokepoints` → Suez Canal, reviewer `Ben Haslam`, usefulness `0.95`
@@ -33,12 +34,26 @@ Current reviewed cases:
 - `urban_coastal_ambiguity` → Port of Rotterdam, reviewer `Ben Haslam`, usefulness `0.90`
 - `pedospheric_integrity` → Mato Grosso Agricultural Frontier, reviewer `Ben Haslam`, outcome `defer` (trust below refine threshold; window not useful — honest result for a low-quality pass)
 
+## Inference Benchmarks
+
+Gemma-4-E2B-IT on Tesla T4 (15.6 GB VRAM), SimSat observe/assess contract v1:
+
+| dtype | N | mean latency | p50 | p95 | tokens/sec |
+|---|---|---|---|---|---|
+| float16 | 100 | 9,455.7 ms | 9,445.0 ms | 9,620.8 ms | 12.8 |
+| float16 | 20 | 11,207.8 ms | 11,201.4 ms | 11,301.5 ms | 13.1 |
+| int8 | — | not available (bitsandbytes incompatible with transformers HEAD) | — | — | — |
+
+N=100 is the primary benchmark: 100 timed passes, std 90.2 ms, p90 9,569.7 ms, p99 9,744.9 ms. N=20 retained for transparency; ~19% latency gap between sessions is documented honestly in [benchmark_results/BENCHMARK_RESULTS.md](./benchmark_results/BENCHMARK_RESULTS.md) — likely Kaggle GPU allocation variability across sessions.
+
 ## Runtime Truth
 - Sentinel is the primary observation source. Spectral bands used: B04, B08 (NDVI), B11, B12 (SWIR ratio, soil moisture/organic proxy), B08A/B05 (EVI, canopy structure) for the pedospheric register; RGB/NIR/SWIR composite for geometric registers.
 - Mapbox is optional and disabled in the current submission flow.
 - ObservationVLA current runtime is `transformers_vlm_local` (Gemma-4-E2B SimSat fine-tune v11). `clip_local` (CLIP ViT-B/32) remains available as a zero-weight-download reference backend. Stored case assessments in the packet reflect the runtime active at review time; see the packet Notes section.
 - **TTT is active at two layers:** VLA weights / adapters adapt on streaming tiles; the WCLI trust layer thresholds and priors update from realized-utility feedback. Both adaptation streams flow through the six viability gates before persistence.
 - The reviewed eval pool was expanded from 8 → 37 operator-reviewed cases via `scripts/batch_review.py` on 2026-04-27. v11 fine-tune over those 37 produces useful/not-useful agreement 0.97 and magnitude MAE 0.13. See `OBSERVATION_VLA_EVAL.md` for the per-case breakdown.
+- **Runtime backend note:** The 86 stored assessments in `assessments.json` used CLIP (`clip_local`) and stub backends at collection time. The Gemma-4 v11 eval is a separate offline evaluation against operator-reviewed Sentinel-2 tiles. CLIP assessments show lower operator usefulness ratings (mean 0.647) vs stub (0.867), a finding documented honestly in `benchmark_results/BENCHMARK_RESULTS.md`. Gemma-4 v11 is the current production backend; CLIP remains available as a reference.
+- A synthetic scenario assessment study (90 Gemma-4 assessments across 27 geographic locations × 4 cloud conditions, 3 scenario packs) runs alongside inference benchmarks and results are tracked in `benchmark_results/BENCHMARK_RESULTS.md`.
 - Mission-response is a policy-and-utility layer, not live spacecraft actuation.
 
 ## Demo Order
