@@ -46,6 +46,44 @@ Gemma-4-E2B-IT on Tesla T4 (15.6 GB VRAM), SimSat observe/assess contract v1:
 
 N=100 is the primary benchmark: 100 timed passes, std 90.2 ms, p90 9,569.7 ms, p99 9,744.9 ms. N=20 retained for transparency; ~19% latency gap between sessions is documented honestly in [benchmark_results/BENCHMARK_RESULTS.md](./benchmark_results/BENCHMARK_RESULTS.md) — likely Kaggle GPU allocation variability across sessions.
 
+## LFM Track Benchmarks
+
+LFM2.5-VL-450M tile encoder + MuZero BC policy head, measured on RTX 2080 (`benhaslam` BEAST), 75 episodes across all 3 scenario packs. Full breakdown in [MUZERO_LFM_EVAL.md](./MUZERO_LFM_EVAL.md).
+
+**Encoder latency (10 synthetic 64×64 tiles, post-warmup):**
+
+| Model | embed_dim | Mean ms/tile | p95 ms/tile |
+|---|---|---|---|
+| `LiquidAI/LFM2.5-VL-450M` | 768 | 69 | 78 |
+| `LiquidAI/LFM2.5-VL-1.6B` | 1152 | 246 | 248 |
+| `google/siglip-base-patch16-224` (offline fallback) | 768 | ~18 | ~25 |
+
+**BC policy — Stage 2 v2 (canonical, `--max-aug-ratio 4.0`, 136 examples):**
+
+| Metric | Value |
+|---|---|
+| Episodes | 75 (all packs) |
+| Best val accuracy | 0.967 |
+| Mean episode reward | -0.0438 ± 0.0191 |
+| accept | 9 (12%) |
+| refine | 53 (71%) |
+| skip | 13 (17%) |
+| defer | 0 (0%) |
+
+**Policy progression:**
+
+| Policy | Val acc | Reward | Notes |
+|---|---|---|---|
+| Playback (stored VLA action) | n/a | -0.0441 | Encoder-decorative baseline |
+| Stage 1 BC (75 traces) | 0.800 | -0.0600 | Class collapse: 100% refine on eval |
+| Stage 2 v1 (uncapped aug) | 0.950 | -0.0396 | Skip over-predicted (36%); accept under-predicted (3%) |
+| **Stage 2 v2 (cap=4.0)** | **0.967** | **-0.0438** | **Canonical. Accept recovered (12%), skip normalized (17%)** |
+
+**Honest limitations:**
+- Defer: 0/75 predictions across all policies. Corpus has only 3 original defer traces — no augmentation ratio compensates for this. `scripts/build_defer_queue.py` generates a focused 20-candidate review queue to address it.
+- Hardware is RTX 2080 (local BEAST), not T4 or Orin. On-orbit latency for LFM2.5-VL-450M is projected sub-250ms per Liquid AI's benchmarks; not yet directly measured on Orin.
+- Stage 3 (two-scope TTT, live per-pass adaptation) is not yet benchmarked — requires a live encounter stream.
+
 ## Runtime Truth
 - Sentinel is the primary observation source. Spectral bands used: B04, B08 (NDVI), B11, B12 (SWIR ratio, soil moisture/organic proxy), B08A/B05 (EVI, canopy structure) for the pedospheric register; RGB/NIR/SWIR composite for geometric registers.
 - Mapbox is optional and disabled in the current submission flow.
