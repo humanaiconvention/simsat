@@ -40,7 +40,7 @@ get_ipython().system(  # noqa: F821
     "pip install -q -U "
     "'transformers>=4.51.0' "
     "'trl>=0.12.0,<0.15.0' "  # Fix #15: 0.15.0 removed DataCollatorForCompletionOnlyLM
-    "'peft>=0.20.0' "  # v12: >=0.20 fixes tied-weight state_dict dedup (GQA k/v drop)
+    "'peft>=0.19.0' "  # v13: >=0.19 available on Kaggle; GQA dedup fix is via .clone() in code
     "'accelerate>=0.33.0' "
     "'bitsandbytes>=0.44.0' "
     "'datasets>=2.19.0'"
@@ -433,7 +433,7 @@ if _missing_tensors:
         f"FAIL: {len(_missing_tensors)} LoRA tensors missing from saved adapter "
         f"({len(_found)}/{_EXPECTED_TOTAL} found).\n"
         f"First 10 missing: {_missing_tensors[:10]}\n"
-        "GQA tie_weights() dedup not fully resolved — check peft>=0.20 install "
+        "GQA tie_weights() dedup not fully resolved — check .clone() step above "
         "and weight clone step above."
     )
 print(f"OK: language_model LoRA present, updated, and all {_EXPECTED_TOTAL} tensors saved.")
@@ -570,7 +570,7 @@ summary = {
         "single_t4": True,
     },
     "v12_fixes": [
-        "peft>=0.20.0 (tied-weight state_dict dedup fix)",
+        "peft>=0.19.0 (tied-weight state_dict dedup via .clone() workaround)",
         "clone LoRA weights before save_pretrained (breaks GQA k/v aliasing)",
         "strict 490-tensor sanity gate (35 layers x 7 modules x 2)",
     ],
