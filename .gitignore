@@ -72,6 +72,9 @@ REVIEW_BACKLOG.md
 review_queue.txt
 review_queue_defer.txt
 
+# --- Local session guides (not for repo) ---
+MORNING_PUSH_GUIDE.md
+
 # --- Local Kaggle dataset staging (zip + metadata copies for `kaggle datasets create/version`) ---
 diloco_kaggle_staging/
 

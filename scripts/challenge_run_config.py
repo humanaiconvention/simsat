@@ -7,6 +7,7 @@ KNOWN_SCENARIO_PACKS = [
     "maritime_chokepoints",
     "disaster_response_weather",
     "urban_coastal_ambiguity",
+    "pedospheric_integrity",
 ]
 
 
@@ -20,6 +21,7 @@ DEFAULT_SCENARIO_RUN_POLICIES: dict[str, ScenarioRunPolicy] = {
     "maritime_chokepoints": ScenarioRunPolicy(smoke_hours=8.0, competition_hours=48.0),
     "disaster_response_weather": ScenarioRunPolicy(smoke_hours=16.0, competition_hours=16.0),
     "urban_coastal_ambiguity": ScenarioRunPolicy(smoke_hours=8.0, competition_hours=8.0),
+    "pedospheric_integrity": ScenarioRunPolicy(smoke_hours=12.0, competition_hours=24.0),
 }
 
 

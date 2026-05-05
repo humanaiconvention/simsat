@@ -47,9 +47,10 @@ class MapboxProvider:
         target_to_sat_unit_vector = target_to_sat_vector / distance
         target_unit_vector = cartesian_target / np.linalg.norm(cartesian_target)
 
+        # Elevation angle: theta = angle between surface normal and sat-to-target vector.
         theta = acos(np.clip(np.dot(target_unit_vector, target_to_sat_unit_vector), -1.0, 1.0))
         elevation_degrees = 90 - np.degrees(theta)
-        pitch = np.degrees(theta)
+        pitch = np.degrees(theta)  # mapbox pitch
         target_visible = elevation_degrees >= 30
         zoom_factor = 13.92 + log2(560 / distance)
 
@@ -59,16 +60,19 @@ class MapboxProvider:
             acos(np.clip(np.dot(nadir_unit_vector, sat_to_target_unit_vector), -1.0, 1.0))
         )
 
-        earth_center_to_south_vector = np.array([0, 0, 1])
+        # Bearing: project sat vector and Z-axis (north pole) onto the target's tangent plane.
+        earth_center_to_south_vector = np.array([0, 0, 1])  # Z-axis points to North Pole
         target_to_sat_vec_projection_to_earth_surface = target_to_sat_unit_vector - np.dot(target_to_sat_unit_vector, target_unit_vector) * target_unit_vector
         target_proj_norm = np.linalg.norm(target_to_sat_vec_projection_to_earth_surface)
         if target_proj_norm < EPS:
+            # Near nadir view: bearing is undefined; use a stable default.
             bearing = 0.0
         else:
             target_to_sat_vec_projection_to_earth_surface_unit_vector = target_to_sat_vec_projection_to_earth_surface / target_proj_norm
             south_vec_projection_to_earth_surface = earth_center_to_south_vector - np.dot(earth_center_to_south_vector, target_unit_vector) * target_unit_vector
             south_proj_norm = np.linalg.norm(south_vec_projection_to_earth_surface)
             if south_proj_norm < EPS:
+                # Degenerate case close to poles; use the same stable default.
                 bearing = 0.0
             else:
                 south_vec_projection_to_earth_surface_unit_vector = south_vec_projection_to_earth_surface / south_proj_norm
@@ -110,15 +114,4 @@ if __name__ == "__main__":
     provider = MapboxProvider()
     lausanne = {'lon': 6.6322734, 'lat': 46.5218266}
     lausanne_north = {'lon': 6.6322734, 'lat': 46.5318266}
-    paris = {'lon': 2.3522219, 'lat': 48.856614}
-    stuttgart = {'lon': 9.1829321, 'lat': 48.7758459}
-    p1 = {'lon': 6.6322734-1, 'lat': 46.5218266}
-
-    h = 500  # km
-
-    sat = stuttgart
-    target = lausanne
-
-    provider.get_target_image(sat['lon'], sat['lat'], h, target['lon'], target['lat'])
-
-        # def get_target_image(self, sat_lon, sat_lat, sat_alt, target_lon, target_lat):
+    paris = {'lon': 2.3522, 'lat': 48.8566}

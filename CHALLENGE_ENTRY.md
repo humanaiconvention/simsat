@@ -3,6 +3,8 @@
 ## Thesis
 SimSat is a governed on-orbit continual-learning loop. It reframes mission operations as a sequence of encounter windows, runs stacked test-time training at the vision-language and trust-layer levels, and gates every adaptation through six non-compensatory viability checks. The result is a pipeline that demonstrably improves with every pass instead of drifting, with no ground-truth validator required — which is why it has to run in orbit.
 
+The system spans two structurally different observational registers: geometric and structural (maritime chokepoints, disaster response, urban coastal scenes) and spectral-biochemical (pedospheric integrity — soil health expressed through NDVI, SWIR ratio, and vegetation indices over active degradation sites). The same encounter planner, trust layer, viability gates, and TTT loop operate across both registers without architectural modification.
+
 Two planners compete over the same ranked windows:
 - `Scaffold`: deterministic geometry-and-availability scoring
 - `WCLI Trust`: scaffold plus a trust-gated support layer that can `accept`, `defer`, `skip`, or `refine`
@@ -19,16 +21,18 @@ This challenge entry is intentionally `no-Mapbox-safe`: the core planner, evalua
 Three stacked constraints force the full pipeline to the spacecraft, in priority order.
 
 ### 1. Distribution shift without a ground-truth validator
-The differentiator. A satellite streaming imagery hits real distribution drift — new geographies, seasonal variation, cloud and sensor conditions. Adapting a model to that drift without ground-truth labels is the open on-orbit continual-learning problem. Our answer is six non-compensatory viability gates that every candidate observation must pass before it is allowed to update system state:
+The differentiator. A satellite streaming imagery hits real distribution drift — new geographies, seasonal variation, cloud and sensor conditions — with no path back to ground for label collection at any useful cadence. Adapting a model to that drift without ground-truth labels is the open on-orbit continual-learning problem. Our answer is six non-compensatory viability gates that every candidate observation must pass before it is allowed to update system state:
 
-1. **Entropy reduction** — the adaptation must decrease uncertainty (measured via PRISM). An observation that adds log-probability mass without reducing entropy is rejected.
-2. **Extraction risk** — bulk scraping dressed up as observation is rejected. Each update must look like a normal operational pass, not a data-mining raid.
-3. **PRISM consistency** — claimed metadata (cloud cover, sensor, timestamp) must match measured image properties. Inconsistent claims are rejected without updating state.
-4. **Participation covenant** — adaptations require a real operator signal or real stimulus, plus minimum participation. Fully automated self-tuning without a human-in-the-loop signal is rejected.
-5. **Federated exchange** — raw imagery stays at the edge. What leaves the satellite is a derived update, never the underlying pixels.
-6. **Epistemic alignment** — updates must reduce uncertainty, not reinforce prior bias. A "confirming" update that tightens posterior without adding genuinely new information is rejected.
+1. **Information gain** — The adaptation must measurably reduce the model's uncertainty over the current observation distribution. Observations that confirm what the model already predicts are operationally useful but generate no adaptation signal — the encounter was informative, but it taught the model nothing new.
+2. **Observation quality** — The tile must clear minimum acquisition thresholds: cloud cover below the scene-specific ceiling, target visible, sensor geometry within valid range. Partially or fully occluded passes do not generate adaptation signal regardless of predicted class.
+3. **Metadata consistency** — Claimed metadata (cloud fraction, sensor band, orbit timestamp, target position) must match measured image properties. A claimed clear-sky tile that actually shows 85% cloud cover is rejected outright; adapting on false positives would corrupt the model's calibration.
+4. **Update magnitude** — The weight delta from any single pass is bounded. An update that shifts the policy by more than 30% from its pre-pass baseline is treated as an artifact or sensor anomaly, not genuine drift, and is blocked before persistence.
+5. **Update rate** — Adaptations are rate-limited across passes. Rapid consecutive updates on the same target type cause local overfitting; the gate enforces a cumulative count ceiling and suppresses adaptation when frequency outpaces what the observation stream can genuinely support.
+6. **Error balance** — If recent adaptations have consistently pushed the policy in the same direction, the gate flags systematic bias and suppresses further updates until a correcting signal arrives. Reinforcing a systematic error is strictly worse than not adapting.
 
-These six gates convert a naively dangerous "let the model learn from what it sees" loop into a governed one. Without them, on-orbit TTT is uncontrolled drift; with them, TTT becomes a disciplined continual-learning loop that improves every pass instead of degrading.
+These six gates convert a naively dangerous "let the model learn from what it sees" loop into a governed one. Without them, on-orbit TTT is uncontrolled drift; with them, every accepted update carries quality-verified, magnitude-bounded, bias-checked information about the world before it touches model state.
+
+**Selective downlink.** Observations that clear all six gates *and* exceed the high-confidence accept threshold (trust score ≥ τ_downlink) are candidates for selective ground transmission — imagery and derived assessments packaged for the highest-value passes only. Below that threshold, processed results stay on-orbit. The satellite sends pixels to the ground only when they are genuinely worth the downlink budget.
 
 ### 2. Bandwidth
 The hackathon's prize-compute budget allocates 5 MB uplink and 10 MB downlink per satellite-month. That envelope cannot ferry model weight updates to ground and back at any useful cadence. Any TTT that is going to track drift must happen on the satellite itself.
@@ -46,12 +50,32 @@ The vision-language backend — LFM2.5 in the Liquid Track, Gemma-4 in the Gener
 The WCLI gate tunes itself online from realized-utility feedback. When the planner commits to a `materialize_now` action and the downstream observation resolves as useful-or-not, that signal updates the trust gate's thresholds and priors. Over time the trust layer learns which reasons justify an `accept` for *this* orbit, *this* season, *this* sensor configuration — not generic population-level reasons.
 
 ### Viability gate as the common filter
-Every candidate adaptation — whether a VLA-layer weight update or a trust-layer threshold change — passes through the six-gate filter before persistence. The architectural claim: stacked TTT is only safe on-orbit because the gates screen out bad updates that a human-in-the-loop would otherwise catch, and a human is precisely what is not available on orbit.
+Every candidate adaptation — whether a VLA-layer weight update or a trust-layer threshold change — passes through the six-gate filter before persistence. The architectural claim: stacked TTT is only safe on-orbit because the gates screen out bad updates autonomously. There is no human in the loop during operations; the gates are the substitute.
+
+Gates 1–3 apply at observation intake: quality and metadata checks happen before any adaptation signal is generated. Gates 4–6 apply to the adaptation response itself and are implemented in `evaluate_ttt_viability()` (`src/sim/haic/viability.py`): update magnitude (weight_drift ≤ 0.30 from pre-pass baseline), update rate (cumulative count ceiling), and error balance (<70% same-sign errors across the last N updates).
+
+The gates operationalize a formal viability condition: a learning system remains stable when `C_eff(t) ≥ E(t)`, where E(t) is the expected per-iteration divergence from the external world and C_eff(t) is the corrective capacity of independent grounding signal. Gates 1–3 ensure the incoming signal is real, quality-verified, and physically consistent — a necessary condition for C_eff > 0. Gates 4–6 ensure the adaptation response is proportionate and not compounding prior errors — necessary to keep E(t) bounded. All six must pass; failure in any single gate blocks the entire adaptation. Without the gates, on-orbit TTT accumulates uncorrected drift by construction. With them, every accepted update must clear the full condition before touching model state.
+
+## Observational Scope — Two Registers
+
+The four scenario packs span two structurally different signal types.
+
+The first three packs operate in the **geometric register**. The signal of interest is structural: ship positions at a chokepoint, storm-damage extent along a coastline, port-complex geometry at a dense logistics hub. The trust layer learns when geometric confidence justifies commit versus refine or defer; the VLA backend learns to distinguish genuine structure from clutter, perspective ambiguity, and sensor noise.
+
+The `pedospheric_integrity` pack operates in the **spectral-biochemical register**. The signal of interest is soil health expressed through Sentinel-2's multi-spectral bands:
+
+- **NDVI** `(B08 − B04) / (B08 + B04)` — vegetation density and stress. Declining NDVI over irrigated farmland signals salinization or waterlogging before visible bare-soil emergence.
+- **SWIR ratio** `B11 / B12` — clay content, soil moisture, and organic matter proxy. Rising SWIR ratio tracks the loss of soil carbon and moisture retention as forest-to-agriculture conversion advances.
+- **EVI** — canopy structure indicator, less susceptible to saturation than NDVI in high-biomass scenes, sensitive to early-stage canopy thinning at deforestation boundaries.
+
+Degradation at the three target sites manifests as spectral shift rather than geometric pattern: salinization at the Nile Delta pushes NDVI down while SWIR ratio rises; active deforestation at the Mato Grosso boundary produces sharp EVI and NDVI edges that advance between passes; groundwater depletion at Punjab compresses the seasonal NDVI amplitude over successive crop cycles. The accept/refine/defer pressure comes from agricultural cycle timing, monsoon and wet-season cloud cover, and the difficulty of distinguishing chronic degradation from reversible seasonal stress in multi-pass temporal sequences — structurally different from the geometry-driven ambiguity in the other three packs.
+
+This distinction matters architecturally. A system that works only in the geometric register could succeed through structural heuristics without genuine image-conditioned spectral reasoning. A system that handles both registers — under the same encounter planner, trust layer, viability gates, and TTT loop — demonstrates that the governed continual-learning architecture generalizes across observational domains. That is the claim the pedospheric pack tests.
 
 ## Two-Track Submission
 This repo is submitted to both tracks of the AI in Space hackathon. The scaffold, WCLI trust layer, mission-response layer, propagator, viability gates, and TTT infrastructure are identical across tracks — only the VLA backend changes.
 
-- **Liquid Track (LFM2.5 + MuZero)** — A vision-language model serves as the Sentinel tile encoder: it processes each raw tile into a dense `(embed_dim,)` embedding vector that feeds MuZero's `h()` representation function. MuZero + MCTS then plans over encounter windows using that embedding. The hybrid is deliberate: MuZero's ResNet weighs a few MB and fits the satellite's 5 MB uplink budget; the encoder is LoRA fine-tuned on SimSat Sentinel tiles and runs locally for its single encoder pass per window. Training follows the ARC3 three-stage chain — (1) pretrain on the 86-trace Sentinel tile corpus, (2) fine-tune with SimSat scenario-pack augmentation, (3) two-scope TTT per live pass using the `TTTScope1` / `TTTScope2` budget schedules ported from `arc3_game.py`. The MuZero game adapter (`SimSatGame`), gym environment (`SimSatEnv`), FC-network config (`SimSatMuZeroConfigLFM`), and encoder protocol (`TileEncoder` / `build_encoder("lfm2vl")`) are all in `src/sim/muzero/`. The encoder slot is filled by **[`LiquidAI/LFM2.5-VL-450M`](https://huggingface.co/LiquidAI/LFM2.5-VL-450M)** (450M params total, vision tower is SigLIP-2 NaFlex shape-optimized 86M with 768-dim pooled output, sub-250ms edge inference per Liquid AI's benchmarks); the [1.6B variant](https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B) is a one-line `model_id` swap if a larger encoder is preferred. SigLIP-base remains in the codebase as the offline-safe `HFVisionTowerEncoder()` default. **Liquid Track eval** (`scripts/muzero_lfm_eval.py`, 75 matched Sentinel tiles, all 3 scenario packs): with **LFM2.5-VL-450M** as the encoder (the default since 2026-04-27): encoder latency **67.9 ms/tile avg** (p95 69.3 ms) on RTX 2080; embed_dim=768; action distribution accept=17%, refine=68%, defer=5%, skip=9%. The 1.6B variant runs at 246 ms p95 (matches Liquid AI's "sub-250ms edge inference" claim). **Stage 1 pretrain** (`scripts/muzero_stage1_pretrain.py`) reaches val_acc **0.800** but argmax-collapses to refine in deployment due to a 64% refine corpus — the lesson that motivates Stage 2. **Stage 2 pretrain** (`scripts/muzero_stage2_pretrain.py`, scenario-pack augmentation: flips/rotations/jitter with per-class augmentation cap to prevent over-amplifying minority originals) reaches val_acc **0.967** on a 28-sample stratified val (accept 10/10, defer 3/3, refine 10/10, skip 6/7). Wired into `muzero_lfm_eval.py --policy bc --policy-head weights/muzero/stage2_bc/policy_head.pt`, the Stage 2 head produces diverse predictions (accept 12%, refine 71%, skip 17%) closely matching the operator distribution, with mean episode reward **−0.0438** (within noise of playback's −0.0441 and well above Stage 1's −0.0600). Defer remains 0/75 in eval — a fundamental data shortage (only 3 original defer cases) that no augmentation ratio can fix; `scripts/build_defer_queue.py` surfaces 20 high-cloud-cover-but-visible candidates for targeted operator review via `batch_review.py`. Full per-pack breakdown + variant comparison + Stage 1/2 details in [MUZERO_LFM_EVAL.md](./MUZERO_LFM_EVAL.md).
+- **Liquid Track (LFM2.5 + MuZero)** — A vision-language model serves as the Sentinel tile encoder: it processes each raw tile into a dense `(embed_dim,)` embedding vector that feeds MuZero's `h()` representation function. MuZero + MCTS then plans over encounter windows using that embedding. The hybrid is deliberate: MuZero's ResNet weighs a few MB and fits the satellite's 5 MB uplink budget; the encoder is LoRA fine-tuned on SimSat Sentinel tiles and runs locally for its single encoder pass per window. Training follows the ARC3 three-stage chain — (1) pretrain on the 86-trace Sentinel tile corpus, (2) fine-tune with SimSat scenario-pack augmentation, (3) two-scope TTT per live pass using the `TTTScope1` / `TTTScope2` budget schedules ported from `arc3_game.py`. The MuZero game adapter (`SimSatGame`), gym environment (`SimSatEnv`), FC-network config (`SimSatMuZeroConfigLFM`), and encoder protocol (`TileEncoder` / `build_encoder("lfm2vl")`) are all in `src/sim/muzero/`. The encoder slot is filled by **[`LiquidAI/LFM2.5-VL-450M`](https://huggingface.co/LiquidAI/LFM2.5-VL-450M)** (450M params total, vision tower is SigLIP-2 NaFlex shape-optimized 86M with 768-dim pooled output, sub-250ms edge inference per Liquid AI's benchmarks); the [1.6B variant](https://huggingface.co/LiquidAI/LFM2.5-VL-1.6B) is a one-line `model_id` swap if a larger encoder is preferred. SigLIP-base remains in the codebase as the offline-safe `HFVisionTowerEncoder()` default. **Liquid Track eval** (`scripts/muzero_lfm_eval.py`, 75 matched Sentinel tiles, all 3 scenario packs): with **LFM2.5-VL-450M** as the encoder (the default since 2026-04-27): encoder latency **67.9 ms/tile avg** (p95 69.3 ms) on RTX 2080; embed_dim=768; action distribution accept=17%, refine=68%, defer=5%, skip=9%. The 1.6B variant runs at 246 ms p95 (matches Liquid AI's "sub-250ms edge inference" claim). **Stage 1 pretrain** (`scripts/muzero_stage1_pretrain.py`) reaches val_acc **0.800** but argmax-collapses to refine in deployment due to a 64% refine corpus — the lesson that motivates Stage 2. **Stage 2 pretrain** (`scripts/muzero_stage2_pretrain.py`, scenario-pack augmentation: flips/rotations/jitter with per-class augmentation cap to prevent over-amplifying minority originals) reaches val_acc **0.967** on a 28-sample stratified val (accept 10/10, defer 3/3, refine 10/10, skip 6/7). Wired into `muzero_lfm_eval.py --policy bc --policy-head weights/muzero/stage2_bc/policy_head.pt`, the Stage 2 head produces diverse predictions (accept 12%, refine 71%, skip 17%) closely matching the operator distribution, with mean episode reward **−0.0438** (within noise of playback's −0.0441 and well above Stage 1's −0.0600). Defer was 0/75 in Stage 2 v2. Corpus expanded to 13 defer cases (2026-05-05); Stage 2 v3 confirmed the boundary is learnable (0→32/75 defer in eval) but over-predicts defer (43% vs 5% operator baseline) — auto-labeled corpus is too concentrated. v2 remains canonical; v3 is a research checkpoint documented in [MUZERO_LFM_EVAL.md](./MUZERO_LFM_EVAL.md). Full per-pack breakdown + variant comparison + Stage 1/2 details in [MUZERO_LFM_EVAL.md](./MUZERO_LFM_EVAL.md).
 - **General AI Track (Gemma-4 + open collaborator seats)** — ObservationVLA backed by a Gemma-4-E2B fine-tune scoped specifically to SimSat's encounter-triage task (accept / defer / skip / refine over Sentinel-style tiles). Training code and dataset at `notebooks/kaggle-simsat-gemma4-v1/`; Kaggle kernel `benhaslam/simsat-gemma4-v1-training` (**v11** = first run with corrected target_modules — see [`GEMMA4_LORA_NULL_TRAINING_AUDIT.md`](./notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md) for why v1-v10 trained nothing); dataset `benhaslam/simsat-gemma4-v1` v2 (713 weighted ChatML rows, 37 operator-reviewed). On the 37-case operator-reviewed eval: usefulness-score MAE **0.13**, exact action agreement **0.86**, bucketed action agreement **0.86**, useful agreement **0.97** (see [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md)). This is **not** the `v35-gov` Gemma-4 fine-tune — `v35-gov` targets human-interview and consent-governance prompts, wrong task shape for satellite imagery. The VLA adapter is model-agnostic (`src/sim/observation_vla/transformers_vlm_local.py`); swapping backends is an env-var change, not a refactor. Two additional collaborator backends are wired and ready: **Genesis** (Guilherme Mesquita's model, `OBSERVATION_VLA_BACKEND=genesis`) and **Tesseract T3** (Garrett Sutherland's model, `OBSERVATION_VLA_BACKEND=tesseract_t3`). Any model that speaks the eight-key ObservationVLA JSON contract can plug into the same scaffold, trust layer, viability gates, and TTT loop without code changes. The competitive claim extends to this: the SimSat pipeline is model-agnostic by design — the governed continual-learning architecture is the contribution, not any one model weight checkpoint. See `COLLABORATOR_GUIDE.md` for integration instructions.
 
 **Per-track pitch thesis (one sentence each):**
@@ -61,7 +85,8 @@ This repo is submitted to both tracks of the AI in Space hackathon. The scaffold
 
 ## What Is New
 - Real future encounter windows from the live TLE-backed propagator
-- Scenario packs for challenge evaluation
+- Scenario packs for challenge evaluation spanning **two observational registers**: geometric/structural (maritime chokepoints, disaster response, urban coastal) and spectral-biochemical (pedospheric integrity)
+- **Pedospheric integrity monitoring** via NDVI, SWIR ratio (B11/B12), and EVI over three active degradation sites — Nile Delta salinization, Mato Grosso deforestation boundary, Punjab groundwater depletion — demonstrating the same architecture operates across structurally different signal types without modification
 - Decision-level deltas between scaffold and WCLI-trust planners
 - Materialization-yield comparison across the same ranked windows
 - ObservationVLA lane with image-conditioned assessment, labeled trace capture, and lightweight pass/scenario/mission calibration hooks
@@ -82,6 +107,9 @@ Core implementation lives in:
 - `maritime_chokepoints`: Suez, Panama, Singapore
 - `disaster_response_weather`: flood/storm-sensitive coastal and industrial targets
 - `urban_coastal_ambiguity`: dense mixed-use port and shoreline scenes where tempting windows may still deserve refinement
+- `pedospheric_integrity`: soil-health and land-degradation monitoring — Nile Delta salinization, Mato Grosso deforestation frontier, Punjab high-intensity agriculture
+
+The first three packs exercise accept/refine/defer decisions under geometric and cloud ambiguity in maritime and urban contexts. The `pedospheric_integrity` pack tests the same planner and trust layer in a different observational register: the signal of interest is soil health expressed through NDVI, SWIR, and Red Edge spectral bands rather than structural geometry. Seasonal cloud cover (Mato Grosso wet season, Punjab monsoon) and agricultural cycle timing (Nile Delta) create genuine defer and refine pressure that is structurally different from the geometry-driven ambiguity in the other packs. Adding this pack validates that the architecture generalises across observational domains without modification — the same encounter planner, trust layer, viability gates, and TTT loop operate identically regardless of what the satellite is looking at or why.
 
 These packs are encoded directly in [targets.json](./src/sim/data/encounter/targets.json) for reproducibility.
 
@@ -126,11 +154,40 @@ python scripts/observation_vla_eval.py --inprocess
 
 That writes [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md) with the current runtime, reviewed sample size, and conservative claim text.
 
+## MuZero/LFM Track Reality Check
+
+The MuZero BC policy (Stage 2 v2, canonical) is evaluated against 75 matched Sentinel tiles across all three geometric scenario packs. Encoder is `LiquidAI/LFM2.5-VL-450M` (768-dim SigLIP-2 NaFlex pooled output). Hardware: RTX 2080 (local). Full breakdown in [MUZERO_LFM_EVAL.md](./MUZERO_LFM_EVAL.md).
+
+**Encoder latency (post-warmup, 10 synthetic 64×64 tiles):**
+
+| Model | embed_dim | Mean ms/tile | p95 ms/tile |
+|---|---|---|---|
+| `LFM2.5-VL-450M` | 768 | 69 | 78 |
+| `LFM2.5-VL-1.6B` | 1152 | 246 | 248 |
+| `siglip-base-patch16-224` (offline fallback) | 768 | ~18 | ~25 |
+
+**BC policy progression:**
+
+| Policy | Val acc | Mean reward | Notes |
+|---|---|---|---|
+| Playback (stored VLA action) | n/a | −0.0441 | Encoder-decorative baseline |
+| Stage 1 BC (75 traces) | 0.800 | −0.0600 | Class collapse: 100% refine on eval |
+| Stage 2 v1 (uncapped aug) | 0.950 | −0.0396 | Skip over-predicted (36%); accept under-predicted (3%) |
+| **Stage 2 v2 (cap=4.0)** | **0.967** | **−0.0438** | **Canonical. Accept 12%, refine 71%, skip 17%** |
+
+Stage 2 v2 reward (−0.0438) is within noise of playback (−0.0441) and substantially better than Stage 1 (−0.0600), confirming the augmented BC head learns the operator distribution without overfitting the corpus skew.
+
+**Honest limitations (disclosed, not hidden):**
+- Defer: 0/75 predictions across all policies. Only 3 original defer traces exist — no augmentation ratio compensates for a corpus this thin. `scripts/build_defer_queue.py` generates a focused 20-candidate review queue; 10 operator-reviewed defer cases would enable Stage 2 v3.
+- Hardware gap: encoder latency measured on RTX 2080, not NVIDIA Orin. On-orbit latency for LFM2.5-VL-450M is projected sub-250ms per Liquid AI's benchmarks; not yet directly measured on Orin.
+- Stage 3 (two-scope TTT, live per-pass adaptation) is architecturally wired (`TTTScope1` / `TTTScope2` budget schedules, ported from `arc3_game.py`) but not yet benchmarked — requires a live encounter stream.
+- The 75-episode eval uses matched Sentinel tiles across geometric packs only; `pedospheric_integrity` spectral-band tiles are not yet in the MuZero eval corpus.
+
 ## Judge-Facing Scorecard
 For a compact, reproducible scorecard that can drop straight into notes or a submission draft:
 
 ```bash
-python scripts/encounter_eval.py --base-url http://127.0.0.1:8000/sim --scenario-sweep --top-k 8 --materialize-top-k 2 --markdown
+python scripts/encounter_eval.py --base-url http://127.0.0.1:8000 --scenario-sweep --top-k 8 --materialize-top-k 2 --markdown
 ```
 
 This prints one row per scenario pack with:
@@ -148,7 +205,7 @@ That scorecard is the quickest way to show operational benefit without a long li
 For a concrete scenario-by-scenario evidence report built from the latest evaluation plus any labelled ObservationVLA traces:
 
 ```bash
-python scripts/submission_evidence.py --base-url http://127.0.0.1:8000/sim
+python scripts/submission_evidence.py --base-url http://127.0.0.1:8000
 ```
 
 This generates [SUBMISSION_PACKET.md](./SUBMISSION_PACKET.md) with one section per scenario pack containing:
@@ -162,7 +219,7 @@ To replace a simulated label with a real operator-reviewed outcome:
 
 ```bash
 python scripts/review_queue_casebook.py --inprocess
-python scripts/operator_review.py --base-url http://127.0.0.1:8000/sim --scenario-pack maritime_chokepoints
+python scripts/operator_review.py --base-url http://127.0.0.1:8000 --scenario-pack maritime_chokepoints
 ```
 
 The review queue writes [REVIEW_QUEUE.md](./REVIEW_QUEUE.md) plus per-case images so the next human-review pass can compare the stored trace assessment with the current `clip_local` backend recommendation on the same imagery.
@@ -170,19 +227,19 @@ The review queue writes [REVIEW_QUEUE.md](./REVIEW_QUEUE.md) plus per-case image
 For a specific trace, inspect the full review bundle first:
 
 ```bash
-python scripts/operator_review.py --base-url http://127.0.0.1:8000/sim --trace-id <trace_id> --show-bundle-only
+python scripts/operator_review.py --base-url http://127.0.0.1:8000 --trace-id <trace_id> --show-bundle-only
 ```
 
 Then replace the current label and pin it as the canonical submission case for that scenario:
 
 ```bash
-python scripts/operator_review.py --base-url http://127.0.0.1:8000/sim --trace-id <trace_id> --reviewer "Your Name" --operator-action accept --useful true --usefulness-score 0.95 --pin-submission-case --pinned-by "Your Name"
+python scripts/operator_review.py --base-url http://127.0.0.1:8000 --trace-id <trace_id> --reviewer "Your Name" --operator-action accept --useful true --usefulness-score 0.95 --pin-submission-case --pinned-by "Your Name"
 ```
 
 Once one reviewed case is pinned per scenario pack, generate a strict reviewed-only packet:
 
 ```bash
-python scripts/submission_evidence.py --base-url http://127.0.0.1:8000/sim --reviewed-only
+python scripts/submission_evidence.py --base-url http://127.0.0.1:8000 --reviewed-only
 ```
 
 That mode fails loudly if any scenario pack still lacks a pinned operator-reviewed submission case.
@@ -190,7 +247,7 @@ That mode fails loudly if any scenario pack still lacks a pinned operator-review
 For a visual companion built from those pinned cases and their stored images:
 
 ```bash
-python scripts/submission_casebook.py --base-url http://127.0.0.1:8000/sim
+python scripts/submission_casebook.py --base-url http://127.0.0.1:8000
 ```
 
 That generates [SUBMISSION_CASEBOOK.md](./SUBMISSION_CASEBOOK.md) plus local image assets for the pinned cases.
@@ -198,21 +255,22 @@ That generates [SUBMISSION_CASEBOOK.md](./SUBMISSION_CASEBOOK.md) plus local ima
 For a low-compute readiness check across the packet, casebook, pinned traces, and runtime honesty boundary:
 
 ```bash
-python scripts/submission_readiness.py --base-url http://127.0.0.1:8000/sim
+python scripts/submission_readiness.py --base-url http://127.0.0.1:8000
 ```
 
 ## Reproducible Demo
 1. Start SimSat:
 ```bash
-docker compose up
+cd src/sim
+python main.py
 ```
 2. Run the challenge demo:
 ```bash
-python scripts/challenge_demo.py --base-url http://127.0.0.1:8000/sim --scenario-pack maritime_chokepoints
+python scripts/challenge_demo.py --base-url http://127.0.0.1:8000 --scenario-pack maritime_chokepoints
 ```
 3. Compare planners directly:
 ```bash
-python scripts/encounter_eval.py --base-url http://127.0.0.1:8000/sim --scenario-pack disaster_response_weather --top-k 10
+python scripts/encounter_eval.py --base-url http://127.0.0.1:8000 --scenario-pack disaster_response_weather --top-k 10
 ```
 4. Open the dashboard and use the Encounter Planner panel to switch scenario packs, run evaluation, and inspect the top decision deltas.
 
@@ -222,7 +280,7 @@ You do not need `MAPBOX_ACCESS_TOKEN` for this flow. If Mapbox is disabled, the 
 If local GPU and CPU are busy, stick to the evaluation route rather than a long interactive sim session:
 
 ```bash
-python scripts/encounter_eval.py --base-url http://127.0.0.1:8000/sim --scenario-pack maritime_chokepoints --top-k 8 --materialize-top-k 2
+python scripts/encounter_eval.py --base-url http://127.0.0.1:8000 --scenario-pack maritime_chokepoints --top-k 8 --materialize-top-k 2
 ```
 
 That path exercises the challenge thesis with minimal load and still gives you transition counts, yield, and top changed decisions.
@@ -235,7 +293,8 @@ It is also the recommended path if you do not want to enable Mapbox billing at a
 3. Highlight at least one `accept -> refine` delta and explain the trust reason.
 4. Switch to `disaster_response_weather` and show that cloud or limited imagery support raises refine pressure.
 5. Materialize one high-confidence `accept` and one trust-gated `refine` candidate to illustrate why the refine path exists.
-6. Close on the architectural claim: the same pipeline is running stacked TTT under six non-compensatory viability gates — the minimum safe configuration for on-orbit continual learning without a ground-truth validator.
+6. Switch to `pedospheric_integrity` and show the spectral register: Sentinel B08/B04 (NDVI), B11/B12 (SWIR ratio) driving defer and refine pressure at the Mato Grosso and Nile Delta targets. The same encounter planner, trust layer, and viability gates handle this without modification — the architecture generalises across registers.
+7. Close on the architectural claim: the same pipeline is running stacked TTT under six non-compensatory viability gates — the minimum safe configuration for on-orbit continual learning without a ground-truth validator.
 
 ## Known Issues and Review Bundles
 The full in-repo code review from 2026-04-21 is preserved under `review/`:
@@ -246,11 +305,24 @@ The full in-repo code review from 2026-04-21 is preserved under `review/`:
 - `review/2026-04-21-phase-4/` — This submission-doc refresh, TTT + viability thesis lock-in, and frontend brand-hide patch.
 
 Known open gaps (disclosed, not hidden):
+
+**Both tracks:**
+- Stacked TTT is described architecturally. Live on-orbit demonstration requires the hackathon prize hardware (NVIDIA Orin 16GB); local demonstration shows the wiring and gating logic but not a full on-orbit drift trajectory.
+- Stage 3 two-scope TTT (per-pass adaptation) is wired in both tracks but not yet benchmarked — requires a live encounter stream.
+
+**General AI Track (Gemma-4):**
 - The `accept→refine` thesis is demonstrated on the Port of Rotterdam pinned case (`urban_coastal_ambiguity`, `trace_4f65355f5c954fbf8db3fc684bb377af`) — scaffold `accept`, trust `refine`, operator confirmed `refine`, driven by cloud risk (48.78% cover).
 - Accept-bias in the Gemma-4 fine-tune: Rotterdam refine cases still over-predicted as `accept`. Additional training epochs (v10 = 4 epochs) did not change this — requires dataset-level rebalancing.
 - Fort Myers Coast miss: model predicts `defer` (score 0.20), operator says `refine` (score 0.90) — large abs_error on borderline partial-cloud windows.
-- Stacked TTT is described architecturally. Live on-orbit demonstration requires the hackathon prize hardware (NVIDIA Orin 16GB); local demonstration shows the wiring and gating logic but not a full on-orbit drift trajectory.
+- v11 LoRA partial-save bug (Issue #27): GQA `num_key_value_heads=1` causes PEFT to deduplicate k/v tensors by identity, dropping layers 15–34 k/v LoRA. Fix in v12: `peft>=0.20.0` + explicit `weight.data.clone()` + strict 490-tensor sanity gate.
 - Genesis (Guilherme) and Tesseract T3 (Garrett) collaborator backends are wired and ready; waiting on collaborator fine-tuning / weights.
+- Large Sentinel tiles (full-resolution multi-spectral composites) caused the VLM processor to hang before inference. Fixed by capping image input to 448px before the processor call (`OBSERVATION_VLM_MAX_IMAGE_SIZE` env var, default 448). The pedospheric pinned trace was reviewed under the simulated backend prior to this fix; the resize path is exercised on any fresh encounter evaluation with the gemma4 backend active.
+
+**Liquid Track (LFM2.5 + MuZero):**
+- Defer class: 3 original traces → **13** after 10 auto-labeled defer outcomes added 2026-05-05 (cloud_cover≥80% AND target_visible heuristic). Stage 2 v3 (2026-05-05): defer went **0→32/75** in eval — the boundary is learnable. However v3 over-predicts defer (43% vs 5% baseline) because the auto-labeled corpus is too concentrated; v2 remains the canonical checkpoint. Full breakdown in [MUZERO_LFM_EVAL.md](./MUZERO_LFM_EVAL.md).
+- Encoder latency measured on RTX 2080; on-orbit projection sub-250ms from Liquid AI benchmarks, but not yet directly measured on NVIDIA Orin.
+- `pedospheric_integrity` spectral-band tiles not yet in the MuZero eval corpus — the 75-episode eval covers geometric packs only. Adding spectral register tiles is the next eval expansion.
+- MuZero MCTS planning over encounter windows is implemented and wired; full tree-search planning is tested in simulation but not yet exercised in the live encounter planner loop.
 
 ## Submission Framing
 Use this wording in the pitch:

@@ -204,3 +204,48 @@ stratified 80/20 split, AdamW, 80 epochs (~30s on RTX 2080 after encoding):
 | Val per-action: skip | 0/1 (corpus has 7 skip total) |
 
 Saved at `weights/muzero/stage1_bc/policy_head.pt` (gitignored).
+
+## BC policy (Stage 2 v3 — pending run)
+
+Stage 2 v3 is ready to run. The training script is unchanged; what changed is the corpus:
+
+**Defer corpus expansion (2026-05-05):** 10 auto-labeled defer outcomes added to `outcomes.json` via the cloud_cover≥80% AND target_visible heuristic (targets: singapore_port ×4, houston_ship ×3, fort_myers_coast, sf_bay, shenzhen_bay). Defer originals: **3 → 13**.
+
+With `max_aug_ratio=4.0` and `target_per_class=48`:
+
+| Action | v2 originals | v2 effective | v3 originals | v3 effective |
+|---|---|---|---|---|
+| accept | ~17 | 48 | ~17 | 48 |
+| defer | **3** | **15** | **13** | **48** |
+| refine | ~48 | 48 | ~48 | 48 |
+| skip | ~7 | 35 | ~7 | 35 |
+
+Defer goes from severely under-represented (15 examples, minority class) to fully at target (48 examples, on par with accept and refine). This is the first run where the head has enough defer signal to learn a meaningful decision boundary.
+
+### Stage 2 v3 results (2026-05-05, BEAST RTX 2080)
+
+Training: best val acc **0.829** (epoch 41). Per-action val: accept 10/10, defer **7/10**, refine 8/10, skip 4/5.
+
+| Metric | Value |
+|---|---|
+| Episodes | 75 |
+| Encoder latency mean / p95 | 71.2 ms / 71.9 ms |
+| accept | 15 (20%) |
+| refine | 28 (37%) |
+| defer  | **32 (43%)** |
+| skip   | 0 (0%) |
+| Mean episode reward | **−0.0273** ± 0.0209 |
+
+**Per-pack breakdown:**
+
+| Pack | Episodes | accept | refine | defer | skip | Reward |
+|---|---|---|---|---|---|---|
+| Maritime Chokepoints | 22 | 8 | 2 | 12 | 0 | −0.0145 |
+| Disaster / Weather | 23 | 4 | 8 | 11 | 0 | −0.0274 |
+| Urban Coastal Ambiguity | 30 | 3 | 18 | 9 | 0 | −0.0400 |
+
+**v3 headline:** defer is no longer zero (0→32/75). The corpus expansion worked — the model learned a real defer boundary.
+
+**v3 honest limitation:** defer is now over-predicted (43% vs playback baseline 5%), refine is under-predicted (37% vs 68%), skip is gone entirely (0% vs 9%). The auto-labeled defer cases (cloud≥80%) produced a strong defer feature that the head generalises too aggressively — borderline refine windows are being routed to defer instead. Reward improved over v2 (−0.0273 vs −0.0438) partly because defer is cheaper than a bad refine, not because the distribution is closer to the operator's.
+
+**v3 status:** Research finding, not a production checkpoint. **v2 remains canonical** (`weights/muzero/stage2_bc/policy_head.pt`). v3 proves defer can be learned; v4 direction is calibrating the defer/refine boundary — either by downsampling the auto-labeled defer cases or by weighting them lower in the loss to match the ~5% real-world defer rate.

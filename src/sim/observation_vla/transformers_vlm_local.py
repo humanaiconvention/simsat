@@ -107,7 +107,7 @@ class TransformersVLMAdapter:
         self.gguf_path = gguf_path or os.environ.get("OBSERVATION_VLM_GGUF_PATH") or str(_weights_root() / "gguf" / "model.gguf")
         self.device = (device or os.environ.get("OBSERVATION_VLM_DEVICE") or "cpu").strip().lower()
         self.allow_fallback = allow_fallback
-        self.max_new_tokens = max_new_tokens
+        self.max_new_tokens = int(os.environ.get("OBSERVATION_VLM_MAX_NEW_TOKENS") or max_new_tokens)
         self.model_label = model_label or os.environ.get("OBSERVATION_VLM_MODEL_LABEL") or ""
 
         self._torch = None
@@ -395,6 +395,8 @@ class TransformersVLMAdapter:
 
         inputs = self._tokenizer(chat_prompt, return_tensors="pt").to(self.device)
         prompt_len = inputs["input_ids"].shape[1]
+        print(f"[VLM] text-only — prompt_tokens={prompt_len} device={self.device} max_new_tokens={self.max_new_tokens}", flush=True)
+        print(f"[VLM] generating...", flush=True)
         with self._torch.no_grad():
             out = self._model.generate(
                 **inputs,
@@ -432,6 +434,13 @@ class TransformersVLMAdapter:
             logger.warning("apply_chat_template (multimodal) failed, falling back to text-only: %s", exc)
             chat_prompt = prompt
 
+        # Resize before processor — large Sentinel tiles generate thousands of image
+        # tokens and cause the processor call to hang indefinitely.
+        _max_img = int(os.environ.get("OBSERVATION_VLM_MAX_IMAGE_SIZE") or 448)
+        if max(image.size) > _max_img:
+            print(f"[VLM] resizing image {image.size} → {_max_img}px", flush=True)
+            image = image.resize((_max_img, _max_img), Image.LANCZOS)
+
         inputs = self._processor(
             text=chat_prompt,
             images=[image],
@@ -439,6 +448,9 @@ class TransformersVLMAdapter:
         )
         inputs = {k: v.to(self.device) if hasattr(v, "to") else v for k, v in inputs.items()}
         prompt_len = inputs["input_ids"].shape[1] if "input_ids" in inputs else None
+        n_image_tokens = inputs.get("pixel_values", None)
+        print(f"[VLM] inputs ready — prompt_tokens={prompt_len} image_tensors={'yes' if n_image_tokens is not None else 'no'} device={self.device} max_new_tokens={self.max_new_tokens}", flush=True)
+        print(f"[VLM] generating...", flush=True)
 
         with self._torch.no_grad():
             out = self._model.generate(
@@ -448,6 +460,7 @@ class TransformersVLMAdapter:
                 temperature=0.0,
                 pad_token_id=getattr(self._tokenizer, "eos_token_id", None),
             )
+        print(f"[VLM] generation complete — output_tokens={out.shape[-1]}", flush=True)
         decoder = self._tokenizer or self._processor
         # See _generate_text — slice on token IDs, not string-startswith.
         if prompt_len is not None:

@@ -113,6 +113,7 @@ class SentinelProvider:
         items = list(search.items())
         if not items:
             return None
+        # Deterministically pick the newest acquisition in the requested window.
         return max(items, key=lambda i: i.datetime)
 
     def _get_latest_item_metadata(self, bbox, datetime_window):

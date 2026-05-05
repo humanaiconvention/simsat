@@ -59,3 +59,7 @@
 
 - Current claim: the ObservationVLA lane is now image-model-backed and shows `0.86` exact action agreement over `37` operator-reviewed Sentinel cases.
 - Conservative claim: this is an early, low-N validation of image-conditioned usefulness scoring, not a broad benchmark.
+
+## Coverage Note
+
+The 37-case reviewed pool covers three geometric/structural scenario packs (maritime_chokepoints, disaster_response_weather, urban_coastal_ambiguity). The `pedospheric_integrity` pack was added after the batch_review.py session of 2026-04-27; its pinned trace (Mato Grosso Agricultural Frontier) was reviewed and deferred by operator as not-useful under the simulated backend. A fresh eval pool for the spectral-biochemical register is pending a VLM assessment with the resize fix (`OBSERVATION_VLM_MAX_IMAGE_SIZE=448`) active. Until that pool exists, the `0.86` agreement figure applies to geometric/structural windows only.

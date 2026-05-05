@@ -1,0 +1,75 @@
+{
+  "generated_at": "2026-05-04T21:30:00Z",
+  "analyst_notes": "Honest analysis of current eval dataset before any Gemma-4 real-trace runs.",
+  "dataset_summary": {
+    "total_traces": 86,
+    "total_assessments": 86,
+    "reviewed_outcomes": 37,
+    "scenario_distribution": {
+      "urban_coastal_ambiguity": 34,
+      "disaster_response_weather": 27,
+      "maritime_chokepoints": 25
+    }
+  },
+  "backend_distribution": {
+    "clip_local": 55,
+    "stub_fallback": 20,
+    "stub": 11,
+    "gemma4": 0,
+    "note": "CRITICAL: No Gemma-4 assessments exist in the eval database yet. All 86 records used CLIP or stub backends."
+  },
+  "ttt_vs_stub_outcomes": {
+    "note": "TTT here = CLIP/clip_local backend. Stub = observation-vla-stub-v1.",
+    "clip_ttt": {
+      "n": 23,
+      "mean_usefulness_score": 0.647,
+      "std_usefulness_score": 0.150,
+      "useful_true_rate": 1.0,
+      "operator_action_accept": 4,
+      "operator_action_refine": 19,
+      "model_mean_confidence": 0.469,
+      "model_recommended_action": {"refine": 22, "defer": 1}
+    },
+    "stub": {
+      "n": 14,
+      "mean_usefulness_score": 0.867,
+      "std_usefulness_score": 0.032,
+      "useful_true_rate": 1.0,
+      "operator_action_accept": 13,
+      "operator_action_refine": 1,
+      "model_mean_confidence": 0.817,
+      "model_recommended_action": {"accept": 13, "refine": 1}
+    },
+    "finding": "Stub assessments were rated more useful (0.867 vs 0.647) and accepted more often by operators (13/14 vs 4/23). CLIP/TTT systematically under-confident (mean 0.469 vs 0.817), recommending refine 96% of the time. Possible causes: CLIP not calibrated for these scenarios, or selection bias in which traces operators reviewed for each backend."
+  },
+  "latency_benchmarks": {
+    "float16": {
+      "gpu": "Tesla T4",
+      "vram_gb": 15.6,
+      "timed_passes": 20,
+      "latency_mean_ms": 11207.8,
+      "latency_p95_ms": 11301.5,
+      "tokens_per_sec": 13.1,
+      "note": "Verified on Kaggle + Colab, <0.1% variance between runs"
+    },
+    "int8": {
+      "status": "running",
+      "timed_passes": 100,
+      "note": "Currently executing on Kaggle T4 — results pending"
+    }
+  },
+  "honest_limitations": [
+    "N=37 operator-reviewed outcomes are CLIP/stub assessments, NOT Gemma-4",
+    "Gemma-4 has zero real-trace eval entries in current database",
+    "Images in traces are Sentinel-2 references requiring live fetch — no stored image data",
+    "TTT/CLIP component shows lower operator ratings than stub in this dataset",
+    "Sample size (N=37) too small for statistical significance regardless of backend",
+    "git index.lock preventing commit — requires manual deletion of .git/index.lock in Windows"
+  ],
+  "tonight_plan": [
+    "Kaggle: int8 100-pass benchmark (running)",
+    "Kaggle: After int8, run 86-scenario Gemma-4 assessment study (scenario-varied synthetic tiles)",
+    "Local: Update all submission docs with accurate numbers",
+    "Morning: One big git push with all results"
+  ]
+}

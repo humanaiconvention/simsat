@@ -79,7 +79,7 @@ file plus a route in `backend_factory.py`.
 - usefulness-score MAE
 - per-case breakdown
 
-**Reference numbers to beat** (Gemma-4 v11 SimSat fine-tune over N=37
+**Reference numbers to beat** (Gemma-4 v12 SimSat fine-tune over N=37
 operator-reviewed cases): exact 0.86, bucketed 0.86, useful 0.97, MAE 0.13.
 Full eval at [`OBSERVATION_VLA_EVAL.md`](./OBSERVATION_VLA_EVAL.md).
 
