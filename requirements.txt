@@ -32,7 +32,7 @@ cartopy>=0.22                    # Map projections (matplotlib backend)
 torch>=2.5,<2.8                  # Last verified: 2.7.0+cu118
 torchvision>=0.20,<0.23          # Last verified: 0.22.0+cu118 (avoids _meta_registrations circular import)
 transformers>=4.45,<4.55
-peft>=0.20.0                     # LoRA adapters; >=0.20.0 required for GQA k/v dedup fix (v12 adapter)
+peft>=0.19.0                     # LoRA adapters; GQA k/v dedup fix is via .clone() in notebook (peft 0.20 doesn't exist)
 accelerate>=0.30                 # Required by transformers for device_map
 
 # --- HAIC convention layer (optional remote LLM adapter) ---
