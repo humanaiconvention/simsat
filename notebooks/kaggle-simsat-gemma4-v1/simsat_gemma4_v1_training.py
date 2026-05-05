@@ -40,7 +40,7 @@ get_ipython().system(  # noqa: F821
     "pip install -q -U "
     "'transformers>=4.51.0' "
     "'trl>=0.12.0,<0.15.0' "  # Fix #15: 0.15.0 removed DataCollatorForCompletionOnlyLM
-    "'peft>=0.12.0' "
+    "'peft>=0.20.0' "  # v12: >=0.20 fixes tied-weight state_dict dedup (GQA k/v drop)
     "'accelerate>=0.33.0' "
     "'bitsandbytes>=0.44.0' "
     "'datasets>=2.19.0'"
@@ -266,7 +266,7 @@ print("\n" + "=" * 60)
 print("TRAINING")
 print("=" * 60)
 
-OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v11-adapter"
+OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v12-adapter"
 
 # Fix #10: fp16=False — do NOT enable AMP. The model is in bfloat16; enabling fp16
 # AMP triggers GradScaler which conflicts with bfloat16 LoRA params. bf16=False
@@ -334,6 +334,18 @@ print(f"\nTraining complete!")
 print(f"  Final loss: {train_result.training_loss:.4f}")
 print(f"  Steps: {train_result.global_step}")
 
+# v12 fix: break tensor aliasing caused by Gemma-4 GQA tie_weights() before saving.
+# PEFT's state_dict deduplication drops k/v LoRA for GQA-tied layers (layers 15-34
+# in v11 had only 410/490 tensors). Cloning each LoRA param's data makes all tensors
+# distinct objects — state_dict can no longer merge them.
+for _mod in trainer.model.modules():
+    for _attr in ("lora_A", "lora_B"):
+        _d = getattr(_mod, _attr, None)
+        if isinstance(_d, dict):
+            for _key in _d:
+                if hasattr(_d[_key], "weight") and _d[_key].weight is not None:
+                    _d[_key].weight.data = _d[_key].weight.data.clone()
+
 trainer.model.save_pretrained(OUTPUT_DIR)
 tokenizer.save_pretrained(OUTPUT_DIR)
 print(f"Adapter saved: {OUTPUT_DIR}")
@@ -394,7 +406,37 @@ if _lora_b_nonzero == 0:
         f"({_lora_b_nonzero}/{_lora_b_total} non-zero). Training did not update the adapter. "
         "Inspect gradient flow (model.train() called? gradient checkpointing kwargs?)."
     )
-print(f"OK: language_model LoRA present and updated by training.")
+
+# v12: strict 490-tensor check — 35 layers × 7 modules × 2 (A+B).
+# v11 saved only 410/490: GQA tie_weights() dedup dropped k/v for layers 15-34.
+import re as _re
+_EXPECTED_LAYERS = 35
+_EXPECTED_MODS = {"q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"}
+_EXPECTED_TOTAL = _EXPECTED_LAYERS * len(_EXPECTED_MODS) * 2  # 490
+_found = set()
+with _safe_open(_adapter_safetensors, framework="numpy") as _f:
+    for _k in _f.keys():
+        _m = _re.search(r"layers\.(\d+)\.\w+\.(\w+_proj)\.(lora_[AB])", _k)
+        if _m and "language_model" in _k:
+            _found.add((int(_m.group(1)), _m.group(2), _m.group(3)))
+_missing_tensors = [
+    f"layer {li} {mod} {ab}"
+    for li in range(_EXPECTED_LAYERS)
+    for mod in sorted(_EXPECTED_MODS)
+    for ab in ("lora_A", "lora_B")
+    if (li, mod, ab) not in _found
+]
+print(f"  LoRA tensor coverage: {len(_found)}/{_EXPECTED_TOTAL} "
+      f"({'PASS' if not _missing_tensors else 'FAIL'})")
+if _missing_tensors:
+    raise RuntimeError(
+        f"FAIL: {len(_missing_tensors)} LoRA tensors missing from saved adapter "
+        f"({len(_found)}/{_EXPECTED_TOTAL} found).\n"
+        f"First 10 missing: {_missing_tensors[:10]}\n"
+        "GQA tie_weights() dedup not fully resolved — check peft>=0.20 install "
+        "and weight clone step above."
+    )
+print(f"OK: language_model LoRA present, updated, and all {_EXPECTED_TOTAL} tensors saved.")
 
 # ============================================================
 # CELL 7: Evaluate — action accuracy on holdout cases
@@ -490,16 +532,16 @@ if eval_shortlist:
 # CELL 8: Summary + save results
 # ============================================================
 print("\n" + "=" * 60)
-print("SIMSAT GEMMA-4-E2B v11 COMPLETE")
+print("SIMSAT GEMMA-4-E2B v12 COMPLETE")
 print("=" * 60)
 print(f"  Training loss: {train_result.training_loss:.4f}")
 print(f"  Training steps: {train_result.global_step}")
 for name, res in eval_results.items():
-    print(f"  Eval ({name}): {res['n_correct']}/{res['n_total']} = {res['accuracy']:.1%}")
+    print(f"  Eval ({{name}}): {{res['n_correct']}}/{{res['n_total']}} = {{res['accuracy']:.1%}}")
 print(f"  Adapter: {OUTPUT_DIR}")
 
 summary = {
-    "version": "simsat-gemma4-v11",
+    "version": "simsat-gemma4-v12",
     "base_model": MODEL_ID,
     "training_loss": round(train_result.training_loss, 4),
     "training_steps": train_result.global_step,
@@ -527,9 +569,14 @@ summary = {
         "precision": "float16_full",
         "single_t4": True,
     },
+    "v12_fixes": [
+        "peft>=0.20.0 (tied-weight state_dict dedup fix)",
+        "clone LoRA weights before save_pretrained (breaks GQA k/v aliasing)",
+        "strict 490-tensor sanity gate (35 layers x 7 modules x 2)",
+    ],
 }
 
-summary_path = "/kaggle/working/simsat_gemma4_v11_summary.json"
+summary_path = "/kaggle/working/simsat_gemma4_v12_summary.json"
 with open(summary_path, "w") as f:
     json.dump(summary, f, indent=2)
 print(f"\nSummary saved: {summary_path}")
