@@ -40,7 +40,7 @@ get_ipython().system(  # noqa: F821
     "pip install -q -U "
     "'transformers>=4.51.0' "
     "'trl>=0.12.0,<0.15.0' "  # Fix #15: 0.15.0 removed DataCollatorForCompletionOnlyLM
-    "'peft>=0.19.0' "  # v13: >=0.19 available on Kaggle; GQA dedup fix is via .clone() in code
+    "'peft>=0.19.0' "  # v14: >=0.19 available on Kaggle; GQA dedup fix is via deepcopy de-share
     "'accelerate>=0.33.0' "
     "'bitsandbytes>=0.44.0' "
     "'datasets>=2.19.0'"
@@ -266,7 +266,7 @@ print("\n" + "=" * 60)
 print("TRAINING")
 print("=" * 60)
 
-OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v12-adapter"
+OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v14-adapter"
 
 # Fix #10: fp16=False — do NOT enable AMP. The model is in bfloat16; enabling fp16
 # AMP triggers GradScaler which conflicts with bfloat16 LoRA params. bf16=False
@@ -334,17 +334,27 @@ print(f"\nTraining complete!")
 print(f"  Final loss: {train_result.training_loss:.4f}")
 print(f"  Steps: {train_result.global_step}")
 
-# v12 fix: break tensor aliasing caused by Gemma-4 GQA tie_weights() before saving.
-# PEFT's state_dict deduplication drops k/v LoRA for GQA-tied layers (layers 15-34
-# in v11 had only 410/490 tensors). Cloning each LoRA param's data makes all tensors
-# distinct objects — state_dict can no longer merge them.
-for _mod in trainer.model.modules():
+# v14 fix: de-share LoRA ModuleDict entries before save_pretrained.
+# Root cause: Gemma-4 GQA ties k/v projection modules across layers (same Python
+# object at multiple paths). PyTorch's named_parameters() deduplicates by module id,
+# so layers 15-34 k/v LoRA are silently dropped (410/490 in v11-v13).
+# Cloning .weight.data (v12/v13) is insufficient — the dedup happens at the module
+# object level before peft inspects tensors.
+# Fix: replace any repeated lora_A/lora_B ModuleDict entry with a deepcopy so every
+# path gets a distinct module id, and named_parameters() yields all 490 tensors.
+import copy as _copy
+_seen_lora_ids = set()
+for _mod_name, _mod in trainer.model.named_modules():
     for _attr in ("lora_A", "lora_B"):
-        _d = getattr(_mod, _attr, None)
-        if isinstance(_d, dict):
-            for _key in _d:
-                if hasattr(_d[_key], "weight") and _d[_key].weight is not None:
-                    _d[_key].weight.data = _d[_key].weight.data.clone()
+        _mdict = getattr(_mod, _attr, None)
+        if not isinstance(_mdict, torch.nn.ModuleDict):
+            continue
+        for _adapter_key in list(_mdict.keys()):
+            _child = _mdict[_adapter_key]
+            if id(_child) in _seen_lora_ids:
+                _mdict[_adapter_key] = _copy.deepcopy(_child)
+            else:
+                _seen_lora_ids.add(id(_child))
 
 trainer.model.save_pretrained(OUTPUT_DIR)
 tokenizer.save_pretrained(OUTPUT_DIR)
@@ -407,8 +417,8 @@ if _lora_b_nonzero == 0:
         "Inspect gradient flow (model.train() called? gradient checkpointing kwargs?)."
     )
 
-# v12: strict 490-tensor check — 35 layers × 7 modules × 2 (A+B).
-# v11 saved only 410/490: GQA tie_weights() dedup dropped k/v for layers 15-34.
+# v14: strict 490-tensor check — 35 layers × 7 modules × 2 (A+B).
+# v11-v13 saved only 410/490: GQA module-id dedup dropped k/v for layers 15-34.
 import re as _re
 _EXPECTED_LAYERS = 35
 _EXPECTED_MODS = {"q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"}
@@ -433,8 +443,7 @@ if _missing_tensors:
         f"FAIL: {len(_missing_tensors)} LoRA tensors missing from saved adapter "
         f"({len(_found)}/{_EXPECTED_TOTAL} found).\n"
         f"First 10 missing: {_missing_tensors[:10]}\n"
-        "GQA tie_weights() dedup not fully resolved — check .clone() step above "
-        "and weight clone step above."
+        "GQA module-id dedup not resolved — check deepcopy de-share step above."
     )
 print(f"OK: language_model LoRA present, updated, and all {_EXPECTED_TOTAL} tensors saved.")
 
@@ -532,7 +541,7 @@ if eval_shortlist:
 # CELL 8: Summary + save results
 # ============================================================
 print("\n" + "=" * 60)
-print("SIMSAT GEMMA-4-E2B v12 COMPLETE")
+print("SIMSAT GEMMA-4-E2B v14 COMPLETE")
 print("=" * 60)
 print(f"  Training loss: {train_result.training_loss:.4f}")
 print(f"  Training steps: {train_result.global_step}")
@@ -541,7 +550,7 @@ for name, res in eval_results.items():
 print(f"  Adapter: {OUTPUT_DIR}")
 
 summary = {
-    "version": "simsat-gemma4-v12",
+    "version": "simsat-gemma4-v14",
     "base_model": MODEL_ID,
     "training_loss": round(train_result.training_loss, 4),
     "training_steps": train_result.global_step,
@@ -569,14 +578,14 @@ summary = {
         "precision": "float16_full",
         "single_t4": True,
     },
-    "v12_fixes": [
-        "peft>=0.19.0 (tied-weight state_dict dedup via .clone() workaround)",
-        "clone LoRA weights before save_pretrained (breaks GQA k/v aliasing)",
+    "v14_fixes": [
+        "peft>=0.19.0 (available on Kaggle)",
+        "deepcopy de-share lora_A/lora_B ModuleDict entries (fixes GQA module-id dedup, 490/490)",
         "strict 490-tensor sanity gate (35 layers x 7 modules x 2)",
     ],
 }
 
-summary_path = "/kaggle/working/simsat_gemma4_v12_summary.json"
+summary_path = "/kaggle/working/simsat_gemma4_v14_summary.json"
 with open(summary_path, "w") as f:
     json.dump(summary, f, indent=2)
 print(f"\nSummary saved: {summary_path}")
