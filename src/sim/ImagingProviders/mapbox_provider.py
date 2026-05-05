@@ -114,4 +114,15 @@ if __name__ == "__main__":
     provider = MapboxProvider()
     lausanne = {'lon': 6.6322734, 'lat': 46.5218266}
     lausanne_north = {'lon': 6.6322734, 'lat': 46.5318266}
-    paris = {'lon': 2.3522, 'lat': 48.8566}
+    paris = {'lon': 2.3522219, 'lat': 48.856614}
+    stuttgart = {'lon': 9.1829321, 'lat': 48.7758459}
+    p1 = {'lon': 6.6322734-1, 'lat': 46.5218266}
+
+    h = 500  # km
+
+    sat = stuttgart
+    target = lausanne
+
+    provider.get_target_image(sat['lon'], sat['lat'], h, target['lon'], target['lat'])
+
+        # def get_target_image(self, sat_lon, sat_lat, sat_alt, target_lon, target_lat):

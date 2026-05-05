@@ -1,9 +1,9 @@
 # ObservationVLA Fallback Prune Report
 
-- Generated: `2026-05-05T14:28:48Z`
+- Generated: `2026-04-26T16:06:52Z`
 - Total traces: `86`
-- Runtime distribution: `clip_local=58, stub=8, stub_fallback=20`
-- Protected trace references: `47`
+- Runtime distribution: `clip_local=55, stub=11, stub_fallback=20`
+- Protected trace references: `15`
 - Keep latest fallback per target: `2`
 - Safe prune candidates: `0`
 
@@ -21,8 +21,8 @@ These are fallback rows that the tool refuses to prune because they are referenc
 | --- | --- | --- |
 | Fort Myers Coast | trace_6f7838564cc94b07a7f29a430a804832 | kept_latest_per_target |
 | Fort Myers Coast | trace_978e6a6a5bf8466e99aa7b38ef7e35a8 | kept_latest_per_target |
-| Houston Ship Channel | trace_ad3890a1998d4d90950201e048708cb4 | protected_reference |
-| Houston Ship Channel | trace_efa9e41802814c429b102c2f77eb64fc | protected_reference |
+| Houston Ship Channel | trace_ad3890a1998d4d90950201e048708cb4 | kept_latest_per_target |
+| Houston Ship Channel | trace_efa9e41802814c429b102c2f77eb64fc | kept_latest_per_target |
 | New Orleans Delta | trace_75f406cf5bff4771945fee5c975e65f1 | kept_latest_per_target |
 | New Orleans Delta | trace_e0bb6c2b04514c90a8892dc9e17630b6 | kept_latest_per_target |
 | Panama Canal | trace_31ec6996796d40c2b09e946f854f0d4a | kept_latest_per_target |
@@ -34,10 +34,10 @@ These are fallback rows that the tool refuses to prune because they are referenc
 | Port of Singapore | trace_1d9e98b6bc7d493f8c292947938b6d4e | kept_latest_per_target |
 | Port of Singapore | trace_b98b5d0bb9f14ef1a2526f0afdc12c02 | kept_latest_per_target |
 | San Francisco Bay | trace_5bc171357b3a431983b9f81646117522 | kept_latest_per_target |
-| San Francisco Bay | trace_b5870f83612a4a7798c4c342661efeab | protected_reference |
+| San Francisco Bay | trace_b5870f83612a4a7798c4c342661efeab | kept_latest_per_target |
 | Shenzhen Bay | trace_2c2e81628756417dbb0093a1babf0ffd | kept_latest_per_target |
 | Shenzhen Bay | trace_511eb967219b4a3db07e08cbcc77064a | kept_latest_per_target |
-| Suez Canal | trace_a4f965f9fce642b9ac42059907c41bd8 | protected_reference |
+| Suez Canal | trace_a4f965f9fce642b9ac42059907c41bd8 | kept_latest_per_target |
 | Suez Canal | trace_a8e23f1ff498486bbf0d60417d46f9b0 | kept_latest_per_target |
 
 ## Sample Prune Candidates
