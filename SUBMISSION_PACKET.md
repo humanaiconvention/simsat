@@ -79,11 +79,13 @@ This packet was generated from the live challenge stack.
 - Submission case: `pinned`
 - Case source: `historical labelled trace`
 
-## Notes
+### Additional reviewed case — San Francisco Bay
 
-- This packet is Sentinel-first and does not depend on Mapbox.
-- Submission cases are generated from the live planner and stored assessment stack.
-- Stored case traces may have been assessed under an earlier ObservationVLA runtime than the current configured backend.
-- The current backend-specific reviewed check lives in `OBSERVATION_VLA_EVAL.md` and should be used for tight model claims.
-- Operator-reviewed labels are preferred when they exist for a scenario case.
-- This packet was generated in `reviewed-only` mode and fails if any scenario lacks a pinned operator-reviewed case.
+- Curated case: San Francisco Bay: scaffold accept -> accept; assessment accept; outcome accept (useful)
+- Stored visual assessment: mode=`image_conditioned`, runtime=`stub`, recommended=`accept`, useful=`True`, usefulness_score=`0.9`
+- Mission response: action=`materialize_now`, utility_realized=`0.9`
+- Trace: `trace_a4e31b4c39224d8fbdb2c4bf0f444823`
+- Label source: `operator_review`; reviewer=`Ben Haslam`; status=`reviewed`
+- Submission case: `pinned`
+- Case source: `historical labelled trace`
+- Notes: Clear image (cloud cover 6.9%), cl

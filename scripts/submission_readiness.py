@@ -59,9 +59,10 @@ def build_readiness_report(
     scenario_packs = targets_payload.get("scenario_packs", [])
     submission_cases_payload = client.get_json("/observation-vla/submission-cases")
     submission_cases = submission_cases_payload.get("cases", [])
-    submission_cases_by_scenario = {
-        case.get("scenario_pack"): case for case in submission_cases
-    }
+    # Group ALL cases per scenario (dict-overwrite would silently drop extras)
+    submission_cases_by_scenario: dict[str, list] = {}
+    for case in submission_cases:
+        submission_cases_by_scenario.setdefault(case.get("scenario_pack", ""), []).append(case)
 
     lines: list[str] = []
     lines.append("# SimSat Submission Readiness")
@@ -98,37 +99,43 @@ def build_readiness_report(
             case_limit=3,
             trace_limit=100,
         )
-        pinned_case = submission_cases_by_scenario.get(scenario_pack, {})
-        target_label = pinned_case.get("target_label", "")
-        trace_id = str(pinned_case.get("trace_id", ""))
+        pinned_cases = submission_cases_by_scenario.get(scenario_pack, [])
+        # Primary case is the first pinned; check ALL cases for packet presence
+        primary_case = pinned_cases[0] if pinned_cases else {}
         packet_case = False
-        if target_label:
-            packet_case = target_label.lower() in packet_text_lower
-        if trace_id and not packet_case:
-            packet_case = trace_id.lower() in packet_text_lower
+        image_asset = False
+        for pc in pinned_cases:
+            tl = pc.get("target_label", "")
+            tid = str(pc.get("trace_id", ""))
+            if tl and tl.lower() in packet_text_lower:
+                packet_case = True
+            if tid and tid.lower() in packet_text_lower:
+                packet_case = True
+            # image asset check per case
+            slug = "_".join([_slug(scenario_pack), _slug(tl)]).strip("_")
+            assets = list(assets_dir.glob(f"{slug}*.png")) if assets_dir.exists() and slug else []
+            if not assets and tl:
+                assets = list(assets_dir.glob(f"*{_slug(tl)}*.png"))
+            if assets and casebook_text:
+                has_target = bool(tl) and tl.lower() in casebook_text_lower
+                has_trace = bool(tid) and tid.lower() in casebook_text_lower
+                if has_target or has_trace:
+                    image_asset = True
+            elif assets:
+                image_asset = True
 
-        image_slug = "_".join(
-            [
-                _slug(scenario_pack),
-                _slug(target_label),
-            ]
-        ).strip("_")
-        matching_assets = list(assets_dir.glob(f"{image_slug}*.png")) if assets_dir.exists() and image_slug else []
-        if not matching_assets and target_label:
-            matching_assets = list(assets_dir.glob(f"*{_slug(target_label)}*.png"))
-        image_asset = bool(matching_assets)
-        if image_asset and casebook_text:
-            has_target_ref = bool(target_label) and target_label.lower() in casebook_text_lower
-            has_trace_ref = bool(trace_id) and trace_id.lower() in casebook_text_lower
-            image_asset = has_target_ref or has_trace_ref
+        target_label = primary_case.get("target_label", "")
+        trace_id = str(primary_case.get("trace_id", ""))
+        pinned_count = len(pinned_cases)
+        trace_display = trace_id + (f" (+{pinned_count - 1} more)" if pinned_count > 1 else "")
         lines.append(
             "| "
             + " | ".join(
                 [
                     scenario_pack,
                     str(bool(evidence.get("reviewed_submission_ready", False))),
-                    str(pinned_case.get("trace_id", "")),
-                    str(pinned_case.get("reviewer", "")),
+                    trace_display,
+                    str(primary_case.get("reviewer", "")),
                     str(packet_case),
                     str(bool(image_asset)),
                 ]
