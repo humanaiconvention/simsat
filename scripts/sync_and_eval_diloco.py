@@ -27,7 +27,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_KERNEL = "benhaslam/simsat-diloco-round-0-learner"
 DEFAULT_OUT = REPO_ROOT / "weights" / "diloco-round0-continued"
-DILOCO_INBOX = Path(os.environ.get("DILOCO_LAB_INBOX", r"D:\diloco_lab\inbox"))
+DILOCO_INBOX = Path(os.environ.get("DILOCO_LAB_INBOX", str(REPO_ROOT.parent / "diloco_lab" / "inbox")))
 
 
 def _kernel_status(kernel: str) -> str:
@@ -105,7 +105,7 @@ def main() -> int:
     parser.add_argument("--skip-eval", action="store_true",
                         help="Download + outbox-copy only, skip eval.")
     parser.add_argument("--no-inbox-copy", action="store_true",
-                        help="Skip copying outbox fragments to D:/diloco_lab/inbox.")
+                        help="Skip copying outbox fragments to DILOCO_LAB_INBOX.")
     args = parser.parse_args()
 
     print(f"Kernel:    {args.kernel}")
