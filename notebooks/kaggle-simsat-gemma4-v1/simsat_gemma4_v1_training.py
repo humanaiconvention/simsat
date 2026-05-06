@@ -276,7 +276,7 @@ print("\n" + "=" * 60)
 print("TRAINING")
 print("=" * 60)
 
-OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v17-adapter"
+OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v18-adapter"
 
 # Fix #10: fp16=False — do NOT enable AMP. The model is in bfloat16; enabling fp16
 # AMP triggers GradScaler which conflicts with bfloat16 LoRA params. bf16=False
@@ -344,39 +344,87 @@ print(f"\nTraining complete!")
 print(f"  Final loss: {train_result.training_loss:.4f}")
 print(f"  Steps: {train_result.global_step}")
 
-# v17 fix: de-share LoRA modules before save_pretrained.
-# Root cause: Gemma-4 GQA ties k/v projection modules across layers — the same
-# Python object appears at multiple paths (e.g. layers 0 and 15 share one module).
-# PyTorch named_parameters() / named_modules() both deduplicate by module id via
-# an internal memo set, so layers 15-34 k/v LoRA are silently dropped (410/490).
-# v14-v16: used named_modules() to find duplicates — but named_modules() itself
-# deduplicates, so shared modules were never visited and the fix never fired.
-# v17: walk _modules directly (bypassing dedup), deepcopy any LoRA module whose
-# id was already seen at a different path.
+# v18 fix: de-share LoRA modules before save_pretrained.
+# Root cause: Gemma-4 GQA ties k/v projection modules across layers at the
+# TENSOR level — different lora.Linear module objects may hold lora_A/lora_B
+# weights that share the same underlying storage (same data_ptr()).
+# PyTorch's state_dict() / named_parameters() deduplicates by tensor data_ptr(),
+# silently dropping k/v LoRA for layers 15-34 (410/490 tensors saved).
+#
+# v14-v16: deepcopy via named_modules() — fix never fired (named_modules deduplicates).
+# v17: walk _modules + id(child) check — catches module-object sharing but misses
+#       cases where distinct module objects share the same underlying tensor storage.
+# v18: walk _modules + data_ptr() check on lora_A/lora_B weights — catches both
+#       object-identity sharing AND tensor-storage sharing. Only deepcopies lora_A
+#       and lora_B (small fp16 matrices), NOT base_layer (bnb.Linear4bit), which
+#       is not reliably deepcopy-safe. Guarantees 490/490 saved tensors.
 import copy as _copy
 
 def _break_lora_sharing(root):
-    _seen = {}
+    _seen_ptrs: set = set()
     _fixed = 0
+
     def _walk(parent, path):
         nonlocal _fixed
+        for name, child in list(parent._modules.items()):
+            if child is None:
+                continue
+            child_path = f"{path}.{name}" if path else name
+            is_lora = hasattr(child, "lora_A") and hasattr(child, "lora_B")
+
+            if is_lora:
+                # Collect data_ptr() of every lora_A and lora_B weight tensor.
+                child_ptrs = set()
+                for ab in (child.lora_A, child.lora_B):
+                    for linear in ab.values():
+                        if hasattr(linear, "weight") and linear.weight is not None:
+                            child_ptrs.add(linear.weight.data_ptr())
+
+                if child_ptrs & _seen_ptrs:
+                    # Shared tensor storage detected — deepcopy only lora_A/lora_B
+                    # to give them independent storage, leaving base_layer untouched.
+                    child.lora_A = _copy.deepcopy(child.lora_A)
+                    child.lora_B = _copy.deepcopy(child.lora_B)
+                    # Re-collect ptrs from the now-independent copies.
+                    for ab in (child.lora_A, child.lora_B):
+                        for linear in ab.values():
+                            if hasattr(linear, "weight") and linear.weight is not None:
+                                _seen_ptrs.add(linear.weight.data_ptr())
+                    _fixed += 1
+                else:
+                    _seen_ptrs.update(child_ptrs)
+                    _walk(child, child_path)
+            else:
+                _walk(child, child_path)
+
+    _walk(root, "")
+    return _fixed
+
+_n_fixed = _break_lora_sharing(trainer.model)
+print(f"  GQA de-share (v18 data_ptr): {_n_fixed} shared LoRA modules de-shared")
+if _n_fixed == 0:
+    print("  WARNING: 0 modules de-shared — GQA sharing may be via object identity only.")
+    print("  Falling back to v17 id() check...")
+    import copy as _copy2
+    _seen_ids: dict = {}
+    _fixed_v17 = 0
+    def _walk_v17(parent, path):
+        nonlocal _fixed_v17
         for name, child in list(parent._modules.items()):
             if child is None:
                 continue
             cid = id(child)
             child_path = f"{path}.{name}" if path else name
             is_lora = hasattr(child, "lora_A") and hasattr(child, "lora_B")
-            if cid in _seen and is_lora:
-                parent._modules[name] = _copy.deepcopy(child)
-                _fixed += 1
+            if cid in _seen_ids and is_lora:
+                child.lora_A = _copy2.deepcopy(child.lora_A)
+                child.lora_B = _copy2.deepcopy(child.lora_B)
+                _fixed_v17 += 1
             else:
-                _seen[cid] = child_path
-                _walk(child, child_path)
-    _walk(root, "")
-    return _fixed
-
-_n_fixed = _break_lora_sharing(trainer.model)
-print(f"  GQA de-share: {_n_fixed} shared LoRA modules replaced with independent deepcopy")
+                _seen_ids[cid] = child_path
+                _walk_v17(child, child_path)
+    _walk_v17(trainer.model, "")
+    print(f"  v17 fallback: {_fixed_v17} modules de-shared by id()")
 
 trainer.model.save_pretrained(OUTPUT_DIR)
 tokenizer.save_pretrained(OUTPUT_DIR)
@@ -572,7 +620,7 @@ for name, res in eval_results.items():
 print(f"  Adapter: {OUTPUT_DIR}")
 
 summary = {
-    "version": "simsat-gemma4-v16",
+    "version": "simsat-gemma4-v18",
     "base_model": MODEL_ID,
     "training_loss": round(train_result.training_loss, 4),
     "training_steps": train_result.global_step,
