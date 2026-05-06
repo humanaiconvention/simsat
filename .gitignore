@@ -84,3 +84,11 @@ diloco_kaggle_staging/
 # Submission markdown reports are intentionally tracked — collaborators read
 # the committed snapshot. They will show as modified after regeneration; that's
 # expected. Use `git checkout -- <file>` to discard regen noise before commits.
+
+# VirtioFS artefacts and SQLite WAL files
+.fuse_hidden*
+*.sqlite3-wal
+*.sqlite3-shm
+
+# scratch files
+review.txt
