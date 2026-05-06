@@ -181,11 +181,31 @@ def _check_loss(
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    base = AutoModelForCausalLM.from_pretrained(
-        base_model,
-        torch_dtype=torch.bfloat16,
-        device_map="auto",
-    )
+    # Use 4-bit NF4 quantization if bitsandbytes is available — keeps the
+    # 2B model under ~2 GB VRAM so it fits on an 8 GB card without offloading.
+    _bnb_cfg = None
+    try:
+        from transformers import BitsAndBytesConfig
+        _bnb_cfg = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_compute_dtype=torch.float16,
+        )
+        print("  4-bit NF4 quantization enabled (bitsandbytes)")
+    except Exception:
+        print("  bitsandbytes not available — loading in bfloat16 (may OOM on 8GB)")
+
+    # Force all layers to GPU 0. "auto" spreads to CPU, which bitsandbytes 4-bit
+    # doesn't support. Gemma-4-E2B in NF4 is ~1.5 GB; should fit in 6 GB free.
+    _device_map = {"": 0} if torch.cuda.is_available() else "cpu"
+    _load_kwargs: dict = {"device_map": _device_map}
+    if _bnb_cfg is not None:
+        _load_kwargs["quantization_config"] = _bnb_cfg
+    else:
+        _load_kwargs["torch_dtype"] = torch.bfloat16
+
+    base = AutoModelForCausalLM.from_pretrained(base_model, **_load_kwargs)
 
     print(f"Loading adapter from {adapter_path}...")
     model = PeftModel.from_pretrained(base, str(adapter_path))
