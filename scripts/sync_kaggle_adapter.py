@@ -114,11 +114,13 @@ def _eval(adapter_path: Path) -> int:
     # to the legacy HAIC v35-gov model. 'gemma4' routes to TransformersVLMAdapter
     # with model_label='gemma4-simsat', which uses the OBSERVATION_VLM_* env vars
     # below to load the freshly-trained SimSat adapter.
-    env["OBSERVATION_VLA_BACKEND"] = "gemma4"
+    env["OBSERVATION_VLA_BACKEND"] = "transformers_vlm_local"
     env["OBSERVATION_VLM_BASE_MODEL"] = env.get("OBSERVATION_VLM_BASE_MODEL", "google/gemma-4-e2b-it")
-    env["OBSERVATION_VLM_LORA_PATH"] = str(adapter_path)
+    env["OBSERVATION_VLM_LORA_PATH"] = str(adapter_path.resolve())  # absolute path required
     env["OBSERVATION_VLM_MODE"] = "lora"
     env["OBSERVATION_VLM_MODEL_LABEL"] = env.get("OBSERVATION_VLM_MODEL_LABEL", "gemma4-simsat")
+    env["OBSERVATION_VLM_DEVICE"] = env.get("OBSERVATION_VLM_DEVICE", "cuda")  # GPU by default
+    env["OBSERVATION_VLM_MAX_IMAGE_SIZE"] = env.get("OBSERVATION_VLM_MAX_IMAGE_SIZE", "448")
     return _run(
         [sys.executable, str(REPO_ROOT / "scripts" / "observation_vla_eval.py"), "--inprocess"],
         env=env,
@@ -213,10 +215,11 @@ def main() -> int:
     print("Sync complete.")
     print(f"Adapter at: {adapter_path}")
     print("To re-run the eval against this backend manually:")
-    print(f"  set OBSERVATION_VLA_BACKEND=gemma4")
-    print(f"  set OBSERVATION_VLM_BASE_MODEL=google/gemma-4-e2b-it")
-    print(f"  set OBSERVATION_VLM_LORA_PATH={adapter_path}")
-    print(f"  set OBSERVATION_VLM_MODE=lora")
+    print(f"  export OBSERVATION_VLA_BACKEND=transformers_vlm_local")
+    print(f"  export OBSERVATION_VLM_BASE_MODEL=google/gemma-4-e2b-it")
+    print(f"  export OBSERVATION_VLM_LORA_PATH={adapter_path.resolve()}")
+    print(f"  export OBSERVATION_VLM_DEVICE=cuda")
+    print(f"  export OBSERVATION_VLM_MAX_IMAGE_SIZE=448")
     print(f"  python scripts/observation_vla_eval.py --inprocess")
     print("=" * 72)
     return 0
