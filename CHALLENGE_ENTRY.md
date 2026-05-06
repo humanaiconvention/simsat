@@ -122,6 +122,31 @@ Each evaluation logs:
 
 The most challenge-relevant artifact is the delta list: it makes the WCLI trust layer falsifiable instead of rhetorical.
 
+**Encounter planner eval summary** (248 windows across all 4 packs, 5 × 48h runs per pack — see [ENCOUNTER_EVAL.md](./ENCOUNTER_EVAL.md)):
+
+The scaffold planner produces **zero refine actions** across all 248 windows. Every refine decision in the system originates from the WCLI trust layer detecting compound risk the deterministic scaffold cannot express. WCLI trust added 72 refine decisions (29% of trust-changed windows) and changed the action on 92 of 248 windows (37%) — all upgrades, zero downgrades.
+
+| Pack | Windows | Trust refine | Trust score lift |
+|------|---------|--------------|-----------------|
+| maritime\_chokepoints | 50 | 10 (20%) | +0.014 |
+| disaster\_response\_weather | 50 | 10 (20%) | +0.014 |
+| urban\_coastal\_ambiguity | 93 | 47 (51%) | +0.013 |
+| pedospheric\_integrity | 55 | 5 (9%) | +0.012 |
+| **All packs** | **248** | **72 (29%)** | **+0.013** |
+
+**Trust-layer TTT results** (10-seed stability, 256 records, 20 cycles — see [ttt_stability_analysis.md](./ttt_stability_analysis.md)):
+
+| Metric | Value |
+|--------|-------|
+| MAE improvement | **22.5% ± 0.1%** (10 seeds, range 22.2–22.7%) |
+| Episode reward improvement | **24.1% ± 0.2%** (SimSatEnv, 544 labeled records) |
+| 90% convergence | **1.9 ± 0.3 cycles** |
+| True-accept gain | +28 per episode (116 → 144) |
+| False-accept reduction | −2 per episode (4 → 2) |
+| Threshold robust | Positive improvement at all thresholds 0.50–0.75 |
+
+The improvement is essentially deterministic (std < 0.2% across 10 random seeds). Convergence in under 2 full passes through the corpus is consistent with the on-orbit constraint: the system reaches near-optimal adapted weights before the satellite completes its first full target revisit cycle.
+
 ## ObservationVLA Reality Check
 The ObservationVLA lane is backed by the Gemma-4-E2B SimSat fine-tune **v11** (`OBSERVATION_VLA_BACKEND=gemma4`). The current reviewed evaluation:
 

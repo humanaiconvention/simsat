@@ -197,20 +197,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-(args.observation_eval),
-        )
-        output_path = Path(args.output)
-        output_path.write_text(report, encoding="utf-8")
-        print(f"Submission readiness written to {output_path}")
-    except Exception as exc:
-        print(f"Submission readiness generation failed: {exc}", file=sys.stderr)
-        raise SystemExit(1)
-    finally:
-        if isinstance(client, InProcessClient):
-            client.close()
-
-
-if __name__ == "__main__":
-    main()
-:
     main()

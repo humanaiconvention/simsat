@@ -26,13 +26,36 @@ Per-track thesis statements for the pitch are finalized in [CHALLENGE_ENTRY.md](
 - Visual casebook: [SUBMISSION_CASEBOOK.md](./SUBMISSION_CASEBOOK.md)
 - Readiness checklist: [SUBMISSION_READINESS.md](./SUBMISSION_READINESS.md)
 - ObservationVLA reviewed eval: [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md)
+- Encounter planner eval (248 windows, all 4 packs): [ENCOUNTER_EVAL.md](./ENCOUNTER_EVAL.md)
+- Trust-layer TTT stability analysis (10 seeds): [ttt_stability_analysis.md](./ttt_stability_analysis.md)
 - Inference benchmarks + scenario assessment: [benchmark_results/BENCHMARK_RESULTS.md](./benchmark_results/BENCHMARK_RESULTS.md)
 
-Current reviewed cases:
+**ObservationVLA eval (37 operator-reviewed cases):**
+- Exact operator-action agreement: **0.86** (32/37)
+- Useful/not-useful agreement: **0.97**
+- Usefulness score MAE: **0.13**
+- Coverage: 3 geometric/structural packs (maritime, disaster, urban coastal)
+
+**Trust-layer TTT (10-seed stability, 256 encounter records, 20 cycles):**
+- MAE improvement: **22.5% ± 0.1%** [22.2–22.7%] — deterministic across seeds
+- Episode reward improvement: **24.1% ± 0.2%** — confirmed over 544 labeled records
+- 90% convergence: **1.9 ± 0.3 cycles** (essentially 2 passes through the corpus)
+- True-accept gain: **+28 per episode** | False-accept reduction: **−2 per episode**
+- Threshold robust: improvement positive at every threshold from 0.50 to 0.75
+- Dominant signal: clarity weight 0.12→0.24 (+0.12); geometry weight 0.34→0.24 (−0.10)
+
+**Encounter planner eval (248 windows, all 4 packs, 5 × 48h runs per pack):**
+- Scaffold produces **zero refine actions** across all 248 windows and all 4 packs
+- WCLI trust layer adds **72 refine decisions** (29% refine rate on trust-changed windows)
+- 92 of 248 windows (37%) changed action; all upgrades move toward engagement (zero downgrades)
+- Urban coastal: 47/93 windows (51%) changed to refine — highest pack, consistent with ambiguity claim
+- Mean trust-score lift over scaffold: **+0.013** across all packs
+
+**Pinned casebook cases (one per pack):**
 - `maritime_chokepoints` → Suez Canal, reviewer `Ben Haslam`, usefulness `0.95`
 - `disaster_response_weather` → Houston Ship Channel, reviewer `Ben Haslam`, usefulness `0.92`
 - `urban_coastal_ambiguity` → Port of Rotterdam, reviewer `Ben Haslam`, usefulness `0.90`
-- `pedospheric_integrity` → Mato Grosso Agricultural Frontier, reviewer `Ben Haslam`, outcome `defer` (trust below refine threshold; window not useful — honest result for a low-quality pass)
+- `pedospheric_integrity` → Mato Grosso Agricultural Frontier, reviewer `Ben Haslam`, outcome `defer` (trust below refine threshold; honest result for a low-quality pass)
 
 ## Inference Benchmarks
 
