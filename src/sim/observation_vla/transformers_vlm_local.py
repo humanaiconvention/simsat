@@ -235,12 +235,40 @@ class TransformersVLMAdapter:
         self._torch = torch
 
     def _load_causal_lm(self, AutoClass, src: str, dtype):
-        """Load a causal LM with device_map set to the configured device."""
-        return AutoClass.from_pretrained(
-            src,
-            torch_dtype=dtype,
-            device_map={"": self.device},
+        """Load a causal LM with device_map set to the configured device.
+
+        On CUDA, uses 4-bit NF4 quantization by default (set
+        OBSERVATION_VLM_LOAD_IN_4BIT=0 to disable). This keeps Gemma-4-E2B
+        (~2B LM + vision + audio towers) under 2 GB on the GPU rather than
+        ~6 GB in float16, which exceeds an 8 GB card during inference.
+        """
+        import os
+        _use_4bit = (
+            self.device != "cpu"
+            and os.environ.get("OBSERVATION_VLM_LOAD_IN_4BIT", "1") != "0"
         )
+        _bnb_cfg = None
+        if _use_4bit:
+            try:
+                import torch as _torch
+                from transformers import BitsAndBytesConfig
+                _bnb_cfg = BitsAndBytesConfig(
+                    load_in_4bit=True,
+                    bnb_4bit_quant_type="nf4",
+                    bnb_4bit_use_double_quant=True,
+                    bnb_4bit_compute_dtype=_torch.float16,
+                )
+                logger.info("_load_causal_lm: 4-bit NF4 quantization enabled")
+            except Exception as _e:
+                logger.warning("_load_causal_lm: 4-bit unavailable (%s), falling back to float16", _e)
+
+        _kwargs: dict = {"device_map": {"": self.device}}
+        if _bnb_cfg is not None:
+            _kwargs["quantization_config"] = _bnb_cfg
+        else:
+            _kwargs["torch_dtype"] = dtype
+
+        return AutoClass.from_pretrained(src, **_kwargs)
 
     def _load_tokenizer_or_processor(self, src: str) -> None:
         """Try AutoProcessor (vision-language) first, fall back to AutoTokenizer (text-only)."""
