@@ -648,15 +648,78 @@ summary = {
         "precision": "float16_full",
         "single_t4": True,
     },
-    "v14_fixes": [
-        "peft>=0.19.0 (available on Kaggle)",
-        "deepcopy de-share lora_A/lora_B ModuleDict entries (fixes GQA module-id dedup, 490/490)",
+    "v18_fixes": [
+        "data_ptr() scan on lora_A/lora_B weights — catches tensor-storage sharing across distinct module objects",
+        "deepcopy only lora_A/lora_B (not bnb.Linear4bit base_layer, which is not reliably deepcopy-safe)",
+        "v17 id()-based walk retained as fallback if _n_fixed==0",
+        "nonlocal _fixed_v17 scoping fix in fallback function",
         "strict 490-tensor sanity gate (35 layers x 7 modules x 2)",
     ],
 }
 
-summary_path = "/kaggle/working/simsat_gemma4_v14_summary.json"
+summary_path = "/kaggle/working/simsat_gemma4_v18_summary.json"
 with open(summary_path, "w") as f:
     json.dump(summary, f, indent=2)
 print(f"\nSummary saved: {summary_path}")
 print(json.dumps(summary, indent=2))
+
+# ===========================================================================
+# HF UPLOAD
+# Fix SFTTrainer README.md: replaces local Kaggle base_model path with the
+# canonical HF model ID before upload. Without this fix, upload_folder raises
+# ValueError: Invalid metadata in README.md — base_model path is not valid.
+# ===========================================================================
+print("\n" + "=" * 60)
+print("HF UPLOAD")
+print("=" * 60)
+
+import os
+
+_readme = f"{OUTPUT_DIR}/README.md"
+if os.path.exists(_readme):
+    _txt = open(_readme).read()
+    _fixed = _txt.replace(
+        "/kaggle/input/models/google/gemma-4/transformers/gemma-4-e2b-it/1",
+        "google/gemma-4-e2b-it",
+    )
+    if _fixed != _txt:
+        open(_readme, "w").write(_fixed)
+        print("  README.md: patched base_model path → google/gemma-4-e2b-it")
+    else:
+        print("  README.md: no local path found (already clean or not generated)")
+else:
+    print("  README.md: not found — skipping patch")
+
+try:
+    from kaggle_secrets import UserSecretsClient
+    _hf_token = UserSecretsClient().get_secret("HF_TOKEN")
+except Exception as _e:
+    print(f"  WARNING: could not retrieve HF_TOKEN from Kaggle secrets: {_e}")
+    print("  Set _hf_token manually before re-running the upload block.")
+    _hf_token = None
+
+_hf_repo = "HumanAIConvention/simsat-gemma4-v18"
+
+if _hf_token:
+    from huggingface_hub import HfApi
+    _api = HfApi(token=_hf_token)
+    try:
+        _api.create_repo(_hf_repo, repo_type="model", exist_ok=True)
+        print(f"  Repo ready: {_hf_repo}")
+    except Exception as _e:
+        print(f"  create_repo warning (may already exist): {_e}")
+
+    try:
+        _api.upload_folder(
+            folder_path=OUTPUT_DIR,
+            repo_id=_hf_repo,
+            repo_type="model",
+            ignore_patterns=["checkpoint-*/**"],
+            commit_message="simsat-gemma4-v18: data_ptr() GQA de-share fix",
+        )
+        print(f"  Upload complete: https://huggingface.co/{_hf_repo}")
+    except Exception as _e:
+        print(f"  Upload failed: {_e}")
+        print(f"  Check {OUTPUT_DIR} contents and retry via Kaggle console (>_ icon).")
+else:
+    print("  Skipping upload — no HF token available.")
