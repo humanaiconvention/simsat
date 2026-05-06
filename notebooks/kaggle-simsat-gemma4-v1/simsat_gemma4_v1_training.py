@@ -23,6 +23,16 @@ import os, shutil, sys
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
+# Guard: fail fast if Kaggle assigned a P100 (sm_60) instead of T4 (sm_75+).
+# PyTorch 2.7 requires minimum sm_70; P100 causes a silent kernel crash ~60s in.
+import torch as _torch
+_cap = _torch.cuda.get_device_capability(0)
+if _cap < (7, 0):
+    raise RuntimeError(
+        f"Wrong GPU: got sm_{_cap[0]}{_cap[1]} ({_torch.cuda.get_device_name(0)}). "
+        "Minimum required is sm_70 (T4). Re-run with accelerator = Tesla T4."
+    )
+
 # Fix #3: uninstall Unsloth if left from a prior warm session.
 # Even without `import unsloth`, it monkey-patches SFTTrainer globally.
 get_ipython().system("pip uninstall -y unsloth unsloth_zoo torchao 2>&1 | tail -3")  # noqa: F821
@@ -266,7 +276,7 @@ print("\n" + "=" * 60)
 print("TRAINING")
 print("=" * 60)
 
-OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v15-adapter"
+OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v16-adapter"
 
 # Fix #10: fp16=False — do NOT enable AMP. The model is in bfloat16; enabling fp16
 # AMP triggers GradScaler which conflicts with bfloat16 LoRA params. bf16=False
@@ -541,7 +551,7 @@ if eval_shortlist:
 # CELL 8: Summary + save results
 # ============================================================
 print("\n" + "=" * 60)
-print("SIMSAT GEMMA-4-E2B v15 COMPLETE")
+print("SIMSAT GEMMA-4-E2B v16 COMPLETE")
 print("=" * 60)
 print(f"  Training loss: {train_result.training_loss:.4f}")
 print(f"  Training steps: {train_result.global_step}")
@@ -550,7 +560,7 @@ for name, res in eval_results.items():
 print(f"  Adapter: {OUTPUT_DIR}")
 
 summary = {
-    "version": "simsat-gemma4-v15",
+    "version": "simsat-gemma4-v16",
     "base_model": MODEL_ID,
     "training_loss": round(train_result.training_loss, 4),
     "training_steps": train_result.global_step,
