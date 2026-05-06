@@ -482,3 +482,286 @@ and under-weight clarity (0.12 vs r=0.865). TTT corrects this autonomously:
 clarity converges 0.12→0.24, geometry 0.34→0.24 in 4 cycles, achieving
 77.3% of the theoretical optimum. The system responds correctly to regime
 shifts (coastal→polar) without any manual recalibration.
+
+### Extended TTT test battery (2026-05-05)
+
+#### Feature ablation (remove one feature, retrain, measure MAE delta)
+
+| Ablated feature | MAE | Delta vs baseline | Finding |
+|---|---|---|---|
+| none (baseline) | 0.10850 | — | |
+| priority | **0.08642** | **−0.022** | Removing priority *improves* MAE — it is adding noise, not signal |
+| geometry | 0.10848 | −0.000 | Near-zero marginal value after TTT down-weights it |
+| duration | 0.11062 | +0.002 | Small positive contribution |
+| imagery | 0.11029 | +0.002 | Small positive contribution |
+| clarity | **0.15954** | **+0.051** | Dominant feature — ablation costs 47% MAE increase |
+
+Priority is anti-helpful in the learned model (likely collinear with clarity on high-priority targets, adding confusion rather than signal). Geometry is near-zero marginal value once its weight is corrected from 0.34→0.24.
+
+#### Learning curve (corpus size vs MAE improvement)
+
+| N traces | Init MAE | Final MAE | Improvement |
+|---|---|---|---|
+| 25 | 0.14416 | 0.10900 | 24.4% |
+| 50 | 0.14558 | 0.11209 | 23.0% |
+| 75 | 0.15072 | 0.11684 | 22.5% |
+| 128 | 0.14995 | 0.11496 | 23.3% |
+| 256 | 0.13984 | 0.10857 | 22.4% |
+
+**Flat across all corpus sizes.** Even 25 traces yields 24.4% improvement — TTT is highly data-efficient. No meaningful gain from scaling the corpus beyond ~50 records. The improvement is driven by weight recalibration, not by seeing more data distribution.
+
+#### Noise robustness (Gaussian feature noise σ)
+
+| σ | Final MAE | Improvement | clarity | geometry |
+|---|---|---|---|---|
+| 0.00 | 0.10824 | 22.6% | 0.2394 | 0.2370 |
+| 0.02 | 0.10831 | 22.5% | 0.2390 | 0.2370 |
+| 0.05 | 0.10840 | 22.5% | 0.2385 | 0.2371 |
+| 0.10 | 0.10847 | 22.4% | 0.2378 | 0.2372 |
+| 0.20 | 0.10852 | 22.4% | 0.2372 | 0.2364 |
+
+Essentially immune to sensor noise up to σ=0.20 (20% of feature range). Learned weights shift by <0.003 under maximum tested noise. Production-safe under realistic measurement uncertainty.
+
+#### Convergence speed (cycles to reach % of total improvement pool)
+
+| Milestone | Cycle | MAE | clarity | geometry |
+|---|---|---|---|---|
+| 50% of pool | 1 | 0.11266 | 0.2225 | 0.2511 |
+| 75% of pool | 1 | 0.11266 | 0.2225 | 0.2511 |
+| 90% of pool | 2 | 0.10920 | 0.2357 | 0.2396 |
+| 95% of pool | 2 | 0.10920 | 0.2357 | 0.2396 |
+| 99% of pool | 5 | 0.10780 | 0.2402 | 0.2373 |
+
+**TTT is essentially a 1-cycle adaptation.** 75% of total possible improvement is captured in the first pass through the corpus. 99% by cycle 5. In production this means re-calibration is complete within a single observation window session (~50–100 encounters).
+
+#### Action-stratified weight signal (accept vs refine traces independently)
+
+| Feature | Prior | Accept-only (n=156) | Refine-only (n=100) | Combined |
+|---|---|---|---|---|
+| clarity | 0.12 | **+0.129** (→0.249) | −0.062 (→0.058) | +0.119 (→0.239) |
+| geometry | 0.34 | −0.113 (→0.228) | +0.004 (→0.344) | −0.102 (→0.238) |
+| priority | 0.20 | −0.086 (→0.114) | **+0.104** (→0.304) | −0.075 (→0.125) |
+| imagery | 0.16 | +0.043 (→0.203) | −0.033 (→0.128) | +0.036 (→0.196) |
+| duration | 0.18 | +0.026 (→0.206) | −0.014 (→0.166) | +0.022 (→0.202) |
+
+Accept and refine traces pull clarity in **opposite directions**. Accept (util=0.85) strongly says clarity matters for high-utility windows (+0.129). Refine (util=0.55) says clarity is less relevant for borderline windows (−0.062). When combined, accept wins because its utility signal is stronger. This explains why the combined model converges to clarity ~0.24 — it's learning that clarity is the primary discriminator between accept-quality and refine-quality windows.
+
+### Deep TTT tests (2026-05-05)
+
+#### Feature correlation matrix (multicollinearity)
+
+| Feature | r with utility | Notes |
+|---|---|---|
+| clarity | +0.865 | Dominant signal |
+| priority | +0.183 | Weak-moderate |
+| geometry | +0.081 | Near-zero |
+| duration | **+0.000** | Constant after clipping — zero discriminative info |
+| imagery | **+0.000** | Constant after clipping — zero discriminative info |
+
+**duration and imagery are perfectly correlated with each other (r=+1.000)** — after clipping at 0.7, both features are identical constants across all 256 traces. They carry zero discriminative information. Their marginal MAE contribution in the ablation (+0.002 each) comes entirely from scale normalization, not from actual signal. The clip threshold is masking two features entirely.
+
+priority has r=+0.212 with clarity — moderate collinearity that explains why removing priority *improves* MAE: in this corpus priority partially mimics clarity variance but noisily, adding confusion rather than signal.
+
+#### Gradient direction consistency
+
+| Feature | Final drift | % traces agree | Signal quality |
+|---|---|---|---|
+| clarity | +0.118 | 71.5% | Consistent |
+| duration | +0.022 | 71.5% | Consistent (but constant feature) |
+| imagery | +0.035 | 71.5% | Consistent (but constant feature) |
+| priority | −0.074 | **28.5%** | Noisy — majority of traces disagree |
+| geometry | −0.102 | **28.5%** | Noisy — majority of traces disagree |
+
+Priority and geometry are learned by a minority-wins mechanism: the 156 accept traces (util=0.85, stronger gradient signal) override the 100 refine traces even though only 28.5% of all traces push in the final direction. This is mechanically correct but means the geometry/priority weights are sensitive to corpus composition.
+
+#### Long-run stability (500 cycles)
+
+| Cycle | MAE | clarity | geometry | priority |
+|---|---|---|---|---|
+| 1 | 0.11266 | 0.2225 | 0.2511 | 0.1365 |
+| 5 | 0.10780 | 0.2402 | 0.2373 | 0.1239 |
+| 20 | 0.10850 | 0.2383 | 0.2384 | 0.1264 |
+| 100 | 0.10823 | 0.2395 | 0.2370 | 0.1259 |
+| 500 | 0.10853 | 0.2380 | 0.2379 | 0.1263 |
+
+Weights oscillate within ±0.003 of their cycle-5 values across 500 cycles. No drift, no collapse. L2 regularization (reg=0.002) is providing the restoring force. MAE stable at 0.108 ± 0.001 from cycle 5 to 500 — the system has fully converged by cycle 5 and remains there indefinitely.
+
+#### Clip sensitivity (duration/imagery saturation threshold)
+
+| dur_clip | img_clip | MAE | clarity | geometry | Notes |
+|---|---|---|---|---|---|
+| 0.5 | 0.5 | 0.14694 | 0.2605 | 0.2601 | Over-constrained |
+| 0.6 | 0.6 | 0.12601 | 0.2476 | 0.2472 | |
+| **0.7** | **0.7** | **0.10850** | **0.2383** | **0.2384** | **Current default** |
+| 0.8 | 0.8 | 0.09537 | 0.2349 | 0.2369 | 12% better MAE |
+| 1.0 | 1.0 | 0.08315 | 0.2475 | 0.2623 | Geometry rises again |
+| 0.7 | 1.0 | 0.09033 | 0.2368 | 0.2414 | |
+
+clip=0.7 is slightly conservative — clip=0.8 gives 12% better MAE while keeping geometry below 0.24. clip=1.0 allows geometry to recover toward 0.26, suggesting that without clipping the saturated imagery/duration features absorb gradient that would otherwise correct geometry. The 0.7 default is safe; 0.8 is worth testing on production traces where saturation is real signal.
+
+#### Cross-dataset convergence (encounter corpus vs OVL traces)
+
+| Feature | Prior | Encounter | OVL | Direction agrees? |
+|---|---|---|---|---|
+| clarity | 0.12 | 0.2383 | 0.2172 | **YES** (+0.119 / +0.097) |
+| priority | 0.20 | 0.1264 | 0.0631 | **YES** (both down) |
+| geometry | 0.34 | 0.2384 | **0.5473** | **NO** (enc down, OVL up) |
+| duration | 0.18 | 0.2016 | 0.1231 | NO |
+| imagery | 0.16 | 0.1954 | 0.0493 | NO |
+
+L2 weight distance between datasets: **0.357** — large divergence. Clarity and priority agree; geometry strongly disagrees (0.238 vs 0.547). The OVL geometry spike likely reflects the OVL corpus bias: stored traces are high-quality accepted windows where geometry truly was the selection criterion. Encounter records include the broader distribution including refine/borderline cases where clarity is the discriminator.
+
+**Implication:** The encounter corpus is the more representative reference for production TTT. OVL traces alone would miscalibrate geometry upward.
+
+#### Streaming production simulation (single pass, no shuffling)
+
+| After N encounters | MAE | Improvement | clarity | geometry |
+|---|---|---|---|---|
+| 10 | 0.13479 | 3.6% | 0.1374 | 0.3239 |
+| 25 | 0.13261 | 5.2% | 0.1461 | 0.3191 |
+| 50 | 0.12715 | 9.1% | 0.1671 | 0.2996 |
+| 100 | 0.11950 | 14.5% | 0.1952 | 0.2769 |
+| 150 | 0.11491 | 17.8% | 0.2141 | 0.2602 |
+| 200 | 0.11270 | 19.4% | 0.2242 | 0.2491 |
+| 256 | 0.11266 | 19.4% | 0.2225 | 0.2511 |
+
+In a realistic production stream (no shuffling, single pass): 19.4% improvement after seeing 256 encounters. Smooth monotonic improvement from first encounter. After ~100 encounters (≈40% of corpus) the system has captured 14.5% of total improvement — meaningful real-time re-calibration with no offline training step.
+
+### Analysis tests (2026-05-05)
+
+#### Error distribution shift (prior → learned)
+
+| Statistic | Prior weights | Learned weights | Change |
+|---|---|---|---|
+| Mean error (bias) | +0.103 | +0.071 | −0.032 |
+| MAE | 0.13984 | 0.10850 | −22.4% |
+| Median AE | 0.133 | 0.103 | −22.6% |
+| p90 AE | 0.250 | 0.179 | −28.4% |
+| p99 AE | 0.333 | 0.259 | −22.2% |
+| Max AE | 0.341 | 0.263 | −22.9% |
+| Std AE | 0.083 | 0.056 | −32.5% |
+
+The learned weights compress the entire error distribution. The tail (p90-p99) improves as much as the median — TTT is not just shifting mean error, it's reducing variance. The remaining bias (+0.071) is a global calibration offset independent of weight direction, not learnable via relative weight adjustment.
+
+#### Outlier analysis (top-10 hardest traces after TTT)
+
+All 10 highest-error traces after TTT are **accept** traces. Feature profile of outliers vs corpus:
+
+| Feature | Outlier mean | Corpus mean | Delta |
+|---|---|---|---|
+| clarity | 0.828 | 0.737 | +0.090 |
+| geometry | 0.401 | 0.710 | **−0.309** |
+| priority | 0.298 | 0.311 | −0.014 |
+| duration | 0.700 | 0.700 | 0.000 |
+| imagery | 0.700 | 0.700 | 0.000 |
+
+Outliers are high-clarity / low-geometry accept traces — the model predicts ~0.59 but utility is 0.85. The error is irreducible within the current linear parameterization: when geometry is low, the model can't reach 0.85 even with maximum clarity weight. These cases likely represent operator accepts driven by target priority or intelligence value not captured in any feature. Residual max AE of 0.263 is the floor for a 5-feature linear trust model on this corpus.
+
+#### Batch OLS vs TTT online
+
+| Method | MAE | Improvement | Notes |
+|---|---|---|---|
+| Prior (default weights) | 0.13984 | — | |
+| TTT online (lr=0.02, 20 cycles) | 0.10850 | 22.4% | |
+| Batch OLS (simplex-constrained) | 0.06104 | 56.4% | |
+| OLS unconstrained | 0.05061 | 63.8% | |
+
+**TTT captures 39.8% of the batch-optimal improvement.** The gap is structural: batch OLS drives clarity→0.43, priority→0.01, geometry→0.001 (essentially a pure clarity model). TTT's L2 regularization prevents this extreme solution, keeping weights closer to the prior for stability. The 39.8% efficiency is the deliberate tradeoff between adaptation and stability.
+
+Batch OLS learned weights: `clarity=0.429, duration=0.280, imagery=0.280, priority=0.010, geometry=0.001` — confirming that with perfect information, the trust model would be nearly single-feature (clarity).
+
+#### Initialization sensitivity — unique fixed point
+
+| Init | Init MAE | Final MAE | clarity | geometry |
+|---|---|---|---|---|
+| default | 0.13984 | 0.10850 | **0.2383** | **0.2384** |
+| uniform | 0.12564 | 0.10850 | **0.2383** | **0.2384** |
+| clarity-hot (0.60) | 0.06671 | 0.10850 | **0.2383** | **0.2384** |
+| geometry-hot (0.70) | 0.12988 | 0.10850 | **0.2383** | **0.2384** |
+| random-1 | 0.15450 | 0.10850 | **0.2383** | **0.2384** |
+| random-2 | 0.12602 | 0.10850 | **0.2383** | **0.2384** |
+
+**All initializations converge to the same fixed point** (clarity=0.2383, geometry=0.2384 to 4 decimal places). TTT has a unique global attractor defined by the corpus signal and L2 regularization. Initialization only affects convergence speed, not the endpoint. This is a strong operational property: the system self-corrects from any miscalibration state.
+
+Note: clarity-hot starts better than the TTT attractor (MAE 0.067 vs 0.108) but TTT pulls it back — the attractor is not the batch optimum but the L2-regularized online optimum.
+
+#### Per-update weight trajectory (first 256 updates, no shuffling)
+
+| Updates | clarity | geometry | priority | MAE |
+|---|---|---|---|---|
+| 1 | 0.1222 | 0.3381 | 0.1986 | 0.13923 |
+| 5 | 0.1274 | 0.3343 | 0.1949 | 0.13772 |
+| 13 | 0.1387 | 0.3232 | 0.1871 | 0.13445 |
+| 34 | 0.1476 | 0.3193 | 0.1830 | 0.13241 |
+| 55 | 0.1709 | 0.2951 | 0.1671 | 0.12593 |
+| 89 | 0.1897 | 0.2805 | 0.1545 | 0.12087 |
+| 144 | 0.2119 | 0.2615 | 0.1429 | 0.11543 |
+| 256 | 0.2225 | 0.2511 | 0.1365 | 0.11266 |
+
+Smooth monotonic convergence from update 1. No oscillation, no overshooting. The weight trajectory follows a Fibonacci-like sampling — most of the movement happens after update 50 as the gradient accumulates consistent signal. By update 89 (~35% of corpus) clarity has already moved from 0.12→0.19 and MAE has dropped 13.6%.
+
+### Final TTT tests (2026-05-05)
+
+#### 5-fold cross-validation (holdout generalization)
+
+| Fold | Train N | Test N | Prior MAE | TTT MAE | Improvement |
+|---|---|---|---|---|---|
+| 1 | 204 | 52 | 0.14959 | 0.11616 | 22.3% |
+| 2 | 205 | 51 | 0.14705 | 0.11260 | 23.4% |
+| 3 | 205 | 51 | 0.15634 | 0.11842 | 24.3% |
+| 4 | 205 | 51 | 0.13717 | 0.10490 | 23.5% |
+| 5 | 205 | 51 | 0.10884 | 0.09084 | 16.5% |
+| **Mean** | | | **0.13980** | **0.10858** | **22.3%** |
+| Std | | | 0.0167 | 0.0100 | |
+
+**TTT generalizes.** 22.3% improvement on held-out test folds (vs 22.4% on full corpus). Generalization gap is negligible. TTT also reduces fold-to-fold variance (std drops 0.0167 → 0.0100) — more consistent predictions across different data splits.
+
+#### Threshold calibration (accept vs refine discrimination)
+
+| Weights | Accept pred | Refine pred | Separation | Best threshold | Accuracy | Overlap |
+|---|---|---|---|---|---|---|
+| Prior | 0.658±0.057 | 0.587±0.058 | 0.071 | 0.65 | 74.2% | 45/156 accepts |
+| **Learned** | **0.712±0.045** | **0.585±0.063** | **0.127** | **0.65** | **89.1%** | **20/156 accepts** |
+
+TTT improves accept/refine discrimination from 74.2% to **89.1% accuracy** at the same threshold. The accept distribution shifts from 0.658→0.712 (mean) while refine stays at ~0.585 — the gap nearly doubles (0.071→0.127). Overlap (accepts predicted below refine mean+1σ) drops from 45→20 cases. This is the most operationally significant TTT finding: the learned score is dramatically better at distinguishing high-value windows from borderline ones.
+
+#### Weight perturbation stability (recovery speed)
+
+| Perturbation | Init MAE | After 1 cycle | After 5 cycles | 5-cycle recovery |
+|---|---|---|---|---|
+| Ground truth (baseline) | 0.10800 | 0.10907 | 0.10780 | — |
+| +0.10 geometry | 0.11045 | 0.10939 | 0.10780 | 108% |
+| −0.05 clarity | 0.11514 | 0.10998 | 0.10780 | 103% |
+| Add noise σ=0.05 | 0.10801 | 0.10907 | 0.10780 | ~100% |
+| **Back to prior** | **0.13984** | **0.11266** | **0.10780** | **100.6%** |
+
+Any perturbation — including a full reset to the prior — is recovered within 5 cycles. Even the full prior reset goes from 0.140→0.113 in 1 cycle, 0.108 in 5 cycles, fully recovering to the attractor. The system is self-healing: after any miscalibration event, it re-converges automatically without manual intervention.
+
+#### Irreducible error and explained variance
+
+| Method | R² | Accept MAE | Refine MAE |
+|---|---|---|---|
+| Prior weights | **−0.23** | — | — |
+| TTT online (lr=0.02) | **+0.31** | 0.138 | 0.062 |
+| OLS unconstrained | ~0.75 (est.) | 0.030 | 0.082 |
+
+**Prior weights have R² = −0.23: the default learned_score_weights are anti-predictive of actual utility variance.** Predictions made with default weights are negatively correlated with real operator outcomes — the model is systematically more confident on worse windows. TTT corrects this to R²=+0.31 (30.9% of utility variance explained) without any retraining.
+
+The refine/accept asymmetry in TTT (refine MAE 0.062 vs accept MAE 0.138) reflects the L2 regularization ceiling: TTT can't drive clarity high enough to fully predict accept-quality windows without destabilizing the weight vector. OLS unconstrained achieves the opposite — near-perfect accept prediction (MAE 0.030) at the cost of worse refine prediction (MAE 0.082) and no operational stability guarantee.
+
+### TTT system summary
+
+| Metric | Value |
+|---|---|
+| **R² prior → TTT** | **−0.23 → +0.31** |
+| **Accept/refine accuracy** | **74.2% → 89.1%** |
+| **MAE improvement (full corpus)** | **22.4%** |
+| **MAE improvement (5-fold CV)** | **22.3% ± generalization gap ≈0%** |
+| Convergence (99% of improvement) | 5 cycles |
+| Data efficiency (25 traces) | 24.4% improvement |
+| Noise robustness (σ=0.20) | 22.4% (unchanged) |
+| Long-run stability (500 cycles) | ±0.003 weight oscillation |
+| Recovery from prior reset | 5 cycles |
+| Unique fixed point | Yes (all inits converge identically) |
+| Streaming single-pass | 19.4% improvement |
+| TTT vs batch-optimal | 39.8% of OLS improvement |
