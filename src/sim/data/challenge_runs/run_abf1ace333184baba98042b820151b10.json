@@ -1,0 +1,42 @@
+{
+  "run_id": "run_abf1ace333184baba98042b820151b10",
+  "created_at": "2026-05-06T14:21:59Z",
+  "runner": "challenge_offline_batch",
+  "scenario_policy": "competition",
+  "scenario_hours": {
+    "maritime_chokepoints": 48.0,
+    "disaster_response_weather": 16.0,
+    "urban_coastal_ambiguity": 8.0,
+    "pedospheric_integrity": 24.0
+  },
+  "lanes": [
+    "matrix",
+    "readiness"
+  ],
+  "outputs": {
+    "matrix": "D:\\SimSat\\CHALLENGE_TEST_STATUS.md",
+    "readiness": "D:\\SimSat\\SUBMISSION_READINESS.md"
+  },
+  "status": "completed",
+  "notes": {
+    "workspace_root": "D:\\SimSat",
+    "policy": "competition",
+    "scenario_hours": {
+      "maritime_chokepoints": 48.0,
+      "disaster_response_weather": 16.0,
+      "urban_coastal_ambiguity": 8.0,
+      "pedospheric_integrity": 24.0
+    },
+    "lanes": [
+      "matrix",
+      "readiness"
+    ],
+    "offline_transport": true,
+    "manifest_version": 1,
+    "output_count": 2,
+    "output_names": [
+      "matrix",
+      "readiness"
+    ]
+  }
+}
