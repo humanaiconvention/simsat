@@ -114,6 +114,7 @@ def _build_augmented_dataset(
     target_per_class: int,
     max_aug_ratio: float,
     seed: int,
+    defer_cap: int | None = None,
 ) -> tuple[np.ndarray, np.ndarray, list[dict]]:
     """Encode original tile + K augmentations per row.
 
@@ -143,6 +144,8 @@ def _build_augmented_dataset(
         # Apply per-class cap on augmentation
         cap = int(np.ceil(len(class_rows) * (1.0 + max_aug_ratio)))
         effective = min(target_per_class, cap)
+        if defer_cap is not None and label_idx == ACTION_TO_IDX["defer"]:
+            effective = min(effective, defer_cap)
         effective_targets[label_idx] = effective
         # First include each original row exactly once.
         for r in class_rows:
@@ -204,6 +207,7 @@ def _train_head(
     device: str,
     seed: int,
     use_class_weights: bool,
+    defer_weight: float = 1.0,
 ) -> tuple[Any, dict]:
     import torch
     import torch.nn as nn
@@ -230,9 +234,12 @@ def _train_head(
     if use_class_weights:
         train_cls_count = torch.bincount(yt, minlength=n_actions).clamp(min=1)
         cls_weights = (train_cls_count.float().mean() / train_cls_count.float()).to(device)
+        if defer_weight != 1.0:
+            defer_idx = ACTIONS.index("defer")
+            cls_weights[defer_idx] *= defer_weight
     else:
         cls_weights = None
-    print(f"  class weights: {cls_weights.tolist() if cls_weights is not None else 'off'}")
+    print(f"  class weights: {cls_weights.tolist() if cls_weights is not None else 'off'} (defer_weight={defer_weight})")
 
     opt = torch.optim.AdamW(head.parameters(), lr=lr, weight_decay=weight_decay)
     loss_fn = nn.CrossEntropyLoss(weight=cls_weights)
@@ -317,6 +324,16 @@ def main() -> int:
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--no-class-weights", action="store_true",
                         help="Disable inverse-frequency class weighting in CE loss.")
+    parser.add_argument("--defer-weight", type=float, default=1.0,
+                        help="Multiplier applied to the defer class loss weight after "
+                             "inverse-frequency calculation. <1.0 penalises over-prediction "
+                             "of defer (e.g. 0.5 halves defer's contribution to the loss). "
+                             "Default 1.0 = no adjustment.")
+    parser.add_argument("--defer-cap", type=int, default=None,
+                        help="Hard ceiling on augmented defer examples, applied after "
+                             "max_aug_ratio. E.g. --defer-cap 24 keeps defer at most 24 "
+                             "examples even if target_per_class=48. Reduces defer's training "
+                             "prior without changing other class targets. Default: no cap.")
     args = parser.parse_args()
 
     import torch
@@ -345,6 +362,7 @@ def main() -> int:
         target_per_class=args.target_per_class,
         max_aug_ratio=args.max_aug_ratio,
         seed=args.seed,
+        defer_cap=args.defer_cap,
     )
     final_per_class = Counter(int(l) for l in labels)
     print(f"  post-aug per-class: {{ {', '.join(f'{ACTIONS[k]}: {final_per_class[k]}' for k in sorted(final_per_class))} }}")
@@ -362,6 +380,7 @@ def main() -> int:
         batch_size=args.batch_size, weight_decay=args.weight_decay,
         device=device, seed=args.seed,
         use_class_weights=not args.no_class_weights,
+        defer_weight=args.defer_weight,
     )
 
     val_pred = np.asarray(train_stats["val_pred"])

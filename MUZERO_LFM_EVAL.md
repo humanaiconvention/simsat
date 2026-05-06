@@ -249,3 +249,236 @@ Training: best val acc **0.829** (epoch 41). Per-action val: accept 10/10, defer
 **v3 honest limitation:** defer is now over-predicted (43% vs playback baseline 5%), refine is under-predicted (37% vs 68%), skip is gone entirely (0% vs 9%). The auto-labeled defer cases (cloud≥80%) produced a strong defer feature that the head generalises too aggressively — borderline refine windows are being routed to defer instead. Reward improved over v2 (−0.0273 vs −0.0438) partly because defer is cheaper than a bad refine, not because the distribution is closer to the operator's.
 
 **v3 status:** Research finding, not a production checkpoint. **v2 remains canonical** (`weights/muzero/stage2_bc/policy_head.pt`). v3 proves defer can be learned; v4 direction is calibrating the defer/refine boundary — either by downsampling the auto-labeled defer cases or by weighting them lower in the loss to match the ~5% real-world defer rate.
+
+## BC policy (Stage 2 v4 — max_aug_ratio 2.0)
+
+Hypothesis: halving the augmentation ratio (4.0→2.0) reduces effective defer pool from 48→26, loosening the over-strong defer feature boundary while keeping defer recall above zero.
+
+Command:
+```
+python scripts/muzero_stage2_pretrain.py --out-dir weights/muzero/stage2_bc_v4 \
+    --max-aug-ratio 2.0 --target-per-class 48 --epochs 60 --lr 1e-3 --seed 42
+```
+
+### Stage 2 v4 results (2026-05-05, BEAST RTX 2080)
+
+Training: best val acc **0.733** (epoch 6). Per-action val: accept 10/10, defer 0/3, refine 7/10, skip 5/5.
+
+| Metric | Value |
+|---|---|
+| Episodes | 75 |
+| accept | 0 (0%) |
+| refine | 39 (52%) |
+| defer  | 36 (48%) |
+| skip   | 0 (0%) |
+| Mean episode reward | −0.0310 ± 0.0255 |
+
+v4 regressed vs v3: lower val acc and similar defer over-prediction. aug_ratio reduction alone is insufficient.
+
+## BC policy (Stage 2 v5 — defer_weight 0.4)
+
+Hypothesis: reducing defer's loss weight (0.4×) tightens the refine/defer decision margin.
+
+Command:
+```
+python scripts/muzero_stage2_pretrain.py --out-dir weights/muzero/stage2_bc_v5 \
+    --max-aug-ratio 4.0 --target-per-class 48 --defer-weight 0.4 --epochs 60 --lr 1e-3 --seed 42
+```
+
+### Stage 2 v5 results (2026-05-05, BEAST RTX 2080)
+
+Training: best val acc **0.829** (epoch 31). Per-action val: accept 9/10, defer 6/10, refine 9/10, skip 5/5.
+
+| Metric | Value |
+|---|---|
+| Episodes | 75 |
+| Encoder latency mean / p95 | 65.1 ms / 66.6 ms |
+| accept | 3 (4%) |
+| refine | 23 (31%) |
+| defer  | 49 (65%) |
+| skip   | 0 (0%) |
+| Mean episode reward | **−0.0244** ± 0.0208 |
+
+**Per-pack breakdown:**
+
+| Pack | Episodes | accept | refine | defer | skip | Reward |
+|---|---|---|---|---|---|---|
+| Maritime Chokepoints | 22 | 1 | 2 | 19 | 0 | −0.0145 |
+| Disaster / Weather | 23 | 1 | 7 | 15 | 0 | −0.0252 |
+| Urban Coastal Ambiguity | 30 | 1 | 14 | 15 | 0 | −0.0333 |
+
+v5 lesson: reducing defer_weight backfired. Training data is identical to v3 (same aug, same originals); lower defer loss weight weakens the gradient signal for distinguishing defer from its neighbors, so the model defaults to defer even more at inference (65% vs v3's 43%). The reward "improves" only because defer is the cheapest action (−0.01 step vs −0.05 refine).
+
+## BC policy (Stage 2 v6 — defer_cap 24)
+
+Hypothesis: capping augmented defer at 24 (vs 48 for accept/refine) shrinks the defer training prior without touching loss weights.
+
+Command:
+```
+python scripts/muzero_stage2_pretrain.py --out-dir weights/muzero/stage2_bc_v6 \
+    --max-aug-ratio 4.0 --target-per-class 48 --defer-cap 24 --epochs 60 --lr 1e-3 --seed 42
+```
+
+### Stage 2 v6 results (2026-05-05, BEAST RTX 2080)
+
+Training: best val acc **0.767** (epoch 14). Per-action val: accept 10/10, defer 2/5, refine 7/10, skip 4/5.
+
+| Metric | Value |
+|---|---|
+| Episodes | 75 |
+| Encoder latency mean / p95 | 70.9 ms / 71.7 ms |
+| accept | 0 (0%) |
+| refine | 10 (13%) |
+| defer  | 65 (87%) |
+| skip   | 0 (0%) |
+| Mean episode reward | **−0.0157** ± 0.0110 |
+
+**Per-pack breakdown:**
+
+| Pack | Episodes | accept | refine | defer | skip | Reward |
+|---|---|---|---|---|---|---|
+| Maritime Chokepoints | 22 | 0 | 0 | 22 | 0 | −0.0100 |
+| Disaster / Weather | 23 | 0 | 1 | 22 | 0 | −0.0122 |
+| Urban Coastal Ambiguity | 30 | 0 | 9 | 21 | 0 | −0.0250 |
+
+v6 lesson: defer collapsed to 87% despite fewer training examples — worse than v5 (65%). Reducing the training prior does not fix the inference distribution. The auto-labeled defer features (cloud≥80%) form a dominant cluster in LFM embedding space that generalises too broadly to cloudy eval tiles regardless of training count.
+
+## Defer over-prediction — root cause and ceiling
+
+All tuning vectors hit the same wall:
+
+| Approach | Result |
+|---|---|
+| aug_ratio reduction (v4) | Lower val acc, same over-prediction |
+| defer_weight < 1.0 (v5) | Weaker gradient → more defer (counterintuitive) |
+| defer_cap reduction (v6) | Fewer training defer → even more inference defer |
+
+**Root cause:** The 10 auto-labeled defer cases (cloud_cover≥80%, target_visible) produce a tight, distinct feature cluster in LFM-450M embedding space. At inference, many cloudy eval tiles fall near this cluster and get routed to defer. The cluster is strong enough that neither loss weighting nor training count changes can displace it.
+
+**Ceiling:** No augmentation or weighting strategy fixes this without real operator-reviewed defer labels from tiles that are *not* cloud-covered (ambiguous light cloud, partial occlusion, etc.) — the cases where an operator actually defers vs refines. The `scripts/build_defer_queue.py` queue targets exactly these; ~10 additional real reviews would let the model learn the true defer/refine boundary.
+
+## Full version comparison
+
+| Action | Playback | S1 BC | S2 v2 | S2 v3 | S2 v5 | S2 v6 | Notes |
+|---|---|---|---|---|---|---|---|
+| accept | 13 (17%) | 0 | 9 (12%) | 15 (20%) | 3 (4%) | 0 | v3 closest |
+| refine | 51 (68%) | 75 | 53 (71%) | 28 (37%) | 23 (31%) | 10 (13%) | v2 closest |
+| defer  | 4 (5%)  | 0 | 0 | 32 (43%) | 49 (65%) | 65 (87%) | all over-predict |
+| skip   | 7 (9%)  | 0 | 13 (17%) | 0 | 0 | 0 | v2 only non-zero |
+| Reward | −0.0441 | −0.0600 | −0.0438 | −0.0273 | −0.0244 | −0.0157 | reward ↑ as defer ↑ (artifact) |
+| Val acc | n/a | 0.800 | 0.967 | 0.829 | 0.829 | 0.767 | |
+
+**Final status:**
+- **v2 is canonical** (`weights/muzero/stage2_bc/policy_head.pt`): highest val acc (0.967), distribution closest to operator, no defer collapse.
+- **v3 is the best research finding**: first run with a real defer boundary; reward improved; action diversity is highest. Not promoted to canonical due to 43% defer over-prediction.
+- **v5 / v6** improve raw reward via defer inflation — this is an artifact of the reward structure, not genuine accuracy improvement.
+
+## TTT (Test-Time Training) — full test battery (2026-05-05)
+
+`trust_model.online_update()` adapts `learned_score_weights` in real time from
+operator utility signal. Two scripts exercise this: `ttt_sim_real.py` (OVL
+traces) and `ttt_sim_env.py` (encounter records, live prediction recompute).
+
+### Feature correlation with utility (encounter corpus, n=256)
+
+| Feature | Prior weight | Pearson r | Implication |
+|---|---|---|---|
+| clarity | 0.12 | **+0.865** | Most under-weighted — dominant signal |
+| priority | 0.20 | +0.341 | Roughly correctly weighted |
+| imagery | 0.16 | +0.287 | Slightly under-weighted |
+| duration | 0.18 | +0.212 | Slightly under-weighted |
+| geometry | 0.34 | +0.081 | Most over-weighted — prior too high by ~0.10 |
+
+### TTT learned weights (bootstrap CI, 200 resamples, lr=0.02, 20 cycles)
+
+| Feature | Prior | Mean learned | 95% CI |
+|---|---|---|---|
+| clarity | 0.12 | 0.2388 | [0.237, 0.240] |
+| geometry | 0.34 | 0.2380 | [0.236, 0.239] |
+| imagery | 0.16 | 0.1959 | [0.194, 0.197] |
+| duration | 0.18 | 0.2018 | [0.200, 0.203] |
+| priority | 0.20 | 0.1254 | [0.124, 0.127] |
+
+Bootstrap CI is tight (±0.001) — learned weights are statistically robust
+on this corpus.
+
+### MAE convergence (live recomputed predictions)
+
+| Dataset | Init MAE | Final MAE | Improvement | Cycles to converge |
+|---|---|---|---|---|
+| Encounter records (n=256) | 0.13984 | 0.10845 | **22.4%** | ~4 |
+| OVL traces (n=55, accept+refine) | 0.27xx | 0.27xx | ~0% (stored score) | n/a |
+
+OVL trace MAE is near-zero improvement because `ttt_sim_real.py` uses stored
+`learned_score` — in production both are equivalent (stored IS the live
+prediction at decision time). The 22.4% improvement on encounter records uses
+live recomputation which measures actual weight quality change.
+
+### Improvement ceiling analysis (lr=0.02, 15 cycles)
+
+| Regime | MAE | vs prior |
+|---|---|---|
+| Prior (init weights) | 0.13984 | — |
+| TTT-learned | 0.10826 | +22.6% |
+| Gradient optimal (unconstrained linear) | 0.09899 | +29.2% |
+
+TTT achieves **77.3% of the unconstrained linear-model optimum** — the gap is
+the online learning overhead (shuffled order, finite cycles, L2 regularization).
+
+### Regularization sensitivity (lr=0.02, 15 cycles)
+
+| reg | MAE | clarity | geometry | Notes |
+|---|---|---|---|---|
+| 0.000 | 0.09565 | 0.287 | 0.194 | Slightly better MAE, higher drift risk |
+| **0.002** | **0.10826** | **0.239** | **0.238** | **Production default — best stability** |
+| 0.050 | 0.13373 | 0.142 | 0.322 | Over-regularized, near-prior |
+
+### LR sweep (20 cycles, encounter corpus)
+
+| lr | Final MAE | Improvement | clarity | geometry |
+|---|---|---|---|---|
+| 0.001 | 0.1283 | 8.2% | 0.148 | 0.308 |
+| 0.005 | 0.1157 | 17.2% | 0.196 | 0.271 |
+| **0.020** | **0.1085** | **22.4%** | **0.239** | **0.238** |
+| 0.050 | 0.1081 | 22.7% | 0.248 | 0.229 |
+| 0.100 | 0.1103 | 21.2% | 0.245 | 0.230 |
+
+lr=0.02 is the sweet spot — 0.05 is marginally better on this corpus but
+risks instability on OOD traces.
+
+### Regime shift: coastal → polar (--shift flag)
+
+`python scripts/ttt_sim_env.py --shift` runs two phases without weight reset:
+
+| Feature | Init | After coastal (15 cycles) | After polar (15 cycles) |
+|---|---|---|---|
+| clarity | 0.12 | **0.239** | 0.130 (↓ polar fog) |
+| geometry | 0.34 | 0.238 | **0.299** (↑ polar geometry) |
+| imagery | 0.16 | 0.196 | 0.215 |
+| duration | 0.18 | 0.202 | 0.221 |
+| priority | 0.20 | 0.125 | 0.136 |
+
+Clarity drops from 0.239→0.130 and geometry rises 0.238→0.299 as the
+operational environment shifts to polar. The system re-adapts autonomously
+with no manual intervention, no weight reset, and no retraining.
+
+### Per-pack TTT (encounter corpus, scenario_pack breakdown)
+
+All packs converge to the same direction (clarity ↑, geometry ↓) with
+consistent magnitude — confirming the prior is systematically miscalibrated
+across scenario types, not just coastal packs.
+
+### Parity check vs trust_model.online_update()
+
+`max_diff=3e-3` between sim and production function. Not a bug — sim uses
+live prediction, production uses stored `learned_score` at decision time.
+In production both are identical (stored IS the live prediction when decision
+was made). Documented architectural difference, not a discrepancy.
+
+### Summary
+
+The prior `learned_score_weights` over-weight geometry (0.34 vs r=0.081)
+and under-weight clarity (0.12 vs r=0.865). TTT corrects this autonomously:
+clarity converges 0.12→0.24, geometry 0.34→0.24 in 4 cycles, achieving
+77.3% of the theoretical optimum. The system responds correctly to regime
+shifts (coastal→polar) without any manual recalibration.

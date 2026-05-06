@@ -276,7 +276,7 @@ print("\n" + "=" * 60)
 print("TRAINING")
 print("=" * 60)
 
-OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v16-adapter"
+OUTPUT_DIR = "/kaggle/working/simsat-gemma4-v17-adapter"
 
 # Fix #10: fp16=False — do NOT enable AMP. The model is in bfloat16; enabling fp16
 # AMP triggers GradScaler which conflicts with bfloat16 LoRA params. bf16=False
@@ -344,27 +344,39 @@ print(f"\nTraining complete!")
 print(f"  Final loss: {train_result.training_loss:.4f}")
 print(f"  Steps: {train_result.global_step}")
 
-# v14 fix: de-share LoRA ModuleDict entries before save_pretrained.
-# Root cause: Gemma-4 GQA ties k/v projection modules across layers (same Python
-# object at multiple paths). PyTorch's named_parameters() deduplicates by module id,
-# so layers 15-34 k/v LoRA are silently dropped (410/490 in v11-v13).
-# Cloning .weight.data (v12/v13) is insufficient — the dedup happens at the module
-# object level before peft inspects tensors.
-# Fix: replace any repeated lora_A/lora_B ModuleDict entry with a deepcopy so every
-# path gets a distinct module id, and named_parameters() yields all 490 tensors.
+# v17 fix: de-share LoRA modules before save_pretrained.
+# Root cause: Gemma-4 GQA ties k/v projection modules across layers — the same
+# Python object appears at multiple paths (e.g. layers 0 and 15 share one module).
+# PyTorch named_parameters() / named_modules() both deduplicate by module id via
+# an internal memo set, so layers 15-34 k/v LoRA are silently dropped (410/490).
+# v14-v16: used named_modules() to find duplicates — but named_modules() itself
+# deduplicates, so shared modules were never visited and the fix never fired.
+# v17: walk _modules directly (bypassing dedup), deepcopy any LoRA module whose
+# id was already seen at a different path.
 import copy as _copy
-_seen_lora_ids = set()
-for _mod_name, _mod in trainer.model.named_modules():
-    for _attr in ("lora_A", "lora_B"):
-        _mdict = getattr(_mod, _attr, None)
-        if not isinstance(_mdict, torch.nn.ModuleDict):
-            continue
-        for _adapter_key in list(_mdict.keys()):
-            _child = _mdict[_adapter_key]
-            if id(_child) in _seen_lora_ids:
-                _mdict[_adapter_key] = _copy.deepcopy(_child)
+
+def _break_lora_sharing(root):
+    _seen = {}
+    _fixed = 0
+    def _walk(parent, path):
+        nonlocal _fixed
+        for name, child in list(parent._modules.items()):
+            if child is None:
+                continue
+            cid = id(child)
+            child_path = f"{path}.{name}" if path else name
+            is_lora = hasattr(child, "lora_A") and hasattr(child, "lora_B")
+            if cid in _seen and is_lora:
+                parent._modules[name] = _copy.deepcopy(child)
+                _fixed += 1
             else:
-                _seen_lora_ids.add(id(_child))
+                _seen[cid] = child_path
+                _walk(child, child_path)
+    _walk(root, "")
+    return _fixed
+
+_n_fixed = _break_lora_sharing(trainer.model)
+print(f"  GQA de-share: {_n_fixed} shared LoRA modules replaced with independent deepcopy")
 
 trainer.model.save_pretrained(OUTPUT_DIR)
 tokenizer.save_pretrained(OUTPUT_DIR)
