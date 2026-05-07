@@ -1,4 +1,3 @@
-[rtk] /!\ No hook installed — run `rtk init -g` for automatic token savings
 # ObservationVLA Reviewed Evaluation
 
 ## Runtime

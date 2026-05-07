@@ -14,8 +14,8 @@
 **Headline evidence (operator-reviewed eval):**
 - **v11 in-distribution N=37** (accept↔refine binary boundary): exact **0.86** (32/37) · useful **0.97** · MAE **0.13** · per-pack disaster=1.00, maritime=0.92, urban-coastal=0.71
 - **v11 cross-distribution N=152** (balanced 4-class, includes 54 spectral-biochemical pedospheric cases): exact **0.30** — distribution-shift evidence motivating the on-orbit TTT + viability-gate architecture
-- **v12 retrain on dataset v4 (1638 rows, balanced 4-class)**: in flight; eval will report both full-pool (in-distribution) and held-out subsets to flag training-set leakage honestly
-- **Trust-layer TTT (10 seeds)**: 22.5% MAE improvement ± 0.1% (`ttt_stability_analysis.md`)
+- **v12 retrain on dataset v4 (1638 rows, balanced 4-class)**: eval complete — **not promoted**. 65% parse failure (53/152 parsed); effective exact ≈0.18 vs v11's 0.30. v11 remains canonical. See [`OBSERVATION_VLA_EVAL.md`](./OBSERVATION_VLA_EVAL.md) and `KNOWN_ISSUES.md` #28
+- **Trust-layer TTT (10 seeds)**: 22.5% MAE improvement ± 0.1%; **distribution shift (coastal→polar)** demo: polar MAE 0.161 → 0.150 (−6.9%) in **1 cycle** — 94% of polar-regime improvement in a single pass (`ttt_stability_analysis.md`)
 - **MuZero Liquid Track BC (10 seeds, LFM2.5-VL-450M)**: best val_acc **0.898 ± 0.049** range [0.825, 0.975] (`MUZERO_SEED_SWEEP.md`)
 - **Viability gates exercise**: 1100 updates × 3 synthetic streams; gates selective and fire on designed conditions (`VIABILITY_GATES_EXERCISE.md`)
 - **Encounter planner (248 windows, 5×48h, 4 packs)**: scaffold produces zero `refine`; trust adds 72; 92/248 changed action
@@ -95,7 +95,7 @@ Fill in two `NotImplementedError` stubs near the top of `src/sim/observation_vla
 - `_load_model(weights_path, device)` — load your model
 - `_predict_heatmap(model, tile, device)` — return `(H', W')` float32 numpy
 
-The stats pooling, action mapping, and 8-key payload assembly are concrete and tested (`pytest tests/test_heatmap_adapter.py` — 14 tests).
+The stats pooling, action mapping, and 8-key payload assembly are concrete and tested (`pytest tests/test_heatmap_adapter.py` — 11 tests).
 
 ```bash
 export OBSERVATION_VLA_BACKEND=heatmap

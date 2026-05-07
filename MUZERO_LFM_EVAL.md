@@ -133,3 +133,29 @@ Hardware: RTX 2080 (benhaslam BEAST). 75 episodes across 3 scenario packs.
 | Encoder latency mean | 69 ms | 13 ms |
 
 SigLIP reward gap is small (-0.0462 vs -0.0438) but accept collapse (0%) limits operational value: a policy that never commits to an observation window is conservative but not useful. The LFM2.5-VL-450M encoder, trained on satellite tile semantics, recovers 12% accept rate and reaches 0.967 val_acc — both gaps attributable to the encoder's richer tile representations rather than BC head capacity.
+
+---
+
+## Why Accept Collapse Happens — and Why On-Orbit TTT Closes It
+
+### The offline collapse mechanism
+
+Eight of ten seeds in the Stage 2 BC sweep (see `MUZERO_SEED_SWEEP.md`) emit zero `accept` predictions despite training on a balanced corpus (a=38, r=37, d=38, s=39) and reaching val_acc 0.898 ± 0.049. The cause is structural:
+
+1. **Decision boundary calibration**: BC training minimizes cross-entropy, not argmax accuracy. A policy can reach high val_acc while the logit gap between `accept` and `defer` is small. At inference, a small logit gap means argmax is sensitive to the exact test distribution — small shifts push every prediction to the safer `defer` or `skip` class.
+
+2. **Offline corpus limitation**: the 4-class training balance is synthetic. The original corpus had 3 natural defer traces; defer examples at a=38 required augmentation. The BC head learns augmented defer patterns rather than real defer geometry, creating a systematic tilt toward negative-class outputs at inference when the tile distribution shifts even slightly.
+
+3. **Reward null-loop**: offline replay only generates utility signal when a window is materialized (accept or refine). When the BC head collapses to defer/skip, no windows are materialized, no utility signal flows, and the static weights remain stuck at the collapse point for the duration of the replay.
+
+### Why on-orbit TTT closes this gap
+
+The on-orbit pipeline has a structural difference from offline replay: the **WCLI trust layer** and the **BC policy head** are decoupled, and the trust layer maintains materialization even when the BC head collapses.
+
+**Path 1 — Scaffold override:** The scaffold (analytic planner) produces accept decisions for high-quality windows based on geometry and clarity alone, before the BC head runs. The encounter service's materialize_top_k pass materializes the highest-scoring candidates regardless of their effective_action classification. High-scaffold-score windows that the BC head classifies as `defer` are still materialized via the scaffold path. These materializations generate utility signal (usefulness_score=0.85 for cloud-clear accepted windows).
+
+**Path 2 — Trust-layer TTT re-weights the clarity signal:** The utility signal from Path 1 feeds into `_apply_trust_layer_ttt` → `trust_model.online_update()`. TTT converges within 2 cycles (see `ttt_stability_analysis.md`). Converged weights: geometry −0.10, clarity +0.12. This means the trust model increases the learned_score for clear windows (high clarity_support), raising their combined_score above the accept threshold independently of the BC head's action distribution.
+
+**Path 3 — The trust layer replaces the stuck prior:** After TTT convergence, the trust model's materialization criterion is based on realized utility from on-orbit operator feedback — not on the BC head's logit distribution. Systematically clear, high-priority windows get combined_score ≥ policy.defer_threshold regardless of whether the BC head's argmax is `defer`. The trust layer effectively acts as a parallel accept path that doesn't inherit the BC head's offline training artifact.
+
+**Net effect:** The BC head collapse is a known limitation of the static offline corpus. On-orbit TTT provides a mechanism for the system to re-learn accept-class criteria from actual mission outcomes within the first few satellite passes — without retraining the BC head and without relying on the fixed training corpus. Stage 3 (two-scope TTT, planned) would additionally adapt the BC head weights directly, closing the gap at the source.

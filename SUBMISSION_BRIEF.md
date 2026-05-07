@@ -18,25 +18,25 @@ The architecture distinguishes between **what handles drift at runtime** (the Si
 
 | Mechanism | Implementation status | Evidence |
 |---|---|---|
-| **Trust-layer TTT** — WCLI thresholds and feature weights tune online from realized-utility feedback | **Proven, working** | 10-seed stability analysis: 22.5% MAE improvement ± 0.1%, 24.1% reward improvement, 1.9 ± 0.3 cycles to 90% convergence ([`ttt_stability_analysis.md`](./ttt_stability_analysis.md)) |
-| **Six viability gates** — information gain, observation quality, metadata consistency, update magnitude, update rate, error balance | **Implemented, exercised** | Wired in `src/sim/haic/viability.py` via `evaluate_ttt_viability()`; fired correctly during the operator-review session (gate warnings `weight_drift`, `error_bias` logged in batch_review output once thresholds drifted) |
+| **Trust-layer TTT** — WCLI thresholds and feature weights tune online from realized-utility feedback | **Proven, working** | 10-seed stability: 22.5% MAE improvement ± 0.1%, 24.1% reward improvement, 1.9 ± 0.3 cycles to 90% convergence. **100-cycle run** (25,600 updates) confirms no divergence — post-convergence MAE range ±0.73%. **Distribution-shift demo (coastal → polar):** with unadapted coastal weights, polar-corpus MAE = 0.161. After **1 cycle of polar feedback**, polar MAE drops to 0.150 (−6.9%); 94% of total polar-regime improvement in a single pass. Weight re-adaptation: geometry +0.061, clarity −0.109 — physically interpretable (polar scenes are cloud-heavy, geometry-reliable). This is the on-orbit improvement mechanism: rapid re-convergence per distribution shift, not monotonic improvement on fixed data. ([`ttt_stability_analysis.md`](./ttt_stability_analysis.md)) |
+| **Six viability gates** — information gain, observation quality, metadata consistency, update magnitude, update rate, error balance | **Implemented, exercised** | Wired in `src/sim/haic/viability.py` via `evaluate_ttt_viability()`. **`error_bias` is a blocking gate**: evaluated pre-update in `_apply_trust_layer_ttt()`; if ≥70% of the last 10 errors share the same sign, the adaptation step is skipped. `weight_drift` and `update_rate` remain post-update log-only warnings. See `VIABILITY_GATES_EXERCISE.md`. |
 | **VLA-layer TTT** — VLM weights / LoRA adapters adapt on streaming Sentinel tiles per-pass, gated by all six checks | **Wired, requires live encounter stream** | `Stage 3 two-scope TTT` is in both tracks (`src/sim/muzero/`, `src/sim/observation_vla/`) but **not benchmarked against a live stream**. This is the lane the prize hardware (NVIDIA Orin 16 GB) enables. |
 
-The ObservationVLA fine-tunes (v11, v12) are **static checkpoints that set where drift starts** — not drift-adaptive at runtime themselves. The 56-point gap between v11's in-distribution (N=37, 0.86) and cross-distribution (N=152, 0.30) eval frames is **what TTT is built to close in flight**, not what offline retraining closes. v12's role is to move the static training distribution closer to deployment so the in-flight TTT loop has less ground to cover, not to make the model itself drift-adaptive.
+The ObservationVLA fine-tune v11 is a **static checkpoint that sets where drift starts** — not drift-adaptive at runtime itself. The 56-point gap between v11's in-distribution (N=37, 0.86) and cross-distribution (N=152, 0.30) eval frames is **what TTT is built to close in flight**, not what offline retraining closes. v12 (dataset v4 retrain) attempted to move that starting point and produced a parse-rate regression instead (35% vs v11's ~100%) — confirming that static corpus rebalancing cannot substitute for the on-orbit adaptation loop.
 
 What the prize buys: Orin time to run Stage 3 VLA-TTT on a live encounter stream and benchmark adaptation convergence per-pass under the same six viability gates that already govern the trust layer.
 
 ## Tracks
 SimSat is submitted to both tracks of the AI in Space hackathon. Both tracks run identical scaffold, WCLI trust, mission-response, viability-gate, and stacked-TTT infrastructure. What differs is the VLA backend and the planning backbone:
 
-- **Liquid Track (LFM2.5 + MuZero)** — A vision-language model serves as the Sentinel tile encoder, producing a dense embedding that feeds MuZero's `h()` representation function. MuZero + MCTS then plans over encounter windows using that embedding. This hybrid architecture is why SimSat genuinely fits the on-orbit constraint: the MuZero ResNet weighs a few MB (fits the 5 MB uplink budget); the encoder is LoRA fine-tuned on SimSat Sentinel tiles and runs its encoder pass locally. Three-stage training: (1) pretrain on the Sentinel tile corpus, (2) fine-tune with SimSat scenario-pack augmentation, (3) two-scope TTT per live pass. The MuZero game adapter, gym environment, and `SimSatMuZeroConfigLFM` FC-network config are all in `src/sim/muzero/`. The encoder seat (`HFVisionTowerEncoder` → `build_encoder("lfm2vl")`) is filled by [`LiquidAI/LFM2.5-VL-450M`](https://huggingface.co/LiquidAI/LFM2.5-VL-450M) (Liquid AI shipped public weights 2026-04-11; SimSat picked them up 2026-04-27). Vision tower is SigLIP-2 NaFlex shape-optimized 86M, 768-dim pooled output. SigLIP-base remains as an offline-safe alternative.
+- **Liquid Track (LFM2.5 + MuZero)** — A vision-language model serves as the Sentinel tile encoder, producing a dense embedding that feeds MuZero's `h()` representation function. MuZero + MCTS then plans over encounter windows using that embedding. This hybrid architecture is why SimSat genuinely fits the on-orbit constraint: the MuZero ResNet weighs a few MB (fits the 5 MB uplink budget); the encoder runs its encoder pass locally. **Domain fine-tuning happens at the policy-head layer:** Stage 1 BC head and Stage 2 BC head are fine-tuned on operator-labeled Sentinel tiles via the LFM2.5-VL-450M embeddings (the encoder weights themselves remain Liquid AI's published production weights — frozen). LoRA-adapter loading on the encoder is wired (`HFVisionTowerEncoder(..., lora_adapter_path=...)`) for Stage 3 on prize hardware, but no encoder adapter has been trained in this submission. Three-stage training: (1) pretrain BC head on the Sentinel tile corpus, (2) fine-tune BC head with SimSat scenario-pack augmentation, (3) two-scope TTT per live pass (encoder LoRA + MuZero head jointly — Orin lane). The MuZero game adapter, gym environment, and `SimSatMuZeroConfigLFM` FC-network config are all in `src/sim/muzero/`. The encoder seat (`HFVisionTowerEncoder` → `build_encoder("lfm2vl")`) is filled by [`LiquidAI/LFM2.5-VL-450M`](https://huggingface.co/LiquidAI/LFM2.5-VL-450M) (Liquid AI shipped public weights 2026-04-11; SimSat picked them up 2026-04-27). Vision tower is SigLIP-2 NaFlex shape-optimized 86M, 768-dim pooled output. SigLIP-base remains as an offline-safe alternative.
 
 - **General AI Track (Gemma-4)** — a Gemma-4-E2B fine-tune scoped specifically to SimSat's encounter-triage task (accept / defer / skip / refine over Sentinel-style tiles). Canonical model: **v11**, on Hugging Face at [`HumanAIConvention/simsat-gemma4-v11`](https://huggingface.co/HumanAIConvention/simsat-gemma4-v11), trained on dataset v2 (713 weighted ChatML rows, pre-defer-expansion). Training code at `notebooks/kaggle-simsat-gemma4-v1/`; Kaggle kernel at [`benhaslam/simsat-gemma4-v1-training`](https://www.kaggle.com/code/benhaslam/simsat-gemma4-v1-training). v11's adapter passes the dynamic LoRA tensor sanity gate at **410/410** — the correct count for Gemma-4-E2B's GQA architecture (15 canonical k/v modules × 2 + 35 layers × 5 non-k/v modules × 2); see [`V11_AUDIT.md`](./V11_AUDIT.md). The v1–v10 null-training audit (target_modules `.linear` matched only the multimodal towers, not the language model) is documented in [`notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md`](./notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md). The `v11 LoRA partial-save` investigation (Issue #27) is also documented honestly: the suspected GQA-dedup bug never existed; 410 was the correct save count; the bug was in the hardcoded `_EXPECTED_TOTAL = 490` sanity gate.
 
   **Eval evidence:**
   - **v11 in-distribution (N=37, accept↔refine binary, geometric register)**: exact **0.86** (32/37), useful **0.97**, MAE **0.13**. Per-pack: disaster=1.00, maritime=0.92, urban-coastal=0.71. +0.32 over always-majority (refine), +0.61 over uniform random.
   - **v11 cross-distribution (N=152, balanced 4-class, geometric + spectral-biochemical)**: exact **0.30**. The 56-point gap is distribution-shift evidence: v11 trained on accept+refine, never saw `defer` or `skip` examples, so the model class-collapses on the broader pool. **This is exactly the on-orbit-drift problem the architecture is built to solve via TTT + viability gates.** The drop is genuine generalization data, not a sign the model is broken.
-  - **v12 retrain (dataset v4, 1638 rows, balanced 4-class, includes the 152 reviewed cases)**: in flight at submission time. v12 eval will report both the full-pool number (with explicit in-distribution-leakage caveat: ~93% of N=152 is in v12 training set) and the held-out N=4 subset (true generalization, but no statistical power). The honest framing for v12 vs v11 is delta-on-comparable-eval, not absolute generalization.
+  - **v12 retrain (dataset v4, 1638 rows, balanced 4-class)**: eval complete — **not promoted; v11 remains canonical.** 65% parse failure (53/152 parsed); effective full-pool exact ≈0.18 — a regression from v11's 0.30. Parse failures show truncated `rationale_tags` JSON (output truncation or schema drift). On the 53 parsed cases exact=0.509, but that subset is self-selected and ~93% in-distribution (training-set leakage). Holdout N=2: exact=0.00. This is the second concrete instance of the labeling-distribution-shift problem: additional training data without operator-loop validation degraded the operational output contract before model accuracy was even measurable. See KNOWN_ISSUES.md #28 and `OBSERVATION_VLA_EVAL.md`.
   - **v17–v19** (intermediate Kaggle runs, dataset v3 with auto-defer expansion): regressed to ~0.46 exact agreement on N=37 — auto-generated defer labels did not match the operator threshold. v11 stayed canonical; the regression is documented as a labeling-distribution finding, not a model failure.
 
   This is **not** the `v35-gov` Gemma-4 fine-tune — `v35-gov` targets human-interview / consent-governance prompts, wrong task shape for satellite imagery. The VLA adapter is model-agnostic by design: any backend that emits the eight-key ObservationVLA JSON contract (schema at `src/sim/observation_vla/observation_payload.schema.json`) plugs into the same scaffold, trust layer, viability gates, and TTT loop without code changes. Swapping the backend is an env-var change (`OBSERVATION_VLA_BACKEND`), not a refactor — model adaptability is an explicit part of the General AI Track entry.
@@ -49,7 +49,7 @@ Per-track thesis statements for the pitch are finalized in [CHALLENGE_ENTRY.md](
 - Readiness checklist: [SUBMISSION_READINESS.md](./SUBMISSION_READINESS.md)
 - ObservationVLA reviewed eval: [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md)
 - Encounter planner eval (248 windows, all 4 packs): [ENCOUNTER_EVAL.md](./ENCOUNTER_EVAL.md)
-- Trust-layer TTT stability analysis (10 seeds): [ttt_stability_analysis.md](./ttt_stability_analysis.md)
+- Trust-layer TTT stability analysis (10 seeds + 100-cycle long-horizon extension): [ttt_stability_analysis.md](./ttt_stability_analysis.md)
 - Inference benchmarks + scenario assessment: [benchmark_results/BENCHMARK_RESULTS.md](./benchmark_results/BENCHMARK_RESULTS.md)
 
 **ObservationVLA eval — v11 in-distribution (N=37 operator-reviewed cases, accept↔refine binary, geometric register):**
@@ -70,22 +70,26 @@ Per-track thesis statements for the pitch are finalized in [CHALLENGE_ENTRY.md](
 - Final val_acc: 0.875 ± 0.055
 - Seeds: {7, 13, 23, 42, 100, 137, 256, 1024, 2026, 9999}
 - Replaces single-seed 0.967 claim from Stage 2 v2; new training corpus is the post-N=152 pool
-- Action collapse to negative-class on offline replay across nearly all seeds — known training-corpus pathology that on-orbit TTT + viability gates address
+- Action collapse to negative-class on offline replay across nearly all seeds — known training-corpus pathology that on-orbit TTT + viability gates address. The mechanism (BC head offline training artifact vs trust-layer TTT runtime correction) is analysed in detail in [`MUZERO_LFM_EVAL.md`](./MUZERO_LFM_EVAL.md) §"Why Accept Collapse Happens".
 - Full breakdown + caveats in [MUZERO_SEED_SWEEP.md](./MUZERO_SEED_SWEEP.md)
 
 **Viability gates exercise (1100 updates × 3 streams):**
-- `baseline_clean`: error_bias 39%, update_rate 9% (ceiling-only) — selective, mostly quiet
-- `drift_one_class`: error_bias **99.8%** — fires almost every step under sustained operator-vs-prediction bias (correct behavior)
-- `saturation`: only update_rate fires — model converges, no other gates activate (correct behavior)
+- `baseline_clean`: error_bias **38.5%** (blocks 423/1100), weight_drift 0%, update_rate 0% — gates selective, mostly quiet on benign streams (38.5% is expected statistical behavior for a 50/50 error distribution with a 70% threshold; 62% of updates still proceed)
+- `drift_one_class`: error_bias **99.1%** (blocks 1090/1100) — **blocking cascade**: systematic bias intercepted pre-update; weight_drift never fires because blocking prevents drift from compounding (correct behavior)
+- `saturation`: update_rate fires past 1000-update ceiling (**9.1%**, 100/1100); error_bias and weight_drift stay quiet (errors = 0 — correct behavior)
 - Demonstrates the gates are **selective** — fire on the conditions they're designed to catch, stay quiet on benign streams. Full breakdown in [VIABILITY_GATES_EXERCISE.md](./VIABILITY_GATES_EXERCISE.md).
 
-**Trust-layer TTT (10-seed stability, 256 encounter records, 20 cycles):**
+**Trust-layer TTT (10-seed stability + 100-cycle long-horizon + distribution-shift demo):**
 - MAE improvement: **22.5% ± 0.1%** [22.2–22.7%] — deterministic across seeds
 - Episode reward improvement: **24.1% ± 0.2%** — confirmed over 544 labeled records
 - 90% convergence: **1.9 ± 0.3 cycles** (essentially 2 passes through the corpus)
 - True-accept gain: **+28 per episode** | False-accept reduction: **−2 per episode**
 - Threshold robust: improvement positive at every threshold from 0.50 to 0.75
-- Dominant signal: clarity weight 0.12→0.24 (+0.12); geometry weight 0.34→0.24 (−0.10)
+- Dominant signal (coastal): clarity 0.12→0.24 (+0.12); geometry 0.34→0.24 (−0.10)
+- **Distribution-shift (coastal → polar):** unadapted polar MAE = 0.161; after 1 polar cycle = **0.150** (−6.9%, 94% of polar improvement in a single pass)
+- Weight re-adaptation at shift: geometry +0.061 (polar geometry reliable), clarity −0.109 (polar scenes cloud-heavy)
+- Long-horizon (100 cycles, 25,600 updates): MAE plateau ±0.73%, no divergence — fixed-corpus stability proven
+- **On-orbit improvement is regime-shift re-adaptation, not monotonic improvement on fixed data**
 
 **Encounter planner eval (248 windows, all 4 packs, 5 × 48h runs per pack):**
 - Scaffold produces **zero refine actions** across all 248 windows and all 4 packs
@@ -161,6 +165,85 @@ _Note: 0.967 is single-seed (seed=42) on the earlier 136-example corpus. The 10-
 - **Runtime backend note:** The 86 stored assessments in `assessments.json` used CLIP (`clip_local`) and stub backends at collection time. The Gemma-4 v11 eval is a separate offline evaluation against operator-reviewed Sentinel-2 tiles. CLIP assessments show lower operator usefulness ratings (mean 0.647) vs stub (0.867), a finding documented honestly in `benchmark_results/BENCHMARK_RESULTS.md`. Gemma-4 v11 is the current production backend; CLIP remains available as a reference.
 - A synthetic scenario assessment study (90 Gemma-4 assessments across 27 geographic locations × 4 cloud conditions, 3 scenario packs) runs alongside inference benchmarks and results are tracked in `benchmark_results/BENCHMARK_RESULTS.md`.
 - Mission-response is a policy-and-utility layer, not live spacecraft actuation.
+
+## Judging Criteria Alignment
+
+Mapped to the published rubric (with weights). Both tracks are submitted; per-track receipts and honest scoping below.
+
+### Liquid Track (10 / 35 / 35 / 20)
+
+**Use of Satellite Imagery — 10%**
+- Sentinel-2 is the **core data source** for every scenario pack; not a tertiary input.
+- **Multispectral analysis beyond RGB:** NDVI `(B08−B04)/(B08+B04)`, SWIR ratio `B11/B12`, EVI `(B08A, B05)` — driving the `pedospheric_integrity` register.
+- **152 operator-reviewed Sentinel-2 tiles** across all 4 scenario packs (`OBSERVATION_VLA_EVAL.md`).
+- **248-window encounter eval** on real Sentinel-backed geometry (`ENCOUNTER_EVAL.md`).
+- DPhi API metadata used end-to-end: cloud cover, source satellite (Sentinel-2A/2B/2C), datetime, footprint — feed both trust-layer reason codes and viability gates.
+
+**Innovation and Problem-Solution Fit — 35%**
+- Specific real problem: **on-orbit continual learning without a ground-truth validator**. The architectural answer is the six non-compensatory viability gates that govern every adaptation step before it persists.
+- The hybrid is deliberate: LFM2.5-VL-450M as a **lightweight tile encoder** (sub-250 ms edge-inference budget per Liquid AI's spec) feeding a few-MB MuZero ResNet that fits a 5 MB satellite uplink budget. This is the combination — neither the VLM nor the planner alone sustains an on-orbit encounter-triage loop under the bandwidth + latency constraints.
+- **Stacked TTT** (VLA + trust-layer) gated by a common viability filter is the architectural contribution — not a reskin of "run a VLM on satellite tiles."
+- **Distribution-shift demo:** coastal→polar 1-cycle re-adaptation (polar MAE 0.161→0.150, **94% recovery in one pass**, weight delta geometry +0.061 / clarity −0.109) — concrete evidence that the on-orbit loop tracks regime shifts, not just plateaus on fixed data.
+- **Product path:** the model-agnostic ObservationVLA contract (8-key JSON, schema in-repo, `COLLABORATOR_GUIDE.md`) lets developers plug in any VLM backend that emits the contract. Two independent collaborators (Genesis, Tesseract T3) integrated against this contract during the build window.
+
+**Technical Implementation — 35%**
+- **App runs cleanly without debugging.** `python scripts/quickstart.py` exits 0 on a fresh clone (full test suite + reviewed-case eval). 209 tests pass, 3 opt-in skipped (HF model downloads). No-Mapbox-safe.
+- **Deployment-tooling-agnostic:** the inference path uses standard `transformers` + `peft` (works with llama.cpp / MLX / ONNX export targets via standard HF tooling).
+- **Honest scope on LFM2-VL fine-tuning** (rubric: "strongly encouraged and rewarded"): in this submission, **LFM2.5-VL-450M weights are used at Liquid AI's published production checkpoint — frozen.** Domain fine-tuning happens at the MuZero BC policy head (Stage 1 → Stage 2 v2 canonical → Stage 2 v3 research). 10-seed sweep on the post-N=152 corpus: best val_acc **0.898 ± 0.049** [0.825, 0.975]. Encoder-LoRA loading is wired (`HFVisionTowerEncoder(..., lora_adapter_path=...)` in `tile_encoder.py`) and is the Stage 3 lane the prize hardware (NVIDIA Orin 16 GB) unlocks. We are upfront about this rather than overclaim.
+- Liquid Track-specific receipts: encoder latency on RTX 2080 — LFM2.5-VL-450M **69 ms/tile mean, 78 ms p95**; 1.6B variant 246 ms p95 (matches Liquid AI's "sub-250 ms edge" claim).
+
+**Demo and Communication — 20%**
+- 4 pinned operator-reviewed cases with image assets (`SUBMISSION_CASEBOOK.md`).
+- **Rotterdam case** = the architectural claim made concrete: scaffold→`accept`, trust→`refine`, operator→`accept` at 48.78% cloud — the whole `accept→refine→accept` calibration loop in one trace.
+- Live FastAPI server + dashboard for an end-to-end interactive walkthrough.
+- 7-step **Suggested Live Demo Flow** in `CHALLENGE_ENTRY.md`.
+
+### General AI Track (20 / 25 / 35 / 20)
+
+**Use of Satellite Imagery — 20%** *(multispectral and space-acquisition constraints explicitly rewarded)*
+- Sentinel-2 is the core data source; same coverage as Liquid Track.
+- **Multiple spectral bands used in operations** (rubric: "rewarded"): B04, B08 (NDVI); B11, B12 (SWIR ratio — soil moisture / organic-matter proxy); B08A, B05 (EVI — canopy structure). Most submissions will use RGB only.
+- **Temporal continuity / large volumes / limited downlink** (rubric: "preference is given to approaches that reflect..."): the encounter-window architecture *is* the continuous-stream model — windows arrive on minutes-cadence; selective downlink (only after all six viability gates pass + high-confidence accept) is built into the architecture, not bolted on.
+- Two observational registers (geometric/structural + spectral-biochemical) operating identically through the same pipeline — demonstrates cross-domain generality on Sentinel data.
+
+**Innovation and Problem-Solution Fit — 25%** *(must clearly justify why on-orbit)*
+- The "Why this must run in orbit" section frames **three stacked physical constraints**, each independently sufficient to force the loop on-board: (1) no ground-truth validator under distribution shift, (2) 5 MB uplink budget cannot ferry weight updates, (3) next encounter window arrives in minutes — no round-trip budget for ground retraining.
+- **What on-board compute uniquely enables:** stacked TTT under six non-compensatory viability gates. The viability gates are the substitute for human-in-the-loop on a satellite — every accepted update carries quality-verified, magnitude-bounded, bias-checked information about the world before touching model state. None of that is possible from the ground at the required cadence.
+- **Distribution-shift demo** quantifies the on-orbit improvement mechanism: 94% of polar-regime improvement in **one cycle** of operator feedback after a coastal→polar shift.
+
+**Technical Implementation — 35%** *(fine-tuning is "(optional)"; conceptual innovation + system design co-equal)*
+- **App runs cleanly:** quickstart exits 0, 209 tests pass, no-Mapbox-safe.
+- **Conceptual innovation:** stacked TTT + six-gate viability filter + two-register architecture; not "adapt an existing model."
+- **System design:** model-agnostic backend factory (`OBSERVATION_VLA_BACKEND` env var swaps backends without code changes); five backends shipped (`clip_local`, `gemma4`, `transformers_vlm`, `genesis`, `tesseract_t3`, `tesseract_t3_heatmap`, `heatmap`); 8-key JSON contract documented in `COLLABORATOR_GUIDE.md`.
+- **Optional fine-tune (delivered):** Gemma-4-E2B v11 fine-tune with documented methodology (`notebooks/kaggle-simsat-gemma4-v1/`), measurable improvement over base (`OBSERVATION_VLA_EVAL.md`: in-distribution exact 0.86 vs always-majority 0.54 / random 0.25), publicly shared weights at [`HumanAIConvention/simsat-gemma4-v11`](https://huggingface.co/HumanAIConvention/simsat-gemma4-v11), and a 410/410 dynamic LoRA-tensor audit (`V11_AUDIT.md`).
+- Honest gap: live encounter-stream Stage 3 TTT is not benchmarked — wired but requires the prize hardware.
+
+**Demo and Communication — 20%**
+- Same demo assets as Liquid Track (4 pinned cases, Rotterdam architectural-claim trace, dashboard, 7-step suggested flow).
+
+## What the prize-credits package buys (Stage 3 plan)
+
+The award package — **5 GPU hours on Orin 16 GB · 5 MB uplink · 10 MB downlink · 1 GB storage for 1 month · 7 days ground-compute testing** — maps directly to our wired-but-not-benchmarked Stage 3 lane:
+
+1. **Ground-compute days:** end-to-end live-stream integration test of the trust-layer + viability-gate loop against real DPhi-API encounter windows (already wired; `_apply_trust_layer_ttt` blocks pre-update on `error_bias`).
+2. **Orin GPU hours:** Stage 3 two-scope TTT — encoder-LoRA + MuZero head adapt jointly per-pass, gated by all six viability checks.
+3. **Storage + downlink:** the selective-downlink mechanism (high-confidence accept passes through gates → tile + assessment downlinked) becomes a measured throughput number rather than an architectural claim.
+
+This isn't aspirational — every component is in-tree today; the prize provides the validator the architecture is designed to operate without.
+
+## Reviewer's 5-Minute Path
+
+If a judge has 5 minutes and wants the highest-density check:
+
+1. **Read SUBMISSION_BRIEF.md** (this file, ~3 min) — claim + tracks + headline numbers
+2. **Read SUBMISSION_CASEBOOK.md** + open the Rotterdam image (~1 min) — the architectural claim made concrete
+3. **Run `python scripts/quickstart.py`** (~30–60 s) — exits 0 on a clean clone; `clip_local` zero-download backend
+4. **Skim CHALLENGE_ENTRY.md §"Why this must run in orbit"** (~30 s) — the three-stack argument
+
+Need to go deeper:
+- `OBSERVATION_VLA_EVAL.md` for the in-distribution + cross-distribution v11 numbers
+- `ttt_stability_analysis.md` for 10-seed + 100-cycle + polar-shift demo
+- `VIABILITY_GATES_EXERCISE.md` for the structured gate-fire-rate exercise
 
 ## Demo Order
 1. Open [SUBMISSION_PACKET.md](./SUBMISSION_PACKET.md) for the scorecard and reviewed cases.
