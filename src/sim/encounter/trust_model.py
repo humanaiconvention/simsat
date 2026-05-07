@@ -165,13 +165,20 @@ class WCLITrustModel:
         learned_score: float,
         realized_utility: float,
         lr: float = 0.02,
+        reg: float = 0.002,
     ) -> dict[str, float]:
         """Online gradient step on learned_score_weights.
 
         Uses realized utility (operator usefulness_score) as the supervision
         signal.  A single step of online least-squares on the linear learned-
         score head: each weight moves proportionally to its feature activation
-        and the prediction error.
+        and the prediction error, plus an L2 regularization pull toward the
+        policy default weights.
+
+        The regularization term (reg * (default - current)) creates a bounded
+        random walk post-convergence, preventing runaway drift on small or
+        one-sided operator corpora.  Mirrors the reg=0.002 term in all SimSat
+        TTT simulation scripts.
 
         Args:
             trust_details: the trust_details dict stored in a trace's decision_after
@@ -182,6 +189,8 @@ class WCLITrustModel:
                 useful=False to push weights away from the current pattern.
             lr: learning rate.  Default 0.02 is intentionally small to prevent
                 single-sample instability.
+            reg: L2 regularization coefficient pulling weights toward policy
+                defaults.  Default 0.002 matches all TTT simulation scripts.
 
         Returns:
             Updated learned_score_weights dict (also mutates self._learned_weights).
@@ -193,9 +202,11 @@ class WCLITrustModel:
             "imagery": trust_details.get("imagery_support", 0.5),
             "clarity": trust_details.get("clarity_support", 0.5),
         }
+        defaults = self.policy.learned_score_weights
         error = realized_utility - learned_score
         for k in list(self._learned_weights):
-            self._learned_weights[k] += lr * error * feature_map.get(k, 0.0)
+            reg_pull = reg * (defaults.get(k, 0.0) - self._learned_weights[k])
+            self._learned_weights[k] += lr * error * feature_map.get(k, 0.0) + reg_pull
             self._learned_weights[k] = max(0.001, self._learned_weights[k])
 
         total = sum(self._learned_weights.values())
@@ -215,6 +226,36 @@ class WCLITrustModel:
             self._update_log = self._update_log[-_MAX_UPDATE_LOG:]
 
         return dict(self._learned_weights)
+
+    def record_skipped_observation(
+        self,
+        trust_details: dict[str, float],
+        learned_score: float,
+        realized_utility: float,
+    ) -> None:
+        """Log an observation that was blocked by a viability gate without changing weights.
+
+        Advances the bias-window history so the error_bias gate can re-evaluate
+        on subsequent calls and clear when a biased run ends.  Without this call,
+        a gate fire self-seals: the window stays frozen and the gate keeps firing
+        indefinitely even if operator feedback becomes unbiased.
+
+        Called by ObservationVLAService._apply_trust_layer_ttt when error_bias blocks
+        an update.  The entry is tagged with 'blocked: True' to distinguish from
+        actual weight-update entries in the log.
+        """
+        error = realized_utility - learned_score
+        entry: dict[str, Any] = {
+            "update_idx": self.update_count,
+            "at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+            "realized_utility": realized_utility,
+            "learned_score": learned_score,
+            "error": round(error, 6),
+            "blocked": True,
+        }
+        self._update_log.append(entry)
+        if len(self._update_log) > _MAX_UPDATE_LOG:
+            self._update_log = self._update_log[-_MAX_UPDATE_LOG:]
 
     def get_weight_snapshot(self) -> dict[str, Any]:
         """Return current adaptive weights and drift relative to policy defaults."""

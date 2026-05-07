@@ -290,6 +290,124 @@ def test_observation_trace_outcome_sync_and_dataset_export(tmp_path):
     assert dataset == [{"trace_id": trace.trace_id, "labelled": True, "labelled_only": True}]
 
 
+def test_apply_trust_layer_ttt_blocks_when_error_bias_fires(tmp_path):
+    """_apply_trust_layer_ttt skips online_update when error_bias gate fires (blocking gate)."""
+    from types import SimpleNamespace
+    from encounter.schemas import EncounterPolicy
+    from encounter.trust_model import WCLITrustModel
+
+    # Build a real trust model seeded with 10 same-sign errors so error_bias fires.
+    policy = EncounterPolicy()
+    trust_model = WCLITrustModel(policy=policy)
+    biased_details = {
+        "target_priority": 0.9, "geometry_margin": 0.9,
+        "duration_margin": 0.9, "imagery_support": 0.9, "clarity_support": 0.9,
+    }
+    for _ in range(10):
+        trust_model.online_update(biased_details, learned_score=0.50, realized_utility=0.95)
+
+    weights_after_seed = dict(trust_model._learned_weights)
+    count_after_seed = trust_model.update_count
+
+    # Wire into a minimal encounter_service mock
+    fake_planner = SimpleNamespace(trust_model=trust_model)
+    fake_encounter_service = SimpleNamespace(planner=fake_planner)
+
+    service, _ = _service(tmp_path)
+    service.encounter_service = fake_encounter_service
+
+    # Build a minimal trace with trust_details + learned_score in decision_after
+    trace = ObservationTraceRecord(
+        trace_id="trace-ttt",
+        created_at="2026-03-10T12:00:00Z",
+        scenario_pack="scope-1",
+        decision_id="dec-1",
+        target_id="target-1",
+        window_id="window-1",
+        sample=ObservationSample(target_label="Target"),
+        assessment=ObservationAssessment(assessment_id="asm-ttt"),
+        residual=ObservationResidual(),
+        decision_after={
+            "trust_details": biased_details,
+            "learned_score": 0.50,
+        },
+    )
+    outcome = ObservationOutcome(
+        outcome_id="out-ttt",
+        trace_id="trace-ttt",
+        operator_action="accept",
+        useful=True,
+        usefulness_score=0.95,
+        label_source="operator_review",
+    )
+
+    service._apply_trust_layer_ttt(trace, outcome)
+
+    # Weights must NOT change (error_bias gate blocked the update)
+    assert trust_model._learned_weights == weights_after_seed
+    # update_count must NOT increment
+    assert trust_model.update_count == count_after_seed
+    # But the log must have a new blocked=True entry
+    snap = trust_model.get_weight_snapshot()
+    recent = snap["recent_updates"]
+    assert recent[-1].get("blocked") is True
+
+
+def test_apply_trust_layer_ttt_updates_weights_when_gate_passes(tmp_path):
+    """_apply_trust_layer_ttt calls online_update when error_bias gate passes (balanced errors)."""
+    from types import SimpleNamespace
+    from encounter.schemas import EncounterPolicy
+    from encounter.trust_model import WCLITrustModel
+
+    policy = EncounterPolicy()
+    trust_model = WCLITrustModel(policy=policy)
+    # Seed with 5 positive + 5 negative errors → 50/50 split → gate passes
+    trust_details = {
+        "target_priority": 0.8, "geometry_margin": 0.8,
+        "duration_margin": 0.8, "imagery_support": 0.8, "clarity_support": 0.8,
+    }
+    for i in range(10):
+        realized = 0.95 if i % 2 == 0 else 0.45
+        trust_model.online_update(trust_details, learned_score=0.70, realized_utility=realized)
+
+    count_before = trust_model.update_count
+
+    fake_planner = SimpleNamespace(trust_model=trust_model)
+    fake_encounter_service = SimpleNamespace(planner=fake_planner)
+
+    service, _ = _service(tmp_path)
+    service.encounter_service = fake_encounter_service
+
+    trace = ObservationTraceRecord(
+        trace_id="trace-pass",
+        created_at="2026-03-10T12:00:00Z",
+        scenario_pack="scope-1",
+        decision_id="dec-1",
+        target_id="target-1",
+        window_id="window-1",
+        sample=ObservationSample(target_label="Target"),
+        assessment=ObservationAssessment(assessment_id="asm-pass"),
+        residual=ObservationResidual(),
+        decision_after={
+            "trust_details": trust_details,
+            "learned_score": 0.70,
+        },
+    )
+    outcome = ObservationOutcome(
+        outcome_id="out-pass",
+        trace_id="trace-pass",
+        operator_action="accept",
+        useful=True,
+        usefulness_score=0.92,
+        label_source="operator_review",
+    )
+
+    service._apply_trust_layer_ttt(trace, outcome)
+
+    # Weight update should have fired
+    assert trust_model.update_count == count_before + 1
+
+
 def test_pin_submission_case_requires_operator_review(tmp_path):
     service, _ = _service(tmp_path)
     trace = ObservationTraceRecord(

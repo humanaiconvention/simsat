@@ -259,10 +259,13 @@ def evaluate_ttt_viability(trust_snapshot: dict) -> Dict[str, bool]:
     """
     Evaluate 3 non-compensatory viability gates for the trust-layer TTT state.
 
-    Called after each trust_model.online_update() to detect adaptation drift,
-    saturation, or systematic error bias.  Returns a dict of gate_name → passed.
-    A failed gate does not stop adaptation (the update already ran), but triggers
-    a WARNING log so operators can intervene.
+    Returns a dict of gate_name → passed.  Callers are responsible for deciding
+    whether to block on a failed gate:
+
+    - **error_bias** — evaluated PRE-update in ObservationVLAService._apply_trust_layer_ttt;
+      a failure causes the update to be skipped entirely (BLOCKING gate in that context).
+    - **weight_drift** — evaluated POST-update; log-only warning, drift is already applied.
+    - **update_rate** — evaluated POST-update; log-only warning, prompts manual review.
 
     Args:
         trust_snapshot: dict returned by WCLITrustModel.get_weight_snapshot()
@@ -320,21 +323,19 @@ def _gate_ttt_update_rate(trust_snapshot: dict) -> bool:
 
 
 def _gate_ttt_error_bias(trust_snapshot: dict) -> bool:
-    """TTT Gate 3: No systematic error bias in the most recent TTT_BIAS_WINDOW updates.
+    """TTT Gate 3 (BLOCKING): No systematic error bias in the most recent TTT_BIAS_WINDOW updates.
 
     If ≥ TTT_BIAS_THRESHOLD (70 %) of recent prediction errors share the same sign,
-    the trust model is systematically over- or under-estimating realized utility,
-    which invalidates its adaptation signal.
+    the trust model is systematically over- or under-estimating realized utility.
+    In ObservationVLAService, this gate is evaluated PRE-update; a failure causes
+    the adaptation step to be skipped rather than reinforcing the bias direction.
     """
     recent = trust_snapshot.get("recent_updates", [])
     window = recent[-TTT_BIAS_WINDOW:] if len(recent) > TTT_BIAS_WINDOW else recent
-    if len(window) < 3:
-        return True  # Not enough history — pass by default
+    if len(window) < TTT_BIAS_WINDOW:
+        return True  # Full window required — gate passes vacuously until 10 entries are accumulated
 
     errors = [u.get("error", 0.0) for u in window if "error" in u]
-    if len(errors) < 3:
-        return True
-
     positive = sum(1 for e in errors if e > 0)
     negative = sum(1 for e in errors if e < 0)
     total = len(errors)

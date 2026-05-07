@@ -3,13 +3,14 @@
 SimSat collaborator quickstart — verifies a fresh clone is wired correctly.
 
 Runs in this order:
-  1. Test suite (33 tests, no GPU, no network, no model weights)
+  1. Full pytest suite (tests/ + src/sim/tests/, ~200 tests; HF-download tests
+     skip by default)
   2. ObservationVLA eval against pinned reviewed cases (in-process FastAPI,
      uses the default `clip_local` backend if torch+CLIP are installed,
      else falls back gracefully)
 
 If both pass, you have a working baseline to compare your model against.
-Total runtime: ~30 seconds (without CLIP model download).
+Total runtime: ~30-60 seconds (without CLIP model download).
 
 Usage:
     python scripts/quickstart.py
@@ -47,19 +48,27 @@ def main() -> int:
 
     failures: list[str] = []
 
-    _step(1, 2, "Run pytest test suite")
+    _step(1, 2, "Run pytest test suite (tests/ + src/sim/tests/)")
     rc = _run(
         "pytest",
-        [sys.executable, "-m", "pytest", "src/sim/tests/", "-v", "--no-header"],
+        [sys.executable, "-m", "pytest", "tests/", "src/sim/tests/", "--no-header", "-q"],
     )
     if rc != 0:
         failures.append("pytest")
 
     _step(2, 2, "ObservationVLA eval against pinned reviewed cases")
     print("  (uses in-process FastAPI; no live server required)")
+    print("  (writes to .quickstart_observation_vla_eval.md to preserve")
+    print("   the canonical OBSERVATION_VLA_EVAL.md submission evidence)")
     rc = _run(
         "observation_vla_eval",
-        [sys.executable, "scripts/observation_vla_eval.py", "--inprocess"],
+        [
+            sys.executable,
+            "scripts/observation_vla_eval.py",
+            "--inprocess",
+            "--output",
+            ".quickstart_observation_vla_eval.md",
+        ],
     )
     if rc != 0:
         failures.append("observation_vla_eval")

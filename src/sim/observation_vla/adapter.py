@@ -445,19 +445,29 @@ class ObservationVLMAdapter:
         payload.setdefault("_model_id", self.model_name_or_path or "observation-vla-endpoint")
         return payload
 
+    _DEFAULT_SCORE_WEIGHTS: dict[str, float] = {
+        "scene_match": 0.35,
+        "salience": 0.20,
+        "change_or_event": 0.15,
+        "clarity": 0.20,
+        "pos_neg_margin": 0.10,
+    }
+
     def vla_online_update(
         self,
         evidence: dict[str, float],
         confidence: float,
         realized_utility: float,
         lr: float = 0.015,
+        reg: float = 0.002,
     ) -> dict[str, float]:
         """VLA-layer TTT: gradient step on confidence blend weights.
 
         Uses operator usefulness_score as the supervision signal and the stored
         intermediate evidence scores as features, reducing confidence calibration
         error (the MAE 0.27 gap between model confidence and operator scores).
-        Both the update and the renormalisation step mirror trust_model.online_update().
+        Both the update and the renormalisation step mirror trust_model.online_update()
+        including L2 regularization (reg=0.002) pulling weights toward their defaults.
         """
         feature_map = {
             "scene_match": float(evidence.get("scene_match_score", 0.5)),
@@ -466,9 +476,11 @@ class ObservationVLMAdapter:
             "clarity": 1.0 - float(evidence.get("occlusion_or_cloud_risk", 0.5)),
             "pos_neg_margin": 0.5,  # not stored in evidence; use neutral prior
         }
+        defaults = self._DEFAULT_SCORE_WEIGHTS
         error = realized_utility - confidence
         for k in list(self._score_weights):
-            self._score_weights[k] += lr * error * feature_map[k]
+            reg_pull = reg * (defaults.get(k, 0.0) - self._score_weights[k])
+            self._score_weights[k] += lr * error * feature_map[k] + reg_pull
             self._score_weights[k] = max(0.001, self._score_weights[k])
         total = sum(self._score_weights.values())
         self._score_weights = {k: v / total for k, v in self._score_weights.items()}
@@ -487,13 +499,7 @@ class ObservationVLMAdapter:
 
     def get_ttt_snapshot(self) -> dict:
         """Return current VLA TTT state: weights, drift, recent updates."""
-        default_weights = {
-            "scene_match": 0.35,
-            "salience": 0.20,
-            "change_or_event": 0.15,
-            "clarity": 0.20,
-            "pos_neg_margin": 0.10,
-        }
+        default_weights = self._DEFAULT_SCORE_WEIGHTS
         drift = {k: round(self._score_weights[k] - default_weights[k], 6) for k in default_weights}
         return {
             "runtime_mode": self.runtime_mode,

@@ -71,7 +71,8 @@ def _learned_score(features: dict[str, float], weights: dict[str, float]) -> flo
     return sum(weights[k] * features[k] for k in weights)
 
 
-def run_single(n: int, lr: float, seed: int, shift: bool = False) -> dict:
+def run_single(n: int, lr: float, seed: int, shift: bool = False,
+               reg: float = 0.002) -> dict:
     """One seed run. If shift=True, true weights change at cycle n//2."""
     rng = np.random.default_rng(seed)
     weights = dict(DEFAULT_WEIGHTS)
@@ -87,7 +88,8 @@ def run_single(n: int, lr: float, seed: int, shift: bool = False) -> dict:
         error = util - ls
         abs_errors.append(abs(error))
         for k in KEYS:
-            weights[k] += lr * error * features[k]
+            reg_pull = reg * (DEFAULT_WEIGHTS[k] - weights[k])
+            weights[k] += lr * error * features[k] + reg_pull
             weights[k] = max(0.001, weights[k])
         total = sum(weights.values())
         weights = {k: v / total for k, v in weights.items()}
@@ -104,9 +106,9 @@ def run_single(n: int, lr: float, seed: int, shift: bool = False) -> dict:
 
 
 def run(n: int = 2000, lr: float = 0.02, seed: int = 42,
-        n_seeds: int = 5, shift: bool = False) -> dict:
+        n_seeds: int = 5, shift: bool = False, reg: float = 0.002) -> dict:
     seeds = [seed + i for i in range(n_seeds)]
-    all_runs = [run_single(n, lr, s, shift=shift) for s in seeds]
+    all_runs = [run_single(n, lr, s, shift=shift, reg=reg) for s in seeds]
 
     # Aggregate histories onto common step axis
     steps = [h["step"] for h in all_runs[0]["history"]]

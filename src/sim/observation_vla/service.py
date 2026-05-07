@@ -305,6 +305,13 @@ class ObservationVLAService:
         Pulls trust_details and learned_score from the stored trace's decision_after,
         then calls online_update() on the active trust model.  No-ops silently if the
         encounter service or trust model is not wired.
+
+        Gate behavior:
+        - error_bias: BLOCKING — if ≥70% of the last 10 updates share the same error
+          sign the adaptation signal is systematically biased; the update is skipped and
+          a WARNING is emitted so operators can intervene.
+        - weight_drift, update_rate: post-update log-only warnings; they measure
+          cumulative drift and cannot block an update already applied.
         """
         if self.encounter_service is None:
             return
@@ -318,19 +325,40 @@ class ObservationVLAService:
             return
         realized_utility = outcome.usefulness_score if outcome.useful else 0.0
         try:
+            # BLOCKING: evaluate error_bias on the pre-update snapshot.
+            # Systematic bias in the error window means the adaptation signal is
+            # unreliable; skip this update rather than reinforcing the bias.
+            pre_snapshot = trust_model.get_weight_snapshot()
+            pre_gates = evaluate_ttt_viability(pre_snapshot)
+            if not pre_gates.get("error_bias", True):
+                logger.warning(
+                    "TTT error_bias gate FAILED — update #%d skipped: systematic "
+                    "over/under-estimation detected in last 10 updates",
+                    pre_snapshot.get("update_count", 0) + 1,
+                )
+                # Advance the bias window even for blocked updates so the gate
+                # can re-evaluate as subsequent operator feedback arrives.
+                trust_model.record_skipped_observation(
+                    trust_details=trust_details,
+                    learned_score=float(learned_score),
+                    realized_utility=float(realized_utility),
+                )
+                return
+
             trust_model.online_update(
                 trust_details=trust_details,
                 learned_score=float(learned_score),
                 realized_utility=float(realized_utility),
             )
+            # Post-update: log-only warnings for weight_drift and update_rate.
             snapshot = trust_model.get_weight_snapshot()
             ttt_gates = evaluate_ttt_viability(snapshot)
-            failed_gates = [g for g, ok in ttt_gates.items() if not ok]
-            if failed_gates:
+            failed_post = [g for g, ok in ttt_gates.items() if not ok and g != "error_bias"]
+            if failed_post:
                 logger.warning(
                     "TTT viability gate failures after update #%d: %s",
                     snapshot.get("update_count", 0),
-                    failed_gates,
+                    failed_post,
                 )
         except Exception as exc:
             # Never let TTT callback crash the outcome registration; log for triage.

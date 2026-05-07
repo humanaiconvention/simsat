@@ -131,6 +131,94 @@ def test_trust_model_online_update_shifts_weights_toward_utility():
     assert snapshot["recent_updates"][0]["realized_utility"] == 0.92
 
 
+def test_online_update_l2_regularization_bounds_drift():
+    """L2 reg (reg=0.002) pulls weights toward policy defaults, preventing runaway drift."""
+    policy = EncounterPolicy()
+    model = WCLITrustModel(policy)
+    defaults = dict(policy.learned_score_weights)
+
+    trust_details = {
+        "target_priority": 0.95,
+        "geometry_margin": 0.95,
+        "duration_margin": 0.95,
+        "imagery_support": 0.95,
+        "clarity_support": 0.95,
+    }
+    # Run many updates with a consistently positive error (realized > learned)
+    for _ in range(200):
+        model.online_update(trust_details, learned_score=0.5, realized_utility=0.95)
+
+    weights = model._learned_weights
+    # With reg, no weight should diverge beyond 3× its default value
+    for k, w in weights.items():
+        assert w < defaults[k] * 5.0, f"weight '{k}' drifted to {w:.4f} (default {defaults[k]})"
+    # Weights must still sum to 1 after renormalisation
+    assert abs(sum(weights.values()) - 1.0) < 1e-6
+
+
+def test_online_update_l2_regularization_pulls_back_after_drift():
+    """After biased updates, switching to neutral signal lets reg pull weights back toward defaults."""
+    policy = EncounterPolicy()
+    model = WCLITrustModel(policy)
+    defaults = dict(policy.learned_score_weights)
+
+    trust_details = {
+        "target_priority": 0.95,
+        "geometry_margin": 0.95,
+        "duration_margin": 0.95,
+        "imagery_support": 0.95,
+        "clarity_support": 0.95,
+    }
+    # Push weights with 50 biased steps
+    for _ in range(50):
+        model.online_update(trust_details, learned_score=0.5, realized_utility=0.95)
+
+    drifted = dict(model._learned_weights)
+
+    # Run 500 neutral (error≈0) steps — reg should dominate, pulling weights back
+    for _ in range(500):
+        model.online_update(trust_details, learned_score=0.70, realized_utility=0.70)
+
+    recovered = model._learned_weights
+    for k in defaults:
+        assert abs(recovered[k] - defaults[k]) < abs(drifted[k] - defaults[k]) + 0.01, (
+            f"weight '{k}' did not recover toward default after neutral signal"
+        )
+
+
+def test_record_skipped_observation_advances_log_without_changing_weights():
+    """record_skipped_observation logs the error without altering weights."""
+    policy = EncounterPolicy()
+    model = WCLITrustModel(policy)
+
+    trust_details = {
+        "target_priority": 0.8,
+        "geometry_margin": 0.7,
+        "duration_margin": 0.7,
+        "imagery_support": 0.8,
+        "clarity_support": 0.6,
+    }
+    weights_before = dict(model._learned_weights)
+    count_before = model.update_count
+
+    model.record_skipped_observation(
+        trust_details=trust_details,
+        learned_score=0.50,
+        realized_utility=0.95,
+    )
+
+    # Weights must not change
+    assert model._learned_weights == weights_before
+    # update_count must not increment
+    assert model.update_count == count_before
+    # But the log must have one new entry tagged blocked=True
+    snapshot = model.get_weight_snapshot()
+    recent = snapshot["recent_updates"]
+    assert len(recent) == 1
+    assert recent[0].get("blocked") is True
+    assert abs(recent[0]["error"] - (0.95 - 0.50)) < 1e-5
+
+
 def test_trust_model_online_update_target_priority_in_trust_details():
     """assess() stores target_priority in trust_details so online_update can use it."""
     policy = EncounterPolicy()

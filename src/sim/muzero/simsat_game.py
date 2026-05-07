@@ -334,7 +334,7 @@ class SimSatGame(_AbstractGame):
         # Mirror the env's window_history so TTTScope can read it off the game.
         self.window_history = list(self._env.window_history)
         self.current_window = self._env.current_window
-        return obs, reward, done
+        return obs, reward, done, info
 
     def legal_actions(self) -> list[int]:
         return self._env.legal_actions()

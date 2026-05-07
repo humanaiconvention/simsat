@@ -486,8 +486,8 @@ class TransformersVLMAdapter:
         )
         inputs = {k: v.to(self.device) if hasattr(v, "to") else v for k, v in inputs.items()}
         prompt_len = inputs["input_ids"].shape[1] if "input_ids" in inputs else None
-        n_image_tokens = inputs.get("pixel_values", None)
-        print(f"[VLM] inputs ready — prompt_tokens={prompt_len} image_tensors={'yes' if n_image_tokens is not None else 'no'} device={self.device} max_new_tokens={self.max_new_tokens}", flush=True)
+        has_image_tensors = inputs.get("pixel_values") is not None
+        print(f"[VLM] inputs ready — prompt_tokens={prompt_len} image_tensors={'yes' if has_image_tensors else 'no'} device={self.device} max_new_tokens={self.max_new_tokens}", flush=True)
         print(f"[VLM] generating...", flush=True)
 
         with self._torch.no_grad():
