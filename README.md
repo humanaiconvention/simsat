@@ -46,8 +46,7 @@
 | | [`ttt_stability_analysis.md`](./ttt_stability_analysis.md) | Trust-layer TTT 10-seed stability (22.5% MAE improvement) |
 | **Repo standard** | [`COLLABORATOR_GUIDE.md`](./COLLABORATOR_GUIDE.md) | Eight-key VLA contract + adapter integration |
 | | [`CONTRIBUTING.md`](./CONTRIBUTING.md) | PR / branching / CI conventions |
-| | [`START_HERE.md`](./START_HERE.md) | Quick-plug-in path for an external VLM backend |
-| | [`README.md`](./README.md) | This file |
+| | [`README.md`](./README.md) | This file (includes "Plugging in another VLM" section, formerly `START_HERE.md`) |
 
 Intermediate eval runs, per-seed dumps, and superseded snapshots live under [`archive/`](./archive/) (cleaned up 2026-05-07; not part of the submission review).
 
@@ -61,27 +60,65 @@ An orbit propagator calculates the satellite position over time and an API serve
 
 ## Plugging in another VLM
 
-The ObservationVLA backend is model-agnostic. Any model that emits the eight-key JSON contract (schema at `src/sim/observation_vla/observation_payload.schema.json`) can serve as the backend without code changes.
+The ObservationVLA backend is model-agnostic. Any model that emits the eight-key JSON contract (schema at `src/sim/observation_vla/observation_payload.schema.json`) can serve as the backend without code changes. Find the path below that matches your model and follow the steps; everything else in the codebase runs on its own.
 
-1. **Read [`COLLABORATOR_GUIDE.md`](./COLLABORATOR_GUIDE.md)** — JSON contract,
-   env vars, what the viability gates do to your output. ~10 minutes.
-2. **Wire the smoke path:**
-   ```bash
-   git clone <repo>
-   cd SimSat
-   cp .env.example .env
-   pip install -r requirements.txt
-   python scripts/quickstart.py
-   ```
-   That runs 33 tests + the eval against pinned reviewed cases using the
-   `clip_local` baseline. If it exits 0, your clone is wired correctly.
-3. **Plug in your backend** by setting `OBSERVATION_VLA_BACKEND=<your_backend>`
-   in `.env` and re-running `quickstart.py`. Your backend's action-agreement
-   and MAE numbers are what we'll compare.
+### Smoke path (first 30 seconds)
 
-For PRs, branching, and CI: see [`CONTRIBUTING.md`](./CONTRIBUTING.md).
-For known limitations and live status: see [`KNOWN_ISSUES.md`](./KNOWN_ISSUES.md).
-All Tier-1 correctness items are resolved.
+```bash
+git clone <repo>
+cd SimSat
+cp .env.example .env
+pip install -r requirements.txt
+python scripts/quickstart.py
+```
+Runs the test suite + an eval against the pinned reviewed cases using the `clip_local` baseline. If it exits 0, your clone is wired correctly.
+
+### If your model emits a JSON assessment (like the SimSat Gemma-4 fine-tune)
+
+Your model needs to emit the 8-key payload defined in `observation_payload.schema.json` given the prompt shape documented in [`COLLABORATOR_GUIDE.md`](./COLLABORATOR_GUIDE.md). For a HuggingFace-style VLM, no code change is needed:
+
+```bash
+export OBSERVATION_VLA_BACKEND=transformers_vlm
+export OBSERVATION_VLM_BASE_MODEL=your-org/your-model
+export OBSERVATION_VLM_LORA_PATH=/path/to/your/adapter   # if you have one
+export OBSERVATION_VLM_MODE=lora
+python scripts/observation_vla_eval.py --inprocess
+```
+
+For a custom load path (non-HF or non-PEFT), add a sibling file to `src/sim/observation_vla/transformers_vlm_local.py` exposing the same `assess()` interface, then route it via `backend_factory.py`.
+
+### If your model emits a per-pixel heatmap
+
+(Alarm / anomaly / salience / change-detection — output is a 2-D `(H, W)` float map, higher = stronger signal.)
+
+Fill in two `NotImplementedError` stubs near the top of `src/sim/observation_vla/heatmap_local.py`:
+- `_load_model(weights_path, device)` — load your model
+- `_predict_heatmap(model, tile, device)` — return `(H', W')` float32 numpy
+
+The stats pooling, action mapping, and 8-key payload assembly are concrete and tested (`pytest tests/test_heatmap_adapter.py` — 14 tests).
+
+```bash
+export OBSERVATION_VLA_BACKEND=heatmap
+export HEATMAP_WEIGHTS_PATH=/path/to/your/weights
+export HEATMAP_DEVICE=cuda
+export HEATMAP_BACKEND_TAG=your_model_name   # appears in rationale_tags
+python scripts/observation_vla_eval.py --inprocess
+```
+
+Optional knobs to tune the action ladder:
+```bash
+export HEATMAP_PEAK_ACCEPT=0.80   # peak >= this AND scene_match >= 0.5 → accept
+export HEATMAP_PEAK_REFINE=0.45   # peak >= this → refine
+export HEATMAP_PEAK_DEFER=0.20    # peak >= this → defer (else skip)
+```
+
+### What you'll see when it works
+
+`scripts/observation_vla_eval.py` prints exact / bucketed action agreement, useful / not-useful agreement, usefulness-score MAE, and a per-case breakdown.
+
+**Reference numbers to beat** (Gemma-4 v11 SimSat fine-tune over N=37 operator-reviewed cases on the geometric register): exact **0.86**, bucketed **0.86**, useful **0.97**, MAE **0.13**. Full eval at [`OBSERVATION_VLA_EVAL.md`](./OBSERVATION_VLA_EVAL.md).
+
+For PRs, branching, and CI: see [`CONTRIBUTING.md`](./CONTRIBUTING.md). For known limitations: [`KNOWN_ISSUES.md`](./KNOWN_ISSUES.md).
 
 ---
 
