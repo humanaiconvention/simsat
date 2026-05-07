@@ -267,8 +267,8 @@ TARGET_MODULES = LFM_MODULES + VISION_TOWER_MODULES + MULTI_MODAL_PROJECTOR_MODU
 peft_config = LoraConfig(
     task_type=TaskType.CAUSAL_LM,
     inference_mode=False,
-    r=8,
-    lora_alpha=16,
+    r=16,                  # v2: was 8 — 4× capacity to push past base's accept-bias prior
+    lora_alpha=32,         # v2: scaled with r (2× rank — standard convention)
     lora_dropout=0.1,
     bias="none",
     target_modules=TARGET_MODULES,
@@ -296,10 +296,22 @@ print(f"  TOTAL matched: {total_matched}")
 # ============================================================
 # CELL 4: Custom collator + smoke test
 # ============================================================
+# v2 FIX (the big one): assistant-only loss masking.
+# v1 collator computed cross-entropy across the ENTIRE sequence — system
+# prompt + user prompt + image-token slots + assistant response — wasting
+# ~78% of the gradient signal on tokens the model already saw (the prompt).
+# Result: LoRA learned barely-distinguishable behavior from base.
+#
+# v2 collator masks everything BEFORE the assistant response. We compute
+# the prompt-only sequence length per-sample by re-applying the chat
+# template with `add_generation_prompt=True` (no assistant message), and
+# mask labels[:that_length] = -100. Now 100% of gradient signal flows
+# through the assistant's JSON output — where the recommended_action lives.
 def collate_fn(batch: list[dict]) -> dict:
-    expanded = [_load_image_in_messages(rec["messages"]) for rec in batch]
+    full_messages = [_load_image_in_messages(rec["messages"]) for rec in batch]
+    # Tokenize the full conversation (system + user + assistant)
     enc = processor.apply_chat_template(
-        expanded,
+        full_messages,
         add_generation_prompt=False,
         return_tensors="pt",
         return_dict=True,
@@ -308,6 +320,28 @@ def collate_fn(batch: list[dict]) -> dict:
     )
     input_ids = enc["input_ids"]
     labels = input_ids.clone()
+
+    # Compute per-sample prompt length (everything BEFORE the assistant
+    # response) by re-tokenizing with assistant message dropped + the
+    # generation-prompt suffix appended. This gives us the index of the
+    # first assistant content token in the full sequence.
+    prompt_lens: list[int] = []
+    for msgs in full_messages:
+        # msgs[:-1] = system + user; add_generation_prompt=True appends
+        # the model's "assistant turn starts here" prefix tokens.
+        prompt_only = msgs[:-1]
+        p = processor.apply_chat_template(
+            [prompt_only],
+            add_generation_prompt=True,
+            return_tensors="pt",
+            return_dict=True,
+            tokenize=True,
+        )
+        prompt_lens.append(int(p["input_ids"].shape[1]))
+
+    for i, plen in enumerate(prompt_lens):
+        labels[i, :plen] = -100  # mask prompt tokens — only assistant response contributes to loss
+
     pad_id = processor.tokenizer.pad_token_id
     if pad_id is not None:
         labels[labels == pad_id] = -100
@@ -323,7 +357,15 @@ print(f"  input_ids:    {tuple(_b['input_ids'].shape)}")
 print(f"  labels:       {tuple(_b['labels'].shape)}")
 if "pixel_values" in _b:
     print(f"  pixel_values: {tuple(_b['pixel_values'].shape)}")
-print(f"  loss-token ratio: {(_b['labels'] != -100).float().mean().item():.3f}")
+_loss_ratio = (_b['labels'] != -100).float().mean().item()
+print(f"  loss-token ratio: {_loss_ratio:.3f}")
+# v2 sanity gate: if loss-token ratio jumped above ~0.30 we have the prompt
+# mask wrong (computing loss on the prompt). If it dropped below ~0.05 we
+# masked too aggressively. Healthy v2 range: roughly 0.08 to 0.25 (assistant
+# JSON is a small fraction of the full sequence, dominated by image tokens).
+assert 0.02 < _loss_ratio < 0.35, (
+    f"loss-token ratio {_loss_ratio:.3f} outside healthy range — prompt mask is wrong"
+)
 
 
 # ============================================================
@@ -335,10 +377,10 @@ OUTPUT_DIR = "/kaggle/working/simsat-lfm25vl-450m-v1"
 
 sft_config = SFTConfig(
     output_dir=OUTPUT_DIR,
-    num_train_epochs=3,
+    num_train_epochs=5,               # v2: was 3 — 5 epochs × 14 = 70 grad steps
     per_device_train_batch_size=1,
     gradient_accumulation_steps=8,
-    learning_rate=5e-5,
+    learning_rate=2e-4,               # v2: was 5e-5 — 4× LR; LoRA r=16 can take it
     lr_scheduler_type="cosine",
     warmup_ratio=0.1,
     logging_steps=2,                  # tighter logging — see loss curve immediately
