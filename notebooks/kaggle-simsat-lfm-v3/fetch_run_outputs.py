@@ -16,9 +16,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO = "benhaslam/simsat-lfm2-5-vl-v1-training"
+REPO = "benhaslam/simsat-lfm2-5-vl-v3-training"
 HERE = Path(__file__).resolve().parent
-OUT_DIR = HERE.parent.parent / ".kaggle_output"
+OUT_DIR = HERE.parent.parent / ".kaggle_output_v3"
 
 
 def main() -> int:
