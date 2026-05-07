@@ -45,6 +45,7 @@
 | | [`VIABILITY_GATES_EXERCISE.md`](./VIABILITY_GATES_EXERCISE.md) | Six-gate fire-rate exercise under three failure conditions |
 | | [`ttt_stability_analysis.md`](./ttt_stability_analysis.md) | Trust-layer TTT 10-seed stability (22.5% MAE improvement) |
 | | [`LFM_FINETUNE_METHODOLOGY.md`](./LFM_FINETUNE_METHODOLOGY.md) | LFM2.5-VL-450M LoRA fine-tune methodology + eval protocol |
+| | [`LFM_TTT_POC.md`](./LFM_TTT_POC.md) | VLA-layer TTT (online LoRA updates per encounter) — implementation receipt |
 | **Repo standard** | [`COLLABORATOR_GUIDE.md`](./COLLABORATOR_GUIDE.md) | Eight-key VLA contract + adapter integration |
 | | [`CONTRIBUTING.md`](./CONTRIBUTING.md) | PR / branching / CI conventions |
 | | [`README.md`](./README.md) | This file (includes "Plugging in another VLM" section, formerly `START_HERE.md`) |
