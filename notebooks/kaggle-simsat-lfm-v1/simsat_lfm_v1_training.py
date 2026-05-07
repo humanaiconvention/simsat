@@ -75,12 +75,16 @@ get_ipython().system(  # noqa: F821
     "'peft>=0.13.0' "
     "'accelerate>=1.0.0' "
     "'datasets>=3.0.0' "
-    "'huggingface_hub>=0.26.0' "
+    # Cap huggingface_hub below 1.0: --pre was pulling 1.0rc which removed
+    # `is_offline_mode`, but transformers main still imports that symbol.
+    # Run 8 errored at `import transformers` with
+    #   `ImportError: cannot import name 'is_offline_mode' from 'huggingface_hub'`.
+    "'huggingface_hub>=0.26.0,<1.0.0' "
     "'torchao>=0.16.0' "  # PEFT's LoRA dispatcher requires torchao > 0.16
     "2>&1 | tail -5"
 )
-import transformers as _tf
-print(f"Deps installed. transformers={_tf.__version__}")
+import huggingface_hub as _hh, transformers as _tf
+print(f"Deps installed. transformers={_tf.__version__} huggingface_hub={_hh.__version__}")
 
 # ============================================================
 # CELL 1: Load processor + base model + dataset
