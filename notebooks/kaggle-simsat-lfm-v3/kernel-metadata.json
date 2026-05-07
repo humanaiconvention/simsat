@@ -1,0 +1,26 @@
+{
+  "id": "benhaslam/simsat-lfm2-5-vl-v3-training",
+  "title": "SimSat LFM2.5-VL v3 Training",
+  "code_file": "notebook.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_tpu": false,
+  "enable_internet": true,
+  "keywords": [
+    "gpu",
+    "simsat",
+    "lfm",
+    "satellite",
+    "vlm",
+    "lora"
+  ],
+  "dataset_sources": [
+    "benhaslam/simsat-lfm-v2"
+  ],
+  "kernel_sources": [],
+  "competition_sources": [],
+  "model_sources": [],
+  "machine_shape": "NvidiaTeslaT4"
+}
