@@ -62,29 +62,46 @@ get_ipython().system(  # noqa: F821
     "pip install -q --force-reinstall --no-deps 'pillow==11.3.0' 2>&1 | tail -3"
 )
 
-# Step 2 — Install the training stack. LFM2.5-VL was published against
-# transformers 5.0.0.dev0 (per its config.json) and uses the new v5
-# `TokenizersBackend` tokenizer abstraction; transformers 4.x doesn't have
-# that class. Install from git main (pre-v5 dev), with --pre to allow
-# pre-release of dependent packages too.
+# Steps 2-4 are split deliberately: combining them in a single pip command
+# made pip's resolver silently drop packages when there was a conflict.
+# Run 9 ended with transformers downgraded from git-main 5.8.0.dev0 (which
+# generates valid JSON for LFM) to PyPI 5.0.0 (which generates garbage),
+# AND `trl` was missing entirely.
+
+# Step 2 — pin huggingface_hub to a stable 0.x BEFORE anything else
+# touches it. transformers main imports `is_offline_mode` which 1.0+
+# removed; staying on 0.x keeps the symbol available.
 get_ipython().system(  # noqa: F821
-    "pip install -q -U --pre "
+    "pip install -q --force-reinstall --no-deps 'huggingface_hub==0.34.4' 2>&1 | tail -3"
+)
+
+# Step 3 — install transformers from git main with --no-deps so it doesn't
+# disturb our pinned huggingface_hub. LFM2.5-VL needs the v5 dev tokenizer
+# backend (`TokenizersBackend`).
+get_ipython().system(  # noqa: F821
+    "pip install -q --no-deps "
     "'transformers @ git+https://github.com/huggingface/transformers.git' "
+    "2>&1 | tail -3"
+)
+
+# Step 4 — install the rest of the training stack from stable PyPI (no
+# --pre, no git URLs). These don't conflict with each other and keep our
+# pinned huggingface_hub intact.
+get_ipython().system(  # noqa: F821
+    "pip install -q -U "
     "'tokenizers' "
     "'trl>=0.12.0' "
     "'peft>=0.13.0' "
     "'accelerate>=1.0.0' "
     "'datasets>=3.0.0' "
-    # Cap huggingface_hub below 1.0: --pre was pulling 1.0rc which removed
-    # `is_offline_mode`, but transformers main still imports that symbol.
-    # Run 8 errored at `import transformers` with
-    #   `ImportError: cannot import name 'is_offline_mode' from 'huggingface_hub'`.
-    "'huggingface_hub>=0.26.0,<1.0.0' "
-    "'torchao>=0.16.0' "  # PEFT's LoRA dispatcher requires torchao > 0.16
+    "'torchao>=0.16.0' "
     "2>&1 | tail -5"
 )
 import huggingface_hub as _hh, transformers as _tf
 print(f"Deps installed. transformers={_tf.__version__} huggingface_hub={_hh.__version__}")
+# Verify trl actually made it (Run 9 silently lost it during conflict resolution).
+import trl as _trl
+print(f"  trl={_trl.__version__}")
 
 # ============================================================
 # CELL 1: Load processor + base model + dataset
