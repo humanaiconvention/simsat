@@ -62,31 +62,27 @@ get_ipython().system(  # noqa: F821
     "pip install -q --force-reinstall --no-deps 'pillow==11.3.0' 2>&1 | tail -3"
 )
 
-# Steps 2-4 are split deliberately: combining them in a single pip command
-# made pip's resolver silently drop packages when there was a conflict.
-# Run 9 ended with transformers downgraded from git-main 5.8.0.dev0 (which
-# generates valid JSON for LFM) to PyPI 5.0.0 (which generates garbage),
-# AND `trl` was missing entirely.
+# 4-stage install. Order matters because:
+#   - transformers main imports `is_offline_mode` from huggingface_hub
+#     (a symbol removed in hf_hub 1.0+).
+#   - Pip's resolver, when given `-U` on packages whose latest releases
+#     depend on hf_hub 1.0+, will silently re-upgrade hf_hub even if
+#     we pinned it earlier — observed in Run 10.
+#   - Therefore we LAST-WIN re-pin hf_hub via `--force-reinstall --no-deps`
+#     after everything else has settled. The hf_hub 0.34.4 wheel still
+#     satisfies the runtime needs of stable PyPI datasets/accelerate; the
+#     dep-resolver constraints are advisory, not load-time required.
 
-# Step 2 — pin huggingface_hub to a stable 0.x BEFORE anything else
-# touches it. transformers main imports `is_offline_mode` which 1.0+
-# removed; staying on 0.x keeps the symbol available.
-get_ipython().system(  # noqa: F821
-    "pip install -q --force-reinstall --no-deps 'huggingface_hub==0.34.4' 2>&1 | tail -3"
-)
-
-# Step 3 — install transformers from git main with --no-deps so it doesn't
-# disturb our pinned huggingface_hub. LFM2.5-VL needs the v5 dev tokenizer
-# backend (`TokenizersBackend`).
+# Step 2 — install transformers from git main with --no-deps (don't touch
+# huggingface_hub). LFM2.5-VL needs the v5 dev tokenizer backend
+# (`TokenizersBackend`) introduced post-PyPI-5.0.0.
 get_ipython().system(  # noqa: F821
     "pip install -q --no-deps "
     "'transformers @ git+https://github.com/huggingface/transformers.git' "
-    "2>&1 | tail -3"
+    "2>&1 | tail -10"
 )
 
-# Step 4 — install the rest of the training stack from stable PyPI (no
-# --pre, no git URLs). These don't conflict with each other and keep our
-# pinned huggingface_hub intact.
+# Step 3 — install the rest of the training stack from stable PyPI.
 get_ipython().system(  # noqa: F821
     "pip install -q -U "
     "'tokenizers' "
@@ -95,8 +91,17 @@ get_ipython().system(  # noqa: F821
     "'accelerate>=1.0.0' "
     "'datasets>=3.0.0' "
     "'torchao>=0.16.0' "
-    "2>&1 | tail -5"
+    "2>&1 | tail -15"
 )
+
+# Step 4 — LAST-WIN pin of huggingface_hub. Even if Step 3 upgraded
+# hf_hub via transitive deps, this puts back a version that has
+# `is_offline_mode` for transformers main. --force-reinstall + --no-deps
+# ensures we override regardless of what pip's resolver wants.
+get_ipython().system(  # noqa: F821
+    "pip install -q --force-reinstall --no-deps 'huggingface_hub==0.34.4' 2>&1 | tail -5"
+)
+
 import huggingface_hub as _hh, transformers as _tf
 print(f"Deps installed. transformers={_tf.__version__} huggingface_hub={_hh.__version__}")
 # Verify trl actually made it (Run 9 silently lost it during conflict resolution).
