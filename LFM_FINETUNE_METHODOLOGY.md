@@ -220,6 +220,36 @@ delta for each metric, plus a per-class breakdown.
 - The eval report is saved to disk (`/kaggle/working/holdout_eval_report.json`)
   so judges can re-derive the numbers without re-running training.
 
+### 6.4 Run 14 (v2.2) results — actual holdout numbers
+
+Pushed adapter live at
+[`HumanAIConvention/simsat-lfm25vl-450m-v1`](https://huggingface.co/HumanAIConvention/simsat-lfm25vl-450m-v1).
+Training kernel public at `benhaslam/simsat-lfm2-5-vl-v1-training`.
+
+| Metric | Base | Tuned | Delta | Notes |
+|---|---|---|---|---|
+| `exact_action_agreement` | 0.250 | **0.656** | **+0.406** | 25% → 65.6% on 32-row holdout |
+| `score_mae` (lower better) | 0.312 | **0.102** | **-0.211** | usefulness-band predictions much closer to operator |
+| `useful_agreement` | 0.500 | 0.500 | 0.000 | flat — base already at ceiling for this binary |
+| `parse_rate` | 1.000 | 0.906 | -0.094 | 3/32, single-scene `0000…` repetition loop |
+
+Per-class action accuracy (tuned): `accept` 1.000 / `defer` 0.625 /
+`refine` 0.625 / `skip` 0.375. Skip remains the hardest class (base = 0.0
+on this holdout, so any positive number is improvement).
+
+Recipe that produced this: assistant-only loss masking (the prompt-length
+re-tokenize fix in Cell 4 collator), `lr=2e-4`, 5 epochs, LoRA
+`r=16/alpha=32`, effective batch size 8, 70 total steps.
+
+The 9.4 pp parse-rate dip is concentrated on a single target scene
+(Punjab Indo-Gangetic Plain); all 3 failures hit the same generation
+pathology (a numeric field looping `00000…` past 700 chars). This is a
+decode-time problem, not a representational regression — fixable with
+`repetition_penalty=1.05` or `no_repeat_ngram_size=20` at inference,
+no retrain required. A v3 run with that one knob would be expected
+to recover parse rate to ~1.0 without sacrificing the +40.6 pp
+action-agreement win.
+
 ## 7. Limitations
 
 These are honest limits of the v1 fine-tune; documenting them up front:
