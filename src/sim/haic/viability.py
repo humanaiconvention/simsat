@@ -336,6 +336,8 @@ def _gate_ttt_error_bias(trust_snapshot: dict) -> bool:
         return True  # Full window required — gate passes vacuously until 10 entries are accumulated
 
     errors = [u.get("error", 0.0) for u in window if "error" in u]
+    if len(errors) < 3:
+        return True  # Too few parseable error entries — skip vacuously rather than divide-by-zero
     positive = sum(1 for e in errors if e > 0)
     negative = sum(1 for e in errors if e < 0)
     total = len(errors)

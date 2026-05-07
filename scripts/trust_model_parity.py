@@ -10,12 +10,12 @@ the entire 2026-05 submission cycle.
 
 Replaced by:
   - Formal pytest coverage: `tests/test_encounter_trust_model.py`
-    (8 tests: refine/no-refine/compound-risk/online-update + L2 reg
-    drift bounds + L2 reg recovery + record_skipped_observation)
+    (5 tests: refine/no-refine/compound-risk/online-update + L2 reg drift bounds)
   - Viability gate coverage: `tests/test_ttt_viability_gates.py`
-    (16 tests on the three-gate evaluator)
+    (17 tests on the three-gate evaluator, including missing-key guard)
   - Trust-model edge cases: `tests/test_trust_model_edge_cases.py`
-    (12 tests on numerical extremes, log overflow, recovery)
+    (12 tests on numerical extremes, log overflow, recovery,
+    record_skipped_observation, and L2 reg recovery)
   - Trust-layer TTT 10-seed stability analysis:
     `ttt_stability_analysis.md` (22.5% MAE improvement +/- 0.1%)
   - Viability gates exercise on the same model:

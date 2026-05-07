@@ -296,3 +296,67 @@ def test_get_weight_snapshot_returns_consistent_drift_after_update():
         # Allow small rounding tolerance — both values are rounded to 6 decimals
         expected = round(weights[k] - defaults[k], 6)
         assert abs(drift[k] - expected) < 1e-6
+
+
+# ── Property test: weight snapshot internal consistency ─────────────────────
+
+def test_weight_snapshot_internally_consistent_over_random_operator_labels():
+    """Feed 100 random operator labels through online_update + record_skipped_observation
+    and assert the resulting weight snapshot is internally consistent:
+      - weights sum to 1.0
+      - all weights are positive
+      - drift_from_policy_defaults[k] == learned_score_weights[k] - default[k]
+      - update_count + skipped entries match log lengths
+    """
+    import random
+    rng = random.Random(42)
+
+    policy = EncounterPolicy()
+    model = WCLITrustModel(policy=policy)
+    defaults = dict(policy.learned_score_weights)
+
+    actions = ["accept", "refine", "defer", "skip"]
+    details_pool = [
+        {"target_priority": rng.uniform(0, 1), "geometry_margin": rng.uniform(0, 1),
+         "duration_margin": rng.uniform(0, 1), "imagery_support": rng.uniform(0, 1),
+         "clarity_support": rng.uniform(0, 1)}
+        for _ in range(100)
+    ]
+
+    expected_updates = 0
+    expected_skips = 0
+
+    for i in range(100):
+        details = details_pool[i]
+        learned = rng.uniform(0.0, 1.0)
+        realized = rng.uniform(0.0, 1.0)
+        if rng.random() < 0.7:
+            model.online_update(details, learned_score=learned, realized_utility=realized)
+            expected_updates += 1
+        else:
+            model.record_skipped_observation(details, learned_score=learned, realized_utility=realized)
+            expected_skips += 1
+
+    snap = model.get_weight_snapshot()
+    weights = snap["learned_score_weights"]
+    drift = snap["drift_from_policy_defaults"]
+
+    # Weights sum to 1
+    assert abs(sum(weights.values()) - 1.0) < 1e-5, (
+        f"weights don't sum to 1: {sum(weights.values())}"
+    )
+    # All weights positive
+    assert all(v > 0 for v in weights.values()), (
+        f"negative weight found: {weights}"
+    )
+    # Drift matches weights - defaults
+    for k in defaults:
+        expected_drift = round(weights[k] - defaults[k], 6)
+        assert abs(drift[k] - expected_drift) < 1e-5, (
+            f"drift mismatch for {k}: snap says {drift[k]}, computed {expected_drift}"
+        )
+    # update_count matches
+    assert model.update_count == expected_updates
+    # Log length is capped at _MAX_UPDATE_LOG, total entries from both paths
+    total_logged = expected_updates + expected_skips
+    assert len(model._update_log) == min(total_logged, _MAX_UPDATE_LOG)

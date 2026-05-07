@@ -185,3 +185,38 @@ def test_weight_drift_fires_after_many_biased_updates():
     # With reg=0, drift can be substantial
     gates = evaluate_ttt_viability(snap)
     assert gates["weight_drift"] is False, "weight_drift should fire after 500 unregularized biased updates"
+
+
+# ── error_bias gate: missing-key guard ─────────────────────────────────────
+
+def test_error_bias_passes_when_all_entries_missing_error_key():
+    """A full window where every entry lacks the 'error' key yields too few
+    parseable errors (< 3) and the gate must pass vacuously rather than
+    raising ZeroDivisionError or incorrectly blocking."""
+    snap = {"recent_updates": [{"foo": 1}] * TTT_BIAS_WINDOW}
+    gates = evaluate_ttt_viability(snap)
+    assert gates["error_bias"] is True, (
+        "gate should pass vacuously when no entries have an 'error' key"
+    )
+
+
+def test_error_bias_passes_when_fewer_than_three_entries_have_error_key():
+    """Only 2 of 10 entries have an 'error' key — below the 3-entry minimum
+    needed to make a meaningful bias measurement; gate must pass vacuously."""
+    window = [{"error": 1.0}, {"error": 1.0}] + [{"skipped": True}] * 8
+    snap = {"recent_updates": window}
+    gates = evaluate_ttt_viability(snap)
+    assert gates["error_bias"] is True, (
+        "gate should pass vacuously with only 2 parseable error entries"
+    )
+
+
+def test_error_bias_fires_when_three_or_more_entries_are_all_same_sign():
+    """Exactly 3 entries with the 'error' key, all same sign (100% ≥ 70%) —
+    gate must fire (return False), not pass vacuously."""
+    window = [{"error": 0.5}] * 3 + [{"skipped": True}] * 7
+    snap = {"recent_updates": window}
+    gates = evaluate_ttt_viability(snap)
+    assert gates["error_bias"] is False, (
+        "gate should fire: 3/3 same-sign errors = 100% ≥ TTT_BIAS_THRESHOLD"
+    )

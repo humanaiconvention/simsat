@@ -292,3 +292,156 @@ def test_snapshot_after_returns_correct_shape():
     snap = result.snapshot_after
     gates = evaluate_ttt_viability(snap)
     assert set(gates) == {"weight_drift", "update_rate", "error_bias"}
+
+
+# ---------------------------------------------------------------------------
+# Real forward-path: mock PreTrainedModel + processor exercising apply_chat_template
+# ---------------------------------------------------------------------------
+
+class _MockTokenizerOutput(dict):
+    """Minimal dict-like tensor bag returned by apply_chat_template."""
+
+    def __init__(self, length: int = 8):
+        import types
+        try:
+            import torch
+            ids = torch.zeros(1, length, dtype=torch.long)
+        except Exception:
+            # torch not available — use a plain list wrapped in something .to()-able
+            class _T:
+                def __init__(self, v):
+                    self._v = v
+                    self.shape = (1, length)
+                def to(self, *a, **kw):
+                    return self
+                def clone(self):
+                    return self
+                def __getitem__(self, k):
+                    return self
+                def __setitem__(self, k, v):
+                    pass
+                def __eq__(self, other):
+                    return self
+            ids = _T(None)
+        super().__init__(input_ids=ids)
+
+    def to(self, *args, **kwargs):
+        return self
+
+
+class _MockProcessor:
+    """Minimal processor that exercises the apply_chat_template code path."""
+
+    class _tokenizer:
+        pad_token_id = 0
+
+    tokenizer = _tokenizer()
+
+    def apply_chat_template(self, conversations, **kwargs):
+        return _MockTokenizerOutput()
+
+    def decode(self, tokens, **kwargs):
+        return '{"recommended_action": "accept", "confidence": 0.8}'
+
+
+class _MockModelOutput:
+    def __init__(self):
+        try:
+            import torch
+            self.loss = torch.tensor(1.0, requires_grad=True)
+        except Exception:
+            class _FakeLoss:
+                def backward(self): pass
+                def detach(self):
+                    class _D:
+                        def item(self): return 1.0
+                    return _D()
+            self.loss = _FakeLoss()
+
+    def __getitem__(self, k):
+        return None
+
+
+class _MockPreTrainedModel:
+    """Lightweight stand-in for a real PreTrainedModel with LoRA weights."""
+
+    class config:
+        image_token_id = 396
+
+    def __init__(self):
+        self._call_count = 0
+        try:
+            import torch
+            import torch.nn as nn
+            self._lora_A = nn.Parameter(torch.randn(4, 8) * 0.01)
+            self._lora_B = nn.Parameter(torch.zeros(8, 4))
+            self._has_torch = True
+        except Exception:
+            self._has_torch = False
+
+    @property
+    def device(self):
+        try:
+            import torch
+            return torch.device("cpu")
+        except Exception:
+            return "cpu"
+
+    def train(self):
+        return self
+
+    def eval(self):
+        return self
+
+    def named_parameters(self):
+        if self._has_torch:
+            yield "base_model.lora_A.weight", self._lora_A
+            yield "base_model.lora_B.weight", self._lora_B
+
+    def generate(self, **kwargs):
+        try:
+            import torch
+            return torch.zeros(1, 12, dtype=torch.long)
+        except Exception:
+            return [[0] * 12]
+
+    def __call__(self, **kwargs):
+        self._call_count += 1
+        return _MockModelOutput()
+
+
+def test_real_forward_path_apply_chat_template():
+    """OnlineLoRAStepper._forward exercises processor.apply_chat_template when
+    no forward_loss_fn stub is provided. This test uses _MockPreTrainedModel
+    (a PreTrainedModel-shape object) and _MockProcessor to validate the real
+    code path without needing actual LFM weights loaded."""
+    model = _MockPreTrainedModel()
+    processor = _MockProcessor()
+
+    try:
+        import torch
+        opt = torch.optim.SGD([model._lora_A, model._lora_B], lr=1e-4)
+    except Exception:
+        opt = _FakeOptimizer()
+
+    stepper = OnlineLoRAStepper(
+        model=model,
+        processor=processor,
+        optimizer=opt,
+        forward_loss_fn=None,  # Use real forward path
+    )
+
+    msgs, target = _msgs("accept")
+    result = stepper.online_step(msgs, target)
+
+    assert isinstance(result, OnlineStepResult)
+    # The mock processor returns '{"recommended_action": "accept", ...}'
+    # target is also "accept" → error=0 → gate passes → step fires
+    assert result.action_error == 0
+    assert result.did_step is True
+    assert result.blocked_by is None
+    # Model's __call__ should have been invoked (forward pass)
+    assert model._call_count >= 1
+    # snapshot_after is viability-compatible
+    gates = evaluate_ttt_viability(result.snapshot_after)
+    assert set(gates) == {"weight_drift", "update_rate", "error_bias"}
