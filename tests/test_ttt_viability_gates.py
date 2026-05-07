@@ -220,3 +220,6 @@ def test_error_bias_fires_when_three_or_more_entries_are_all_same_sign():
     assert gates["error_bias"] is False, (
         "gate should fire: 3/3 same-sign errors = 100% ≥ TTT_BIAS_THRESHOLD"
     )
+
+
+# ── error_bias gate: missing-key guard ─────────────────────────────────────
