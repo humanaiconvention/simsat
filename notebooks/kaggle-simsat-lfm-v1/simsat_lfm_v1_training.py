@@ -336,9 +336,10 @@ sft_config = SFTConfig(
     learning_rate=5e-5,
     lr_scheduler_type="cosine",
     warmup_ratio=0.1,
-    logging_steps=5,
-    save_strategy="epoch",
-    save_total_limit=1,
+    logging_steps=2,                  # tighter logging — see loss curve immediately
+    save_strategy="steps",            # save checkpoints during training
+    save_steps=8,                     # ~5x per epoch; survives a mid-train crash
+    save_total_limit=3,
     bf16=True,
     fp16=False,
     optim="adamw_torch",
@@ -347,7 +348,11 @@ sft_config = SFTConfig(
     remove_unused_columns=False,
     dataset_kwargs={"skip_prepare_dataset": True},
     max_length=2048,
+    max_grad_norm=1.0,                # gradient clipping for bf16 stability
+    weight_decay=0.01,                # standard AdamW regularization
     report_to="none",
+    seed=42,
+    data_seed=42,
     # NB: do NOT set dataset_text_field — when skip_prepare_dataset=True
     # is set, TRL hands the dataset to the data_collator unchanged and any
     # `dataset_text_field` value can trigger column-validation warnings/errors
@@ -356,24 +361,22 @@ sft_config = SFTConfig(
 )
 
 
-class _ListDataset:
-    def __init__(self, records: list[dict]):
-        self._records = records
+# Convert to a real HF Dataset — TRL >=0.20 may reject arbitrary list-likes
+# in some code paths (column inspection during the inner trainer state setup).
+# The records are JSON-serializable so this is a clean conversion.
+from datasets import Dataset as _HFDataset
 
-    def __len__(self):
-        return len(self._records)
-
-    def __getitem__(self, idx):
-        return self._records[idx]
-
+_train_ds = _HFDataset.from_list(train_records)
+print(f"Train dataset: {len(_train_ds)} rows, columns={list(_train_ds.column_names)}")
 
 trainer = SFTTrainer(
     model=model,
     args=sft_config,
-    train_dataset=_ListDataset(train_records),
+    train_dataset=_train_ds,
     data_collator=collate_fn,
     processing_class=processor.tokenizer,
 )
+print("SFTTrainer constructed.")
 
 
 # ============================================================
@@ -381,8 +384,35 @@ trainer = SFTTrainer(
 # ============================================================
 print(f"Training for {sft_config.num_train_epochs} epochs on {len(train_records)} samples...")
 print(f"Effective batch size: {sft_config.per_device_train_batch_size * sft_config.gradient_accumulation_steps}")
-trainer.train()
-print("Training complete.")
+
+# Wrap training so a mid-step crash (OOM / NaN / kernel timeout) doesn't
+# discard the partial adapter — TRL writes step-checkpoints under
+# OUTPUT_DIR/checkpoint-N, and we additionally save a final snapshot here.
+_emergency_dir = OUTPUT_DIR + "-EMERGENCY"
+try:
+    trainer.train()
+    print("Training complete.")
+except Exception as _train_err:
+    import traceback
+    print(f"\n!!! TRAINING CRASHED: {type(_train_err).__name__}: {_train_err}")
+    traceback.print_exc()
+    try:
+        trainer.model.save_pretrained(_emergency_dir)
+        processor.save_pretrained(_emergency_dir)
+        print(f"Emergency snapshot saved to: {_emergency_dir}")
+    except Exception as _save_err:
+        print(f"  (also could not save snapshot: {_save_err})")
+    # Re-raise so papermill marks the run failed; downstream cells expect
+    # a successfully-trained `trainer.model` to operate on.
+    raise
+
+# Diagnostic: print free VRAM after training so future runs can see if
+# we're at the OOM edge.
+import torch as _t
+if _t.cuda.is_available():
+    _alloc = _t.cuda.memory_allocated(0) / 1024**3
+    _reserved = _t.cuda.memory_reserved(0) / 1024**3
+    print(f"GPU memory after train: allocated={_alloc:.2f} GB  reserved={_reserved:.2f} GB")
 
 
 # ============================================================
@@ -429,9 +459,22 @@ if missing:
 # ============================================================
 print("Running TUNED-model hold-out inference (32 samples)...")
 trainer.model.eval()
+# Gradient checkpointing was on during training; turn it off for generation
+# (otherwise generate() runs ~2x slower because forward gets re-executed).
+try:
+    trainer.model.gradient_checkpointing_disable()
+except Exception:
+    pass
+
+# Save predictions incrementally so a crash partway through doesn't lose them.
+_tuned_path = "/kaggle/working/tuned_predictions.json"
 tuned_predictions = []
 for i, rec in enumerate(holdout_records):
-    text = generate_assessment(trainer.model, processor, rec["messages"][:2])
+    try:
+        text = generate_assessment(trainer.model, processor, rec["messages"][:2])
+    except Exception as _gen_err:
+        print(f"  generate failed on sample {i}: {type(_gen_err).__name__}: {_gen_err}")
+        text = ""
     tuned_predictions.append({
         "trace_id": rec.get("trace_id"),
         "scenario_pack": rec.get("scenario_pack"),
@@ -441,10 +484,14 @@ for i, rec in enumerate(holdout_records):
     })
     if (i + 1) % 8 == 0:
         print(f"  {i+1}/{len(holdout_records)} done")
+        # Persist progress every 8 samples so a late OOM doesn't destroy work
+        with open(_tuned_path, "w", encoding="utf-8") as f:
+            json.dump(tuned_predictions, f, indent=2)
 
-with open("/kaggle/working/tuned_predictions.json", "w", encoding="utf-8") as f:
+# Final save
+with open(_tuned_path, "w", encoding="utf-8") as f:
     json.dump(tuned_predictions, f, indent=2)
-print("Tuned predictions saved -> /kaggle/working/tuned_predictions.json")
+print(f"Tuned predictions saved -> {_tuned_path}")
 print(f"Sample tuned prediction: {tuned_predictions[0]['predicted'][:200]}")
 
 
@@ -567,31 +614,40 @@ def score_predictions(preds: list[dict]) -> dict:
     }
 
 
-base_metrics = score_predictions(base_predictions)
-tuned_metrics = score_predictions(tuned_predictions)
+_report_path = "/kaggle/working/holdout_eval_report.json"
+try:
+    base_metrics = score_predictions(base_predictions)
+    tuned_metrics = score_predictions(tuned_predictions)
 
-print("\n" + "=" * 60)
-print("BASE vs TUNED — 32-row stratified hold-out")
-print("=" * 60)
-print(f"{'Metric':<28} {'Base':>10} {'Tuned':>10} {'Delta':>10}")
-print("-" * 60)
-for k in ("parse_rate", "exact_action_agreement", "useful_agreement", "score_mae"):
-    b = base_metrics[k]
-    t = tuned_metrics[k]
-    d = t - b
-    print(f"{k:<28} {b:>10.3f} {t:>10.3f} {d:>+10.3f}")
-print("\nPer-class accuracy:")
-print(f"{'Class':<10} {'Base':>10} {'Tuned':>10} {'Delta':>10}")
-print("-" * 42)
-for cls in ("accept", "refine", "defer", "skip"):
-    b = base_metrics["per_class_accuracy"].get(cls, 0.0)
-    t = tuned_metrics["per_class_accuracy"].get(cls, 0.0)
-    print(f"{cls:<10} {b:>10.3f} {t:>10.3f} {(t-b):>+10.3f}")
+    print("\n" + "=" * 60)
+    print("BASE vs TUNED — 32-row stratified hold-out")
+    print("=" * 60)
+    print(f"{'Metric':<28} {'Base':>10} {'Tuned':>10} {'Delta':>10}")
+    print("-" * 60)
+    for k in ("parse_rate", "exact_action_agreement", "useful_agreement", "score_mae"):
+        b = base_metrics[k]
+        t = tuned_metrics[k]
+        d = t - b
+        print(f"{k:<28} {b:>10.3f} {t:>10.3f} {d:>+10.3f}")
+    print("\nPer-class accuracy:")
+    print(f"{'Class':<10} {'Base':>10} {'Tuned':>10} {'Delta':>10}")
+    print("-" * 42)
+    for cls in ("accept", "refine", "defer", "skip"):
+        b = base_metrics["per_class_accuracy"].get(cls, 0.0)
+        t = tuned_metrics["per_class_accuracy"].get(cls, 0.0)
+        print(f"{cls:<10} {b:>10.3f} {t:>10.3f} {(t-b):>+10.3f}")
 
-# Persist the eval report so it can be cited in the docs
-with open("/kaggle/working/holdout_eval_report.json", "w", encoding="utf-8") as f:
-    json.dump({"base": base_metrics, "tuned": tuned_metrics}, f, indent=2)
-print("\nReport saved -> /kaggle/working/holdout_eval_report.json")
+    with open(_report_path, "w", encoding="utf-8") as f:
+        json.dump({"base": base_metrics, "tuned": tuned_metrics}, f, indent=2)
+    print(f"\nReport saved -> {_report_path}")
+except Exception as _metrics_err:
+    import traceback
+    print(f"\n!!! METRICS COMPUTATION FAILED: {type(_metrics_err).__name__}: {_metrics_err}")
+    traceback.print_exc()
+    # Save raw predictions so the user can compute metrics offline if needed.
+    with open(_report_path, "w", encoding="utf-8") as f:
+        json.dump({"error": str(_metrics_err), "base_predictions_count": len(base_predictions),
+                   "tuned_predictions_count": len(tuned_predictions)}, f, indent=2)
 
 
 # ============================================================
@@ -609,30 +665,54 @@ if eval_records:
 # ============================================================
 # CELL 11: Optional — push adapter to HuggingFace Hub
 # ============================================================
+# This cell is gated by HF_PUSH_ENABLED. To enable upload:
+#   1. Add HF_TOKEN as a Kaggle Secret (write-permission token from
+#      https://huggingface.co/settings/tokens) — scope: write to
+#      HumanAIConvention/simsat-lfm25vl-450m-v1.
+#   2. Re-run this cell with HF_PUSH_ENABLED=True (set just below).
+# We never crash the kernel here on missing token / push failure — the
+# adapter is already saved locally to ADAPTER_DIR and you can upload it
+# manually with `huggingface-cli upload` or `HfApi().upload_folder(...)`.
+
+HF_PUSH_ENABLED = False
 HF_REPO_ID = "HumanAIConvention/simsat-lfm25vl-450m-v1"
 
-if False:  # set True after you've reviewed Cell 9 metrics
-    from huggingface_hub import HfApi, login
-
-    HF_TOKEN = os.environ.get("HF_TOKEN") or os.environ.get("KAGGLE_USERNAME_HF_TOKEN")
-    assert HF_TOKEN, "Set HF_TOKEN as a Kaggle secret to push."
-    login(token=HF_TOKEN)
-    api = HfApi()
-    api.create_repo(repo_id=HF_REPO_ID, exist_ok=True, private=False)
-    api.upload_folder(
-        folder_path=ADAPTER_DIR,
-        repo_id=HF_REPO_ID,
-        repo_type="model",
-        commit_message="SimSat LFM2.5-VL-450M v1 LoRA adapter — initial release",
-    )
-    # Also upload the eval report so the model card has the evidence inline
-    api.upload_file(
-        path_or_fileobj="/kaggle/working/holdout_eval_report.json",
-        path_in_repo="holdout_eval_report.json",
-        repo_id=HF_REPO_ID,
-        repo_type="model",
-    )
-    print(f"Pushed adapter to https://huggingface.co/{HF_REPO_ID}")
+if HF_PUSH_ENABLED:
+    try:
+        from huggingface_hub import HfApi, login
+        HF_TOKEN = os.environ.get("HF_TOKEN") or os.environ.get("KAGGLE_USERNAME_HF_TOKEN")
+        if not HF_TOKEN:
+            try:
+                from kaggle_secrets import UserSecretsClient
+                HF_TOKEN = UserSecretsClient().get_secret("HF_TOKEN")
+            except Exception:
+                pass
+        if not HF_TOKEN:
+            raise RuntimeError("HF_TOKEN not found in env or Kaggle Secrets. "
+                               "Add it as a Secret and re-run.")
+        login(token=HF_TOKEN)
+        api = HfApi()
+        api.create_repo(repo_id=HF_REPO_ID, exist_ok=True, private=False)
+        api.upload_folder(
+            folder_path=ADAPTER_DIR,
+            repo_id=HF_REPO_ID,
+            repo_type="model",
+            commit_message="SimSat LFM2.5-VL-450M v1 LoRA adapter — initial release",
+        )
+        if Path("/kaggle/working/holdout_eval_report.json").exists():
+            api.upload_file(
+                path_or_fileobj="/kaggle/working/holdout_eval_report.json",
+                path_in_repo="holdout_eval_report.json",
+                repo_id=HF_REPO_ID,
+                repo_type="model",
+            )
+        print(f"Pushed adapter to https://huggingface.co/{HF_REPO_ID}")
+    except Exception as _push_err:
+        print(f"!!! HF upload failed: {type(_push_err).__name__}: {_push_err}")
+        print(f"    Adapter is still saved locally at: {ADAPTER_DIR}")
+        print(f"    To upload manually:")
+        print(f"      huggingface-cli upload {HF_REPO_ID} {ADAPTER_DIR}")
 else:
-    print(f"\nHF upload skipped. Edit Cell 11 (`if False:` -> `if True:`) once metrics look good.")
+    print(f"\nHF upload skipped. To enable: set HF_PUSH_ENABLED=True in Cell 11.")
     print(f"Local adapter dir: {ADAPTER_DIR}")
+    print(f"Holdout report: /kaggle/working/holdout_eval_report.json")
