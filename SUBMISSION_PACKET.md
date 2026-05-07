@@ -15,9 +15,9 @@ This packet was generated from the live challenge stack.
 | scenario | windows | scaffold_accept | trust_accept | trust_refine | scaffold_yield | trust_yield | labelled_cases |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | disaster_response_weather | 3 | 0 | 0 | 0 | 1.0 | 1.0 | 30 |
-| maritime_chokepoints | 8 | 3 | 3 | 3 | 1.0 | 1.0 | 31 |
+| maritime_chokepoints | 1 | 1 | 1 | 0 | 1.0 | 1.0 | 32 |
 | pedospheric_integrity | 5 | 3 | 3 | 0 | 1.0 | 1.0 | 54 |
-| urban_coastal_ambiguity | 3 | 0 | 0 | 2 | 1.0 | 1.0 | 37 |
+| urban_coastal_ambiguity | 2 | 1 | 1 | 1 | 1.0 | 1.0 | 37 |
 
 ## disaster_response_weather
 
@@ -36,16 +36,16 @@ This packet was generated from the live challenge stack.
 
 ## maritime_chokepoints
 
-- Evaluation: `eval_9928df6176ea40a9b02614210f4b6a3e`
+- Evaluation: `eval_8346ab8783a7426b94145b208073170f`
 - Policy horizon: `48.0` hour(s)
 - Horizon used: `48.0` hour(s)
-- Transition counts: `{'accept->accept': 3, 'defer->defer': 2, 'defer->refine': 3}`
-- Top delta: `Panama Canal` `defer -> refine` (reason: `compound_risk_refine`)
-- Curated case: Suez Canal: scaffold accept -> refine; assessment accept; outcome accept (useful)
-- Stored visual assessment: mode=`image_conditioned`, runtime=`clip_local`, recommended=`accept`, useful=`True`, usefulness_score=`0.85`
-- Mission response: action=`queue_refine_review`, utility_realized=`0.85`
-- Trace: `trace_3957ae2fabb34f298e9ff95ec912b6e1`
-- Label source: `operator_review`; reviewer=`ben`; status=`reviewed`
+- Transition counts: `{'accept->accept': 1}`
+- Top delta: `Suez Canal` `accept -> accept` (reason: `high_visibility,high_priority,sentinel_available,line_of_sight`)
+- Curated case: Suez Canal: scaffold accept -> refine; assessment refine; outcome accept (useful)
+- Stored visual assessment: mode=`image_conditioned`, runtime=`clip_local`, recommended=`refine`, useful=`True`, usefulness_score=`0.95`
+- Mission response: action=`escalate_operator`, utility_realized=`0.95`
+- Trace: `trace_65140d61f76c4db4aff8b1851047db69`
+- Label source: `operator_review`; reviewer=`regression_operator`; status=`reviewed`
 - Submission case: `pinned`
 - Case source: `historical labelled trace`
 
@@ -66,11 +66,11 @@ This packet was generated from the live challenge stack.
 
 ## urban_coastal_ambiguity
 
-- Evaluation: `eval_aeb9b9de742d484b9cff28561376052a`
+- Evaluation: `eval_b5c865d841fc4aaca85a2c79153fef8a`
 - Policy horizon: `8.0` hour(s)
 - Horizon used: `8.0` hour(s)
-- Transition counts: `{'defer->defer': 1, 'defer->refine': 2}`
-- Top delta: `Shenzhen Bay` `defer -> refine` (reason: `compound_risk_refine`)
+- Transition counts: `{'accept->accept': 1, 'defer->refine': 1}`
+- Top delta: `Port of Los Angeles` `defer -> refine` (reason: `compound_risk_refine`)
 - Curated case: Port of Rotterdam: scaffold accept -> refine; assessment refine; outcome accept (useful)
 - Stored visual assessment: mode=`image_conditioned`, runtime=`clip_local`, recommended=`refine`, useful=`True`, usefulness_score=`0.85`
 - Mission response: action=`escalate_operator`, utility_realized=`0.85`
