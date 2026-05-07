@@ -1,0 +1,53 @@
+{
+  "version": "v12",
+  "full_pool": {
+    "n_total": 152,
+    "n_parsed": 53,
+    "exact": 0.5094339622641509,
+    "useful": 0.7358490566037735,
+    "mae": 0.2063334547036502,
+    "per_pack": {
+      "disaster_response_weather": 0.4375,
+      "maritime_chokepoints": 0.5454545454545454,
+      "pedospheric_integrity": 0.47058823529411764,
+      "urban_coastal_ambiguity": 0.6666666666666666
+    },
+    "majority_baseline": 0.3018867924528302,
+    "majority_class": "accept",
+    "confusion_matrix": {
+      "accept": {
+        "accept": 13,
+        "refine": 7,
+        "defer": 7,
+        "skip": 7
+      },
+      "refine": {
+        "accept": 3,
+        "refine": 7,
+        "defer": 0,
+        "skip": 0
+      },
+      "defer": {
+        "accept": 0,
+        "refine": 0,
+        "defer": 0,
+        "skip": 0
+      },
+      "skip": {
+        "accept": 0,
+        "refine": 0,
+        "defer": 2,
+        "skip": 7
+      }
+    },
+    "leakage_warning": "~93% of full-pool cases are in v12 training set; this is an in-distribution metric, not generalization"
+  },
+  "holdout": {
+    "n_total": 2,
+    "exact": 0.0,
+    "useful": 0.0,
+    "mae": 0.3180296158517554,
+    "note": "True generalization (N=4 held out from training); small sample, no statistical power"
+  },
+  "elapsed_seconds": 3064.9596495628357
+}

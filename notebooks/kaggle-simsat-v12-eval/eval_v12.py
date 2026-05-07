@@ -27,13 +27,31 @@ except Exception as _e:
 
 if not HF_TOKEN:
     HF_TOKEN = os.environ.get("HF_TOKEN")
-    if not HF_TOKEN:
-        raise RuntimeError(
-            "HF_TOKEN unavailable: Kaggle Secret retry exhausted and OS env unset. "
-            "Verify the secret is configured AND attached to this kernel "
-            "(Kaggle UI: Settings > Secrets)."
-        )
-    print(f"  OS env HF_TOKEN fallback active ({HF_TOKEN[:8]}...)")
+    if HF_TOKEN:
+        print(f"  OS env HF_TOKEN fallback active ({HF_TOKEN[:8]}...)")
+
+# Final fallback: private Kaggle dataset mounted as input. Used when the
+# Kaggle Secrets backend is unreachable from the kernel runner (a
+# documented intermittent failure mode of the service).
+if not HF_TOKEN:
+    import glob as _glob
+    for _candidate in _glob.glob("/kaggle/input/**/hf_token.txt", recursive=True):
+        try:
+            with open(_candidate) as _f:
+                HF_TOKEN = _f.read().strip()
+            if HF_TOKEN:
+                print(f"  Mounted-dataset HF_TOKEN fallback active from {_candidate} ({HF_TOKEN[:8]}...)")
+                break
+        except Exception as _e:
+            print(f"  could not read {_candidate}: {_e}")
+
+if not HF_TOKEN:
+    raise RuntimeError(
+        "HF_TOKEN unavailable from any source: Kaggle Secret retry exhausted, "
+        "OS env unset, and no hf_token.txt under /kaggle/input/. Either attach "
+        "the HF_TOKEN secret AND ensure the Secrets service is up, or attach a "
+        "private dataset containing hf_token.txt to the kernel."
+    )
 
 os.environ["HF_TOKEN"] = HF_TOKEN
 os.environ["HUGGING_FACE_HUB_TOKEN"] = HF_TOKEN

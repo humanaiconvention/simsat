@@ -1,0 +1,234 @@
+[{"stream_name":"stderr","time":5.433841217,"data":"/usr/local/lib/python3.12/dist-packages/nbformat/__init__.py:96: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.\n"}
+,{"stream_name":"stderr","time":5.433921523,"data":"  validate(nb)\n"}
+,{"stream_name":"stderr","time":6.213250614,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":6.213275484,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":6.213280236,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":6.213284074,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":6.811093711,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":6.811122586,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":6.811127966,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":6.811131736,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":8.286417318,"data":"  Kaggle Secrets attempt 1/5 failed: Connection error trying to communicate with service.\n"}
+,{"stream_name":"stdout","time":10.491214582,"data":"  Kaggle Secrets attempt 2/5 failed: Connection error trying to communicate with service.\n"}
+,{"stream_name":"stdout","time":14.71089438,"data":"  Kaggle Secrets attempt 3/5 failed: Connection error trying to communicate with service.\n"}
+,{"stream_name":"stdout","time":20.904264565,"data":"  Kaggle Secrets attempt 4/5 failed: Connection error trying to communicate with service.\n"}
+,{"stream_name":"stdout","time":29.104494637,"data":"  Kaggle Secrets attempt 5/5 failed: Connection error trying to communicate with service.\n"}
+,{"stream_name":"stdout","time":29.104535259,"data":"  Mounted-dataset HF_TOKEN fallback active from /kaggle/input/simsat-secrets/hf_token.txt (hf_OhMxV...)\n"}
+,{"stream_name":"stdout","time":29.104541675,"data":"\n"}
+,{"stream_name":"stdout","time":29.10455081,"data":"[1/6] installing/pinning deps...\n"}
+,{"stream_name":"stdout","time":55.798393382,"data":"     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 79.5/79.5 kB 1.0 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":56.001802392,"data":"     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 79.5/79.5 kB 1.0 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":56.72214674,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 383.7/383.7 kB 4.0 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":56.923688997,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 383.7/383.7 kB 4.0 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":56.934524701,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.2/3.2 MB 20.4 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":57.136519398,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.2/3.2 MB 20.4 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":57.155323281,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10.9/10.9 MB 62.9 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":57.225498765,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 661.5/661.5 kB 43.6 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":57.354755068,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.5/4.5 MB 60.1 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":57.357102564,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10.9/10.9 MB 62.9 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":57.357121292,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 661.5/661.5 kB 43.6 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":57.35712677,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.5/4.5 MB 60.1 MB/s eta 0:00:00\n"}
+,{"stream_name":"stderr","time":102.056573419,"data":"Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch \u003e= 2.11.0 (found 2.10.0+cu128).\n"}
+,{"stream_name":"stderr","time":102.056606031,"data":"\n"}
+,{"stream_name":"stderr","time":102.056611965,"data":"Skipping import of cpp extensions due to incompatible torch version. Please upgrade to torch \u003e= 2.11.0 (found 2.10.0+cu128).\n"}
+,{"stream_name":"stdout","time":103.905838778,"data":"  transformers=5.8.0.dev0  peft=0.19.2.dev0\n"}
+,{"stream_name":"stdout","time":103.905877218,"data":"  torch=2.10.0+cu128  cuda=True  device=Tesla T4\n"}
+,{"stream_name":"stdout","time":103.905883424,"data":"\n"}
+,{"stream_name":"stdout","time":103.905887926,"data":"[2/6] downloading eval_pool.jsonl + eval_holdout.jsonl from HF...\n"}
+,{"stream_name":"stderr","time":104.744621224,"data":"Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.\n"}
+,{"stream_name":"stderr","time":104.744653093,"data":"\n"}
+,{"stream_name":"stderr","time":104.744666725,"data":"Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.\n"}
+,{"stream_name":"stdout","time":105.356623317,"data":"  eval_pool: /root/.cache/huggingface/hub/models--HumanAIConvention--simsat-gemma4-v11/snapshots/7bad1764f7c804b6a67eca3f0541ac557ceae982/eval_pool.jsonl\n"}
+,{"stream_name":"stdout","time":105.356669716,"data":"  eval_holdout: /root/.cache/huggingface/hub/models--HumanAIConvention--simsat-gemma4-v11/snapshots/7bad1764f7c804b6a67eca3f0541ac557ceae982/eval_holdout.jsonl\n"}
+,{"stream_name":"stdout","time":105.356677596,"data":"\n"}
+,{"stream_name":"stdout","time":105.356683233,"data":"[3/6] locating base model...\n"}
+,{"stream_name":"stdout","time":105.356687958,"data":"  base_model: /kaggle/input/models/google/gemma-4/transformers/gemma-4-e2b-it/1\n"}
+,{"stream_name":"stdout","time":105.356692854,"data":"\n"}
+,{"stream_name":"stdout","time":105.356697375,"data":"[4/6] loading base + v12 LoRA...\n"}
+,{"stream_name":"stderr","time":108.313576646,"data":"[transformers] `torch_dtype` is deprecated! Use `dtype` instead!\n"}
+,{"stream_name":"stderr","time":108.313614279,"data":"\n"}
+,{"stream_name":"stderr","time":108.313618715,"data":"[transformers] `torch_dtype` is deprecated! Use `dtype` instead!\n"}
+,{"stream_name":"stdout","time":143.579207613,"data":"  loaded in 38.2s  device=cuda:0\n"}
+,{"stream_name":"stdout","time":143.579249201,"data":"\n"}
+,{"stream_name":"stdout","time":143.579255204,"data":"[5/6] running inference...\n"}
+,{"stream_name":"stdout","time":143.579260263,"data":"  full pool: 152 cases (in-distribution leakage: ~93% of these are in v12 training set)\n"}
+,{"stream_name":"stdout","time":143.579265395,"data":"  held-out: 4 cases (true generalization, but small N)\n"}
+,{"stream_name":"stdout","time":357.856967762,"data":"  [10/152] elapsed=214s · 21.4s/case\n"}
+,{"stream_name":"stdout","time":570.852497246,"data":"  [20/152] elapsed=427s · 21.4s/case\n"}
+,{"stream_name":"stdout","time":769.515448835,"data":"  [30/152] elapsed=626s · 20.9s/case\n"}
+,{"stream_name":"stdout","time":979.09341656,"data":"  [40/152] elapsed=836s · 20.9s/case\n"}
+,{"stream_name":"stdout","time":1182.949488045,"data":"  [50/152] elapsed=1039s · 20.8s/case\n"}
+,{"stream_name":"stdout","time":1400.099842855,"data":"  [60/152] elapsed=1257s · 20.9s/case\n"}
+,{"stream_name":"stdout","time":1609.612043197,"data":"  [70/152] elapsed=1466s · 20.9s/case\n"}
+,{"stream_name":"stdout","time":1811.114843084,"data":"  [80/152] elapsed=1668s · 20.8s/case\n"}
+,{"stream_name":"stdout","time":1985.806654694,"data":"  [90/152] elapsed=1842s · 20.5s/case\n"}
+,{"stream_name":"stdout","time":2186.489307452,"data":"  [100/152] elapsed=2043s · 20.4s/case\n"}
+,{"stream_name":"stdout","time":2395.123598298,"data":"  [110/152] elapsed=2252s · 20.5s/case\n"}
+,{"stream_name":"stdout","time":2594.36880733,"data":"  [120/152] elapsed=2451s · 20.4s/case\n"}
+,{"stream_name":"stdout","time":2804.076056249,"data":"  [130/152] elapsed=2660s · 20.5s/case\n"}
+,{"stream_name":"stdout","time":3008.251695622,"data":"  [140/152] elapsed=2865s · 20.5s/case\n"}
+,{"stream_name":"stdout","time":3181.346634614,"data":"  [150/152] elapsed=3038s · 20.3s/case\n"}
+,{"stream_name":"stdout","time":3208.544695391,"data":"\n"}
+,{"stream_name":"stdout","time":3208.544728938,"data":"  inference done in 3065s (20.2s/case avg)\n"}
+,{"stream_name":"stdout","time":3208.544733491,"data":"\n"}
+,{"stream_name":"stdout","time":3208.544736699,"data":"[6/6] summary, baselines, per-pack, confusion matrix...\n"}
+,{"stream_name":"stdout","time":3208.544739935,"data":"\n"}
+,{"stream_name":"stdout","time":3208.54474298,"data":"Parse rate: 53/152 = 34.87%\n"}
+,{"stream_name":"stdout","time":3208.544746192,"data":"\n"}
+,{"stream_name":"stdout","time":3208.544749157,"data":"HEADLINE (over 53 parsed):\n"}
+,{"stream_name":"stdout","time":3208.544752342,"data":"  Exact action agreement: 0.509\n"}
+,{"stream_name":"stdout","time":3208.544755547,"data":"  Useful agreement:       0.736\n"}
+,{"stream_name":"stdout","time":3208.544759623,"data":"  Score MAE:              0.206\n"}
+,{"stream_name":"stdout","time":3208.544777611,"data":"\n"}
+,{"stream_name":"stdout","time":3208.544782704,"data":"Per-pack:\n"}
+,{"stream_name":"stdout","time":3208.544788056,"data":"  disaster_response_weather        N= 16  exact=0.438\n"}
+,{"stream_name":"stdout","time":3208.544793339,"data":"  maritime_chokepoints             N= 11  exact=0.545\n"}
+,{"stream_name":"stdout","time":3208.544798016,"data":"  pedospheric_integrity            N= 17  exact=0.471\n"}
+,{"stream_name":"stdout","time":3208.54480263,"data":"  urban_coastal_ambiguity          N=  9  exact=0.667\n"}
+,{"stream_name":"stdout","time":3208.544807247,"data":"\n"}
+,{"stream_name":"stdout","time":3208.544811699,"data":"Operator action distribution: {'accept': 16, 'refine': 14, 'skip': 14, 'defer': 9}\n"}
+,{"stream_name":"stdout","time":3208.544830439,"data":"Always-majority (accept) baseline: 0.302\n"}
+,{"stream_name":"stdout","time":3208.544833574,"data":"Random uniform (4-class) baseline: 0.250\n"}
+,{"stream_name":"stdout","time":3208.544835808,"data":"\n"}
+,{"stream_name":"stdout","time":3208.544837899,"data":"Confusion matrix (rows=operator, cols=v12 prediction):\n"}
+,{"stream_name":"stdout","time":3208.544840079,"data":"pred_action  accept  refine  defer  skip\n"}
+,{"stream_name":"stdout","time":3208.544842274,"data":"op_action                               \n"}
+,{"stream_name":"stdout","time":3208.544844401,"data":"accept           13       3      0     0\n"}
+,{"stream_name":"stdout","time":3208.544846518,"data":"refine            7       7      0     0\n"}
+,{"stream_name":"stdout","time":3208.544848651,"data":"defer             7       0      0     2\n"}
+,{"stream_name":"stdout","time":3208.544850859,"data":"skip              7       0      0     7\n"}
+,{"stream_name":"stdout","time":3208.544853036,"data":"\n"}
+,{"stream_name":"stdout","time":3208.544855069,"data":"Saved /kaggle/working/v12_eval_results.csv\n"}
+,{"stream_name":"stdout","time":3208.544858017,"data":"\n"}
+,{"stream_name":"stdout","time":3208.544872555,"data":"HELD-OUT (N=2, true generalization):\n"}
+,{"stream_name":"stdout","time":3208.544876729,"data":"  Exact action agreement: 0.000\n"}
+,{"stream_name":"stdout","time":3208.544880995,"data":"  Useful agreement:       0.000\n"}
+,{"stream_name":"stdout","time":3208.544884781,"data":"  Score MAE:              0.318\n"}
+,{"stream_name":"stdout","time":3208.544888506,"data":"  Per-trace:\n"}
+,{"stream_name":"stdout","time":3208.544891809,"data":"    trace_1081256ca906412f97cc4a7b maritime_chokepoints           pred=accept  op=defer   match=✗\n"}
+,{"stream_name":"stdout","time":3208.54489608,"data":"    trace_00850a706d0244eaabd97997 disaster_response_weather      pred=accept  op=defer   match=✗\n"}
+,{"stream_name":"stdout","time":3208.544899741,"data":"Saved /kaggle/working/v12_eval_summary.json\n"}
+,{"stream_name":"stdout","time":3208.544903161,"data":"\n"}
+,{"stream_name":"stdout","time":3208.544906296,"data":"Uploading results to HF...\n"}
+,{"stream_name":"stderr","time":3212.543192635,"data":"Traceback (most recent call last):\n"}
+,{"stream_name":"stderr","time":3212.543216197,"data":"  File \"\u003cstring\u003e\", line 1, in \u003cmodule\u003e\n"}
+,{"stream_name":"stderr","time":3212.543221637,"data":"  File \"/usr/local/lib/python3.12/dist-packages/papermill/execute.py\", line 131, in execute_notebook\n"}
+,{"stream_name":"stderr","time":3212.543410427,"data":"    raise_for_execution_errors(nb, output_path)\n"}
+,{"stream_name":"stderr","time":3212.546149179,"data":"  File \"/usr/local/lib/python3.12/dist-packages/papermill/execute.py\", line 251, in raise_for_execution_errors\n"}
+,{"stream_name":"stderr","time":3212.546167413,"data":"    raise error\n"}
+,{"stream_name":"stderr","time":3212.546172335,"data":"papermill.exceptions.PapermillExecutionError: \n"}
+,{"stream_name":"stderr","time":3212.54617664,"data":"---------------------------------------------------------------------------\n"}
+,{"stream_name":"stderr","time":3212.546181452,"data":"Exception encountered at \"In [1]\":\n"}
+,{"stream_name":"stderr","time":3212.546185057,"data":"---------------------------------------------------------------------------\n"}
+,{"stream_name":"stderr","time":3212.546188569,"data":"HTTPStatusError                           Traceback (most recent call last)\n"}
+,{"stream_name":"stderr","time":3212.546192018,"data":"/usr/local/lib/python3.12/dist-packages/huggingface_hub/utils/_http.py in hf_raise_for_status(response, endpoint_name)\n"}
+,{"stream_name":"stderr","time":3212.546207859,"data":"    760     try:\n"}
+,{"stream_name":"stderr","time":3212.546210469,"data":"--\u003e 761         response.raise_for_status()\n"}
+,{"stream_name":"stderr","time":3212.546212945,"data":"    762     except httpx.HTTPStatusError as e:\n"}
+,{"stream_name":"stderr","time":3212.546215295,"data":"\n"}
+,{"stream_name":"stderr","time":3212.546217398,"data":"/usr/local/lib/python3.12/dist-packages/httpx/_models.py in raise_for_status(self)\n"}
+,{"stream_name":"stderr","time":3212.546219653,"data":"    828         message = message.format(self, error_type=error_type)\n"}
+,{"stream_name":"stderr","time":3212.54622192,"data":"--\u003e 829         raise HTTPStatusError(message, request=request, response=self)\n"}
+,{"stream_name":"stderr","time":3212.546224204,"data":"    830 \n"}
+,{"stream_name":"stderr","time":3212.546226384,"data":"\n"}
+,{"stream_name":"stderr","time":3212.546228622,"data":"HTTPStatusError: Client error '401 Unauthorized' for url 'https://huggingface.co/api/models/HumanAIConvention/simsat-gemma4-v12/preupload/main'\n"}
+,{"stream_name":"stderr","time":3212.54623112,"data":"For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401\n"}
+,{"stream_name":"stderr","time":3212.54623368,"data":"\n"}
+,{"stream_name":"stderr","time":3212.546235755,"data":"The above exception was the direct cause of the following exception:\n"}
+,{"stream_name":"stderr","time":3212.546237976,"data":"\n"}
+,{"stream_name":"stderr","time":3212.54624008,"data":"RepositoryNotFoundError                   Traceback (most recent call last)\n"}
+,{"stream_name":"stderr","time":3212.54624232,"data":"/tmp/ipykernel_22/3145752546.py in \u003ccell line: 0\u003e()\n"}
+,{"stream_name":"stderr","time":3212.546244674,"data":"    294 from huggingface_hub import HfApi\n"}
+,{"stream_name":"stderr","time":3212.546246864,"data":"    295 api = HfApi(token=HF_TOKEN)\n"}
+,{"stream_name":"stderr","time":3212.546249094,"data":"--\u003e 296 api.upload_file(\n"}
+,{"stream_name":"stderr","time":3212.546251329,"data":"    297     path_or_fileobj=csv_path,\n"}
+,{"stream_name":"stderr","time":3212.546253472,"data":"    298     path_in_repo=f\"v12_eval_results_n{n_total}.csv\",\n"}
+,{"stream_name":"stderr","time":3212.546255751,"data":"\n"}
+,{"stream_name":"stderr","time":3212.5462579,"data":"/usr/local/lib/python3.12/dist-packages/huggingface_hub/utils/_validators.py in _inner_fn(*args, **kwargs)\n"}
+,{"stream_name":"stderr","time":3212.546260273,"data":"     86         kwargs = smoothly_deprecate_legacy_arguments(fn_name=fn.__name__, kwargs=kwargs)\n"}
+,{"stream_name":"stderr","time":3212.546262516,"data":"     87 \n"}
+,{"stream_name":"stderr","time":3212.546264656,"data":"---\u003e 88         return fn(*args, **kwargs)\n"}
+,{"stream_name":"stderr","time":3212.546266892,"data":"     89 \n"}
+,{"stream_name":"stderr","time":3212.546269032,"data":"     90     return _inner_fn  # type: ignore\n"}
+,{"stream_name":"stderr","time":3212.546271196,"data":"\n"}
+,{"stream_name":"stderr","time":3212.546273299,"data":"/usr/local/lib/python3.12/dist-packages/huggingface_hub/hf_api.py in _inner(self, *args, **kwargs)\n"}
+,{"stream_name":"stderr","time":3212.546275535,"data":"   2073 \n"}
+,{"stream_name":"stderr","time":3212.546277657,"data":"   2074         # Otherwise, call the function normally\n"}
+,{"stream_name":"stderr","time":3212.546280519,"data":"-\u003e 2075         return fn(self, *args, **kwargs)\n"}
+,{"stream_name":"stderr","time":3212.546282787,"data":"   2076 \n"}
+,{"stream_name":"stderr","time":3212.546284865,"data":"   2077     _inner.is_future_compatible = True  # type: ignore\n"}
+,{"stream_name":"stderr","time":3212.546289749,"data":"\n"}
+,{"stream_name":"stderr","time":3212.546292007,"data":"/usr/local/lib/python3.12/dist-packages/huggingface_hub/hf_api.py in upload_file(self, path_or_fileobj, path_in_repo, repo_id, token, repo_type, revision, commit_message, commit_description, create_pr, parent_commit, run_as_future, _hot_reload)\n"}
+,{"stream_name":"stderr","time":3212.546295377,"data":"   5376         )\n"}
+,{"stream_name":"stderr","time":3212.546297522,"data":"   5377 \n"}
+,{"stream_name":"stderr","time":3212.546299644,"data":"-\u003e 5378         return self.create_commit(\n"}
+,{"stream_name":"stderr","time":3212.546301858,"data":"   5379             repo_id=repo_id,\n"}
+,{"stream_name":"stderr","time":3212.546304007,"data":"   5380             repo_type=repo_type,\n"}
+,{"stream_name":"stderr","time":3212.546306165,"data":"\n"}
+,{"stream_name":"stderr","time":3212.546308307,"data":"/usr/local/lib/python3.12/dist-packages/huggingface_hub/utils/_validators.py in _inner_fn(*args, **kwargs)\n"}
+,{"stream_name":"stderr","time":3212.546310574,"data":"     86         kwargs = smoothly_deprecate_legacy_arguments(fn_name=fn.__name__, kwargs=kwargs)\n"}
+,{"stream_name":"stderr","time":3212.546312836,"data":"     87 \n"}
+,{"stream_name":"stderr","time":3212.546314921,"data":"---\u003e 88         return fn(*args, **kwargs)\n"}
+,{"stream_name":"stderr","time":3212.546317128,"data":"     89 \n"}
+,{"stream_name":"stderr","time":3212.546319214,"data":"     90     return _inner_fn  # type: ignore\n"}
+,{"stream_name":"stderr","time":3212.546321407,"data":"\n"}
+,{"stream_name":"stderr","time":3212.54632347,"data":"/usr/local/lib/python3.12/dist-packages/huggingface_hub/hf_api.py in _inner(self, *args, **kwargs)\n"}
+,{"stream_name":"stderr","time":3212.546325752,"data":"   2073 \n"}
+,{"stream_name":"stderr","time":3212.546327863,"data":"   2074         # Otherwise, call the function normally\n"}
+,{"stream_name":"stderr","time":3212.546330046,"data":"-\u003e 2075         return fn(self, *args, **kwargs)\n"}
+,{"stream_name":"stderr","time":3212.546332227,"data":"   2076 \n"}
+,{"stream_name":"stderr","time":3212.54633432,"data":"   2077     _inner.is_future_compatible = True  # type: ignore\n"}
+,{"stream_name":"stderr","time":3212.546336522,"data":"\n"}
+,{"stream_name":"stderr","time":3212.546338606,"data":"/usr/local/lib/python3.12/dist-packages/huggingface_hub/hf_api.py in create_commit(self, repo_id, operations, commit_message, commit_description, token, repo_type, revision, create_pr, num_threads, parent_commit, run_as_future, _hot_reload)\n"}
+,{"stream_name":"stderr","time":3212.546341173,"data":"   4931         _warn_on_overwriting_operations(operations)\n"}
+,{"stream_name":"stderr","time":3212.546343384,"data":"   4932 \n"}
+,{"stream_name":"stderr","time":3212.546345505,"data":"-\u003e 4933         self.preupload_lfs_files(\n"}
+,{"stream_name":"stderr","time":3212.546347699,"data":"   4934             repo_id=repo_id,\n"}
+,{"stream_name":"stderr","time":3212.546349835,"data":"   4935             additions=additions,\n"}
+,{"stream_name":"stderr","time":3212.546352033,"data":"\n"}
+,{"stream_name":"stderr","time":3212.546354148,"data":"/usr/local/lib/python3.12/dist-packages/huggingface_hub/hf_api.py in preupload_lfs_files(self, repo_id, additions, token, repo_type, revision, create_pr, num_threads, free_memory, gitignore_content)\n"}
+,{"stream_name":"stderr","time":3212.546356576,"data":"   5158         if len(additions_no_upload_mode) \u003e 0:\n"}
+,{"stream_name":"stderr","time":3212.546358853,"data":"   5159             try:\n"}
+,{"stream_name":"stderr","time":3212.54636102,"data":"-\u003e 5160                 _fetch_upload_modes(\n"}
+,{"stream_name":"stderr","time":3212.546364993,"data":"   5161                     additions=additions_no_upload_mode,\n"}
+,{"stream_name":"stderr","time":3212.546367293,"data":"   5162                     repo_type=repo_type,\n"}
+,{"stream_name":"stderr","time":3212.546369475,"data":"\n"}
+,{"stream_name":"stderr","time":3212.546371961,"data":"/usr/local/lib/python3.12/dist-packages/huggingface_hub/utils/_validators.py in _inner_fn(*args, **kwargs)\n"}
+,{"stream_name":"stderr","time":3212.546374362,"data":"     86         kwargs = smoothly_deprecate_legacy_arguments(fn_name=fn.__name__, kwargs=kwargs)\n"}
+,{"stream_name":"stderr","time":3212.546376679,"data":"     87 \n"}
+,{"stream_name":"stderr","time":3212.546378816,"data":"---\u003e 88         return fn(*args, **kwargs)\n"}
+,{"stream_name":"stderr","time":3212.546381149,"data":"     89 \n"}
+,{"stream_name":"stderr","time":3212.546383389,"data":"     90     return _inner_fn  # type: ignore\n"}
+,{"stream_name":"stderr","time":3212.54638555,"data":"\n"}
+,{"stream_name":"stderr","time":3212.546387658,"data":"/usr/local/lib/python3.12/dist-packages/huggingface_hub/_commit_api.py in _fetch_upload_modes(additions, repo_type, repo_id, headers, revision, endpoint, create_pr, gitignore_content)\n"}
+,{"stream_name":"stderr","time":3212.546390052,"data":"    758             params={\"create_pr\": \"1\"} if create_pr else None,\n"}
+,{"stream_name":"stderr","time":3212.546392505,"data":"    759         )\n"}
+,{"stream_name":"stderr","time":3212.546394601,"data":"--\u003e 760         hf_raise_for_status(resp)\n"}
+,{"stream_name":"stderr","time":3212.546396831,"data":"    761         preupload_info = _validate_preupload_info(resp.json())\n"}
+,{"stream_name":"stderr","time":3212.546399101,"data":"    762         upload_modes.update(**{file[\"path\"]: file[\"uploadMode\"] for file in preupload_info[\"files\"]})\n"}
+,{"stream_name":"stderr","time":3212.546401686,"data":"\n"}
+,{"stream_name":"stderr","time":3212.546403739,"data":"/usr/local/lib/python3.12/dist-packages/huggingface_hub/utils/_http.py in hf_raise_for_status(response, endpoint_name)\n"}
+,{"stream_name":"stderr","time":3212.546406031,"data":"    833                 + \"\\nFor more details, see https://huggingface.co/docs/huggingface_hub/authentication\"\n"}
+,{"stream_name":"stderr","time":3212.546408423,"data":"    834             )\n"}
+,{"stream_name":"stderr","time":3212.546410572,"data":"--\u003e 835             raise _format(RepositoryNotFoundError, message, response, repo_type=repo_type, repo_id=repo_id) from e\n"}
+,{"stream_name":"stderr","time":3212.546412878,"data":"    836 \n"}
+,{"stream_name":"stderr","time":3212.546415015,"data":"    837         elif response.status_code == 400:\n"}
+,{"stream_name":"stderr","time":3212.546417211,"data":"\n"}
+,{"stream_name":"stderr","time":3212.546419297,"data":"RepositoryNotFoundError: 401 Client Error. (Request ID: Root=1-69fc21d9-63105b5d456526b3796ce01f;3f7f4246-f25c-4d57-bf4f-551d49a2a70b)\n"}
+,{"stream_name":"stderr","time":3212.546421607,"data":"\n"}
+,{"stream_name":"stderr","time":3212.546423665,"data":"Repository Not Found for url: https://huggingface.co/api/models/HumanAIConvention/simsat-gemma4-v12/preupload/main.\n"}
+,{"stream_name":"stderr","time":3212.54642592,"data":"Please make sure you specified the correct `repo_id` and `repo_type`.\n"}
+,{"stream_name":"stderr","time":3212.546428176,"data":"If you are trying to access a private or gated repo, make sure you are authenticated and your token has the required permissions.\n"}
+,{"stream_name":"stderr","time":3212.546430479,"data":"For more details, see https://huggingface.co/docs/huggingface_hub/authentication\n"}
+,{"stream_name":"stderr","time":3212.546432722,"data":"Invalid username or password.\n"}
+,{"stream_name":"stderr","time":3212.546436985,"data":"Note: Creating a commit assumes that the repo already exists on the Huggingface Hub. Please use `create_repo` if it's not the case.\n"}
+,{"stream_name":"stderr","time":3212.546439423,"data":"\n"}
+,{"stream_name":"stderr","time":3214.555161646,"data":"/usr/local/lib/python3.12/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":3214.555196219,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":3214.69731589,"data":"/usr/local/lib/python3.12/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":3214.697343938,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":3215.280111381,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":3215.581277881,"data":"[NbConvertApp] Writing 98759 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":3217.859216014,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":3218.676647157,"data":"[NbConvertApp] Writing 405162 bytes to __results__.html\n"}
+]
