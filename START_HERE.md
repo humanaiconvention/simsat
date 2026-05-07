@@ -63,9 +63,9 @@ export OBSERVATION_VLM_MODE=lora
 python scripts/observation_vla_eval.py --inprocess
 ```
 
-If your model has a custom load path (like Genesis's native loader), see
-`src/sim/observation_vla/genesis_local.py` as a reference and add a sibling
-file plus a route in `backend_factory.py`.
+If your model needs a custom load path (non-HF or non-PEFT), add a sibling
+file to `src/sim/observation_vla/transformers_vlm_local.py` exposing the
+same `assess()` interface, then route it via `backend_factory.py`.
 
 ---
 
@@ -79,7 +79,7 @@ file plus a route in `backend_factory.py`.
 - usefulness-score MAE
 - per-case breakdown
 
-**Reference numbers to beat** (Gemma-4 v12 SimSat fine-tune over N=37
+**Reference numbers to beat** (Gemma-4 v11 SimSat fine-tune over N=37
 operator-reviewed cases): exact 0.86, bucketed 0.86, useful 0.97, MAE 0.13.
 Full eval at [`OBSERVATION_VLA_EVAL.md`](./OBSERVATION_VLA_EVAL.md).
 

@@ -3,7 +3,7 @@
 ## Fast Gate
 
 - Pytest pass: `True`
-- Pytest summary: `skipped`
+- Pytest summary: `112 passed in 11.76s`
 
 ## Runtime
 
@@ -16,19 +16,19 @@
 
 | scenario | windows | scaffold_accept | trust_accept | trust_refine | changed | accept_to_refine | trust_yield | reviewed_ready | top_reason |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| maritime_chokepoints (48h) | 8 | 5 | 5 | 1 | 8 | 0 | 1.00 | True | compound_risk_refine |
-| disaster_response_weather (16h) | 5 | 0 | 1 | 2 | 5 | 0 | 1.00 | True | compound_risk_refine |
-| urban_coastal_ambiguity (8h) | 5 | 1 | 1 | 4 | 5 | 0 | 1.00 | True | compound_risk_refine |
-| pedospheric_integrity (24h) | 7 | 5 | 6 | 0 | 7 | 0 | 1.00 | True | high_priority,sentinel_available,low_cloud_risk,line_of_sight,edge_geometry |
+| maritime_chokepoints (48h) | 8 | 3 | 4 | 3 | 8 | 0 | 1.00 | True | compound_risk_refine |
+| disaster_response_weather (16h) | 3 | 0 | 0 | 0 | 3 | 0 | 1.00 | True | high_visibility,sentinel_available,line_of_sight,cloud_risk |
+| urban_coastal_ambiguity (8h) | 3 | 0 | 0 | 2 | 3 | 0 | 1.00 | True | compound_risk_refine |
+| pedospheric_integrity (24h) | 6 | 4 | 4 | 0 | 6 | 0 | 1.00 | True | high_priority,sentinel_available,low_cloud_risk,line_of_sight,edge_geometry |
 
 ## Horizon Guidance
 
 | scenario | smoke_lane | competition_lane | rationale |
 | --- | --- | --- | --- |
-| maritime_chokepoints | 8h smoke check | 8h ambiguity rehearsal | compound_risk_refine |
-| disaster_response_weather | 8h smoke check | 8h ambiguity rehearsal | compound_risk_refine |
+| maritime_chokepoints | 8h smoke check | 16h ambiguity rehearsal | compound_risk_refine |
+| disaster_response_weather | 8h smoke check | 48h ambiguity rehearsal | sentinel_available,line_of_sight,cloud_risk |
 | urban_coastal_ambiguity | 8h smoke check | 8h ambiguity rehearsal | compound_risk_refine |
-| pedospheric_integrity | 8h smoke check | 48h ambiguity rehearsal | high_priority,sentinel_available,low_cloud_risk,line_of_sight,edge_geometry |
+| pedospheric_integrity | 8h smoke check | 48h ambiguity rehearsal | compound_risk_refine |
 
 ## Refine Diagnosis
 
@@ -43,9 +43,9 @@
 
 ### maritime_chokepoints
 
-- Trace: `trace_73f56c878603406e868fcf95b164997c`
-- Target: `Suez Canal`
-- Recommended action: `accept`
+- Trace: `trace_868637cfaf6343acba5dc01bc22cfbd9`
+- Target: `Port of Singapore`
+- Recommended action: `defer`
 - Current label source: `operator_review`
 - Needs operator review: `False`
 

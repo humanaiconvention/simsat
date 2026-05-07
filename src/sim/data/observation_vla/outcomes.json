@@ -2,362 +2,1391 @@
   "schema_version": 1,
   "outcomes": [
     {
-      "outcome_id": "out_ac217093c0b246af886ebd3052252ed8",
-      "trace_id": "trace_2507337b7939460ebf01cbc9fcef8055",
-      "assessment_id": "asm_20ff1b5828654ec9bae3d8101054daaa",
-      "decision_id": "dec_f850b25e2f5e42708a3dfe0ec2298de2",
-      "registered_at": "2026-04-10T17:35:18Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.95,
-      "label_source": "operator_review",
-      "reviewer": "Ben Haslam",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": "out_c07070b47db34f89bb4a7aa75a3db9e1",
-      "outcome_tags": [
-        "operator_reviewed",
-        "submission_case"
-      ],
-      "notes": "No observable cloud cover, user wouldn't know Suez canal but appears correct and useful."
-    },
-    {
-      "outcome_id": "out_1e919a3d45104aeabf469fb00383a4da",
-      "trace_id": "trace_1926b646ee4b48478913681a33fcdfb1",
-      "assessment_id": "asm_7b5ccfcb93794fb196210be69e2f1c2d",
-      "decision_id": "dec_3d45e15388db4282a6efcf646694346b",
-      "registered_at": "2026-04-10T17:35:19Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.92,
-      "label_source": "operator_review",
-      "reviewer": "Ben Haslam",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": "out_d5ec1307477f42cd8e27292e906b9fa0",
-      "outcome_tags": [
-        "operator_reviewed",
-        "submission_case"
-      ],
-      "notes": "No observable cloud cover, user wouldn't know Houston but appears correct and useful."
-    },
-    {
-      "outcome_id": "out_4780e7859b1741f9a9ef7399e16968a8",
-      "trace_id": "trace_a4e31b4c39224d8fbdb2c4bf0f444823",
-      "assessment_id": "asm_27760e63af514efeab5fea9fde71f62f",
-      "decision_id": "dec_ae382895c85a4aba9a73201ac8a1568f",
-      "registered_at": "2026-04-10T17:35:19Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.9,
-      "label_source": "operator_review",
-      "reviewer": "Ben Haslam",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": "out_939554bedfc44c7681e60cd7f92fe6cb",
-      "outcome_tags": [
-        "operator_reviewed",
-        "submission_case"
-      ],
-      "notes": "No observable cloud cover, user wouldn't know SF Bay at all but accepted as correct and useful."
-    },
-    {
-      "outcome_id": "out_26d9d482cb3a4c7787a653c8283e6750",
-      "trace_id": "trace_e9e45ad652ff4e74853f0c6d0c03a827",
-      "assessment_id": "asm_f855a14c3de0413ea689173cd6f0a353",
-      "decision_id": "dec_cde38e345c864bf0a3cc0dadc9714bde",
-      "registered_at": "2026-04-23T20:36:58Z",
+      "outcome_id": "out_ed6fda4a3b954e20825b6fbd116d7f5b",
+      "trace_id": "trace_3467f146001c4e3da98536b87b0a2c59",
+      "assessment_id": "asm_cf6d7fd79f29445d84084d5fe9727f8a",
+      "decision_id": "dec_196bd1cf5cc6468ab42a5af75edc172d",
+      "registered_at": "2026-05-07T00:51:32Z",
       "mission_id": "default",
       "operator_action": "refine",
       "useful": true,
-      "usefulness_score": 0.88,
+      "usefulness_score": 0.55,
       "label_source": "operator_review",
-      "reviewer": "Codex local rehearsal",
+      "reviewer": "ben",
       "review_status": "reviewed",
       "is_current": true,
       "supersedes_outcome_id": null,
       "outcome_tags": [
-        "scenario_policy_replacement",
-        "pending_human_confirmation",
         "operator_reviewed"
       ],
-      "notes": "Assistant-generated maritime 48h replacement for scenario-policy rehearsal; pending human confirmation."
+      "notes": null
     },
     {
-      "outcome_id": "out_60d8d7effcc644e7b274b4ce0e7101b7",
-      "trace_id": "trace_f7c1153a370b4c828274566a2714a524",
-      "assessment_id": "asm_62bcc016f8444329a0565585353f7779",
-      "decision_id": "dec_f0265865c7484b9cbfc1f847e571bfdf",
-      "registered_at": "2026-04-23T20:36:58Z",
+      "outcome_id": "out_f59b46c924d3491b84b3f57ef5975095",
+      "trace_id": "trace_235e3b10fbae4b1787d788d375679b88",
+      "assessment_id": "asm_5293e38a6afa41bebe7e1de506d6c228",
+      "decision_id": "dec_22774838debb4dd9ac4550caf559398d",
+      "registered_at": "2026-05-07T00:51:32Z",
       "mission_id": "default",
       "operator_action": "refine",
       "useful": true,
-      "usefulness_score": 0.9,
+      "usefulness_score": 0.55,
       "label_source": "operator_review",
-      "reviewer": "Codex local rehearsal",
+      "reviewer": "ben",
       "review_status": "reviewed",
       "is_current": true,
       "supersedes_outcome_id": null,
       "outcome_tags": [
-        "scenario_policy_replacement",
-        "pending_human_confirmation",
         "operator_reviewed"
       ],
-      "notes": "Assistant-generated disaster 16h replacement for scenario-policy rehearsal; pending human confirmation."
+      "notes": null
     },
     {
-      "outcome_id": "out_625975908b7b4e95a99f207fadac26d4",
+      "outcome_id": "out_0effcb83bc51417fbd214f827841e519",
+      "trace_id": "trace_c01e4d839e0c47de83881c96a2667d23",
+      "assessment_id": "asm_2c3bc87711f94a5db973bd3042dba7ef",
+      "decision_id": "dec_d401019456b24cfdb2b40cf8deb972bd",
+      "registered_at": "2026-05-07T00:51:32Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_18841fff8ad64eafa12a0516b4e448c6",
+      "trace_id": "trace_f0afbd32a6244f429203e38202b1394a",
+      "assessment_id": "asm_1b88779b64894d3aa0f0fa7ce8c076a4",
+      "decision_id": "dec_0a9543491add434d982bd5d6de380042",
+      "registered_at": "2026-05-07T00:51:32Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_7e8598dd3f0747f8b0aebb9598877475",
+      "trace_id": "trace_89b9c715b7b141c5a7cf612a1ee20829",
+      "assessment_id": "asm_6af5a174bd254f7db89ef5d675e2b21d",
+      "decision_id": "dec_50f6e852bbc34bddace6cc7cfeeaf350",
+      "registered_at": "2026-05-07T00:51:32Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_de426259fce44e0f859e128de09490b7",
+      "trace_id": "trace_ad59f6f402e546cb95e85ee03cafffd5",
+      "assessment_id": "asm_cdd6e345342b4dc1bba7c87100cb7777",
+      "decision_id": "dec_9ec20775367b4701ad3984c65548b12b",
+      "registered_at": "2026-05-07T00:51:32Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_38a7c881ab1d48099f3cb855df32f079",
+      "trace_id": "trace_faa23a04032843c3986b5dfcaf76b1ca",
+      "assessment_id": "asm_9762758291574c3199bcbca89edf9d02",
+      "decision_id": "dec_c6bd49a3305445788c83024f9652e33e",
+      "registered_at": "2026-05-07T00:51:32Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_e0748a0484a4448b817c006e4cd6c047",
+      "trace_id": "trace_f7cac31c07244a1bb67cf7007a166e30",
+      "assessment_id": "asm_ce16c42c9d4f425dbff3332b0160d36b",
+      "decision_id": "dec_89cc446f6b5446dbb757da263252074e",
+      "registered_at": "2026-05-07T00:51:32Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_3d1a54a403754562a4904421323c80ea",
+      "trace_id": "trace_1033e94aecc94a8889c8ff992fcfe78c",
+      "assessment_id": "asm_7a7abc9d3f46419f8e1ee9b32cd9a35c",
+      "decision_id": "dec_4cd3679470f445c9b95c6dd9a7f00c13",
+      "registered_at": "2026-05-07T00:51:32Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_b7644da3a1ee415cafeb104c64220c7f",
+      "trace_id": "trace_48ba72be71464d0aa6ae22f26e57d48e",
+      "assessment_id": "asm_a0b9efde256f4dffb2596423512ac9c7",
+      "decision_id": "dec_f86c7d49b2484d93971dc5256b5d00e8",
+      "registered_at": "2026-05-07T00:51:32Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_17fbf49a4c3a4d838d11e2cc9e72d6f4",
+      "trace_id": "trace_ca697b3dc16b46a7b2941c78b6b9f90e",
+      "assessment_id": "asm_6b71762672f44444b61e26f514a6f8a7",
+      "decision_id": "dec_3d3f6c8b9de541ed844833b4df0a646d",
+      "registered_at": "2026-05-07T00:51:32Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_f427559d736e4671bbc3633632fa4030",
+      "trace_id": "trace_5f9e8e9226154b7d84f2519a88c51aaf",
+      "assessment_id": "asm_6bc724c774ce4e2e8f501b814a82cd3d",
+      "decision_id": "dec_99726981cc7a4c8abd26b013610bef65",
+      "registered_at": "2026-05-07T00:51:32Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_e75e49b71dda433b9c86246251197479",
+      "trace_id": "trace_2b6b3d1b568d4061b4514fd0fee2c947",
+      "assessment_id": "asm_6e0098036cf44c04a167bcdb358cfd64",
+      "decision_id": "dec_625073d5bc6c4dbcb3a0f0f217b9c97e",
+      "registered_at": "2026-05-07T00:51:33Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_6e29f862867b4dfea877ce986bb36361",
+      "trace_id": "trace_b1b1e48066404a0eaf9165da77bea5c0",
+      "assessment_id": "asm_568a2a1ea35d48dab9edafe320a794b2",
+      "decision_id": "dec_97d553d924ad4b17b74d02c036b8ff3d",
+      "registered_at": "2026-05-07T00:51:33Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_b24773fec702437fbcc425360cc50255",
+      "trace_id": "trace_ce6437efcee544d6a89a473b56b86a97",
+      "assessment_id": "asm_5532fbd530d446e89fa708d413bf1b3f",
+      "decision_id": "dec_790fd93802714d398be789790e35f553",
+      "registered_at": "2026-05-07T00:51:33Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_b98c3c8e3b314f1a9a6cb5a8eeb08dbd",
+      "trace_id": "trace_8c0da54da8ef430596089cd9d7d10161",
+      "assessment_id": "asm_3a90cab2fa9a477585de2b7b1bdd165c",
+      "decision_id": "dec_3f09a2f060c349578469633cc0865f14",
+      "registered_at": "2026-05-07T00:51:33Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_07154536bea944a4828bf268470640cb",
+      "trace_id": "trace_609c8117b57f49d695a12433e998c393",
+      "assessment_id": "asm_5f08f414617b4a69b7d075e366872b8e",
+      "decision_id": "dec_91b67da6597c473c95db82b7133c33ce",
+      "registered_at": "2026-05-07T00:51:33Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_6078c14549094f2f9d4ec25a789a9a07",
+      "trace_id": "trace_532924585aac4819b4e75c208234bf49",
+      "assessment_id": "asm_70e2e3da97a845b4b8f17dc133f83fc6",
+      "decision_id": "dec_8415a3f991464de98713a265c6aca5eb",
+      "registered_at": "2026-05-07T00:51:33Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_c1bfc7dae0fe4497afa9f18351425d7d",
+      "trace_id": "trace_ce8c5f5c8bc54c9898b3d576f168c51b",
+      "assessment_id": "asm_8b31a65ad53d49279b9078fe4f1cad67",
+      "decision_id": "dec_a7535c0e936d431a978d8509667ee77f",
+      "registered_at": "2026-05-07T00:51:33Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_d2f8fca55d4c4950981dfa4bde6c5c3c",
+      "trace_id": "trace_0fbc17f24a0c43f387cb2783b34ed553",
+      "assessment_id": "asm_5ea06f583e5b404eac6f236aeafe38c9",
+      "decision_id": "dec_2fb1e9b94edd4478a3193831a0d1dcaa",
+      "registered_at": "2026-05-07T00:51:33Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_0f077915f17d49488ada1548cc1412f2",
+      "trace_id": "trace_2e09332cf30e4fc8826f3a1a380a8d7b",
+      "assessment_id": "asm_031ecf5320ca46f49843ab87c8eb8709",
+      "decision_id": "dec_d93b2ab936cc43218433ea4c77352f7e",
+      "registered_at": "2026-05-07T00:51:33Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_cd5ad252a54742468835d287188161e7",
+      "trace_id": "trace_7dff2d0ed4a34e9cba89304f9f76652a",
+      "assessment_id": "asm_b9639d1b00c746ae918910ddd703f979",
+      "decision_id": "dec_22c7140812a448e89ec6ae41ceaa85c3",
+      "registered_at": "2026-05-07T00:51:33Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_dcebcf9515d849d58189e858584c4e75",
+      "trace_id": "trace_0adeac03c4c8465e9dc0e2a4f6d15425",
+      "assessment_id": "asm_de5dc52c6f5247b9a60034fe4225c379",
+      "decision_id": "dec_72e69944ab204c468687e511c1af9cd7",
+      "registered_at": "2026-05-07T00:51:33Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_7dd20c62ab794dffab8d2ec993a2bf9a",
+      "trace_id": "trace_fc87cda68f954e669f8c0a2680775119",
+      "assessment_id": "asm_0b3524dcd5a9450cacd1c9a7ae43b3bf",
+      "decision_id": "dec_28996e45f21d4e40b6af9b4dc93f2266",
+      "registered_at": "2026-05-07T00:51:33Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_2cb1265db7d94a50b9d42860c7a6b541",
+      "trace_id": "trace_bd4999fb1ed642f0901237632bb52643",
+      "assessment_id": "asm_4175276305584b9593e3dd6fb9fb8308",
+      "decision_id": "dec_8f940b19caec4cde84892e36665d847e",
+      "registered_at": "2026-05-07T00:51:33Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_f7565f8bce5c433faf8fb3e4cbf3032b",
+      "trace_id": "trace_42d70d19ed9a4502a9c55cf9e36fae55",
+      "assessment_id": "asm_aad97b12410e4b7a8c07ade01c58f482",
+      "decision_id": "dec_3d43fd2033e643a48f0a236840cce5c1",
+      "registered_at": "2026-05-07T00:51:34Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_6510a422a54543968149cf470fcdc478",
+      "trace_id": "trace_a8b3f1f1673947008a09414984841dc7",
+      "assessment_id": "asm_7a92f2ebb59340138415a05316556ccb",
+      "decision_id": "dec_d1f5537fba774ed2b251dd0a8351a8c6",
+      "registered_at": "2026-05-07T00:51:34Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_cbe014c2927c45989ad1ed4358d6aba9",
+      "trace_id": "trace_217fc399bd2b4a0ebe7e7ba64ff8484e",
+      "assessment_id": "asm_fcf575b0d4544b4eb8a1c658d08094da",
+      "decision_id": "dec_57d8d5a4fb7c4a93abb44b9d00a5d6ec",
+      "registered_at": "2026-05-07T00:51:34Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_257631ce3fdf4a718aab557939c6dc3d",
+      "trace_id": "trace_0e22d536100f4117b8d35b2c4a78d8f2",
+      "assessment_id": "asm_437e3bdf5dc44274a07910c4b7d85e5d",
+      "decision_id": "dec_971357f8f6d7491eb96cb90a8f6e6b23",
+      "registered_at": "2026-05-07T00:51:34Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_863b01c9318d46feb87593fe9e24a4a6",
+      "trace_id": "trace_d7be2561178c455086619d369c1bb99d",
+      "assessment_id": "asm_a0ed06e26757454c851b49e7957acfd0",
+      "decision_id": "dec_e351ff0bbe844b1f8e83cf1c4cf43389",
+      "registered_at": "2026-05-07T00:51:34Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_7a657a8b67d24d429836200e9856c0c7",
+      "trace_id": "trace_67e1acb72a1447ee8b605031d7efa69e",
+      "assessment_id": "asm_a40a4a9dd3334457bd7de3d5154affc6",
+      "decision_id": "dec_f78f438cdad7451ea60ae0a4bc5effb6",
+      "registered_at": "2026-05-07T00:51:34Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_80aaa6620d1740769e944a663ba3ad8f",
+      "trace_id": "trace_1e7c5b3104a7441781b903b5c2edfe5a",
+      "assessment_id": "asm_802c6856be9b42988e62c4a5167fa44e",
+      "decision_id": "dec_712dfdff215f40c3ad8d3595bbe9665e",
+      "registered_at": "2026-05-07T00:51:34Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_3aa48d5e680a4db7a6d9bb6c59f72f51",
+      "trace_id": "trace_b147d25df42741c68ef6efad441205c3",
+      "assessment_id": "asm_e05744b46d3d4eebab89db8b19b8e2a2",
+      "decision_id": "dec_6208d122c0d446c29fb09f6d31f05184",
+      "registered_at": "2026-05-07T00:51:34Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_27e6cea9b754437290884b8671002110",
+      "trace_id": "trace_81f5c83d67fe4133aaf1f67415b5623f",
+      "assessment_id": "asm_b5e7cd05b89d4329b8de9aaf90e94e5b",
+      "decision_id": "dec_a064d3a9879243aeb18a162afdcf8b7b",
+      "registered_at": "2026-05-07T00:51:35Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_7a6604c444ca4611acef549ac0235104",
+      "trace_id": "trace_f8e5a9204e5248ea9633264606a52b49",
+      "assessment_id": "asm_fdbf4be0fb8543b6b7431448d24c2a29",
+      "decision_id": "dec_7ed38c704d694201bd52128cbdb2f408",
+      "registered_at": "2026-05-07T00:51:35Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_a0d2a9cb4eb14de5bcfaa528951e92f8",
+      "trace_id": "trace_1dbf6d76f3c94a99931291ef146ba8b4",
+      "assessment_id": "asm_b5ca49eb6ef345cfae7f5e222374c186",
+      "decision_id": "dec_99d132d6f32044299bb0ed1d3eed218f",
+      "registered_at": "2026-05-07T00:51:35Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_689e16e2b9de4fbd92d7ec71b5a4bb62",
+      "trace_id": "trace_da60215e144a47fcb019bc71c93a6ebb",
+      "assessment_id": "asm_abf7f95c75b242829c15a8166977f00b",
+      "decision_id": "dec_5c49157a3a9f453f9e577bda84c34b3b",
+      "registered_at": "2026-05-07T00:51:35Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_6229dd0cf6b64df5ba662bc646182bc7",
+      "trace_id": "trace_84c9df1c67274eba90739d4669ee90bb",
+      "assessment_id": "asm_75ef5764a51b43928d5afde669fe8d0a",
+      "decision_id": "dec_d7bac83829b34006857d544002117961",
+      "registered_at": "2026-05-07T00:51:35Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_ad1ce024769b4bc79bbead6e7e31b9e8",
+      "trace_id": "trace_ac9aa814127745d4b606abf5834f983e",
+      "assessment_id": "asm_22ba4be9d08c4b0d801c237b441fb8e8",
+      "decision_id": "dec_0111a4f0f6da45af98a5443685f8f806",
+      "registered_at": "2026-05-07T00:51:35Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_6117e26f76f0431c93d3d73cdd0e44ba",
+      "trace_id": "trace_b1e3d5d4b82240559c80e5aeae47ded9",
+      "assessment_id": "asm_8917b1866b294b8a9a6eb54e137e0a8d",
+      "decision_id": "dec_df0bcd9503be4894acf9d7ee0c78871e",
+      "registered_at": "2026-05-07T00:51:35Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_f932db5c703b415b8e974efc4b0c622f",
+      "trace_id": "trace_912579355a8e408eb7e37c53f39a64e6",
+      "assessment_id": "asm_b7cb0980b494467ca7e9487e80ff0004",
+      "decision_id": "dec_fdaec2fe77044dccade5c3de389b4995",
+      "registered_at": "2026-05-07T00:51:35Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_77217d6502704c86972a56965cb69a7b",
+      "trace_id": "trace_2f8f105dbe6c4b918f91afdf26eba31c",
+      "assessment_id": "asm_d40e783280ff423fbe7d6d4bc5cca014",
+      "decision_id": "dec_6cdbebe17bc444289a58bb2dfd7eca5b",
+      "registered_at": "2026-05-07T00:51:35Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_a5b484ff47914733932727c06659347f",
+      "trace_id": "trace_dd57eebee3364c47bd80551a03f0b0bb",
+      "assessment_id": "asm_36ed35015888462babaa17b4156a19bd",
+      "decision_id": "dec_f890be6f91984f829a64803f65ecd82c",
+      "registered_at": "2026-05-07T00:51:35Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_20ea8210045c4cd3adc4093750ba2c20",
+      "trace_id": "trace_e1fb6e23d2dc41668ce3387ddfdae084",
+      "assessment_id": "asm_c792016d041947caabac35b27df77932",
+      "decision_id": "dec_215c5761c30f4dada832fca74b57a26e",
+      "registered_at": "2026-05-07T00:51:36Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_53a96f239a794a2fa794f8b1f299c3ff",
+      "trace_id": "trace_3d10cd03f80b48b88d3fcc895ff8917a",
+      "assessment_id": "asm_942a5ef143aa40ee930ff918d6944798",
+      "decision_id": "dec_6c22d1f81c4d4d629bc76272cea25c83",
+      "registered_at": "2026-05-07T00:51:36Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_58d34959b75f4141bf45ecc681e593c1",
+      "trace_id": "trace_6acefc228d024b1e8d8240aa221d4f2c",
+      "assessment_id": "asm_e305f26f21484297842d76413e4c1809",
+      "decision_id": "dec_21c0c3ffe30c41e38894c2e9656a6fcf",
+      "registered_at": "2026-05-07T00:51:36Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_734da769306b4346ab35446786cfcc4d",
+      "trace_id": "trace_f28a0254f6ef4d4ba671db918a919524",
+      "assessment_id": "asm_4314508192574e93b038d9056f12c7a9",
+      "decision_id": "dec_ef277019759542f48454637a5c32db62",
+      "registered_at": "2026-05-07T00:51:36Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_bf174b175a1c4468a3a25c993683d9ef",
+      "trace_id": "trace_6d629c8a22854e8880bbbb764f75a550",
+      "assessment_id": "asm_0c9c66cea396480aa79878d7e7226774",
+      "decision_id": "dec_b12b5631286148a593106600470a3624",
+      "registered_at": "2026-05-07T00:51:36Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_69347bb43d6e42608f8e6098b749382f",
+      "trace_id": "trace_1125f0b3e2204e849537c6cb96e5e0c1",
+      "assessment_id": "asm_69af3a9516c04bea93029e63a7ef8bec",
+      "decision_id": "dec_793ab9a9ff8d49b5a52bbc2351273f4a",
+      "registered_at": "2026-05-07T00:51:36Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_e0c060dd17ba412b884242e2a1b42ad3",
+      "trace_id": "trace_864ee0696e8a4a83944d0366a5310b31",
+      "assessment_id": "asm_77fab3a9e52242c3b9f32fd0fc05fba1",
+      "decision_id": "dec_4da73853a5d94a3a83414b18f75ff793",
+      "registered_at": "2026-05-07T00:51:36Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_aa08c5f35a754ab09da72791b4f6f911",
+      "trace_id": "trace_e47624f8532148a89dd399d0c7caacc6",
+      "assessment_id": "asm_688aa6273bf945afb8a0eed5ff9a4bac",
+      "decision_id": "dec_99b02cdbafb54697ab2579c4c7cdaab6",
+      "registered_at": "2026-05-07T00:51:36Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_0b241c3c479241e3a2b1f8fc680bfac1",
+      "trace_id": "trace_f9b6e8e10cd84e32b64a62632887ebbc",
+      "assessment_id": "asm_3fda6003353b41479c88b619203e5937",
+      "decision_id": "dec_440963c545594776916d81453fc5b494",
+      "registered_at": "2026-05-07T00:51:37Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_09a96accc978478781be93f961df5ba3",
+      "trace_id": "trace_73f56c878603406e868fcf95b164997c",
+      "assessment_id": "asm_6d41f835dc404e26b02ba4f8026a1faf",
+      "decision_id": "dec_8870652a4d1648f4ab036c762bdc70da",
+      "registered_at": "2026-05-07T00:51:37Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_e2f804c21d19460eb31234b597710a0c",
+      "trace_id": "trace_868637cfaf6343acba5dc01bc22cfbd9",
+      "assessment_id": "asm_def69e9d3f734c99b9855e1f39bdd7af",
+      "decision_id": "dec_7ee0828da378464d8b761df4fd3253d5",
+      "registered_at": "2026-05-07T00:51:37Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_e2b4af09ad704cd7b1b6fd1ef91bd0f0",
+      "trace_id": "trace_d720dd5339e6427c89e323da1169eb78",
+      "assessment_id": "asm_5a0c8ccd421d423989869fb08f1007fe",
+      "decision_id": "dec_6dfab986575341eba8fd22fb0fa47f7d",
+      "registered_at": "2026-05-07T00:51:37Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_c395296970e24345a008566fad94b2ae",
+      "trace_id": "trace_6e90ae316b844778ab3522b2f73a9e5b",
+      "assessment_id": "asm_f0f514b8d5a64c06a77ca2b1352d7b3a",
+      "decision_id": "dec_c59f9c5a865641979df2adb6cd8f7e46",
+      "registered_at": "2026-05-07T00:51:37Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_64742eadf2ef4beca176df97b71c1c91",
+      "trace_id": "trace_4307b2a9f77d47ecaf447188e3b619a3",
+      "assessment_id": "asm_27aa6385895b4a03a8af3fc48bbfa947",
+      "decision_id": "dec_dfe6e2b590dd4ab6ab079386018d0037",
+      "registered_at": "2026-05-07T00:51:37Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_3ffb3f313d8f4e2aa4c77485b777601c",
+      "trace_id": "trace_97b7316b366f47e2957fc2829b39d9dd",
+      "assessment_id": "asm_e28165b82c4f4e03919cb0d724bd44da",
+      "decision_id": "dec_acbfe5babebf4a558d74e48135f6995b",
+      "registered_at": "2026-05-07T00:51:37Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_e8a70555f4194e3dba5bbaddb220641d",
+      "trace_id": "trace_168abfca532a42728a9fe3594eecb333",
+      "assessment_id": "asm_b96508a6244147f3af9bae9518b80559",
+      "decision_id": "dec_1f25eaca551940b79cbcfde214a33aee",
+      "registered_at": "2026-05-07T00:51:37Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_7fe7e8507be84b08a1e23bdd2c345a39",
+      "trace_id": "trace_bab79b553c7841558e0c42272cc87b61",
+      "assessment_id": "asm_9b6fbcbf55894f5da9e0294d3d8b5735",
+      "decision_id": "dec_37ffd2f423084078b0184c6a2033f2e4",
+      "registered_at": "2026-05-07T00:51:38Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_e49b3354368e41c4a9f663751a86730f",
+      "trace_id": "trace_864233c63eee45df8beb5bd69fb6b9ed",
+      "assessment_id": "asm_0321fc74cd244c6c808777f24e93955f",
+      "decision_id": "dec_295f99fefa4547ef9015edce2f4dd526",
+      "registered_at": "2026-05-07T00:51:38Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_f853a0f0d7fb40b390686e1beec2ce86",
+      "trace_id": "trace_5acf98c2915148b78456b775372c2c81",
+      "assessment_id": "asm_9ebdd6b349bb4049849ef33a08e7f862",
+      "decision_id": "dec_f8bc1794b68b4e0490198da49dea8804",
+      "registered_at": "2026-05-07T00:51:38Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_3133e9421f5845c289c909cd7be82790",
+      "trace_id": "trace_41cc4824fd824e7796f585f9bdbd0b03",
+      "assessment_id": "asm_3641987f6b734ef3a7f295fa7cd6a113",
+      "decision_id": "dec_423f29750b9043c6ab78ef6365d62548",
+      "registered_at": "2026-05-07T00:51:38Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_d68593fdfd6f479bbeabebb843062cc0",
+      "trace_id": "trace_dc5fd48f75804187a91ec33b831cd629",
+      "assessment_id": "asm_d90c8854c6a74a6db244b762b9f59bea",
+      "decision_id": "dec_d7510aa6336c4b8bbabd694d269e7732",
+      "registered_at": "2026-05-07T00:51:38Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_a1c861bdf50640e6aec8881d2ec0eee4",
+      "trace_id": "trace_bfa2fad124374601b3f2884c3be2a42e",
+      "assessment_id": "asm_13bed627b85d40a2b4128f3cf4619c6f",
+      "decision_id": "dec_170cfbe8e3684c1884d9432e2b69e2f8",
+      "registered_at": "2026-05-07T00:51:38Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_0fb89e6e39164b77b2ee7334de7bc75e",
+      "trace_id": "trace_46aad3c86251428b9bbb1d5dbd4b3e04",
+      "assessment_id": "asm_a37009c0380841758b4fea9f9300719b",
+      "decision_id": "dec_860d7fa244ea42059413356c4b7ddf71",
+      "registered_at": "2026-05-07T00:51:38Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_58f598dfceb64f849b3143bf74eefccf",
+      "trace_id": "trace_1d9e98b6bc7d493f8c292947938b6d4e",
+      "assessment_id": "asm_bed8159035804b0bb6c24446b529e166",
+      "decision_id": "dec_3e06f77b724145c49295f5832fd13928",
+      "registered_at": "2026-05-07T00:51:39Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_b4862a5b6fd04db2a096c8b1d91c82a3",
+      "trace_id": "trace_31ec6996796d40c2b09e946f854f0d4a",
+      "assessment_id": "asm_cc225e21166f4580b5edac7708accc6e",
+      "decision_id": "dec_beae076498b04a8c8e072f729acb9b26",
+      "registered_at": "2026-05-07T00:51:39Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_809c9d9dfbb84ddfb4bcea2d69acc21a",
+      "trace_id": "trace_10d844ffa6a14e39b7e933375f05c9cd",
+      "assessment_id": "asm_1a2055c53f6d48faa78db2e883da6af5",
+      "decision_id": "dec_0112a2ffc75840238739aee4b4794556",
+      "registered_at": "2026-05-07T00:51:39Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_66e21b4f2a9140899bd4a1b8c049dcc7",
       "trace_id": "trace_fccb18798b844f68b6d0ad583d1e3caf",
       "assessment_id": "asm_27578d1da6e14fa78d40992fd70cb538",
       "decision_id": "dec_c9a2053021e94ba38150212ed82cf56b",
-      "registered_at": "2026-04-23T20:36:58Z",
-      "mission_id": "default",
-      "operator_action": "refine",
-      "useful": true,
-      "usefulness_score": 0.87,
-      "label_source": "operator_review",
-      "reviewer": "Codex local rehearsal",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "scenario_policy_replacement",
-        "pending_human_confirmation",
-        "operator_reviewed"
-      ],
-      "notes": "Assistant-generated urban 8h replacement for scenario-policy rehearsal; pending human confirmation."
-    },
-    {
-      "outcome_id": "out_824f60a0400241f48f3c01f3316239bb",
-      "trace_id": "trace_4f65355f5c954fbf8db3fc684bb377af",
-      "assessment_id": "asm_842884e0fef64f1b9c9ce00e0d20ead7",
-      "decision_id": "dec_6b473ac21b4b4075979e14d73fa021ed",
-      "registered_at": "2026-04-23T21:42:14Z",
-      "mission_id": "default",
-      "operator_action": "refine",
-      "useful": true,
-      "usefulness_score": 0.89,
-      "label_source": "operator_review",
-      "reviewer": "Ben Haslam",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": "out_219acc6ccf984a4192c789c3f07e0311",
-      "outcome_tags": [
-        "scenario_policy_replacement",
-        "human_review_confirmed",
-        "operator_reviewed"
-      ],
-      "notes": "Human reviewed confirmed Rotterdam challenge case."
-    },
-    {
-      "outcome_id": "out_8f9bf6e3ec9448f8931e901de2bae699",
-      "trace_id": "trace_e5a00b774bcf410fafe9944b8a4cc4f8",
-      "assessment_id": "asm_62c028a95d4345cd91357b9e4a799b41",
-      "decision_id": "dec_da8f5231491f45a5ae9abfddcb4f173d",
-      "registered_at": "2026-04-27T16:56:29Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.85,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": "out_a2e8b729c62a4528b102615a47ae8134",
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=a"
-    },
-    {
-      "outcome_id": "out_4a1b3c867c1b4b649a8ce7b367d5116d",
-      "trace_id": "trace_f889dbec218e45039cbf63c5b092aa60",
-      "assessment_id": "asm_bae0a49b534e43f993599aab5eafbb2c",
-      "decision_id": "dec_10d9cf6da2ae411abe5495f286cca55d",
-      "registered_at": "2026-04-27T16:56:43Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.85,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": "out_317427fcab5949d9bba849103ba3442d",
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=a"
-    },
-    {
-      "outcome_id": "out_aea6f25f260241e3a7812771f9d2c5e9",
-      "trace_id": "trace_ba0e1a1a2b744cdf94f76fd990fec3f8",
-      "assessment_id": "asm_0fc58efb6ac2476babfdba95dc1116a6",
-      "decision_id": "dec_b00bca25801f4cd08472626e93370fdd",
-      "registered_at": "2026-04-27T16:56:54Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.85,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": "out_929e3ed5797147de9934d449fdb10749",
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=a"
-    },
-    {
-      "outcome_id": "out_72c481c8bc094efaa51ed4a60dcea180",
-      "trace_id": "trace_d886c4872e1047d8b3f50b3563448968",
-      "assessment_id": "asm_c5206f606b7b4e18bb2cb8a2bf5d1979",
-      "decision_id": "dec_d300f2ea1c4d47588749d06ff6abc484",
-      "registered_at": "2026-04-27T16:57:01Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.85,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": "out_7843d44964694d909aab32a3ed94b3d1",
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=a"
-    },
-    {
-      "outcome_id": "out_76da1acdf4e6469c82458ef81dfbbf03",
-      "trace_id": "trace_46c71a07326648039517d0a736b3ba31",
-      "assessment_id": "asm_1dcebbd3203a408c93bca0679856adcd",
-      "decision_id": "dec_0c584980333340efa07c6da4f1851749",
-      "registered_at": "2026-04-27T16:57:07Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.85,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": "out_306e495fae204705ae28cf0c883b2fad",
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=a"
-    },
-    {
-      "outcome_id": "out_7ec137dbc29842db8374fa8003328a50",
-      "trace_id": "trace_26f2081882cf46ba94e10b53ca5c2707",
-      "assessment_id": "asm_c6af0ce3d49d4debb01e5686c98f11aa",
-      "decision_id": "dec_3a78834c56e5408391e63d244ea4d78c",
-      "registered_at": "2026-04-27T16:57:11Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.85,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": "out_2cd12b12e58d497895016f32a03566ab",
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=a"
-    },
-    {
-      "outcome_id": "out_f2430864432c41f3a2b7cfc1f4a113f9",
-      "trace_id": "trace_103f989c13d1437a8927fc031cfefc56",
-      "assessment_id": "asm_e00825f08d704f7b877b405e5437b0df",
-      "decision_id": "dec_ec674cf5de604c0cb9fcd4c8681d8a51",
-      "registered_at": "2026-04-27T16:57:15Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.85,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": "out_61231247d81d458e91e8cd18c8e1f57c",
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=a"
-    },
-    {
-      "outcome_id": "out_8c5d36b267c94cdab216c501cf425dfe",
-      "trace_id": "trace_67918155fd3e47b8a207ae1bf635269c",
-      "assessment_id": "asm_0744fc5168d04ca3bcf4da6b97c84495",
-      "decision_id": "dec_8fc9a3b1674941a0a66bf87749f083e0",
-      "registered_at": "2026-04-27T16:57:18Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.85,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": "out_d139c5c41743416ba012f8bd72c6eb98",
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=a"
-    },
-    {
-      "outcome_id": "out_c5a5ad88d7d04b81add67e0934cc2f35",
-      "trace_id": "trace_04e08f0b4c4c42869a7663c3cb8bf641",
-      "assessment_id": "asm_22fc2cb069ab44c486b22343dccc56ac",
-      "decision_id": "dec_73c40418a57048e1b34164ca87c0d03f",
-      "registered_at": "2026-04-27T16:57:51Z",
-      "mission_id": "default",
-      "operator_action": "refine",
-      "useful": true,
-      "usefulness_score": 0.55,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=r"
-    },
-    {
-      "outcome_id": "out_05cb4ba4e93040d2b8c32a1a76d976a6",
-      "trace_id": "trace_c6da2e5391a8418c9ec2f379436509f2",
-      "assessment_id": "asm_26b05d9e9ab84932a0d49c0479b60be1",
-      "decision_id": "dec_08fc8c838ab7446b8e120b652b2dd0ab",
-      "registered_at": "2026-04-27T16:57:58Z",
-      "mission_id": "default",
-      "operator_action": "refine",
-      "useful": true,
-      "usefulness_score": 0.55,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=r"
-    },
-    {
-      "outcome_id": "out_1c9913d14e2f4f448ba871357330906d",
-      "trace_id": "trace_9afbbc332a96426abd0629fc019d395e",
-      "assessment_id": "asm_95def716f1c84e2ca47ef3de97631973",
-      "decision_id": "dec_5cbde90ff6f54cd8aeba8fbf5b19531f",
-      "registered_at": "2026-04-27T16:58:05Z",
+      "registered_at": "2026-05-07T00:51:39Z",
       "mission_id": "default",
       "operator_action": "accept",
       "useful": true,
@@ -370,18 +1399,18 @@
       "outcome_tags": [
         "operator_reviewed"
       ],
-      "notes": "batch_review: keystroke=a"
+      "notes": null
     },
     {
-      "outcome_id": "out_5bf46ec0f1de4d68983c01530dc8d6dd",
-      "trace_id": "trace_7edbad05378b45eb88f8fedf7a71331c",
-      "assessment_id": "asm_3cd38f30030347569decb232549a7b01",
-      "decision_id": "dec_105d4a888ba84d4cb6f5bc5d7ec99366",
-      "registered_at": "2026-04-27T16:58:10Z",
+      "outcome_id": "out_38bb963f3f3143438bc0787f9f12d2af",
+      "trace_id": "trace_2c2e81628756417dbb0093a1babf0ffd",
+      "assessment_id": "asm_af748977488b46388865ab58f1062a97",
+      "decision_id": "dec_3b07f9d07f18490f81c853ed3d96e1bb",
+      "registered_at": "2026-05-07T00:51:39Z",
       "mission_id": "default",
-      "operator_action": "refine",
-      "useful": true,
-      "usefulness_score": 0.55,
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
       "label_source": "operator_review",
       "reviewer": "ben",
       "review_status": "reviewed",
@@ -390,18 +1419,18 @@
       "outcome_tags": [
         "operator_reviewed"
       ],
-      "notes": "batch_review: keystroke=r"
+      "notes": null
     },
     {
-      "outcome_id": "out_f2b4c698120045d892f9ab11da363ace",
-      "trace_id": "trace_f77a115170574657ba4228ed818ec68d",
-      "assessment_id": "asm_5c09d40afd8042efaadba0ba159f1e68",
-      "decision_id": "dec_1210d1ba47fd40a990c9238431ab27e3",
-      "registered_at": "2026-04-27T16:58:14Z",
+      "outcome_id": "out_ba95a68e42f34cb5bca49a48803d6f9e",
+      "trace_id": "trace_22155d6f9ee14be18d072bcda4aa4a2c",
+      "assessment_id": "asm_0e77cea6549a42c39c2415ec48ae4eef",
+      "decision_id": "dec_f0265865c7484b9cbfc1f847e571bfdf",
+      "registered_at": "2026-05-07T00:51:39Z",
       "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.85,
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
       "label_source": "operator_review",
       "reviewer": "ben",
       "review_status": "reviewed",
@@ -410,18 +1439,18 @@
       "outcome_tags": [
         "operator_reviewed"
       ],
-      "notes": "batch_review: keystroke=a"
+      "notes": null
     },
     {
-      "outcome_id": "out_11945d05a25a48898f19e69d557f079f",
-      "trace_id": "trace_ecb6521c521446838ea9035d9631f4ca",
-      "assessment_id": "asm_bf20e0ba4e2a40d884953de679b93f86",
-      "decision_id": "dec_cd73a91ca92f44abb4fd6aa3ec53e00c",
-      "registered_at": "2026-04-27T16:58:17Z",
+      "outcome_id": "out_d470e26f00964f29af6c6ed8fcaa82c4",
+      "trace_id": "trace_f7c1153a370b4c828274566a2714a524",
+      "assessment_id": "asm_62bcc016f8444329a0565585353f7779",
+      "decision_id": "dec_f0265865c7484b9cbfc1f847e571bfdf",
+      "registered_at": "2026-05-07T00:51:39Z",
       "mission_id": "default",
-      "operator_action": "refine",
-      "useful": true,
-      "usefulness_score": 0.55,
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
       "label_source": "operator_review",
       "reviewer": "ben",
       "review_status": "reviewed",
@@ -430,234 +1459,14 @@
       "outcome_tags": [
         "operator_reviewed"
       ],
-      "notes": "batch_review: keystroke=r"
+      "notes": null
     },
     {
-      "outcome_id": "out_09e9bf4935e94528a6b120d221566bbc",
-      "trace_id": "trace_ae1998677df5406093334f1fcf0abc66",
-      "assessment_id": "asm_2fb5c9da1f27402f940bf2ed631f1ba5",
-      "decision_id": "dec_69ead4656e094ea4af78ea122ba81b6f",
-      "registered_at": "2026-04-27T16:58:21Z",
-      "mission_id": "default",
-      "operator_action": "refine",
-      "useful": true,
-      "usefulness_score": 0.55,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=r"
-    },
-    {
-      "outcome_id": "out_52d3c09ee96041728be5b3b782756862",
-      "trace_id": "trace_599f94be68e14eccb19ce49bac32d609",
-      "assessment_id": "asm_6e260ae75ab9437fb3d5eff0e1c9e91e",
-      "decision_id": "dec_5400ecdb5f8d43848de098b5c81c3310",
-      "registered_at": "2026-04-27T16:58:25Z",
-      "mission_id": "default",
-      "operator_action": "refine",
-      "useful": true,
-      "usefulness_score": 0.55,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=r"
-    },
-    {
-      "outcome_id": "out_a66c926df76f4fc891dca06a2116c8d6",
-      "trace_id": "trace_03147bb1b2234f489ce01208d11bbf4a",
-      "assessment_id": "asm_c78c170e13084ec0820e6dc1a46f87fe",
-      "decision_id": "dec_2531b68931734835b07ade08a7fc83b2",
-      "registered_at": "2026-04-27T16:58:38Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.85,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=a"
-    },
-    {
-      "outcome_id": "out_db8ce81cc55f4c4e82c51963717df7b8",
-      "trace_id": "trace_1f00711c8db6433f9e1f7a79691c23d3",
-      "assessment_id": "asm_6b08b0ddd55448acb18bfa89905e8ab5",
-      "decision_id": "dec_553bff0593bd4c019047241156d601f4",
-      "registered_at": "2026-04-27T16:58:44Z",
-      "mission_id": "default",
-      "operator_action": "refine",
-      "useful": true,
-      "usefulness_score": 0.55,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=r"
-    },
-    {
-      "outcome_id": "out_1f02537c3d94431e9c680e05d64ff6ff",
-      "trace_id": "trace_0725ba13314d4aec8e695ed0fe2130dd",
-      "assessment_id": "asm_a4cbbd23056746f78060d5af0440a089",
-      "decision_id": "dec_8f6a79f77a7f4246ac5a4a8e1969bf2f",
-      "registered_at": "2026-04-27T16:58:48Z",
-      "mission_id": "default",
-      "operator_action": "refine",
-      "useful": true,
-      "usefulness_score": 0.55,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=r"
-    },
-    {
-      "outcome_id": "out_fad7dd519fea40ccb61727b2717d871c",
-      "trace_id": "trace_d5b4d837f3d0444f89633ec10766d73a",
-      "assessment_id": "asm_77cbb5d864154ed89799ff722e91a5fa",
-      "decision_id": "dec_84a49bd0db0548928880811fec6b4a7e",
-      "registered_at": "2026-04-27T16:58:52Z",
-      "mission_id": "default",
-      "operator_action": "refine",
-      "useful": true,
-      "usefulness_score": 0.55,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=r"
-    },
-    {
-      "outcome_id": "out_0ab91228080149ca834b158a320e4c63",
-      "trace_id": "trace_58951351d068471c81106c7d029e2c81",
-      "assessment_id": "asm_1d69bdc905664d38b46f1a26eb311cb6",
-      "decision_id": "dec_0ac42ca100864e26aed7e7fb3d7c0195",
-      "registered_at": "2026-04-27T16:58:55Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.85,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=a"
-    },
-    {
-      "outcome_id": "out_d67abb1125ff4308aacdf1681d4ab112",
-      "trace_id": "trace_212662f658bd48028077bc23fb87c442",
-      "assessment_id": "asm_9b37a6f0f94f4168afb923e1ca881e39",
-      "decision_id": "dec_abc01362aee740528c3236c67d871ab1",
-      "registered_at": "2026-04-27T16:58:58Z",
-      "mission_id": "default",
-      "operator_action": "refine",
-      "useful": true,
-      "usefulness_score": 0.55,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=r"
-    },
-    {
-      "outcome_id": "out_ea9a90c012664fe7bab55c84285aa600",
-      "trace_id": "trace_b992766137e2419e8b1575e8b4ae3fc2",
-      "assessment_id": "asm_1c27af5d1603439e8e18f9675d3f7395",
-      "decision_id": "dec_b34684a215db4821a1e72459ced1ee47",
-      "registered_at": "2026-04-27T16:59:01Z",
-      "mission_id": "default",
-      "operator_action": "refine",
-      "useful": true,
-      "usefulness_score": 0.55,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=r"
-    },
-    {
-      "outcome_id": "out_6cfd4c54730c41fa8918304be5cb259b",
-      "trace_id": "trace_e0aa6488d0b541f2819fcf257006b636",
-      "assessment_id": "asm_26a3e73886fb4c41890d1ea293bd6250",
-      "decision_id": "dec_839eb461e63244afbec6ff6b34ccebf9",
-      "registered_at": "2026-04-27T16:59:04Z",
-      "mission_id": "default",
-      "operator_action": "refine",
-      "useful": true,
-      "usefulness_score": 0.55,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=r"
-    },
-    {
-      "outcome_id": "out_83119aea9dd14339b66560093baeb6db",
-      "trace_id": "trace_ad3890a1998d4d90950201e048708cb4",
-      "assessment_id": "asm_37a78b5351d7455e9793421bb3185ee7",
-      "decision_id": "dec_f33faf38506e4ca2baf37a99e571221f",
-      "registered_at": "2026-04-27T16:59:07Z",
-      "mission_id": "default",
-      "operator_action": "accept",
-      "useful": true,
-      "usefulness_score": 0.85,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=a"
-    },
-    {
-      "outcome_id": "out_796425f004d245cd8e4ca89149dfe048",
+      "outcome_id": "out_c6d43a403a9b42a5aaa1f7df5b1777c1",
       "trace_id": "trace_a4f965f9fce642b9ac42059907c41bd8",
       "assessment_id": "asm_c34dd90f443f4fccab42994889347af6",
       "decision_id": "dec_a9df79a2af5c4684b845b71a4dbf61fc",
-      "registered_at": "2026-04-27T16:59:11Z",
+      "registered_at": "2026-05-07T00:51:40Z",
       "mission_id": "default",
       "operator_action": "accept",
       "useful": true,
@@ -670,297 +1479,1567 @@
       "outcome_tags": [
         "operator_reviewed"
       ],
-      "notes": "batch_review: keystroke=a"
+      "notes": null
     },
     {
-      "outcome_id": "out_24b52ad8b8aa46c0b1296179cdf4bd86",
-      "trace_id": "trace_88c56a41ee64478b94257e26df7f5f77",
-      "assessment_id": "asm_736d64fbfa644591b6e37a7658971d13",
-      "decision_id": "dec_f0265865c7484b9cbfc1f847e571bfdf",
-      "registered_at": "2026-04-27T16:59:14Z",
-      "mission_id": "default",
-      "operator_action": "refine",
-      "useful": true,
-      "usefulness_score": 0.55,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=r"
-    },
-    {
-      "outcome_id": "out_1bec870dc2584eb5a386e05830de3e2e",
-      "trace_id": "trace_777833d1ce0847259cfbac033b271266",
-      "assessment_id": "asm_bd261ba3021e4c209aa6c6a6ff8da347",
-      "decision_id": "dec_c4628846eac74676952b1f35267ba85f",
-      "registered_at": "2026-04-27T16:59:18Z",
-      "mission_id": "default",
-      "operator_action": "refine",
-      "useful": true,
-      "usefulness_score": 0.55,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=r"
-    },
-    {
-      "outcome_id": "out_8419269974e64fd2bae40bd316a5bb6b",
-      "trace_id": "trace_cdcc2a7023d1433e9d4e0edc6bddf10e",
-      "assessment_id": "asm_b548c42c5cbe4515ba4d1c89b13685f8",
-      "decision_id": "dec_a43f2e1b33bc4a0399227657477c4bca",
-      "registered_at": "2026-04-27T16:59:29Z",
-      "mission_id": "default",
-      "operator_action": "refine",
-      "useful": true,
-      "usefulness_score": 0.55,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=r"
-    },
-    {
-      "outcome_id": "out_2f1a12aad9e844d78b990c98c4c2899c",
-      "trace_id": "trace_da37bb4310014942a24d430ea238110a",
-      "assessment_id": "asm_9ed3a2e2ff7a4e4faf8e13c7dbc40566",
-      "decision_id": "dec_4478c6da06e4424a9d609439abe94f14",
-      "registered_at": "2026-04-27T17:00:01Z",
-      "mission_id": "default",
-      "operator_action": "refine",
-      "useful": true,
-      "usefulness_score": 0.55,
-      "label_source": "operator_review",
-      "reviewer": "ben",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "operator_reviewed"
-      ],
-      "notes": "batch_review: keystroke=r"
-    },
-    {
-      "outcome_id": "out_a8dd407ebfb0452aa4f8e8ff9beb6f36",
-      "trace_id": "trace_b6aa341cd881425c89fe20bd1ee2e0d1",
-      "assessment_id": "asm_3d7a05e658b64be6a9a8a2de3a33b59a",
-      "decision_id": "dec_a277da0b0b3e4ec6bac278f45b41b82d",
-      "registered_at": "2026-05-05T14:25:27Z",
-      "mission_id": "default",
-      "operator_action": "defer",
-      "useful": false,
-      "usefulness_score": 0.35,
-      "label_source": "operator_review",
-      "reviewer": "auto-defer (cloud>=80%)",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "auto_labeled",
-        "cloud_heuristic"
-      ],
-      "notes": "Auto-labeled defer: cloud_cover=88.6% >= 80% threshold AND target_visible. Review and override with operator_review.py if this assessment is incorrect. Generated by SimSat autonomous session 2026-05-05."
-    },
-    {
-      "outcome_id": "out_588a26bb3c5147bdb5ffa3514fbf345e",
-      "trace_id": "trace_cbe073faf8554afb986b632128204650",
-      "assessment_id": "asm_dcd5355a6d864ad89b2251fd85cc0e9f",
-      "decision_id": "dec_9dd2a50b868e4ca9ad8705d588539316",
-      "registered_at": "2026-05-05T14:25:27Z",
-      "mission_id": "default",
-      "operator_action": "defer",
-      "useful": false,
-      "usefulness_score": 0.35,
-      "label_source": "operator_review",
-      "reviewer": "auto-defer (cloud>=80%)",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "auto_labeled",
-        "cloud_heuristic"
-      ],
-      "notes": "Auto-labeled defer: cloud_cover=86.1% >= 80% threshold AND target_visible. Review and override with operator_review.py if this assessment is incorrect. Generated by SimSat autonomous session 2026-05-05."
-    },
-    {
-      "outcome_id": "out_0ece2f00bd1547b59a392ffc17d4fc43",
-      "trace_id": "trace_f3b408a550ee4031b35ab7d452c21d71",
-      "assessment_id": "asm_4c3ef329949942c08ad67d5e3121894f",
-      "decision_id": "dec_31f06c60833c4b63b078ed41a51b7c0c",
-      "registered_at": "2026-05-05T14:25:27Z",
-      "mission_id": "default",
-      "operator_action": "defer",
-      "useful": false,
-      "usefulness_score": 0.35,
-      "label_source": "operator_review",
-      "reviewer": "auto-defer (cloud>=80%)",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "auto_labeled",
-        "cloud_heuristic"
-      ],
-      "notes": "Auto-labeled defer: cloud_cover=89.5% >= 80% threshold AND target_visible. Review and override with operator_review.py if this assessment is incorrect. Generated by SimSat autonomous session 2026-05-05."
-    },
-    {
-      "outcome_id": "out_3c5543ffa86d43318fd8bc1d02ef0e4e",
-      "trace_id": "trace_6982090f337548b2939921ea3324f55a",
-      "assessment_id": "asm_ac2fef7232044578b8db27db9ff0a16a",
-      "decision_id": "dec_fe35ab033dc0460fb8516133ffa9822b",
-      "registered_at": "2026-05-05T14:25:27Z",
-      "mission_id": "default",
-      "operator_action": "defer",
-      "useful": false,
-      "usefulness_score": 0.35,
-      "label_source": "operator_review",
-      "reviewer": "auto-defer (cloud>=80%)",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "auto_labeled",
-        "cloud_heuristic"
-      ],
-      "notes": "Auto-labeled defer: cloud_cover=93.1% >= 80% threshold AND target_visible. Review and override with operator_review.py if this assessment is incorrect. Generated by SimSat autonomous session 2026-05-05."
-    },
-    {
-      "outcome_id": "out_a4241685b8b14ecf8d2b14a6442a9f5d",
-      "trace_id": "trace_31ae7bb2ac304fad9c91e6497bfb31c5",
-      "assessment_id": "asm_3cc7939caa524315959ba8b34e598827",
-      "decision_id": "dec_dd65861a127e4210930691b72598ef33",
-      "registered_at": "2026-05-05T14:25:27Z",
-      "mission_id": "default",
-      "operator_action": "defer",
-      "useful": false,
-      "usefulness_score": 0.35,
-      "label_source": "operator_review",
-      "reviewer": "auto-defer (cloud>=80%)",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "auto_labeled",
-        "cloud_heuristic"
-      ],
-      "notes": "Auto-labeled defer: cloud_cover=91.3% >= 80% threshold AND target_visible. Review and override with operator_review.py if this assessment is incorrect. Generated by SimSat autonomous session 2026-05-05."
-    },
-    {
-      "outcome_id": "out_1a45d0e8b51a46e4bd605ef413d7361e",
-      "trace_id": "trace_08ae57efb8a44376a74a3e1a2b91a037",
-      "assessment_id": "asm_74939f182f974fbdb4d85c2c104813af",
-      "decision_id": "dec_d9c8a265f30e41fa8fd889e2e1812f93",
-      "registered_at": "2026-05-05T14:25:27Z",
-      "mission_id": "default",
-      "operator_action": "defer",
-      "useful": false,
-      "usefulness_score": 0.35,
-      "label_source": "operator_review",
-      "reviewer": "auto-defer (cloud>=80%)",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "auto_labeled",
-        "cloud_heuristic"
-      ],
-      "notes": "Auto-labeled defer: cloud_cover=88.6% >= 80% threshold AND target_visible. Review and override with operator_review.py if this assessment is incorrect. Generated by SimSat autonomous session 2026-05-05."
-    },
-    {
-      "outcome_id": "out_8894bb5719674ceca75bbc49e0bba211",
-      "trace_id": "trace_c1de50e3492b42bf912d8bc688a360cc",
-      "assessment_id": "asm_ecc4b7e9d022454ead465801652564a8",
-      "decision_id": "dec_08e5b02c5cea4b4d9324570d54b55761",
-      "registered_at": "2026-05-05T14:25:27Z",
-      "mission_id": "default",
-      "operator_action": "defer",
-      "useful": false,
-      "usefulness_score": 0.35,
-      "label_source": "operator_review",
-      "reviewer": "auto-defer (cloud>=80%)",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "auto_labeled",
-        "cloud_heuristic"
-      ],
-      "notes": "Auto-labeled defer: cloud_cover=97.2% >= 80% threshold AND target_visible. Review and override with operator_review.py if this assessment is incorrect. Generated by SimSat autonomous session 2026-05-05."
-    },
-    {
-      "outcome_id": "out_2c45143640d0409abd215e3691e14f3b",
-      "trace_id": "trace_50c8eab02a1b445a9fbb13dd9a92cf09",
-      "assessment_id": "asm_a7932fcca0fd48f2a03c190111890c36",
-      "decision_id": "dec_a831a2b228e54bc692a0f0336ecc0b4e",
-      "registered_at": "2026-05-05T14:25:27Z",
-      "mission_id": "default",
-      "operator_action": "defer",
-      "useful": false,
-      "usefulness_score": 0.35,
-      "label_source": "operator_review",
-      "reviewer": "auto-defer (cloud>=80%)",
-      "review_status": "reviewed",
-      "is_current": true,
-      "supersedes_outcome_id": null,
-      "outcome_tags": [
-        "auto_labeled",
-        "cloud_heuristic"
-      ],
-      "notes": "Auto-labeled defer: cloud_cover=94.8% >= 80% threshold AND target_visible. Review and override with operator_review.py if this assessment is incorrect. Generated by SimSat autonomous session 2026-05-05."
-    },
-    {
-      "outcome_id": "out_41f1204e9a234dce8a100f04bb079251",
+      "outcome_id": "out_8830d06ad6fc4659a1ec0e5fc30f5344",
       "trace_id": "trace_b5870f83612a4a7798c4c342661efeab",
       "assessment_id": "asm_4f96cdd11dff4deaa7a56706ba1b80f5",
       "decision_id": "dec_46e8c7bb49504f66ab6593ecff04669f",
-      "registered_at": "2026-05-05T14:25:27Z",
+      "registered_at": "2026-05-07T00:51:40Z",
       "mission_id": "default",
       "operator_action": "defer",
       "useful": false,
-      "usefulness_score": 0.35,
+      "usefulness_score": 0.4,
       "label_source": "operator_review",
-      "reviewer": "auto-defer (cloud>=80%)",
+      "reviewer": "ben",
       "review_status": "reviewed",
       "is_current": true,
       "supersedes_outcome_id": null,
       "outcome_tags": [
-        "auto_labeled",
-        "cloud_heuristic"
+        "operator_reviewed"
       ],
-      "notes": "Auto-labeled defer: cloud_cover=89.8% >= 80% threshold AND target_visible. Review and override with operator_review.py if this assessment is incorrect. Generated by SimSat autonomous session 2026-05-05."
+      "notes": null
     },
     {
-      "outcome_id": "out_58e3bb91465f41028e9d82adf348b024",
+      "outcome_id": "out_138e5c0cb3da4e7fb9cbcbf45c9b597d",
       "trace_id": "trace_efa9e41802814c429b102c2f77eb64fc",
       "assessment_id": "asm_eb2e1de57f694cd4bcc1f9e68e549bcc",
       "decision_id": "dec_223c1e49f38545c7bceede0bc1fd97e6",
-      "registered_at": "2026-05-05T14:25:27Z",
+      "registered_at": "2026-05-07T00:51:40Z",
       "mission_id": "default",
       "operator_action": "defer",
       "useful": false,
-      "usefulness_score": 0.35,
+      "usefulness_score": 0.4,
       "label_source": "operator_review",
-      "reviewer": "auto-defer (cloud>=80%)",
+      "reviewer": "ben",
       "review_status": "reviewed",
       "is_current": true,
       "supersedes_outcome_id": null,
       "outcome_tags": [
-        "auto_labeled",
-        "cloud_heuristic"
+        "operator_reviewed"
       ],
-      "notes": "Auto-labeled defer: cloud_cover=99.7% >= 80% threshold AND target_visible. Review and override with operator_review.py if this assessment is incorrect. Generated by SimSat autonomous session 2026-05-05."
+      "notes": null
+    },
+    {
+      "outcome_id": "out_cee52bdefd6e49579d21c9e092743cf1",
+      "trace_id": "trace_a8e23f1ff498486bbf0d60417d46f9b0",
+      "assessment_id": "asm_90b25aa4c4cc443097acc636316a43f0",
+      "decision_id": "dec_91b6777fb09b4b998fc04b898e95a989",
+      "registered_at": "2026-05-07T00:51:40Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_603c7b2424a04a8daa909e97e4a8b10c",
+      "trace_id": "trace_978e6a6a5bf8466e99aa7b38ef7e35a8",
+      "assessment_id": "asm_b2b08f2a1b34436884578ef106834712",
+      "decision_id": "dec_2cf5ded3ca2042f894e17235bf2cd8d3",
+      "registered_at": "2026-05-07T00:51:40Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_546c16182f8540babf557537de42d064",
+      "trace_id": "trace_75f406cf5bff4771945fee5c975e65f1",
+      "assessment_id": "asm_ba96931215ae4b6c9b8962ebb622b179",
+      "decision_id": "dec_93de74b784144e94b3016d2189b2162c",
+      "registered_at": "2026-05-07T00:51:40Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_a27374fc44e9407c99c4b70b1c961805",
+      "trace_id": "trace_b98b5d0bb9f14ef1a2526f0afdc12c02",
+      "assessment_id": "asm_ab4867528a994fb48a2674269ff76634",
+      "decision_id": "dec_733b363c75634fbfa1ff1d0f8a806d18",
+      "registered_at": "2026-05-07T00:51:41Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_de0f250d76584fee9ce8464f0be778df",
+      "trace_id": "trace_a0aab6981bb24016bd2d36a859e5d7e9",
+      "assessment_id": "asm_e9233cdf709e4850b2445ac133ee69cc",
+      "decision_id": "dec_f8a680a4d3b24735a2747b3bea96f843",
+      "registered_at": "2026-05-07T00:51:41Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_b82c0f8758fc44978d2834335ac4c213",
+      "trace_id": "trace_e0bb6c2b04514c90a8892dc9e17630b6",
+      "assessment_id": "asm_3e133df7432b407baf67dbb4af00d167",
+      "decision_id": "dec_d7bf602007f34e8abf4ce55828a3dc95",
+      "registered_at": "2026-05-07T00:51:41Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_45c24d6231674a4487c62bd232b25647",
+      "trace_id": "trace_511eb967219b4a3db07e08cbcc77064a",
+      "assessment_id": "asm_41d2ce1d8f4a4659b793151db82111ec",
+      "decision_id": "dec_10df05fd632a4c098ed926521568a6cb",
+      "registered_at": "2026-05-07T00:51:41Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_122600056fa64a46bd0f4b9e2ae11d31",
+      "trace_id": "trace_5bc171357b3a431983b9f81646117522",
+      "assessment_id": "asm_8f038e6e3e984d068de1e40ac2714a19",
+      "decision_id": "dec_f4f067459b2444ecade20ea83807b7c2",
+      "registered_at": "2026-05-07T00:51:41Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_25832af70dcd49fb901793874d1ac21f",
+      "trace_id": "trace_ad3890a1998d4d90950201e048708cb4",
+      "assessment_id": "asm_37a78b5351d7455e9793421bb3185ee7",
+      "decision_id": "dec_f33faf38506e4ca2baf37a99e571221f",
+      "registered_at": "2026-05-07T00:51:41Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_3d260325b2b545dc98b91c07bf0f23c5",
+      "trace_id": "trace_e9e45ad652ff4e74853f0c6d0c03a827",
+      "assessment_id": "asm_f855a14c3de0413ea689173cd6f0a353",
+      "decision_id": "dec_cde38e345c864bf0a3cc0dadc9714bde",
+      "registered_at": "2026-05-07T00:51:42Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_70e72edf0d4a4ff49759cff2c4936c51",
+      "trace_id": "trace_35e90312fef94a0ca53839d7b3cdfe5d",
+      "assessment_id": "asm_af5926d8408b4ca3945f6165bf8a0925",
+      "decision_id": "dec_3346954014624e5ab6841b9594b370ed",
+      "registered_at": "2026-05-07T00:51:42Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_2ef5ef56822a40f68cf9d54712ecd7f9",
+      "trace_id": "trace_e47d4364940b489e8e41e4a6091ddd3e",
+      "assessment_id": "asm_15a77439050d48458a9f0258ff119027",
+      "decision_id": "dec_1652329774a6489c9213005fdf7bb9c7",
+      "registered_at": "2026-05-07T00:51:42Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_851020e4fdc345bc97f4c5378dea3eb3",
+      "trace_id": "trace_fe171375483748c39828af9e2587378d",
+      "assessment_id": "asm_2346b5db5ee04dba920f178962d08466",
+      "decision_id": "dec_5409dc6afe974bfab37e0f19462156a1",
+      "registered_at": "2026-05-07T00:51:42Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_4dc5a6ecf36d4a5f94984ce6fe2708d8",
+      "trace_id": "trace_6f7838564cc94b07a7f29a430a804832",
+      "assessment_id": "asm_4f6bd3c7f47342acbc6b47283f4af952",
+      "decision_id": "dec_ab3de5342f4b43769877c4f7b164330e",
+      "registered_at": "2026-05-07T00:51:42Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_3b0583f0fc8e46c685685de9edfd8f7a",
+      "trace_id": "trace_4bccb9cf7b864225bad705117654f277",
+      "assessment_id": "asm_d4f15fcd27ea422bb993e0cdc00d7bc2",
+      "decision_id": "dec_eaf9d75662bf4913b7d890cccac0eb34",
+      "registered_at": "2026-05-07T00:51:43Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_c3d894063eba4ee98cfdbecb9060a2ec",
+      "trace_id": "trace_63d2f16600264d93b7443459166cfde7",
+      "assessment_id": "asm_f9659adaba854320beaad794e0910fa9",
+      "decision_id": "dec_dfab62957fd1428eb0d64d7e532bcf89",
+      "registered_at": "2026-05-07T00:51:43Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_7268c9e670d74888815fd1ce045a1f57",
+      "trace_id": "trace_ad3a863eae974301b903539c40a708b2",
+      "assessment_id": "asm_f99cfc6235e248658c59e5ce89b86800",
+      "decision_id": "dec_102fa81d4eaa419d996dab2441028bfb",
+      "registered_at": "2026-05-07T00:51:43Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_bb146ffeb3324f4692b3df4bcbf29236",
+      "trace_id": "trace_85ddfa677bfd459d95dbed455dd38505",
+      "assessment_id": "asm_b5162be3a9fb4d0c9a249be5cbbcf2cc",
+      "decision_id": "dec_007c851134d84dad904f76737d0661b5",
+      "registered_at": "2026-05-07T00:51:43Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_cc5ac832b2a74530b13dfbc608f13730",
+      "trace_id": "trace_32c41b142ecf42a5b378caa654efe6c7",
+      "assessment_id": "asm_003fae92cb70497ba6a3064939d2d3f4",
+      "decision_id": "dec_0f36db84c3f44fabbfe9b29951cf8d46",
+      "registered_at": "2026-05-07T00:51:43Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_09b3d76ea58a4d26a6393e4b91a85c78",
+      "trace_id": "trace_e603eaf267c448b1a4ed059e6ac3e638",
+      "assessment_id": "asm_edb2e9cf30c448ecb0da827725c1f7cd",
+      "decision_id": "dec_8655bb4635df4f71b72fad40b7fa0b9e",
+      "registered_at": "2026-05-07T00:51:44Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_50b36075b98346eabc55b2958807f6b3",
+      "trace_id": "trace_c1de50e3492b42bf912d8bc688a360cc",
+      "assessment_id": "asm_ecc4b7e9d022454ead465801652564a8",
+      "decision_id": "dec_08e5b02c5cea4b4d9324570d54b55761",
+      "registered_at": "2026-05-07T00:51:44Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_513b059e6c9545edb6111ee5017a5d7c",
+      "trace_id": "trace_a58ea3113555401ea9f748c127824b49",
+      "assessment_id": "asm_6a605fa19585475292898a2c68fdacde",
+      "decision_id": "dec_d4c9840b1feb41948c551c9dac65f871",
+      "registered_at": "2026-05-07T00:51:44Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_498a0d970f184b4b95a69d93df237c7a",
+      "trace_id": "trace_38571614c1464b8d994f61629eb22772",
+      "assessment_id": "asm_4ebc64a7ab454a08b19c78282a313bba",
+      "decision_id": "dec_8a9b8b7b860444c79364204b61c4c06b",
+      "registered_at": "2026-05-07T00:51:44Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_01a24966d06641b6a464b72030f38016",
+      "trace_id": "trace_50c8eab02a1b445a9fbb13dd9a92cf09",
+      "assessment_id": "asm_a7932fcca0fd48f2a03c190111890c36",
+      "decision_id": "dec_a831a2b228e54bc692a0f0336ecc0b4e",
+      "registered_at": "2026-05-07T00:51:44Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_580a18e2277d438da6092b163896cce2",
+      "trace_id": "trace_1081256ca906412f97cc4a7bcfa75b1b",
+      "assessment_id": "asm_cabc0d633d0f48759eca804ef94ae7ea",
+      "decision_id": "dec_6e173bdb1d2f484bb5dd6d1b533c7b02",
+      "registered_at": "2026-05-07T00:51:44Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_1809eb91d094410f86ada56cfe3151b3",
+      "trace_id": "trace_a46b65c213aa4493a0ed34aaed741a77",
+      "assessment_id": "asm_2fbe8116dc8a4648bc061cd451e613a9",
+      "decision_id": "dec_9513609cac9e4b9a8b7142ea4758781f",
+      "registered_at": "2026-05-07T00:51:45Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_6108b931274647ecb4ed85d0373314d5",
+      "trace_id": "trace_08ae57efb8a44376a74a3e1a2b91a037",
+      "assessment_id": "asm_74939f182f974fbdb4d85c2c104813af",
+      "decision_id": "dec_d9c8a265f30e41fa8fd889e2e1812f93",
+      "registered_at": "2026-05-07T00:51:45Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_c01f3a79cc4143e391cdc316ea60dd8c",
+      "trace_id": "trace_aaa144b5ec6146cca1f2cd743a9cefe0",
+      "assessment_id": "asm_7e435e1fc4224793b932a904e103b38c",
+      "decision_id": "dec_11d277d915744237b3a32f38208bbe3b",
+      "registered_at": "2026-05-07T00:51:45Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_1ab6588d8cd5427dbced937b1242a191",
+      "trace_id": "trace_de8ffd5863714ac5bd22ff398e4fccc9",
+      "assessment_id": "asm_52f880ec13954aaaa9aaaafad0b05c5f",
+      "decision_id": "dec_0b19140566fd42ffb9efb11fd46ccb44",
+      "registered_at": "2026-05-07T00:51:45Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_aa3ba97302d54349acbc205517527835",
+      "trace_id": "trace_11691f60aa8d47d38493aebb399f41f2",
+      "assessment_id": "asm_3e4ad1c37e474d19bc36be2b752e31f5",
+      "decision_id": "dec_199d10f7a0d14dbb9a67aa5c40b0bdf9",
+      "registered_at": "2026-05-07T00:51:46Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_02dce5fcc8a94269ae1f6af35330e414",
+      "trace_id": "trace_f760ebf72a964cab8ac6372e6e2dd820",
+      "assessment_id": "asm_d08163ce824b488c993b440836bec881",
+      "decision_id": "dec_12232a70458a4bb3998c67d2b682e428",
+      "registered_at": "2026-05-07T00:51:46Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_3bb436006d134a8e8bd6623f3740cc08",
+      "trace_id": "trace_31ae7bb2ac304fad9c91e6497bfb31c5",
+      "assessment_id": "asm_3cc7939caa524315959ba8b34e598827",
+      "decision_id": "dec_dd65861a127e4210930691b72598ef33",
+      "registered_at": "2026-05-07T00:51:46Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_6b638a9f94514bdaa10716bd8fc90bd2",
+      "trace_id": "trace_00850a706d0244eaabd9799791a914a3",
+      "assessment_id": "asm_3d9c0645847d43e696e1e9549308fcaf",
+      "decision_id": "dec_9eb36c869f3948eab0519a936fe05682",
+      "registered_at": "2026-05-07T00:51:46Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_c6c61dfb44e742f2b104fa909ff4b2b7",
+      "trace_id": "trace_3957ae2fabb34f298e9ff95ec912b6e1",
+      "assessment_id": "asm_b6f71830142541d38ef42b30f268f39f",
+      "decision_id": "dec_ce291d29caaa40bf870ca70015665552",
+      "registered_at": "2026-05-07T00:51:47Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_1ea995bd42c94c7ca86eff90111180d9",
+      "trace_id": "trace_6982090f337548b2939921ea3324f55a",
+      "assessment_id": "asm_ac2fef7232044578b8db27db9ff0a16a",
+      "decision_id": "dec_fe35ab033dc0460fb8516133ffa9822b",
+      "registered_at": "2026-05-07T00:51:47Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_35a84e3d916244d8a71bbaac7b83c9e7",
+      "trace_id": "trace_e0aa6488d0b541f2819fcf257006b636",
+      "assessment_id": "asm_26a3e73886fb4c41890d1ea293bd6250",
+      "decision_id": "dec_839eb461e63244afbec6ff6b34ccebf9",
+      "registered_at": "2026-05-07T00:51:47Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_80cbc1cbf6dd4baaa1315ee76ad8a60d",
+      "trace_id": "trace_c3e2a26eeab540a3b34a2b5185ce6613",
+      "assessment_id": "asm_1e84dc78d6ba47fda4ac662665624fa9",
+      "decision_id": "dec_cf01af6fd36a46868e5565337b3a5ced",
+      "registered_at": "2026-05-07T00:51:47Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_b09c54fd6acc4bc7afca2dd7b64c8a7b",
+      "trace_id": "trace_212662f658bd48028077bc23fb87c442",
+      "assessment_id": "asm_9b37a6f0f94f4168afb923e1ca881e39",
+      "decision_id": "dec_abc01362aee740528c3236c67d871ab1",
+      "registered_at": "2026-05-07T00:51:48Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_7c8fd043adba4f6f9eb082e9c54aa744",
+      "trace_id": "trace_cbe073faf8554afb986b632128204650",
+      "assessment_id": "asm_dcd5355a6d864ad89b2251fd85cc0e9f",
+      "decision_id": "dec_9dd2a50b868e4ca9ad8705d588539316",
+      "registered_at": "2026-05-07T00:51:48Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_b8118d3eda274e4698e1761e4540f078",
+      "trace_id": "trace_f3b408a550ee4031b35ab7d452c21d71",
+      "assessment_id": "asm_4c3ef329949942c08ad67d5e3121894f",
+      "decision_id": "dec_31f06c60833c4b63b078ed41a51b7c0c",
+      "registered_at": "2026-05-07T00:51:48Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_59afc20861974fc3981d30c5398de955",
+      "trace_id": "trace_b992766137e2419e8b1575e8b4ae3fc2",
+      "assessment_id": "asm_1c27af5d1603439e8e18f9675d3f7395",
+      "decision_id": "dec_b34684a215db4821a1e72459ced1ee47",
+      "registered_at": "2026-05-07T00:51:48Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_fba3598dc2624b6d811fe243cd113f4e",
+      "trace_id": "trace_d5b4d837f3d0444f89633ec10766d73a",
+      "assessment_id": "asm_77cbb5d864154ed89799ff722e91a5fa",
+      "decision_id": "dec_84a49bd0db0548928880811fec6b4a7e",
+      "registered_at": "2026-05-07T00:51:49Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_6b4cc21ec5294af29cd8fab58e217229",
+      "trace_id": "trace_dbbe33015d04413082df17ba2f0c8d12",
+      "assessment_id": "asm_bf1a343859d140d29b6566131ae0f9d5",
+      "decision_id": "dec_c0bce45da08a4607966d2926fcb066ef",
+      "registered_at": "2026-05-07T00:51:49Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_45b78acbb189433d93a21a38ea4eb886",
+      "trace_id": "trace_58951351d068471c81106c7d029e2c81",
+      "assessment_id": "asm_1d69bdc905664d38b46f1a26eb311cb6",
+      "decision_id": "dec_0ac42ca100864e26aed7e7fb3d7c0195",
+      "registered_at": "2026-05-07T00:51:49Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_7204816d44c64b0c9dd789302d4e87bd",
+      "trace_id": "trace_e086e5c0816d4b148ce12db9ef1684e0",
+      "assessment_id": "asm_d0ef2d2fb6924b27b9fefa078060de7b",
+      "decision_id": "dec_fcc25db1ce014910a3502d8a79220b21",
+      "registered_at": "2026-05-07T00:51:49Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_4dcb9c061b784390b03dd0c60d2985b7",
+      "trace_id": "trace_8b4d77c012664ec5a72cb14c96ae08b7",
+      "assessment_id": "asm_4e6f3a9fd05248b7b8cb4ab110a4cde7",
+      "decision_id": "dec_38fc6b90fc494ea9a551d967ac682ec1",
+      "registered_at": "2026-05-07T00:51:50Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_200255860f6c4e8d9efdb485b8de244e",
+      "trace_id": "trace_1f00711c8db6433f9e1f7a79691c23d3",
+      "assessment_id": "asm_6b08b0ddd55448acb18bfa89905e8ab5",
+      "decision_id": "dec_553bff0593bd4c019047241156d601f4",
+      "registered_at": "2026-05-07T00:51:50Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_6ae20bd9510b44daa4b63e0368281f7a",
+      "trace_id": "trace_b18d19ea66d84e8784a4904de93925cb",
+      "assessment_id": "asm_ee87890f16344026a3cebd494f8016ee",
+      "decision_id": "dec_32e371df8cf74bd7b6ce40a831da9540",
+      "registered_at": "2026-05-07T00:51:50Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_a749d33d7d2045d48ac23d22b362dcc5",
+      "trace_id": "trace_0725ba13314d4aec8e695ed0fe2130dd",
+      "assessment_id": "asm_a4cbbd23056746f78060d5af0440a089",
+      "decision_id": "dec_8f6a79f77a7f4246ac5a4a8e1969bf2f",
+      "registered_at": "2026-05-07T00:51:50Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_3a777717321f4e7087f7d5f85d67abb2",
+      "trace_id": "trace_b6aa341cd881425c89fe20bd1ee2e0d1",
+      "assessment_id": "asm_3d7a05e658b64be6a9a8a2de3a33b59a",
+      "decision_id": "dec_a277da0b0b3e4ec6bac278f45b41b82d",
+      "registered_at": "2026-05-07T00:51:50Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_e0ec5ede11944d98b19c7d5eba8b2c5b",
+      "trace_id": "trace_ae1998677df5406093334f1fcf0abc66",
+      "assessment_id": "asm_2fb5c9da1f27402f940bf2ed631f1ba5",
+      "decision_id": "dec_69ead4656e094ea4af78ea122ba81b6f",
+      "registered_at": "2026-05-07T00:51:51Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_f04c8b4486414fe89f99c9eaf3fed0b9",
+      "trace_id": "trace_da37bb4310014942a24d430ea238110a",
+      "assessment_id": "asm_9ed3a2e2ff7a4e4faf8e13c7dbc40566",
+      "decision_id": "dec_4478c6da06e4424a9d609439abe94f14",
+      "registered_at": "2026-05-07T00:51:51Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_758e3937109b444b96347f856014a211",
+      "trace_id": "trace_599f94be68e14eccb19ce49bac32d609",
+      "assessment_id": "asm_6e260ae75ab9437fb3d5eff0e1c9e91e",
+      "decision_id": "dec_5400ecdb5f8d43848de098b5c81c3310",
+      "registered_at": "2026-05-07T00:51:51Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_ac98915915974404bf35d21c3b1e4210",
+      "trace_id": "trace_03147bb1b2234f489ce01208d11bbf4a",
+      "assessment_id": "asm_c78c170e13084ec0820e6dc1a46f87fe",
+      "decision_id": "dec_2531b68931734835b07ade08a7fc83b2",
+      "registered_at": "2026-05-07T00:51:51Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_5ea14bcb6d39442c9b2c16eabe287b90",
+      "trace_id": "trace_f77a115170574657ba4228ed818ec68d",
+      "assessment_id": "asm_5c09d40afd8042efaadba0ba159f1e68",
+      "decision_id": "dec_1210d1ba47fd40a990c9238431ab27e3",
+      "registered_at": "2026-05-07T00:51:52Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_b4070e1eb1804d83b46a591a2bd698db",
+      "trace_id": "trace_1113fa0223014708a27c28f6cb876e73",
+      "assessment_id": "asm_1a2d0dc43e58425cae3492ede3b4f229",
+      "decision_id": "dec_02c36b1066e5496681ee58fd8c8634e4",
+      "registered_at": "2026-05-07T00:51:52Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_8bdcb8a967d4473a991d78862605b9fd",
+      "trace_id": "trace_ecb6521c521446838ea9035d9631f4ca",
+      "assessment_id": "asm_bf20e0ba4e2a40d884953de679b93f86",
+      "decision_id": "dec_cd73a91ca92f44abb4fd6aa3ec53e00c",
+      "registered_at": "2026-05-07T00:51:52Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_0f1f6352c06d417aaa763ab66f04964c",
+      "trace_id": "trace_cdcc2a7023d1433e9d4e0edc6bddf10e",
+      "assessment_id": "asm_b548c42c5cbe4515ba4d1c89b13685f8",
+      "decision_id": "dec_a43f2e1b33bc4a0399227657477c4bca",
+      "registered_at": "2026-05-07T00:51:52Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_90693bc29ce44627a736cc0f94438b30",
+      "trace_id": "trace_c6da2e5391a8418c9ec2f379436509f2",
+      "assessment_id": "asm_26b05d9e9ab84932a0d49c0479b60be1",
+      "decision_id": "dec_08fc8c838ab7446b8e120b652b2dd0ab",
+      "registered_at": "2026-05-07T00:51:53Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_c6cee75969a74da0a3bcb96ecd970244",
+      "trace_id": "trace_9afbbc332a96426abd0629fc019d395e",
+      "assessment_id": "asm_95def716f1c84e2ca47ef3de97631973",
+      "decision_id": "dec_5cbde90ff6f54cd8aeba8fbf5b19531f",
+      "registered_at": "2026-05-07T00:51:53Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_0eff7395fd334232b5c327c09d0d3bde",
+      "trace_id": "trace_4f65355f5c954fbf8db3fc684bb377af",
+      "assessment_id": "asm_842884e0fef64f1b9c9ce00e0d20ead7",
+      "decision_id": "dec_6b473ac21b4b4075979e14d73fa021ed",
+      "registered_at": "2026-05-07T00:51:53Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_a36576214f3d4f60a8814a340b63db45",
+      "trace_id": "trace_7edbad05378b45eb88f8fedf7a71331c",
+      "assessment_id": "asm_3cd38f30030347569decb232549a7b01",
+      "decision_id": "dec_105d4a888ba84d4cb6f5bc5d7ec99366",
+      "registered_at": "2026-05-07T00:51:53Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_9123135dca40421cab40d1efce6e51b6",
+      "trace_id": "trace_a4e31b4c39224d8fbdb2c4bf0f444823",
+      "assessment_id": "asm_27760e63af514efeab5fea9fde71f62f",
+      "decision_id": "dec_ae382895c85a4aba9a73201ac8a1568f",
+      "registered_at": "2026-05-07T00:51:54Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_8eda43461e7141c98390dc96655cd811",
+      "trace_id": "trace_88c56a41ee64478b94257e26df7f5f77",
+      "assessment_id": "asm_736d64fbfa644591b6e37a7658971d13",
+      "decision_id": "dec_f0265865c7484b9cbfc1f847e571bfdf",
+      "registered_at": "2026-05-07T00:51:54Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_1405884f8e904e2fa3b8ccd4416f0c3e",
+      "trace_id": "trace_04e08f0b4c4c42869a7663c3cb8bf641",
+      "assessment_id": "asm_22fc2cb069ab44c486b22343dccc56ac",
+      "decision_id": "dec_73c40418a57048e1b34164ca87c0d03f",
+      "registered_at": "2026-05-07T00:51:54Z",
+      "mission_id": "default",
+      "operator_action": "refine",
+      "useful": true,
+      "usefulness_score": 0.55,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_6ee23ae03c1f4c13bf08d49b0076bab0",
+      "trace_id": "trace_777833d1ce0847259cfbac033b271266",
+      "assessment_id": "asm_bd261ba3021e4c209aa6c6a6ff8da347",
+      "decision_id": "dec_c4628846eac74676952b1f35267ba85f",
+      "registered_at": "2026-05-07T00:51:54Z",
+      "mission_id": "default",
+      "operator_action": "defer",
+      "useful": false,
+      "usefulness_score": 0.4,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_d44dd54e90864c978fea146b3a0f6535",
+      "trace_id": "trace_103f989c13d1437a8927fc031cfefc56",
+      "assessment_id": "asm_e00825f08d704f7b877b405e5437b0df",
+      "decision_id": "dec_ec674cf5de604c0cb9fcd4c8681d8a51",
+      "registered_at": "2026-05-07T00:51:55Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_ffa7ae34280547c7b4194cab7802a960",
+      "trace_id": "trace_67918155fd3e47b8a207ae1bf635269c",
+      "assessment_id": "asm_0744fc5168d04ca3bcf4da6b97c84495",
+      "decision_id": "dec_8fc9a3b1674941a0a66bf87749f083e0",
+      "registered_at": "2026-05-07T00:51:55Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_c9736bb5eb4b480c8120c4007b281b45",
+      "trace_id": "trace_1926b646ee4b48478913681a33fcdfb1",
+      "assessment_id": "asm_7b5ccfcb93794fb196210be69e2f1c2d",
+      "decision_id": "dec_3d45e15388db4282a6efcf646694346b",
+      "registered_at": "2026-05-07T00:51:55Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_afc71a717e63418bba3fe13e2085b229",
+      "trace_id": "trace_2507337b7939460ebf01cbc9fcef8055",
+      "assessment_id": "asm_20ff1b5828654ec9bae3d8101054daaa",
+      "decision_id": "dec_f850b25e2f5e42708a3dfe0ec2298de2",
+      "registered_at": "2026-05-07T00:51:55Z",
+      "mission_id": "default",
+      "operator_action": "skip",
+      "useful": false,
+      "usefulness_score": 0.2,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_105956871e9342f596d9eb7a4972ee8d",
+      "trace_id": "trace_ba0e1a1a2b744cdf94f76fd990fec3f8",
+      "assessment_id": "asm_0fc58efb6ac2476babfdba95dc1116a6",
+      "decision_id": "dec_b00bca25801f4cd08472626e93370fdd",
+      "registered_at": "2026-05-07T00:51:56Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_a4971cb3803545369153dc2e8c289396",
+      "trace_id": "trace_d886c4872e1047d8b3f50b3563448968",
+      "assessment_id": "asm_c5206f606b7b4e18bb2cb8a2bf5d1979",
+      "decision_id": "dec_d300f2ea1c4d47588749d06ff6abc484",
+      "registered_at": "2026-05-07T00:51:56Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_1459c72e161b43ee971328bab8859b17",
+      "trace_id": "trace_46c71a07326648039517d0a736b3ba31",
+      "assessment_id": "asm_1dcebbd3203a408c93bca0679856adcd",
+      "decision_id": "dec_0c584980333340efa07c6da4f1851749",
+      "registered_at": "2026-05-07T00:51:56Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_76b782a59cb6442b8b5a8416c3109c33",
+      "trace_id": "trace_26f2081882cf46ba94e10b53ca5c2707",
+      "assessment_id": "asm_c6af0ce3d49d4debb01e5686c98f11aa",
+      "decision_id": "dec_3a78834c56e5408391e63d244ea4d78c",
+      "registered_at": "2026-05-07T00:51:56Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_ce4e11e7e7a24ff28150620b67441510",
+      "trace_id": "trace_e5a00b774bcf410fafe9944b8a4cc4f8",
+      "assessment_id": "asm_62c028a95d4345cd91357b9e4a799b41",
+      "decision_id": "dec_da8f5231491f45a5ae9abfddcb4f173d",
+      "registered_at": "2026-05-07T00:51:57Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
+    },
+    {
+      "outcome_id": "out_15b13a0c63ce4084ab3ed158851925dc",
+      "trace_id": "trace_f889dbec218e45039cbf63c5b092aa60",
+      "assessment_id": "asm_bae0a49b534e43f993599aab5eafbb2c",
+      "decision_id": "dec_10d9cf6da2ae411abe5495f286cca55d",
+      "registered_at": "2026-05-07T00:51:57Z",
+      "mission_id": "default",
+      "operator_action": "accept",
+      "useful": true,
+      "usefulness_score": 0.85,
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "review_status": "reviewed",
+      "is_current": true,
+      "supersedes_outcome_id": null,
+      "outcome_tags": [
+        "operator_reviewed"
+      ],
+      "notes": null
     }
   ]
 }

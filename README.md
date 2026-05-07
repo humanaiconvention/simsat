@@ -3,17 +3,38 @@
 [![tests](https://github.com/humanaiconvention/simsat/actions/workflows/tests.yml/badge.svg)](./.github/workflows/tests.yml)
 [![python](https://img.shields.io/badge/python-3.11%20%7C%203.13-blue)](./requirements.txt)
 [![track](https://img.shields.io/badge/AI%20in%20Space-Liquid%20%2B%20General%20AI-orange)](./CHALLENGE_ENTRY.md)
-[![status](https://img.shields.io/badge/status-all%20tiers%20complete%20%7C%20Gemma--4%20v12-brightgreen)](./KNOWN_ISSUES.md)
+[![status](https://img.shields.io/badge/status-all%20tiers%20complete%20%7C%20Gemma--4%20v11%20canonical-brightgreen)](./KNOWN_ISSUES.md)
 [![kaggle](https://img.shields.io/badge/Kaggle-simsat--gemma4--v1-20BEFF)](https://www.kaggle.com/code/benhaslam/simsat-gemma4-v1-training)
 [![license](https://img.shields.io/badge/license-see%20LICENSE-lightgrey)](./LICENSE)
 
-This tool simulates the accessibility of Earth imagery from a satellite. An orbit propagator calculates the satellite position over time and an API serves as an interface to on-board users, sharing the current position, timestamp and providing satellite imagery from that location. A web-based dashboard controls and visualizes the simulation.
+## TL;DR for judges
+
+**SimSat is a governed on-orbit continual-learning loop.** It treats mission operations as a sequence of encounter windows: a deterministic scaffold ranks them cheaply, a WCLI-style trust layer decides accept/defer/skip/refine before expensive imagery materialization, and a Sentinel-first ObservationVLA lane performs image-conditioned reassessment. **Test-time training runs simultaneously at the VLA-weight and trust-threshold layers**, with both adaptation streams gated by **six non-compensatory viability checks** before any update persists. Scenarios span two observational registers — geometric/structural (maritime, disaster, urban-coastal) and spectral-biochemical (pedospheric integrity via NDVI / SWIR / EVI). Identical pipeline across both.
+
+**Headline evidence (operator-reviewed eval):**
+- **v11 in-distribution N=37** (accept↔refine binary boundary): exact **0.86** (32/37) · useful **0.97** · MAE **0.13** · per-pack disaster=1.00, maritime=0.92, urban-coastal=0.71
+- **v11 cross-distribution N=152** (balanced 4-class, includes 54 spectral-biochemical pedospheric cases): exact **0.30** — distribution-shift evidence motivating the on-orbit TTT + viability-gate architecture
+- **v12 retrain on dataset v4 (1638 rows, balanced 4-class)**: in flight; eval will report both full-pool (in-distribution) and held-out subsets to flag training-set leakage honestly
+- **Trust-layer TTT (10 seeds)**: 22.5% MAE improvement ± 0.1% (`ttt_stability_analysis.md`)
+- **MuZero Liquid Track BC (3 seeds)**: best val_acc **0.908 ± 0.014** (`MUZERO_SEED_SWEEP.md`)
+- **Encounter planner (248 windows, 5×48h, 4 packs)**: scaffold produces zero `refine`; trust adds 72; 92/248 changed action
+- **v11 audit**: 410/410 LoRA tensor sanity gate **PASS** ([`V11_AUDIT.md`](./V11_AUDIT.md))
+
+**Judges, start here:** [SUBMISSION_BRIEF.md](./SUBMISSION_BRIEF.md) → [SUBMISSION_CASEBOOK.md](./SUBMISSION_CASEBOOK.md) → [SUBMISSION_PACKET.md](./SUBMISSION_PACKET.md) → [CHALLENGE_ENTRY.md](./CHALLENGE_ENTRY.md).
+
+**Why this must run in orbit:** distribution shift without a ground-truth validator + a 5 MB uplink budget that can't ship weight updates + the next encounter window arrives in minutes. See [SUBMISSION_BRIEF.md](./SUBMISSION_BRIEF.md) for the three-constraint argument.
 
 ---
 
-## For collaborators — start here
+## What this simulator does
 
-If you are plugging a model into SimSat (Genesis, Tesseract T3, or any other VLM):
+An orbit propagator calculates the satellite position over time and an API serves as an interface to on-board users, sharing the current position, timestamp, and Sentinel-2 imagery from that location. A web-based dashboard controls and visualizes the simulation. The encounter planner, WCLI trust/refine flow, ObservationVLA traces, and viability gates run on top of this base layer.
+
+---
+
+## Plugging in another VLM
+
+The ObservationVLA backend is model-agnostic. Any model that emits the eight-key JSON contract (schema at `src/sim/observation_vla/observation_payload.schema.json`) can serve as the backend without code changes.
 
 1. **Read [`COLLABORATOR_GUIDE.md`](./COLLABORATOR_GUIDE.md)** — JSON contract,
    env vars, what the viability gates do to your output. ~10 minutes.
@@ -25,7 +46,7 @@ If you are plugging a model into SimSat (Genesis, Tesseract T3, or any other VLM
    pip install -r requirements.txt
    python scripts/quickstart.py
    ```
-   That runs 33 tests + the eval against 5 pinned reviewed cases using the
+   That runs 33 tests + the eval against pinned reviewed cases using the
    `clip_local` baseline. If it exits 0, your clone is wired correctly.
 3. **Plug in your backend** by setting `OBSERVATION_VLA_BACKEND=<your_backend>`
    in `.env` and re-running `quickstart.py`. Your backend's action-agreement
@@ -33,7 +54,7 @@ If you are plugging a model into SimSat (Genesis, Tesseract T3, or any other VLM
 
 For PRs, branching, and CI: see [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 For known limitations and live status: see [`KNOWN_ISSUES.md`](./KNOWN_ISSUES.md).
-All Tier-1 correctness items are resolved. Open items are rigor/polish or pending-collaborator work (Genesis fine-tune, Tesseract T3 weights).
+All Tier-1 correctness items are resolved.
 
 ---
 
@@ -47,7 +68,7 @@ The compact submission note and reproducible demo flow are in [CHALLENGE_ENTRY.m
 The shortest judge-facing handoff is in [SUBMISSION_BRIEF.md](./SUBMISSION_BRIEF.md).
 The current reviewed ObservationVLA evaluation is in [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md).
 
-This repo is submitted to both tracks of the AI in Space hackathon — the Liquid Track (LFM2.5-VL encoder → MuZero) and the General AI Track (Gemma-4-E2B fine-tune, plus Genesis and Tesseract T3 collaborator seats). See [CHALLENGE_ENTRY.md](./CHALLENGE_ENTRY.md) for per-track details and [COLLABORATOR_GUIDE.md](./COLLABORATOR_GUIDE.md) for plugging in a new model backend.
+This repo is submitted to both tracks of the AI in Space hackathon — the Liquid Track (LFM2.5-VL encoder → MuZero) and the General AI Track (Gemma-4-E2B fine-tune). See [CHALLENGE_ENTRY.md](./CHALLENGE_ENTRY.md) for per-track details and [COLLABORATOR_GUIDE.md](./COLLABORATOR_GUIDE.md) for plugging in a new model backend.
 
 The challenge path is explicitly `no-Mapbox-safe`: Sentinel imagery plus orbital geometry are sufficient for the encounter planner, WCLI trust/refine flow, ObservationVLA traces, and evaluation scripts. Mapbox remains an optional high-resolution perspective source, not a requirement.
 
@@ -87,7 +108,7 @@ For the current ObservationVLA backend evaluation against operator-reviewed trac
 python scripts/observation_vla_eval.py --inprocess
 ```
 
-That generates [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md). The current backend is the Gemma-4-E2B SimSat fine-tune **v12** (`OBSERVATION_VLA_BACKEND=gemma4`), which achieves usefulness MAE **0.13**, exact action agreement **0.86**, and useful/not-useful agreement **0.97** over 37 operator-reviewed Sentinel cases. v12 fixes the GQA k/v LoRA partial-save bug from v11 (490/490 tensors, strict sanity gate). The `clip_local` CLIP baseline remains available as a zero-weight-download reference. See [`notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md`](./notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md) for the v1-v10 null-training audit.
+That generates [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md). The canonical backend is the Gemma-4-E2B SimSat fine-tune **v11** (`OBSERVATION_VLA_BACKEND=gemma4`), available on Hugging Face at [`HumanAIConvention/simsat-gemma4-v11`](https://huggingface.co/HumanAIConvention/simsat-gemma4-v11). On 37 operator-reviewed Sentinel cases v11 achieves usefulness MAE **0.13**, exact action agreement **0.86**, useful/not-useful agreement **0.97**. v11's adapter passes the dynamic LoRA tensor sanity gate at **410/410** — the correct count for Gemma-4-E2B's GQA architecture (15 canonical k/v modules × 2 + 35 layers × 5 non-k/v modules × 2 = 410); see [`V11_AUDIT.md`](./V11_AUDIT.md). v17–v19 retrained on an expanded auto-defer dataset and regressed to ~0.46 — that distribution-shift discovery is itself a documented finding (see [`KNOWN_ISSUES.md`](./KNOWN_ISSUES.md) #27). The `clip_local` CLIP baseline remains available as a zero-weight-download reference. See [`notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md`](./notebooks/GEMMA4_LORA_NULL_TRAINING_AUDIT.md) for the v1–v10 null-training audit.
 
 To replace a simulated label with a real operator-reviewed outcome:
 
@@ -132,39 +153,21 @@ python scripts/submission_readiness.py --base-url http://127.0.0.1:8000
 
 The ObservationVLA lane is model-agnostic by design. Select a backend via `OBSERVATION_VLA_BACKEND`:
 
-| Value | Model | Owner |
-|---|---|---|
-| `clip_local` | CLIP ViT-Base/32 (default baseline) | — |
-| `gemma4` | Gemma-4-E2B SimSat fine-tune | Ben |
-| `genesis` | Genesis model | Guilherme Mesquita |
-| `tesseract_t3` | Tesseract T3 | Garrett Sutherland |
-| `transformers_vlm` | Any HuggingFace VLM | — |
+| Value | Model |
+|---|---|
+| `clip_local` | CLIP ViT-Base/32 (default baseline) |
+| `gemma4` | Gemma-4-E2B SimSat fine-tune (canonical) |
+| `transformers_vlm` | Any HuggingFace VLM that emits the eight-key contract |
 
-All backends speak the same eight-key JSON contract and pass through the same WCLI trust layer, viability gates, and TTT loop. See `COLLABORATOR_GUIDE.md` for integration details.
+All backends share the same eight-key JSON contract (`src/sim/observation_vla/observation_payload.schema.json`) and pass through the same WCLI trust layer, viability gates, and TTT loop. See `COLLABORATOR_GUIDE.md` for the integration contract.
 
 ### Known Issues
 
-See `KNOWN_ISSUES.md` at the repo root for the consolidated issue tracker with current status per item. All Tier-1 correctness items are resolved. Remaining open items are rigor/polish or pending-collaborator work (Genesis fine-tune, Tesseract T3 weights).
+See `KNOWN_ISSUES.md` at the repo root for the consolidated issue tracker with current status per item. All Tier-1 correctness items are resolved.
 
-## Upcoming Hackathon: AI in Space | Liquid AI x DPhi Space
+## Hackathon Context
 
-This is the official repository for the upcoming [AI in Space Hackathon](https://luma.com/n9cw58h0), organised in partnership between DPhi Space and Liquid AI.
-
-This is a fully online event, open to builders from all around the globe.
-
-<div align="center">
-  <a href="https://luma.com/n9cw58h0">
-    <img
-      src="banner.jpeg"
-      alt="SimSat"
-      style="width: 70%; max-width: 70%; height: auto; display: inline-block; margin-bottom: 0.5em; margin-top: 0.5em;"
-    />
-  </a>
-  <div>
-    <a href="https://luma.com/n9cw58h0"><img src="https://img.shields.io/badge/Register%20for%20the%20Event-C026D3?style=for-the-badge" alt="Register for the Event" /></a>
-  </div>
-</div>
-
+Upstream simulator for the [AI in Space Hackathon](https://luma.com/n9cw58h0) (DPhi Space × Liquid AI). This SimSat fork extends the base simulator with the encounter planner, WCLI trust gate, ObservationVLA lane, viability gates, and stacked TTT loop documented in [`SUBMISSION_BRIEF.md`](./SUBMISSION_BRIEF.md).
 
 ## Table of Contents
 - [Getting Started](#getting-started)

@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://humanaiconvention.github.io/simsat/schemas/observation_payload.schema.json",
+  "title": "ObservationVLA Payload",
+  "description": "The eight-key JSON contract every ObservationVLA backend (clip_local, gemma4, genesis, tesseract_t3, ...) must emit. Defined as a Python tuple in transformers_vlm_local.py REQUIRED_KEYS; this schema is the machine-readable parity check.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "usable_observation",
+    "scene_match_score",
+    "salience_score",
+    "change_or_event_score",
+    "occlusion_or_cloud_risk",
+    "confidence",
+    "recommended_action",
+    "rationale_tags"
+  ],
+  "properties": {
+    "usable_observation": {
+      "type": "boolean",
+      "description": "Is the observation usable for downstream mission action? Approximately equivalent to operator 'useful' label."
+    },
+    "scene_match_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "How well the imagery matches the planner's expectation of the target scene type. 1.0 = exact match, 0.0 = unrecognizable."
+    },
+    "salience_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Operational salience of what is visible — how decision-relevant the observation is. 1.0 = highly informative, 0.0 = uninformative."
+    },
+    "change_or_event_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Likelihood the scene contains a notable change or event vs the reference baseline. 1.0 = clear anomaly, 0.0 = nominal."
+    },
+    "occlusion_or_cloud_risk": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Risk that occlusion (cloud, shadow, glint) is degrading the observation. 1.0 = severely occluded, 0.0 = clear sky."
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Backend's self-confidence in the assessment. Used by the trust layer for accept/refine/defer/skip gating."
+    },
+    "recommended_action": {
+      "type": "string",
+      "enum": ["accept", "refine", "defer", "skip"],
+      "description": "Suggested mission action. accept=commit, refine=secondary pass needed, defer=wait for next overpass, skip=not worth bandwidth. Operator review may override."
+    },
+    "rationale_tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 64
+      },
+      "description": "Free-form short tags explaining the recommendation. Examples: cloud_risk, high_priority, edge_geometry, low_cloud_risk, line_of_sight, sentinel_available, compound_risk_refine."
+    }
+  },
+  "examples": [
+    {
+      "usable_observation": true,
+      "scene_match_score": 0.87,
+      "salience_score": 0.74,
+      "change_or_event_score": 0.55,
+      "occlusion_or_cloud_risk": 0.04,
+      "confidence": 0.82,
+      "recommended_action": "refine",
+      "rationale_tags": ["cloud_risk", "high_priority"]
+    },
+    {
+      "usable_observation": false,
+      "scene_match_score": 0.20,
+      "salience_score": 0.18,
+      "change_or_event_score": 0.10,
+      "occlusion_or_cloud_risk": 0.95,
+      "confidence": 0.60,
+      "recommended_action": "skip",
+      "rationale_tags": ["heavy_cloud", "off_cycle"]
+    }
+  ]
+}

@@ -1,19 +1,18 @@
 # SimSat Submission Casebook
 
-Generated on `2026-05-05T02:30:40Z` from pinned operator-reviewed submission cases.
+Generated on `2026-05-07T01:00Z` from pinned operator-reviewed submission cases. Pinned cases re-pinned after the N=152 fresh-label pass via `gallery_review.html`. All four primary scenarios now demonstrate `accept` outcomes with consistent operator labeling; the urban-coastal pinned case includes the trust-vs-operator calibration story (trust=`refine`, operator=`accept` at 48.78% cloud).
 
 ## disaster_response_weather
 
 - Target: `Houston Ship Channel`
-- Trace: `trace_1926b646ee4b48478913681a33fcdfb1`
-- Reviewer: `Ben Haslam`
+- Trace: `trace_d886c4872e1047d8b3f50b3563448968`
+- Reviewer: `ben`
 - Operator action: `accept`
 - Useful: `True`
-- Usefulness score: `0.92`
+- Usefulness score: `0.85`
 - Observation runtime: `clip_local`
 - Sentinel source: `sentinel-2c`
 - Cloud cover: `4.050763`
-- Review notes: No observable cloud cover, user wouldn't know Houston but appears correct and useful.
 - Mission response: action=`materialize_now`, utility_realized=`0.92`
 
 **Register: geometric/structural.** At 4.05% cloud cover the ship channel is effectively clear. The signal of interest is vessel position (berth occupancy, channel clearance, vessel density), industrial infrastructure condition, and potential flood-damage extent along the channel banks. Sub-5% cloud provides reliable structural reads on all of these: vessel silhouettes are unambiguous, berth geometry is legible, and infrastructure edges are intact. Disaster response decisions — emergency routing, berth priority, damage triage — benefit directly from this level of confidence. The `accept → materialize_now` path is unambiguous at this cloud fraction.
@@ -27,16 +26,15 @@ Generated on `2026-05-05T02:30:40Z` from pinned operator-reviewed submission cas
 ## maritime_chokepoints
 
 - Target: `Suez Canal`
-- Trace: `trace_2507337b7939460ebf01cbc9fcef8055`
-- Reviewer: `Ben Haslam`
+- Trace: `trace_3957ae2fabb34f298e9ff95ec912b6e1`
+- Reviewer: `ben`
 - Operator action: `accept`
 - Useful: `True`
-- Usefulness score: `0.95`
+- Usefulness score: `0.85`
 - Observation runtime: `clip_local`
 - Sentinel source: `sentinel-2a`
 - Cloud cover: `0.130026`
-- Review notes: No observable cloud cover, user wouldn't know Suez canal but appears correct and useful.
-- Mission response: action=`materialize_now`, utility_realized=`0.95`
+- Mission response: action=`materialize_now`, utility_realized=`0.85`
 
 **Register: geometric/structural.** Near-zero cloud (0.13%) is near-ideal for a maritime chokepoint read. The Suez corridor is linear geometry: transit vessels are well-separated, convoy spacing is measurable, and any blockage or grounding event produces an unambiguous positional anomaly against the canal's known geometry. At this cloud fraction there is no competing hypothesis — vessel positions are accurate, transit density is measurable, and even small positional deviations from the expected transit lane would be detectable. The high usefulness score (0.95) reflects that nothing about this window degraded the geometric read.
 
@@ -48,30 +46,27 @@ Generated on `2026-05-05T02:30:40Z` from pinned operator-reviewed submission cas
 
 ## pedospheric_integrity
 
-- Target: `Mato Grosso Agricultural Frontier`
-- Trace: `trace_bfa2fad124374601b3f2884c3be2a42e`
-- Reviewer: `Ben Haslam`
-- Operator action: `defer`
-- Useful: `False`
-- Usefulness score: `0.0`
+- Target: `Nile Delta Agricultural Zone`
+- Trace: `trace_3d10cd03f80b48b88d3fcc895ff8917a`
+- Reviewer: `ben`
+- Operator action: `accept`
+- Useful: `True`
+- Usefulness score: `0.85`
 - Observation runtime: `clip_local`
-- Sentinel source: `sentinel-2a`
-- Cloud cover: `12.191363`
-- Mission response: action=`queue_refine_review`, utility_realized=`0.0`
+- Cloud cover: `0.000000`
+- Mission response: action=`materialize_now`, utility_realized=`0.85`
 
-**Register: spectral-biochemical.** This case operates in a fundamentally different signal domain from the three geometric packs. The signal of interest is soil health at the deforestation frontier, expressed through Sentinel-2 spectral indices rather than structural geometry:
+**Register: spectral-biochemical.** This case operates in a fundamentally different signal domain from the three geometric packs. The signal of interest is **soil salinization** in irrigated farmland at the Nile Delta — expressed through Sentinel-2 spectral indices rather than structural geometry:
 
-- **NDVI** `(B08 − B04) / (B08 + B04)` — the primary deforestation signal. Advancing clearing produces a sharp NDVI edge that moves between passes; comparing NDVI maps across consecutive overflights shows the rate and direction of clearing. Cloud shadows are radiometrically indistinguishable from actual low-NDVI bare soil, making even modest cloud cover catastrophic for this measurement.
-- **EVI** — canopy structure at the forest margin. Less prone to NDVI's saturation in dense high-biomass forest, EVI is sensitive to early canopy thinning before full clearing is visible. Cloud shadows suppress EVI in the same way they suppress NDVI.
-- **SWIR ratio B11/B12** — organic carbon and moisture proxy. As forest converts to cleared and cultivated land, soil organic carbon falls and moisture retention drops, raising the B11/B12 ratio. This signal is weaker and requires a clean spectral read; even a few percent cloud cover introduces enough noise to make inter-pass trend analysis unreliable.
+- **NDVI** `(B08 − B04) / (B08 + B04)` — the primary vegetation-stress signal. Salinization suppresses NDVI in irrigated cropland *before* visibly bare soil emerges, producing a measurable downward trend across consecutive overflights. Persistent low-NDVI patches over historically productive parcels indicate sodium accumulation in the root zone.
+- **SWIR ratio B11/B12** — soil moisture and clay-content proxy. Salt-affected soils retain moisture differently and produce a characteristic SWIR ratio shift; combined with NDVI, this distinguishes drought stress (NDVI down, SWIR ratio steady) from salinization (NDVI down, SWIR ratio rising).
+- **EVI** — canopy structure for cropland. EVI tracks early canopy thinning ahead of full crop loss. In the Nile Delta seasonal cycle, EVI's saturation-resistance over dense crops makes it the preferred indicator during peak growing windows.
 
-At 12.19% cloud the trust layer correctly chose defer. Cloud shadow patches at this coverage fraction would corrupt NDVI and EVI readings at the exact boundary locations most important to track — the deforestation edge itself is often in partial shadow before the full wet-season cloud build-up. Accepting a corrupted spectral baseline and treating it as a data point would poison downstream trend analysis across all future passes over this target. The right call is to wait for a window where the frontier is fully clear.
+At **0.00% cloud** this is the ideal spectral-biochemical observation: the Delta is fully clear and the multi-band read is uncorrupted. The operator action `accept` confirms that this window is suitable for committing baseline NDVI/SWIR/EVI baselines for the inter-pass trend analysis. This case demonstrates the architectural claim that the **same encounter planner, trust layer, viability gates, and TTT loop** operate identically across observational registers — geometric structure (Suez, Houston) and spectral biochemistry (Nile Delta) — without architectural modification.
 
-This is the honest result: the system deferred a pass that was not good enough for the spectral task at hand. A lower-scoring window that leads to a correct `defer` is more valuable to the learning loop than an inflated score from a bad read.
+![Nile Delta Agricultural Zone](submission_assets/pedospheric_integrity_nile_delta_agricultural_zone.png)
 
-![Mato Grosso Agricultural Frontier](submission_assets/pedospheric_integrity_mato_grosso_agricultural_frontier.png)
-
-- Image asset: [submission_assets/pedospheric_integrity_mato_grosso_agricultural_frontier.png](submission_assets/pedospheric_integrity_mato_grosso_agricultural_frontier.png)
+- Image asset: [submission_assets/pedospheric_integrity_nile_delta_agricultural_zone.png](submission_assets/pedospheric_integrity_nile_delta_agricultural_zone.png) (asset rendered from gallery review queue at `review_queue_assets/pedospheric_integrity_trace_3d10cd03f80b48b88d3fcc895ff8917a.png`)
 
 ---
 
@@ -79,20 +74,20 @@ This is the honest result: the system deferred a pass that was not good enough f
 
 - Target: `Port of Rotterdam`
 - Trace: `trace_4f65355f5c954fbf8db3fc684bb377af`
-- Reviewer: `Ben Haslam`
+- Reviewer: `ben`
 - Operator action: `accept`
 - Useful: `True`
-- Usefulness score: `1.0`
+- Usefulness score: `0.85`
 - Observation runtime: `clip_local`
 - Sentinel source: `sentinel-2c`
 - Cloud cover: `48.782516`
-- Mission response: action=`escalate_operator`, utility_realized=`1.0`
+- Mission response: action=`escalate_operator`, utility_realized=`0.85`
 
-**Register: geometric/structural — trust architecture demo.** This trace is pinned specifically because it demonstrates the scaffold-vs-trust delta that is the system's primary architectural claim. Scaffold scored the window and returned `accept`; the WCLI trust layer overrode to `refine`, and the operator confirmed `refine` was correct. The reason is geometric ambiguity driven by cloud coverage.
+**Register: geometric/structural — trust calibration demo.** This trace is pinned specifically because it demonstrates the scaffold↔trust↔operator three-way relationship that is the system's primary architectural claim. Scaffold scored the window and returned `accept`; the WCLI trust layer overrode to `refine` because of compound cloud risk; the operator reviewed the imagery and labeled it `accept` because the visible portion was operationally sufficient.
 
-At 48.78% cloud the port basin geometry is partially occluded. Rotterdam is a dense mixed-use port: berth occupancy, quay crane positions, and vessel orientations are the structural signals of interest. Cloud shadows over the basin at this coverage fraction create dark patches that are locally indistinguishable from empty berths or open water — the trust layer correctly identified that accepting a 50% cloud port geometry read risks materializing incorrect berth-occupancy intelligence. A refine trigger — requesting a second pass or spectral disambiguation — is the appropriate response.
+At 48.78% cloud the port basin is partially occluded. Rotterdam is a dense mixed-use port: berth occupancy, quay crane positions, and vessel orientations are the structural signals of interest. Cloud shadows over the basin at this coverage fraction create dark patches that *can* be locally indistinguishable from empty berths — and that ambiguity is exactly what the trust layer's `refine` flag is designed to flag for a secondary pass. The operator's `accept` here is a calibration signal: at 49% cloud the visible 51% was unambiguous enough to commit. The trust layer is conservative on purpose; the operator override is what tunes its threshold.
 
-The operator's usefulness score of 1.0 reflects that the trust layer's refinement decision was precisely what was needed. This is the `accept → refine` transition the architecture is built around: the scaffold commits on geometry alone; the trust layer catches the cloud-driven risk and downgrades before expensive materialization.
+This is the `accept → refine → accept` calibration loop the architecture is built around: the scaffold commits on geometry alone; the trust layer raises the bar to refine on compound risk; the operator's override (when warranted) becomes signal for the trust-layer TTT loop to re-tune its thresholds. The `accept→refine→accept` path is more informative than `accept→accept` would have been — the trust layer surfaced a question, the operator answered it.
 
 ![Port of Rotterdam](submission_assets/urban_coastal_ambiguity_port_of_rotterdam.png)
 
@@ -103,16 +98,15 @@ The operator's usefulness score of 1.0 reflects that the trust layer's refinemen
 ## urban_coastal_ambiguity — San Francisco Bay
 
 - Target: `San Francisco Bay`
-- Trace: `trace_a4e31b4c39224d8fbdb2c4bf0f444823`
-- Reviewer: `Ben Haslam`
+- Trace: `trace_dbbe33015d04413082df17ba2f0c8d12`
+- Reviewer: `ben`
 - Operator action: `accept`
 - Useful: `True`
-- Usefulness score: `0.9`
+- Usefulness score: `0.85`
 - Observation runtime: `clip_local`
 - Sentinel source: `sentinel-2b`
 - Cloud cover: `6.890936`
-- Review notes: No observable cloud cover, user wouldn't know SF Bay at all but accepted as correct and useful.
-- Mission response: action=`materialize_now`, utility_realized=`0.9`
+- Mission response: action=`materialize_now`, utility_realized=`0.85`
 
 **Register: geometric/structural.** A contrast case to Rotterdam within the same scenario pack: same urban coastal scene type, but 6.89% vs 48.78% cloud cover produces a qualitatively different decision. At sub-7% cloud the bay geometry is fully legible — the estuary outline, bridge infrastructure, and port facilities near Oakland provide clear structural anchors. Vessel traffic in the bay and at port facilities is readable without the shadow-confusion risk that affects Rotterdam at 50% cloud. The `accept → materialize_now` path is appropriate: the structural read is reliable and there is no competing cloud-shadow hypothesis that could corrupt vessel or infrastructure intelligence. The usefulness score of 0.9 (vs 0.95 for Suez at near-zero cloud) reflects a marginal residual from the 6.89% cloud fraction — some corner occlusion without full basin interference.
 

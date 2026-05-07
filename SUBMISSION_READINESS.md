@@ -13,14 +13,14 @@
 - Submission casebook exists: `True`
 - Submission assets dir exists: `True`
 - ObservationVLA eval exists: `True`
-- Pinned submission cases: `7`
+- Pinned submission cases: `8`
 
 ## Scenario Status
 
 | scenario | reviewed_ready | pinned_trace | reviewer | packet_case | image_asset |
 | --- | --- | --- | --- | --- | --- |
 | disaster_response_weather | True | trace_1926b646ee4b48478913681a33fcdfb1 | Ben Haslam | True | True |
-| maritime_chokepoints | True | trace_73f56c878603406e868fcf95b164997c (+2 more) | regression_operator | True | True |
+| maritime_chokepoints | True | trace_868637cfaf6343acba5dc01bc22cfbd9 (+3 more) | regression_operator | True | True |
 | pedospheric_integrity | True | trace_bfa2fad124374601b3f2884c3be2a42e | Ben Haslam | True | True |
 | urban_coastal_ambiguity | True | trace_4f65355f5c954fbf8db3fc684bb377af (+1 more) | Ben Haslam | True | True |
 

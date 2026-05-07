@@ -1,0 +1,65 @@
+# Pedospheric review queue (generated 2026-05-06)
+# 54 pedospheric_integrity candidates across 3 targets
+# Targets: nile_delta_agri (Egypt salinization), mato_grosso_frontier (Brazil deforestation), punjab_agricultural (India groundwater)
+# Spectral-biochemical register: NDVI / SWIR ratio (B11/B12) / EVI signals
+# Decisions:
+#   accept  = clear cycle visibility; commit to pass
+#   refine  = some seasonal cloud or partial visibility; secondary evidence will help
+#   defer   = wait for next overpass (better timing in spectral cycle)
+#   skip    = not worth the bandwidth (excessive cloud or off-cycle)
+# Review with: python scripts/batch_review.py --inprocess --reviewer ben --queue-file review_queue_pedospheric.txt
+
+trace_5f9e8e9226154b7d84f2519a88c51aaf
+trace_1033e94aecc94a8889c8ff992fcfe78c
+trace_faa23a04032843c3986b5dfcaf76b1ca
+trace_3467f146001c4e3da98536b87b0a2c59
+trace_7dff2d0ed4a34e9cba89304f9f76652a
+trace_532924585aac4819b4e75c208234bf49
+trace_ce6437efcee544d6a89a473b56b86a97
+trace_2b6b3d1b568d4061b4514fd0fee2c947
+trace_b147d25df42741c68ef6efad441205c3
+trace_0e22d536100f4117b8d35b2c4a78d8f2
+trace_217fc399bd2b4a0ebe7e7ba64ff8484e
+trace_dd57eebee3364c47bd80551a03f0b0bb
+trace_912579355a8e408eb7e37c53f39a64e6
+trace_f8e5a9204e5248ea9633264606a52b49
+trace_6d629c8a22854e8880bbbb764f75a550
+trace_6acefc228d024b1e8d8240aa221d4f2c
+trace_e1fb6e23d2dc41668ce3387ddfdae084
+trace_4307b2a9f77d47ecaf447188e3b619a3
+trace_bfa2fad124374601b3f2884c3be2a42e
+trace_ca697b3dc16b46a7b2941c78b6b9f90e
+trace_48ba72be71464d0aa6ae22f26e57d48e
+trace_ad59f6f402e546cb95e85ee03cafffd5
+trace_c01e4d839e0c47de83881c96a2667d23
+trace_235e3b10fbae4b1787d788d375679b88
+trace_fc87cda68f954e669f8c0a2680775119
+trace_0fbc17f24a0c43f387cb2783b34ed553
+trace_b1b1e48066404a0eaf9165da77bea5c0
+trace_1e7c5b3104a7441781b903b5c2edfe5a
+trace_a8b3f1f1673947008a09414984841dc7
+trace_42d70d19ed9a4502a9c55cf9e36fae55
+trace_b1e3d5d4b82240559c80e5aeae47ded9
+trace_1dbf6d76f3c94a99931291ef146ba8b4
+trace_e47624f8532148a89dd399d0c7caacc6
+trace_1125f0b3e2204e849537c6cb96e5e0c1
+trace_f28a0254f6ef4d4ba671db918a919524
+trace_3d10cd03f80b48b88d3fcc895ff8917a
+trace_f7cac31c07244a1bb67cf7007a166e30
+trace_89b9c715b7b141c5a7cf612a1ee20829
+trace_f0afbd32a6244f429203e38202b1394a
+trace_bd4999fb1ed642f0901237632bb52643
+trace_0adeac03c4c8465e9dc0e2a4f6d15425
+trace_2e09332cf30e4fc8826f3a1a380a8d7b
+trace_ce8c5f5c8bc54c9898b3d576f168c51b
+trace_609c8117b57f49d695a12433e998c393
+trace_8c0da54da8ef430596089cd9d7d10161
+trace_67e1acb72a1447ee8b605031d7efa69e
+trace_d7be2561178c455086619d369c1bb99d
+trace_2f8f105dbe6c4b918f91afdf26eba31c
+trace_ac9aa814127745d4b606abf5834f983e
+trace_84c9df1c67274eba90739d4669ee90bb
+trace_da60215e144a47fcb019bc71c93a6ebb
+trace_81f5c83d67fe4133aaf1f67415b5623f
+trace_864ee0696e8a4a83944d0366a5310b31
+trace_168abfca532a42728a9fe3594eecb333

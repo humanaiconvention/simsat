@@ -23,7 +23,7 @@ import math
 import os
 from pathlib import Path
 
-EXPORT_DIR = Path(__file__).resolve().parents[2] / "exports" / "gemma4_v3"
+EXPORT_DIR = Path(__file__).resolve().parents[2] / "exports" / "gemma4_v4"
 OUT_DIR = Path(__file__).parent
 
 REFINE_BOOST = float(os.environ.get("REFINE_BOOST", "1.0"))

@@ -174,7 +174,17 @@ class TransformersVLMAdapter:
     # ---- Loading ----
 
     def _inferred_label(self) -> str:
-        for source in (self.merged_path, self.lora_path, self.base_model, self.gguf_path):
+        # Prefer the source that matches the active mode so the label reflects
+        # what was actually loaded (avoids "base" from the merged_path default).
+        if self.mode == "lora":
+            ordered = (self.lora_path, self.base_model, self.merged_path, self.gguf_path)
+        elif self.mode == "merged":
+            ordered = (self.merged_path, self.base_model, self.lora_path, self.gguf_path)
+        elif self.mode == "gguf":
+            ordered = (self.gguf_path, self.base_model, self.merged_path, self.lora_path)
+        else:
+            ordered = (self.merged_path, self.lora_path, self.base_model, self.gguf_path)
+        for source in ordered:
             if not source:
                 continue
             tail = Path(source).name

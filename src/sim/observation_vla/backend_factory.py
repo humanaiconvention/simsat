@@ -9,6 +9,7 @@ OBSERVATION_VLA_BACKEND values:
     gemma4              TransformersVLMAdapter  (SimSat Gemma-4-E2B fine-tune)
     genesis             GenesisAdapter          (Guilherme's Genesis model)
     tesseract_t3        TesseractT3Adapter      (Garrett's Tesseract T3 model)
+    tesseract_t3_heatmap TesseractT3HeatmapAdapter (T3 + heatmap fusion)
     transformers_vlm    TransformersVLMAdapter  (generic — use OBSERVATION_VLM_* vars)
     gemma4_haic         Gemma4HAICAdapter       (HAIC v35-gov, legacy reference)
     stub                ObservationVLMAdapter   (stub-only, no model load)
@@ -64,6 +65,10 @@ def build_vla_adapter(backend: str | None = None) -> Any:
         from .tesseract_t3_local import TesseractT3Adapter
         return TesseractT3Adapter()
 
+    if key in {"tesseract_t3_heatmap", "t3_heatmap"}:
+        from .tesseract_t3_heatmap import TesseractT3HeatmapAdapter
+        return TesseractT3HeatmapAdapter()
+
     if key in {"heatmap", "heatmap_local"}:
         # Generic insertion seat for any model that emits a per-pixel
         # heatmap rather than a JSON assessment. See
@@ -83,5 +88,5 @@ def build_vla_adapter(backend: str | None = None) -> Any:
     raise ValueError(
         f"Unknown OBSERVATION_VLA_BACKEND: {key!r}. "
         "Valid values: clip_local, gemma4, genesis, tesseract_t3, "
-        "heatmap, transformers_vlm, gemma4_haic, stub"
+        "tesseract_t3_heatmap, heatmap, transformers_vlm, gemma4_haic, stub"
     )

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "cases": [
+  "submission_cases": [
     {
       "scenario_pack": "maritime_chokepoints",
       "trace_id": "trace_2507337b7939460ebf01cbc9fcef8055",
@@ -29,19 +29,6 @@
     },
     {
       "scenario_pack": "urban_coastal_ambiguity",
-      "trace_id": "trace_4f65355f5c954fbf8db3fc684bb377af",
-      "decision_id": "dec_6b473ac21b4b4075979e14d73fa021ed",
-      "target_id": "rotterdam",
-      "target_label": "Port of Rotterdam",
-      "outcome_id": "out_824f60a0400241f48f3c01f3316239bb",
-      "label_source": "operator_review",
-      "reviewer": "Ben Haslam",
-      "pinned_at": "2026-04-23T21:42:15Z",
-      "pinned_by": "Ben Haslam",
-      "notes": "Human reviewed confirmed Rotterdam challenge case."
-    },
-    {
-      "scenario_pack": "urban_coastal_ambiguity",
       "trace_id": "trace_a4e31b4c39224d8fbdb2c4bf0f444823",
       "decision_id": "dec_ae382895c85a4aba9a73201ac8a1568f",
       "target_id": "sf_bay",
@@ -52,6 +39,110 @@
       "pinned_at": "2026-04-25T15:31:40Z",
       "pinned_by": "Ben Haslam",
       "notes": "San Francisco Bay \u2014 clear image, accept decision, low cloud cover. 4th human-reviewed case."
+    },
+    {
+      "scenario_pack": "pedospheric_integrity",
+      "trace_id": "trace_bfa2fad124374601b3f2884c3be2a42e",
+      "decision_id": "dec_170cfbe8e3684c1884d9432e2b69e2f8",
+      "target_id": "mato_grosso_frontier",
+      "target_label": "Mato Grosso Agricultural Frontier",
+      "outcome_id": "out_caa18b0381c54f828fd702793d7332ea",
+      "label_source": "operator_review",
+      "reviewer": "Ben Haslam",
+      "pinned_at": "2026-05-05T02:19:33Z",
+      "pinned_by": "Ben Haslam",
+      "notes": null
+    },
+    {
+      "scenario_pack": "maritime_chokepoints",
+      "trace_id": "trace_f9b6e8e10cd84e32b64a62632887ebbc",
+      "decision_id": "dec_440963c545594776916d81453fc5b494",
+      "target_id": "suez",
+      "target_label": "Suez Canal",
+      "outcome_id": "out_9616727e5d5f4db2ad56cff4108417a0",
+      "label_source": "operator_review",
+      "reviewer": "regression_operator",
+      "pinned_at": "2026-05-06T05:46:32Z",
+      "pinned_by": "regression_operator",
+      "notes": "regression pinned case"
+    },
+    {
+      "scenario_pack": "maritime_chokepoints",
+      "trace_id": "trace_73f56c878603406e868fcf95b164997c",
+      "decision_id": "dec_8870652a4d1648f4ab036c762bdc70da",
+      "target_id": "suez",
+      "target_label": "Suez Canal",
+      "outcome_id": "out_d200032956454c71b26ef34573b318e3",
+      "label_source": "operator_review",
+      "reviewer": "regression_operator",
+      "pinned_at": "2026-05-06T05:49:14Z",
+      "pinned_by": "regression_operator",
+      "notes": "regression pinned case"
+    },
+    {
+      "scenario_pack": "maritime_chokepoints",
+      "trace_id": "trace_868637cfaf6343acba5dc01bc22cfbd9",
+      "decision_id": "dec_7ee0828da378464d8b761df4fd3253d5",
+      "target_id": "singapore_port",
+      "target_label": "Port of Singapore",
+      "outcome_id": "out_f62fb8c1924148efb12fc1ae421e8d1c",
+      "label_source": "operator_review",
+      "reviewer": "regression_operator",
+      "pinned_at": "2026-05-06T23:35:53Z",
+      "pinned_by": "regression_operator",
+      "notes": "regression pinned case"
+    },
+    {
+      "scenario_pack": "maritime_chokepoints",
+      "trace_id": "trace_3957ae2fabb34f298e9ff95ec912b6e1",
+      "decision_id": "dec_ce291d29caaa40bf870ca70015665552",
+      "target_id": "suez",
+      "target_label": "Suez Canal",
+      "outcome_id": "out_c6c61dfb44e742f2b104fa909ff4b2b7",
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "pinned_at": "2026-05-07T01:17:31Z",
+      "pinned_by": "ben",
+      "notes": "Suez 0.13% cloud, operator accept"
+    },
+    {
+      "scenario_pack": "disaster_response_weather",
+      "trace_id": "trace_d886c4872e1047d8b3f50b3563448968",
+      "decision_id": "dec_d300f2ea1c4d47588749d06ff6abc484",
+      "target_id": "houston_ship",
+      "target_label": "Houston Ship Channel",
+      "outcome_id": "out_a4971cb3803545369153dc2e8c289396",
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "pinned_at": "2026-05-07T01:17:31Z",
+      "pinned_by": "ben",
+      "notes": "Houston 4.05% cloud, operator accept"
+    },
+    {
+      "scenario_pack": "pedospheric_integrity",
+      "trace_id": "trace_3d10cd03f80b48b88d3fcc895ff8917a",
+      "decision_id": "dec_6c22d1f81c4d4d629bc76272cea25c83",
+      "target_id": "nile_delta_agri",
+      "target_label": "Nile Delta Agricultural Zone",
+      "outcome_id": "out_53a96f239a794a2fa794f8b1f299c3ff",
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "pinned_at": "2026-05-07T01:17:31Z",
+      "pinned_by": "ben",
+      "notes": "Nile Delta 0.00% cloud, operator accept (pedospheric register)"
+    },
+    {
+      "scenario_pack": "urban_coastal_ambiguity",
+      "trace_id": "trace_4f65355f5c954fbf8db3fc684bb377af",
+      "decision_id": "dec_6b473ac21b4b4075979e14d73fa021ed",
+      "target_id": "rotterdam",
+      "target_label": "Port of Rotterdam",
+      "outcome_id": "out_0eff7395fd334232b5c327c09d0d3bde",
+      "label_source": "operator_review",
+      "reviewer": "ben",
+      "pinned_at": "2026-05-07T01:17:31Z",
+      "pinned_by": "ben",
+      "notes": "Rotterdam, operator accept (trust said refine, accept\u2192refine\u2192accept calibration)"
     }
   ]
 }
