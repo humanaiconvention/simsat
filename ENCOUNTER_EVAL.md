@@ -1,8 +1,9 @@
 # Encounter Evaluation — Scaffold vs WCLI Trust Planner
 
-Measured across all four scenario packs. Each pack was evaluated over 5 independent
+Measured across all four scenario packs. The controlled evaluation used 5 independent
 48-hour simulation runs (step=30s, top\_k=20, materialize\_top\_k=7), giving
-248 total encounter windows across the full pack suite.
+248 total encounter windows. The full historical eval corpus (all eval runs across
+the project lifetime) contains 5,962 windows — detailed in the Full Corpus section below.
 
 **Key finding:** The scaffold planner **never produces a refine action** (0 refine
 across all packs and all runs). Every refine decision in the system comes from
@@ -11,7 +12,25 @@ misses. This is the primary quantitative argument for the two-planner architectu
 
 ---
 
-## Per-Pack Summary (5 × 48h, step=30s, top\_k=20)
+## Full Historical Eval Corpus (5,962 windows)
+
+Aggregated from all evaluation runs stored in `src/sim/data/encounter/records.json`
+(5,907 records) plus the controlled 5 × 48h pedospheric eval (55 windows).
+Scaffold never produces a refine action in any record.
+
+| Pack | Windows | Trust accept | Trust defer | Trust refine | Trust skip | Mean trust | Score lift |
+|------|---------|-------------|------------|-------------|-----------|-----------|-----------|
+| maritime\_chokepoints | 1,589 | 583 (37%) | 775 (49%) | 196 (12%) | 35 (2%) | 0.699 | +0.014 |
+| disaster\_response\_weather | 1,705 | 564 (33%) | 884 (52%) | 203 (12%) | 54 (3%) | 0.703 | +0.014 |
+| urban\_coastal\_ambiguity | 2,613 | 884 (34%) | 1,424 (54%) | 262 (10%) | 43 (2%) | 0.695 | +0.018 |
+| pedospheric\_integrity | 55 | 35 (64%) | 15 (27%) | 5 (9%) | 0 (0%) | 0.763 | +0.012 |
+| **All packs** | **5,962** | **2,066 (35%)** | **3,098 (52%)** | **666 (11%)** | **132 (2%)** | **0.698** | **+0.015** |
+
+Score lift = mean(effective\_combined\_score − analytic\_score) over materialized windows (544 records for the 3 structured packs). Pedospheric score lift from controlled eval.
+
+---
+
+## Controlled Evaluation (5 × 48h, step=30s, top\_k=20)
 
 ### Maritime Chokepoints
 

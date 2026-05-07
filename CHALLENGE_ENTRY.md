@@ -141,17 +141,17 @@ Each evaluation logs:
 
 The most challenge-relevant artifact is the delta list: it makes the WCLI trust layer falsifiable instead of rhetorical.
 
-**Encounter planner eval summary** (248 windows across all 4 packs, 5 × 48h runs per pack — see [ENCOUNTER_EVAL.md](./ENCOUNTER_EVAL.md)):
+**Encounter planner eval summary** (5,962 windows across all 4 packs, full historical eval corpus — see [ENCOUNTER_EVAL.md](./ENCOUNTER_EVAL.md)):
 
-The scaffold planner produces **zero refine actions** across all 248 windows. Every refine decision in the system originates from the WCLI trust layer detecting compound risk the deterministic scaffold cannot express. WCLI trust added 72 refine decisions (29% of trust-changed windows) and changed the action on 92 of 248 windows (37%) — all upgrades, zero downgrades.
+The scaffold planner produces **zero refine actions** across all 5,962 windows. Every refine decision in the system originates from the WCLI trust layer detecting compound risk the deterministic scaffold cannot express. WCLI trust added 666 refine decisions across the 5,907-window structured-pack corpus — all upgrades, zero downgrades. Pedospheric figures from the controlled 5 × 48h eval (55 windows); remaining three packs from the full historical eval corpus (5,907 stored records).
 
 | Pack | Windows | Trust refine | Trust score lift |
 |------|---------|--------------|-----------------|
-| maritime\_chokepoints | 50 | 10 (20%) | +0.014 |
-| disaster\_response\_weather | 50 | 10 (20%) | +0.014 |
-| urban\_coastal\_ambiguity | 93 | 47 (51%) | +0.013 |
+| maritime\_chokepoints | 1,589 | 196 (12%) | +0.014 |
+| disaster\_response\_weather | 1,705 | 203 (12%) | +0.014 |
+| urban\_coastal\_ambiguity | 2,613 | 262 (10%) | +0.018 |
 | pedospheric\_integrity | 55 | 5 (9%) | +0.012 |
-| **All packs** | **248** | **72 (29%)** | **+0.013** |
+| **All packs** | **5,962** | **666 (11%)** | **+0.015** |
 
 **Trust-layer TTT results** (10-seed stability, 256 records, 20 cycles — see [ttt_stability_analysis.md](./ttt_stability_analysis.md)):
 
