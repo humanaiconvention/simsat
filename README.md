@@ -27,6 +27,32 @@
 
 ---
 
+## Repository Layout — Top-Level Docs
+
+| Category | File | Purpose |
+| --- | --- | --- |
+| **Submission front matter** | [`SUBMISSION_BRIEF.md`](./SUBMISSION_BRIEF.md) | Short pitch — claim + tracks + headline numbers |
+| | [`SUBMISSION_PACKET.md`](./SUBMISSION_PACKET.md) | Scorecard + per-pack cases + reviewer attribution |
+| | [`SUBMISSION_CASEBOOK.md`](./SUBMISSION_CASEBOOK.md) | Pinned case-by-case visual narrative (one per scenario pack) |
+| | [`SUBMISSION_READINESS.md`](./SUBMISSION_READINESS.md) | Pre-submission checklist |
+| | [`CHALLENGE_ENTRY.md`](./CHALLENGE_ENTRY.md) | Long-form thesis — TTT mechanics, viability gates, two-track architecture |
+| | [`KNOWN_ISSUES.md`](./KNOWN_ISSUES.md) | Issue tracker + session log |
+| **Evidence** | [`OBSERVATION_VLA_EVAL.md`](./OBSERVATION_VLA_EVAL.md) | v11 VLA eval (in-distribution N=37 + cross-distribution N=152) |
+| | [`V11_AUDIT.md`](./V11_AUDIT.md) | Canonical model 410/410 sanity-gate audit |
+| | [`ENCOUNTER_EVAL.md`](./ENCOUNTER_EVAL.md) | Scaffold-vs-trust planner eval over 248 windows × 4 packs |
+| | [`MUZERO_LFM_EVAL.md`](./MUZERO_LFM_EVAL.md) | Liquid Track BC eval (LFM2.5-VL-450M + SigLIP-base) |
+| | [`MUZERO_SEED_SWEEP.md`](./MUZERO_SEED_SWEEP.md) | 10-seed BC variance bands on canonical encoder |
+| | [`VIABILITY_GATES_EXERCISE.md`](./VIABILITY_GATES_EXERCISE.md) | Six-gate fire-rate exercise under three failure conditions |
+| | [`ttt_stability_analysis.md`](./ttt_stability_analysis.md) | Trust-layer TTT 10-seed stability (22.5% MAE improvement) |
+| **Repo standard** | [`COLLABORATOR_GUIDE.md`](./COLLABORATOR_GUIDE.md) | Eight-key VLA contract + adapter integration |
+| | [`CONTRIBUTING.md`](./CONTRIBUTING.md) | PR / branching / CI conventions |
+| | [`START_HERE.md`](./START_HERE.md) | Quick-plug-in path for an external VLM backend |
+| | [`README.md`](./README.md) | This file |
+
+Intermediate eval runs, per-seed dumps, and superseded snapshots live under [`archive/`](./archive/) (cleaned up 2026-05-07; not part of the submission review).
+
+---
+
 ## What this simulator does
 
 An orbit propagator calculates the satellite position over time and an API serves as an interface to on-board users, sharing the current position, timestamp, and Sentinel-2 imagery from that location. A web-based dashboard controls and visualizes the simulation. The encounter planner, WCLI trust/refine flow, ObservationVLA traces, and viability gates run on top of this base layer.

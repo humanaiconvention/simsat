@@ -266,7 +266,7 @@ python scripts/review_queue_casebook.py --inprocess
 python scripts/operator_review.py --base-url http://127.0.0.1:8000 --scenario-pack maritime_chokepoints
 ```
 
-The review queue writes [REVIEW_QUEUE.md](./REVIEW_QUEUE.md) plus per-case images so the next human-review pass can compare the stored trace assessment with the current `clip_local` backend recommendation on the same imagery.
+The review queue writes per-case images plus a markdown summary (now archived under `archive/eval_runs/observation_vla/REVIEW_QUEUE.md` after the 2026-05-07 cleanup; superseded by the live gallery flow in `gallery_review.html` + `scripts/apply_labels.py`) so the next human-review pass can compare the stored trace assessment with the current `clip_local` backend recommendation on the same imagery.
 
 For a specific trace, inspect the full review bundle first:
 
