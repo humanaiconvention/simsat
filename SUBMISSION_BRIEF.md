@@ -48,7 +48,7 @@ Per-track thesis statements for the pitch are finalized in [CHALLENGE_ENTRY.md](
 - Visual casebook: [SUBMISSION_CASEBOOK.md](./SUBMISSION_CASEBOOK.md)
 - Readiness checklist: [SUBMISSION_READINESS.md](./SUBMISSION_READINESS.md)
 - ObservationVLA reviewed eval: [OBSERVATION_VLA_EVAL.md](./OBSERVATION_VLA_EVAL.md)
-- Encounter planner eval (248 windows, all 4 packs): [ENCOUNTER_EVAL.md](./ENCOUNTER_EVAL.md)
+- Encounter planner eval (5,962 windows, all 4 packs): [ENCOUNTER_EVAL.md](./ENCOUNTER_EVAL.md)
 - Trust-layer TTT stability analysis (10 seeds + 100-cycle long-horizon extension): [ttt_stability_analysis.md](./ttt_stability_analysis.md)
 - Inference benchmarks + scenario assessment: [benchmark_results/BENCHMARK_RESULTS.md](./benchmark_results/BENCHMARK_RESULTS.md)
 

@@ -119,14 +119,14 @@ Config is read from: `genesis_local.py` → `GenesisAdapter` (native, no HF Auto
 
 ---
 
-## Setup — Tesseract T3 (Garrett)
+## Setup — [T^3](https://github.com/GMaN1911) (Garrett)
 
-Two backends are wired for T3 — pick the one that matches your model's
+Two backends are wired for T^3 — pick the one that matches your model's
 output format.
 
 ### Option A — JSON-output VLM (LLM-style, returns 8-key assessment)
 
-Use this if your T3 variant produces a structured JSON assessment directly
+Use this if your T^3 variant produces a structured JSON assessment directly
 (same contract as the Gemma-4 fine-tune). Routed through the generic
 TransformersVLMAdapter:
 
@@ -246,7 +246,7 @@ Add to `docker-compose.yaml` under the `sim` service environment:
 - GENESIS_MERGED_PATH=/app/weights/genesis/base
 - OBSERVATION_VLA_DEVICE=cuda
 
-# Tesseract T3
+# Tesseract T^3
 - OBSERVATION_VLA_BACKEND=tesseract_t3
 - TESSERACT_T3_MODE=merged
 - TESSERACT_T3_MERGED_PATH=/app/weights/tesseract-t3/base

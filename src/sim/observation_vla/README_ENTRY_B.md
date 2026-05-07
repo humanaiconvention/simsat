@@ -28,8 +28,8 @@ Why: the v35-gov HAIC Gemma-4 model is a human-interview / consent-governance fi
 |---|---|---|---|---|
 | Liquid Track | Entry A | `transformers_vlm` | **LFM2.5-VL** encoder → MuZero `h()` | Encoder stub wired; weight loader pending |
 | General AI Track | Entry B (primary) | `gemma4` | **Gemma-4-E2B** SimSat fine-tune | Kernel v3 ready; GPU quota resets ~15:15 today |
-| General AI Track | Entry B (collaborator) | `genesis` | **Genesis** (Guilherme Mesquita) | Adapter wired; weights pending collaborator |
-| General AI Track | Entry B (collaborator) | `tesseract_t3` | **Tesseract T3** (Garrett Sutherland) | Adapter wired; weights pending collaborator |
+| General AI Track | Entry B (collaborator) | `genesis` | **Genesis** (Guilherme Ferrari Brescia) | Adapter wired; weights pending collaborator |
+| General AI Track | Entry B (collaborator) | `tesseract_t3` | **[T^3](https://github.com/GMaN1911)** (Garrett Sutherland) | Adapter wired; weights pending collaborator |
 
 All General AI Track backends load through `TransformersVLMAdapter` by swapping env vars.
 Model adaptability is an explicit part of the entry — the governed pipeline is
