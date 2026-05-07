@@ -125,6 +125,7 @@ improvement over base" across all 4 classes (the rubric requirement).
 
 | Risk | Mitigation |
 |---|---|
+| **Dataset versioning footgun** — Kaggle attaches the dataset *version* that was current when the kernel was last pushed; new dataset versions do NOT auto-refresh on the kernel | If you push an updated dataset (e.g. `push.py --dataset-only` to re-upload images), you MUST also re-push the kernel (`push.py --kernel-only`) so Kaggle re-snapshots the dataset attachment to the latest version. The error symptom is `AssertionError: Missing /kaggle/input/simsat-lfm-v1/simsat_lfm_train.jsonl` even though the dataset clearly exists on Kaggle. |
 | LFM module names differ from leap-finetune in this transformers version | Pre-train target match audit (Cell 2) catches this before training spends compute |
 | LoRA trains zero parameters | Post-save sanity gate (Cell 7) catches this and refuses to claim a successful run |
 | OOM on T4 (16 GB) with 450M model + activations | bf16 + grad checkpointing + batch 1 + grad accum 8 — already configured |
