@@ -86,13 +86,13 @@ def main() -> None:
         if rc != 0:
             print("Kernel push failed. Check kaggle CLI credentials.")
             sys.exit(rc)
-        print("Kernel pushed: benhaslam/simsat-lfm-v1-training")
+        print("Kernel pushed: benhaslam/simsat-lfm2-5-vl-v1-training")
 
     print("\n" + "=" * 60)
     print("DONE")
     print("=" * 60)
     if not args.dry_run:
-        print("Monitor at: https://www.kaggle.com/code/benhaslam/simsat-lfm-v1-training")
+        print("Monitor at: https://www.kaggle.com/code/benhaslam/simsat-lfm2-5-vl-v1-training")
         print("Dataset at: https://www.kaggle.com/datasets/benhaslam/simsat-lfm-v1")
 
 

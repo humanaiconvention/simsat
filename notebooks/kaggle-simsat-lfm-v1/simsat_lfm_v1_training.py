@@ -49,9 +49,22 @@ print(f"GPU: {_torch.cuda.get_device_name(0)} (sm_{_cap[0]}{_cap[1]})")
 
 # Purge warm-kernel module state
 for _m in list(sys.modules):
-    if _m.startswith(("trl", "peft", "transformers", "accelerate", "datasets")):
+    if _m.startswith(("trl", "peft", "transformers", "accelerate", "datasets", "PIL", "torchvision")):
         del sys.modules[_m]
 
+# Step 1 — Pin Pillow to an internally-consistent build BEFORE anything
+# else is upgraded. The default Kaggle image was hitting an
+# `ImportError: cannot import name '_Ink' from 'PIL._typing'` on Cell 1
+# imports because the installed Pillow had `ImageText.py` from a newer
+# release than `_typing.py`. --force-reinstall + --no-deps ensures all
+# PIL/*.py files come from the same release.
+get_ipython().system(  # noqa: F821
+    "pip install -q --force-reinstall --no-deps 'pillow==11.3.0' 2>&1 | tail -3"
+)
+
+# Step 2 — Install the training stack. transformers <5 keeps us off the
+# 5.0.0.dev wheel that the LFM config.json was built against; trust_remote_code
+# loads the LFM modeling code from the model repo, so 4.46+ is sufficient.
 get_ipython().system(  # noqa: F821
     "pip install -q -U "
     "'transformers>=4.46.0,<5.0.0' "
@@ -59,7 +72,6 @@ get_ipython().system(  # noqa: F821
     "'peft>=0.13.0' "
     "'accelerate>=1.0.0' "
     "'datasets>=3.0.0' "
-    "'pillow>=10.0.0' "
     "'huggingface_hub>=0.26.0' "
     "2>&1 | tail -5"
 )
@@ -87,13 +99,32 @@ assert TRAIN_JSONL.exists(), f"Missing {TRAIN_JSONL}"
 assert HOLDOUT_JSONL.exists(), f"Missing {HOLDOUT_JSONL}"
 
 print(f"Loading {MODEL_ID} in bfloat16 on cuda:0 ...")
-processor = AutoProcessor.from_pretrained(MODEL_ID, max_image_tokens=256, trust_remote_code=True)
-model = AutoModelForImageTextToText.from_pretrained(
-    MODEL_ID,
-    torch_dtype=DTYPE,
-    device_map="cuda:0",
-    trust_remote_code=True,
-)
+# `max_image_tokens` is a config-sourced kwarg supported by LFM's processor.
+# Some transformers versions reject unknown kwargs in from_pretrained — fall
+# back to a plain load if the kwarg variant errors.
+try:
+    processor = AutoProcessor.from_pretrained(
+        MODEL_ID, max_image_tokens=256, trust_remote_code=True,
+    )
+except TypeError:
+    processor = AutoProcessor.from_pretrained(MODEL_ID, trust_remote_code=True)
+
+# `dtype` is the modern transformers kwarg (matches LFM's official model card
+# example). Older transformers used `torch_dtype` — fall back if needed.
+try:
+    model = AutoModelForImageTextToText.from_pretrained(
+        MODEL_ID,
+        dtype=DTYPE,
+        device_map="cuda:0",
+        trust_remote_code=True,
+    )
+except TypeError:
+    model = AutoModelForImageTextToText.from_pretrained(
+        MODEL_ID,
+        torch_dtype=DTYPE,
+        device_map="cuda:0",
+        trust_remote_code=True,
+    )
 print(f"  Total params: {sum(p.numel() for p in model.parameters()):,}")
 
 
@@ -282,7 +313,11 @@ sft_config = SFTConfig(
     dataset_kwargs={"skip_prepare_dataset": True},
     max_length=2048,
     report_to="none",
-    dataset_text_field="messages",
+    # NB: do NOT set dataset_text_field — when skip_prepare_dataset=True
+    # is set, TRL hands the dataset to the data_collator unchanged and any
+    # `dataset_text_field` value can trigger column-validation warnings/errors
+    # that don't apply to multimodal records. Liquid AI's reference TRL
+    # config does not set this field either.
 )
 
 

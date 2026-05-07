@@ -12,7 +12,7 @@ rubric asks for.
 |---|---|
 | `simsat_lfm_v1_training.py` | The full Python source (split into CELLs). Edit this, never edit `notebook.ipynb` directly. |
 | `build_notebook.py` | Validates `simsat_lfm_v1_training.py` against 17 invariants (target_modules, sanity gates, etc.) and rebuilds `notebook.ipynb`. |
-| `kernel-metadata.json` | Kaggle kernel config — points at `benhaslam/simsat-lfm-v1-training`, attaches `benhaslam/simsat-lfm-v1` dataset. |
+| `kernel-metadata.json` | Kaggle kernel config — points at `benhaslam/simsat-lfm2-5-vl-v1-training`, attaches `benhaslam/simsat-lfm-v1` dataset. |
 | `push.py` | Driver: prepares dataset → pushes to Kaggle → rebuilds notebook → pushes kernel. |
 | `notebook.ipynb` | Built artifact (do not hand-edit). |
 
@@ -54,7 +54,7 @@ python notebooks/kaggle-simsat-lfm-v1/push.py
 # (use --dataset-only or --kernel-only or --dry-run if you want)
 
 # 3. Open the kernel page and click "Run All"
-# https://www.kaggle.com/code/benhaslam/simsat-lfm-v1-training
+# https://www.kaggle.com/code/benhaslam/simsat-lfm2-5-vl-v1-training
 ```
 
 The kernel runs the **complete pipeline in one Run All**:
