@@ -76,6 +76,7 @@ get_ipython().system(  # noqa: F821
     "'accelerate>=1.0.0' "
     "'datasets>=3.0.0' "
     "'huggingface_hub>=0.26.0' "
+    "'torchao>=0.16.0' "  # PEFT's LoRA dispatcher requires torchao > 0.16
     "2>&1 | tail -5"
 )
 import transformers as _tf
