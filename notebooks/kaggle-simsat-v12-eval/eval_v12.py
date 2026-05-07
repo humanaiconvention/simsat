@@ -6,19 +6,34 @@ to /kaggle/working/v12_eval_results.csv and uploads back to HF.
 """
 import os, sys, subprocess, time
 
-# ---- HF token (Kaggle Secrets preferred; fallback to embedded) ------------
+# ---- HF token (Kaggle Secrets preferred; OS env fallback; retry on flake) -
+# Kaggle Secrets sometimes drops connection on first attempt; retry up to 5x
+# with backoff before falling through to env-var or hard-failing.
 HF_TOKEN = None
 try:
     from kaggle_secrets import UserSecretsClient
-    HF_TOKEN = UserSecretsClient().get_secret("HF_TOKEN")
+    _client = UserSecretsClient()
+    for _attempt in range(5):
+        try:
+            HF_TOKEN = _client.get_secret("HF_TOKEN")
+            print(f"  Kaggle Secret HF_TOKEN fetched (attempt {_attempt + 1})")
+            break
+        except Exception as _e:
+            print(f"  Kaggle Secrets attempt {_attempt + 1}/5 failed: {str(_e)[:120]}")
+            if _attempt < 4:
+                time.sleep(2 * (_attempt + 1))  # 2s, 4s, 6s, 8s
 except Exception as _e:
-    print(f"  Kaggle Secrets HF_TOKEN unavailable: {_e}")
+    print(f"  kaggle_secrets unavailable: {_e}")
 
 if not HF_TOKEN:
     HF_TOKEN = os.environ.get("HF_TOKEN")
     if not HF_TOKEN:
-        raise RuntimeError("HF_TOKEN unavailable: set the Kaggle Secret HF_TOKEN before running.")
-    print(f"  Using fallback HF_TOKEN ({HF_TOKEN[:8]}...)")
+        raise RuntimeError(
+            "HF_TOKEN unavailable: Kaggle Secret retry exhausted and OS env unset. "
+            "Verify the secret is configured AND attached to this kernel "
+            "(Kaggle UI: Settings > Secrets)."
+        )
+    print(f"  OS env HF_TOKEN fallback active ({HF_TOKEN[:8]}...)")
 
 os.environ["HF_TOKEN"] = HF_TOKEN
 os.environ["HUGGING_FACE_HUB_TOKEN"] = HF_TOKEN
