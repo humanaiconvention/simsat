@@ -58,13 +58,22 @@ def main() -> None:
         print("\n" + "=" * 60)
         print("STEP 2: Push dataset to Kaggle")
         print("=" * 60)
+        # `-r tar` preserves the images/ subdirectory (default --dir-mode is
+        # "skip", which silently drops subdirectories — that bug shipped a
+        # 40 KB dataset on first push and made the kernel error with
+        # "Missing simsat_lfm_train.jsonl" because the dataset mount had
+        # only metadata).
         rc = run(
-            ["kaggle", "datasets", "version", "-p", str(DATASET_DIR), "-m", "simsat-lfm-v1 update"],
+            ["kaggle", "datasets", "version", "-p", str(DATASET_DIR),
+             "-m", "simsat-lfm-v1 update", "-r", "tar"],
             dry_run=args.dry_run,
         )
         if rc != 0:
             print("  version failed (possibly first push) — trying create...")
-            rc = run(["kaggle", "datasets", "create", "-p", str(DATASET_DIR)], dry_run=args.dry_run)
+            rc = run(
+                ["kaggle", "datasets", "create", "-p", str(DATASET_DIR), "-r", "tar"],
+                dry_run=args.dry_run,
+            )
         if rc != 0:
             print("Dataset push failed. Check kaggle CLI credentials and dataset-metadata.json.")
             sys.exit(rc)
