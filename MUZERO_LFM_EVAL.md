@@ -2,7 +2,7 @@
 
 Two encoder configurations evaluated: **LFM2.5-VL-450M** (primary, Liquid AI production weights) and **SigLIP-base** (offline fallback, local eval). Both use the SimSatEnv offline-replay harness with the Stage 2 BC policy head.
 
-> **Seed variance**: The Stage 2 v2 numbers below are single-seed (seed=42). For confidence intervals across 3 seeds {13, 42, 2026}, see [`MUZERO_SEED_SWEEP.md`](./MUZERO_SEED_SWEEP.md) — **best val_acc 0.908 ± 0.014** on the post-N=152 reviewed corpus.
+> **Seed variance**: The Stage 2 v2 numbers below are single-seed (seed=42). For confidence intervals across 10 seeds {7, 13, 23, 42, 100, 137, 256, 1024, 2026, 9999}, see [`MUZERO_SEED_SWEEP.md`](./MUZERO_SEED_SWEEP.md) — **best val_acc 0.898 ± 0.049 (range 0.825-0.975)** on the post-N=152 reviewed corpus with the LFM2.5-VL-450M encoder. The earlier 3-seed sweep underestimated variance by ~3.5×.
 
 ---
 

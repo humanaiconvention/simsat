@@ -65,10 +65,19 @@ Per-track thesis statements for the pitch are finalized in [CHALLENGE_ENTRY.md](
 - 56-point gap from in-distribution: v11 was trained on accept+refine only, class-collapses on defer/skip
 - This is distribution-shift evidence — the on-orbit-drift problem the architecture exists to solve
 
-**MuZero Liquid Track BC — Stage 2 seed sweep (3 seeds: 13, 42, 2026):**
-- Best val_acc: **0.908 ± 0.014** (range 0.900-0.925)
+**MuZero Liquid Track BC — Stage 2 seed sweep (10 seeds, LFM2.5-VL-450M encoder):**
+- Best val_acc: **0.898 ± 0.049** (range 0.825-0.975)
+- Final val_acc: 0.875 ± 0.055
+- Seeds: {7, 13, 23, 42, 100, 137, 256, 1024, 2026, 9999}
 - Replaces single-seed 0.967 claim from Stage 2 v2; new training corpus is the post-N=152 pool
-- Full breakdown in [MUZERO_SEED_SWEEP.md](./MUZERO_SEED_SWEEP.md)
+- Action collapse to negative-class on offline replay across nearly all seeds — known training-corpus pathology that on-orbit TTT + viability gates address
+- Full breakdown + caveats in [MUZERO_SEED_SWEEP.md](./MUZERO_SEED_SWEEP.md)
+
+**Viability gates exercise (1100 updates × 3 streams):**
+- `baseline_clean`: error_bias 39%, update_rate 9% (ceiling-only) — selective, mostly quiet
+- `drift_one_class`: error_bias **99.8%** — fires almost every step under sustained operator-vs-prediction bias (correct behavior)
+- `saturation`: only update_rate fires — model converges, no other gates activate (correct behavior)
+- Demonstrates the gates are **selective** — fire on the conditions they're designed to catch, stay quiet on benign streams. Full breakdown in [VIABILITY_GATES_EXERCISE.md](./VIABILITY_GATES_EXERCISE.md).
 
 **Trust-layer TTT (10-seed stability, 256 encounter records, 20 cycles):**
 - MAE improvement: **22.5% ± 0.1%** [22.2–22.7%] — deterministic across seeds

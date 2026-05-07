@@ -16,7 +16,8 @@
 - **v11 cross-distribution N=152** (balanced 4-class, includes 54 spectral-biochemical pedospheric cases): exact **0.30** — distribution-shift evidence motivating the on-orbit TTT + viability-gate architecture
 - **v12 retrain on dataset v4 (1638 rows, balanced 4-class)**: in flight; eval will report both full-pool (in-distribution) and held-out subsets to flag training-set leakage honestly
 - **Trust-layer TTT (10 seeds)**: 22.5% MAE improvement ± 0.1% (`ttt_stability_analysis.md`)
-- **MuZero Liquid Track BC (3 seeds)**: best val_acc **0.908 ± 0.014** (`MUZERO_SEED_SWEEP.md`)
+- **MuZero Liquid Track BC (10 seeds, LFM2.5-VL-450M)**: best val_acc **0.898 ± 0.049** range [0.825, 0.975] (`MUZERO_SEED_SWEEP.md`)
+- **Viability gates exercise**: 1100 updates × 3 synthetic streams; gates selective and fire on designed conditions (`VIABILITY_GATES_EXERCISE.md`)
 - **Encounter planner (248 windows, 5×48h, 4 packs)**: scaffold produces zero `refine`; trust adds 72; 92/248 changed action
 - **v11 audit**: 410/410 LoRA tensor sanity gate **PASS** ([`V11_AUDIT.md`](./V11_AUDIT.md))
 

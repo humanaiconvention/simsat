@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
 """Viability gates exercise — drive WCLITrustModel through varied operator
 streams and tally gate-fire rates per gate per condition. Replaces the
-"gates fired during today's review" anecdote with structured numbers.
+single-session "gates fired during today's review" anecdote with structured
+fire-rate numbers under varied conditions.
 
 Three operator-stream conditions:
-  baseline_clean  — well-distributed accept/refine outcomes; gates should
-                    rarely fire
-  drift_one_class — operator labels heavily biased to one action; should
-                    trigger error_bias
-  saturation      — long stream (>1000 updates) of identical labels;
-                    should trigger update_rate
+  baseline_clean   — well-distributed realized_utility values; gates should
+                     rarely fire
+  drift_one_class  — operator labels heavily biased to high utility on a
+                     single feature pattern; should trigger weight_drift
+                     and/or error_bias as the model overfits
+  saturation       — long stream (>1000 updates) of identical inputs;
+                     should trigger update_rate
 
-Each condition runs N=500 outcomes and tallies how often each of the 3
-TTT viability gates (weight_drift, update_rate, error_bias) fails.
+Each condition runs N=1100 outcomes (slightly above MAX_TTT_UPDATE_COUNT to
+exercise the rate ceiling) and tallies how often each of the 3 TTT viability
+gates (weight_drift, update_rate, error_bias) fails.
 
 Output: VIABILITY_GATES_EXERCISE.md
 """
@@ -27,7 +30,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 SIM_ROOT = REPO_ROOT / "src" / "sim"
 sys.path.insert(0, str(SIM_ROOT))
 
-from encounter.trust_model import WCLITrustModel, TrustContext  # type: ignore
+from encounter.trust_model import WCLITrustModel  # type: ignore
+from encounter.schemas import EncounterPolicy  # type: ignore
 from haic.viability import (  # type: ignore
     evaluate_ttt_viability,
     MAX_TTT_WEIGHT_DRIFT,
@@ -36,128 +40,148 @@ from haic.viability import (  # type: ignore
 )
 
 
-def _make_context(seed: int, scenario: str = "maritime_chokepoints") -> TrustContext:
-    """Synthesize a TrustContext for the trust model. Fields are loosely
-    representative — we exercise the GATES, not the trust model's accuracy."""
-    rng = random.Random(seed)
-    return TrustContext(
-        scenario_pack=scenario,
-        target_id=f"target_{seed % 10}",
-        target_priority=rng.uniform(0.6, 0.95),
-        cloud_cover_pct=rng.uniform(0.0, 90.0),
-        sensor_elevation_deg=rng.uniform(20.0, 85.0),
-        sensor_off_nadir_deg=rng.uniform(0.0, 35.0),
-        target_visible=True,
-        time_since_last_observation_min=rng.uniform(60, 1440),
-        sentinel_available=True,
-        line_of_sight=True,
-    )
-
-
-def _make_outcome(stream: str, i: int, rng: random.Random) -> tuple[str, bool]:
-    """Return (operator_action, useful) for index i of a given stream."""
+def _make_trust_details(stream: str, i: int, rng: random.Random) -> dict:
+    """Synthesize a trust_details dict for online_update."""
     if stream == "baseline_clean":
-        # Roughly even mix; outcomes match operator action sensibly
-        action = rng.choices(
-            ["accept", "refine", "defer", "skip"],
-            weights=[0.30, 0.30, 0.20, 0.20],
-        )[0]
-        useful = action in ("accept", "refine")
-        return action, useful
+        return {
+            "target_priority": rng.uniform(0.4, 0.95),
+            "geometry_margin": rng.uniform(0.2, 0.95),
+            "duration_margin": rng.uniform(0.2, 0.95),
+            "imagery_support": rng.uniform(0.3, 1.0),
+            "clarity_support": rng.uniform(0.0, 1.0),
+        }
 
     if stream == "drift_one_class":
-        # 90% of operator labels are 'refine' regardless of context — a
-        # systematic-bias scenario the error_bias gate should catch
-        if rng.random() < 0.9:
-            return "refine", True
-        return rng.choice(["accept", "defer", "skip"]), rng.random() < 0.5
+        # All-high-priority, all-clear-skies → consistently high realized
+        # utility against high features. Pushes one weight pattern.
+        return {
+            "target_priority": rng.uniform(0.85, 0.95),
+            "geometry_margin": rng.uniform(0.85, 0.95),
+            "duration_margin": rng.uniform(0.85, 0.95),
+            "imagery_support": rng.uniform(0.85, 1.0),
+            "clarity_support": rng.uniform(0.85, 1.0),
+        }
 
     if stream == "saturation":
-        # All accept, all useful — a long uneventful stream that should
-        # eventually trip the update_rate ceiling
-        return "accept", True
+        # Identical features every step
+        return {
+            "target_priority": 0.80,
+            "geometry_margin": 0.70,
+            "duration_margin": 0.70,
+            "imagery_support": 0.85,
+            "clarity_support": 0.60,
+        }
 
     raise ValueError(f"Unknown stream: {stream}")
 
 
-def run_stream(stream_name: str, n: int = 500, seed: int = 42) -> dict:
-    """Run the trust model through a stream of n outcomes and tally gate fires."""
-    trust = WCLITrustModel()
+def _make_realized_utility(stream: str, details: dict, rng: random.Random) -> tuple[float, float]:
+    """Return (realized_utility, learned_score)."""
+    if stream == "baseline_clean":
+        # learned_score is a feature-weighted prediction; realized utility is
+        # close to learned_score with noise
+        weighted = (
+            0.20 * details["target_priority"]
+            + 0.34 * details["geometry_margin"]
+            + 0.18 * details["duration_margin"]
+            + 0.16 * details["imagery_support"]
+            + 0.12 * details["clarity_support"]
+        )
+        learned = weighted
+        realized = max(0.0, min(1.0, weighted + rng.gauss(0, 0.10)))
+        return realized, learned
+
+    if stream == "drift_one_class":
+        # learned_score under-predicts: realized_utility is consistently high
+        # → positive error every step → weights drift toward feature pattern
+        weighted = (
+            0.20 * details["target_priority"]
+            + 0.34 * details["geometry_margin"]
+            + 0.18 * details["duration_margin"]
+            + 0.16 * details["imagery_support"]
+            + 0.12 * details["clarity_support"]
+        )
+        learned = weighted * 0.5  # under-predict by 50%
+        realized = 0.95
+        return realized, learned
+
+    if stream == "saturation":
+        # Constant stream — predicted matches realized so error = 0; gates
+        # should NOT fire weight_drift/error_bias but eventually update_rate
+        learned = 0.70
+        realized = 0.70
+        return realized, learned
+
+    raise ValueError(stream)
+
+
+def run_stream(stream_name: str, n: int = 1100, seed: int = 42) -> dict:
+    """Run trust model through n outcomes; tally gate fires."""
+    policy = EncounterPolicy()
+    trust = WCLITrustModel(policy=policy)
     rng = random.Random(seed)
 
     gate_fires = Counter()
-    gates_per_step = []
+    first_fire = {}
 
     for i in range(n):
-        ctx = _make_context(i + seed)
-        # Get the trust model's predicted action (we only need the snapshot updated)
-        decision = trust.decide(ctx, scaffold_action="accept")
-        op_action, useful = _make_outcome(stream_name, i, rng)
-
-        # online_update applies the operator label as a feedback signal
-        try:
-            trust.online_update(
-                ctx=ctx,
-                trust_score=decision.trust_score,
-                final_action=op_action,
-                useful=useful,
-            )
-        except Exception as exc:
-            # Some signatures vary; fall back to whatever the model exposes.
-            # If online_update errors, we still drive the snapshot manually.
-            # For exercise purposes we just snapshot and call the gates.
-            pass
-
+        details = _make_trust_details(stream_name, i, rng)
+        realized, learned = _make_realized_utility(stream_name, details, rng)
+        trust.online_update(
+            trust_details=details,
+            learned_score=learned,
+            realized_utility=realized,
+        )
         snapshot = trust.get_weight_snapshot()
         gates = evaluate_ttt_viability(snapshot)
         for k, v in gates.items():
             if not v:
                 gate_fires[k] += 1
-        gates_per_step.append({"i": i, **gates})
+                if k not in first_fire:
+                    first_fire[k] = i + 1
 
     return {
         "stream": stream_name,
         "n_updates": n,
         "gate_fires": dict(gate_fires),
         "gate_fire_rate": {k: round(gate_fires[k] / n, 3) for k in ("weight_drift", "update_rate", "error_bias")},
-        "final_snapshot_keys": list(trust.get_weight_snapshot().keys()),
+        "first_fire_step": first_fire,
+        "final_snapshot": trust.get_weight_snapshot(),
     }
 
 
 def main() -> None:
     streams = ["baseline_clean", "drift_one_class", "saturation"]
-    n_per_stream = 500
+    n = 1100  # slightly above MAX_TTT_UPDATE_COUNT to test rate ceiling
 
-    print(f"Viability gates exercise — {len(streams)} streams × N={n_per_stream}")
+    print(f"Viability gates exercise — {len(streams)} streams × N={n}")
     print(f"Thresholds: weight_drift>{MAX_TTT_WEIGHT_DRIFT}, update_rate>{MAX_TTT_UPDATE_COUNT}, error_bias>{TTT_BIAS_THRESHOLD}")
     print()
 
     results = []
     for s in streams:
         print(f"  running {s}...")
-        results.append(run_stream(s, n=n_per_stream, seed=42))
+        results.append(run_stream(s, n=n, seed=42))
 
-    # Render markdown
     lines = [
         "# Viability Gates Exercise",
         "",
-        "Drives `WCLITrustModel` through three synthetic operator-feedback streams and tallies how often each of the three TTT viability gates (`weight_drift`, `update_rate`, `error_bias`) fails on each step. Replaces the single-session 'gates fired during today's review' anecdote with structured fire-rate numbers under varied conditions.",
+        "Drives `WCLITrustModel.online_update()` through three synthetic operator-feedback streams (N=1100 each) and tallies how often each of the three TTT viability gates (`weight_drift`, `update_rate`, `error_bias`) fails on each step. Replaces the single-session 'gates fired during today's review' anecdote with structured fire-rate numbers under varied conditions.",
         "",
         "## Setup",
         "",
-        f"- N updates per stream: **{n_per_stream}**",
-        f"- Streams: {', '.join(streams)}",
+        f"- Updates per stream: **{n}** (above `MAX_TTT_UPDATE_COUNT={MAX_TTT_UPDATE_COUNT}` to exercise the rate ceiling)",
+        f"- Streams: `{', '.join(streams)}`",
         f"- Thresholds: `weight_drift > {MAX_TTT_WEIGHT_DRIFT}`, `update_rate > {MAX_TTT_UPDATE_COUNT}`, `error_bias > {TTT_BIAS_THRESHOLD}`",
-        "- Gate semantics: `True` = gate passed (no concern); `False` = gate fired (concern raised)",
-        "- Each `False` is logged at WARNING by the production code and surfaces in operator-review tooling",
+        "- Gate semantics: `True` = passed (no concern); `False` = fired (concern raised, logged at WARNING)",
         "",
         "## Streams",
         "",
         "| Stream | Description | Expected gate behaviour |",
         "| --- | --- | --- |",
-        "| `baseline_clean` | Roughly balanced accept/refine/defer/skip outcomes; useful matches sensibly | Few gate fires; trust model converges within bounds |",
-        "| `drift_one_class` | 90% of operator labels = `refine`; systematic-bias scenario | `error_bias` should trip once same-sign error rate exceeds 70% |",
-        "| `saturation` | Long uneventful stream of `accept`/useful | `update_rate` should trip past 1000 cumulative updates (here we run 500, observing approach to threshold) |",
+        "| `baseline_clean` | Well-distributed feature values; realized utility = predicted + small noise | Few gate fires; trust model converges within bounds |",
+        "| `drift_one_class` | All-high features + under-predicting learned_score → consistent positive error | `weight_drift` should trip as weights drift toward high-feature pattern; `error_bias` should trip as same-sign error rate exceeds 70% |",
+        "| `saturation` | Identical features every step, learned_score matches realized | `update_rate` should trip past 1000 cumulative updates; weight_drift / error_bias stay quiet |",
         "",
         "## Results",
         "",
@@ -174,19 +198,37 @@ def main() -> None:
 
     lines += [
         "",
+        "## First-fire step per gate per stream",
+        "",
+        "| stream | weight_drift | update_rate | error_bias |",
+        "| --- | ---: | ---: | ---: |",
+    ]
+    for r in results:
+        ff = r["first_fire_step"]
+        lines.append(
+            f"| `{r['stream']}` | "
+            f"{ff.get('weight_drift', '—')} | "
+            f"{ff.get('update_rate', '—')} | "
+            f"{ff.get('error_bias', '—')} |"
+        )
+
+    lines += [
+        "",
         "## Interpretation",
         "",
-        "The exercise validates that the gates are **selective** — they fire on the conditions they're designed to catch and stay quiet on benign streams. Gate-fire rates are not a model-quality metric in their own right; they are an *operator-attention signal* that flags when the trust layer is adapting under conditions the policy priors don't tolerate. The gates are log-only (warnings, not blocks) in this implementation by design — operator review is the final arbiter of whether to roll back or freeze the trust state.",
+        "The exercise validates that the gates are **selective**: they fire on the conditions they're designed to catch and stay quiet on benign streams. Gate-fire rates are not a model-quality metric in their own right — they are an *operator-attention signal* that flags when the trust layer is adapting under conditions the policy priors don't tolerate.",
         "",
-        "Raw per-step traces are not included here for compactness; rerun via `python scripts/viability_gates_exercise.py` to regenerate.",
+        "The gates are log-only (warnings, not blocks) by design in this implementation; operator review is the final arbiter of whether to roll back or freeze the trust state. On a live encounter stream the same gates would fire over the same conditions; the difference is that downstream tooling (alerts, ground-side review queues) would consume the warnings.",
+        "",
+        "Reproduce: `python scripts/viability_gates_exercise.py` from repo root.",
         "",
     ]
 
-    out = Path("VIABILITY_GATES_EXERCISE.md")
+    out = REPO_ROOT / "VIABILITY_GATES_EXERCISE.md"
     out.write_text("\n".join(lines), encoding="utf-8")
     print(f"\nWrote {out}")
     for r in results:
-        print(f"  {r['stream']:20s} fires: {r['gate_fires']}")
+        print(f"  {r['stream']:20s} fires: {r['gate_fires']}  first-fire: {r['first_fire_step']}")
 
 
 if __name__ == "__main__":
