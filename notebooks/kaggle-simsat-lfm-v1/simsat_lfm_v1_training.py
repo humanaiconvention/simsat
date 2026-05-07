@@ -62,14 +62,15 @@ get_ipython().system(  # noqa: F821
     "pip install -q --force-reinstall --no-deps 'pillow==11.3.0' 2>&1 | tail -3"
 )
 
-# Step 2 — Install the training stack. LFM2.5-VL's tokenizer references a
-# `TokenizersBackend` class introduced in newer transformers; pin >=4.51.0
-# (May 2025+ release) which has the new tokenizer backend abstraction.
-# Also pin `tokenizers>=0.21` for the same reason.
+# Step 2 — Install the training stack. LFM2.5-VL was published against
+# transformers 5.0.0.dev0 (per its config.json) and uses the new v5
+# `TokenizersBackend` tokenizer abstraction; transformers 4.x doesn't have
+# that class. Install from git main (pre-v5 dev), with --pre to allow
+# pre-release of dependent packages too.
 get_ipython().system(  # noqa: F821
-    "pip install -q -U "
-    "'transformers>=4.51.0,<5.0.0' "
-    "'tokenizers>=0.21.0' "
+    "pip install -q -U --pre "
+    "'transformers @ git+https://github.com/huggingface/transformers.git' "
+    "'tokenizers' "
     "'trl>=0.12.0' "
     "'peft>=0.13.0' "
     "'accelerate>=1.0.0' "
@@ -77,7 +78,8 @@ get_ipython().system(  # noqa: F821
     "'huggingface_hub>=0.26.0' "
     "2>&1 | tail -5"
 )
-print("Deps installed.")
+import transformers as _tf
+print(f"Deps installed. transformers={_tf.__version__}")
 
 # ============================================================
 # CELL 1: Load processor + base model + dataset
