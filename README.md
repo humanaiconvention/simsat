@@ -419,7 +419,7 @@ Mapbox uses a 2D map on a 3D globe to create perspectives. This looks ok when ob
 
 <img src="fig/wrong_perspective_example.png" alt="Image of New York City with incorrect perspective" width="500">
 
-*Figure 2: Mapbox static image of New York City with incorrect perspective as the image was taken at a different angle than the current prespective.*
+*Figure 2: Mapbox static image of New York City with incorrect perspective as the image was taken at a different angle than the current perspective.*
 
 
 

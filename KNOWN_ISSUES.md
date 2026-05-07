@@ -48,7 +48,7 @@ Deadline: **Friday May 8, 2026, 5:00 PM PDT**
 | # | Issue | Location | Status |
 |---|---|---|---|
 | 17 | Per-track one-sentence thesis for the pitch video | `CHALLENGE_ENTRY.md` Two-Track section | **Open** — track framing is locked; one-liner video copy drafted at recording time |
-| 18 | Entry B fine-tune dataset design | `datasets/simsat-gemma4-v1/` | **Resolved** — bumped from 294 → **713 weighted ChatML rows** (2026-04-27). Regenerated 2026-05-05 to **628 rows** with significantly improved defer class: action dist accept=206, refine=298, **defer=120** (was 12), skip=4. Defer class expansion via auto-defer heuristic on 10 new cloud_cover>=80% outcomes. Dataset slug unchanged: `benhaslam/simsat-gemma4-v1`. Needs Kaggle push (v3). |
+| 18 | Entry B fine-tune dataset design | `datasets/simsat-gemma4-v1/` | **Resolved** — bumped from 294 → **713 weighted ChatML rows** (2026-04-27). Regenerated 2026-05-05 to **628 rows** with improved defer class (v3). Further regenerated 2026-05-07 to **dataset v4 — 1638 rows, balanced 4-class** (accept/refine/defer/skip), includes 152 fresh operator-reviewed labels from gallery_review.html; v12 retraining on v4. |
 | 19 | Entry B VLA backend adapter | `src/sim/observation_vla/` | **Resolved** — `TransformersVLMAdapter` (generic), `GenesisAdapter`, `TesseractT3Adapter`, `backend_factory.py` all shipped |
 | 20 | Google Drive OAuth scope too narrow — blocks LFM2.5 Colab notebook recon | platform integration | **Open / Low priority** — not on critical path |
 | 21 | VLA-layer TTT wiring | `adapter.py` | **Resolved architecturally** — `vla_online_update()` implemented; tunes confidence blend weights from operator usefulness_score |

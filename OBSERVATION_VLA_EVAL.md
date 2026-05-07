@@ -80,8 +80,8 @@ v11 outperforms the always-majority baseline by **+0.32 exact agreement** and be
 
 ## Caveats and honest scope
 
-- **Class coverage:** The N=37 v11 reviewed pool is `accept` + `refine` only — **no `defer` or `skip` cases**. The 0.86 figure measures v11's accept↔refine boundary, the most operationally consequential decision (commit vs. wait-for-secondary-evidence). Adding `defer/skip` cases is what the expanded N=119 pool (in progress) measures.
-- **Cross-register scope:** All 37 cases are from the three geometric/structural packs (maritime, disaster, urban-coastal). v11 was trained on the same register. The pedospheric (spectral-biochemical) register expansion eval is in progress — see [`OBSERVATION_VLA_EVAL_V11_N66.md`](./OBSERVATION_VLA_EVAL_V11_N66.md) and the planned N=119 follow-up that will include the 53 pedospheric reviews completed 2026-05-06.
+- **Class coverage:** The N=37 v11 reviewed pool is `accept` + `refine` only — **no `defer` or `skip` cases**. The 0.86 figure measures v11's accept↔refine boundary, the most operationally consequential decision (commit vs. wait-for-secondary-evidence). Adding `defer/skip` cases is what the expanded N=152 pool (complete — see cross-distribution results below) measures.
+- **Cross-register scope:** All 37 cases are from the three geometric/structural packs (maritime, disaster, urban-coastal). v11 was trained on the same register. The pedospheric (spectral-biochemical) register expansion eval is in progress — see the cross-distribution results below, which include the 54 pedospheric reviews completed 2026-05-06 (intermediate eval snapshots archived under `archive/eval_runs/`).
 - **Adapter integrity:** v11's saved adapter passes the dynamic LoRA tensor sanity gate at 410/410. See [`V11_AUDIT.md`](./V11_AUDIT.md).
 
 ## Cross-Distribution Eval (v11 on N=152 expanded pool, balanced 4-class)

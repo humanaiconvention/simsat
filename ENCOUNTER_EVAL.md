@@ -73,8 +73,8 @@ Targets: SF Bay, Port of Los Angeles, Shenzhen Bay, Port of Rotterdam
 | skip | 2 (2%) | 2 (2%) |
 | Mean trust score | — | 0.743 |
 | Mean combined score lift | — | +0.013 |
-| Windows where trust changed action | — | 40 (43%) |
-| Changed → refine | — | 40 |
+| Windows where trust changed action | — | 47 (51%) |
+| Changed → refine | — | 47 |
 
 **Highest refine rate of all packs (51%).** Dense mixed-use port and shoreline scenes
 create systematic geometric and cloud ambiguity — high off-nadir angles at dense port

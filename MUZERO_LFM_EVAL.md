@@ -47,7 +47,7 @@ Hardware: RTX 2080 (benhaslam BEAST). 75 episodes across 3 scenario packs (marit
 | **Stage 2 v2 (cap=4.0)** | **0.967** | **-0.0438** | **Canonical. Accept recovered (12%), skip normalized (17%)** |
 
 **Honest limitations:**
-- Defer: 0/75 predictions across all policies. Corpus has only 3 original defer traces. `scripts/build_defer_queue.py` generates a focused 20-candidate review queue to address this.
+- Defer: 0/75 predictions across all policies in Stage 2 v2 (3 original defer traces in the training corpus; augmentation alone cannot compensate). Stage 2 v3 (research checkpoint, 2026-05-05) expanded to 13 defer traces via auto-labeling and recovered defer prediction (0→32/75) but over-predicts at 43% vs 5% baseline — v2 remains canonical. See `MUZERO_SEED_SWEEP.md` and `CHALLENGE_ENTRY.md` Liquid Track Known Issues for details.
 - Stage 3 (two-scope TTT, live per-pass adaptation) not yet benchmarked — requires a live encounter stream.
 
 ---

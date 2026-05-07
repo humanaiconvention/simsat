@@ -62,7 +62,7 @@ GATE: 410/410  ✓ PASS
 
 ## Implication for the submission
 
-v11 is the canonical SimSat Gemma-4 fine-tune for the General AI Track. It was trained on dataset v2 (713 weighted ChatML rows, pre-defer-expansion), saved 410 LoRA tensors covering all language-model attention and MLP projections at the correct unique-module granularity, and produced the strongest operator-reviewed eval numbers in the v1–v19 series. The dynamic sanity gate added in v19 (`_EXPECTED_TOTAL = sum(1 for _, p in model.named_parameters() if "lora_A" in name or "lora_B" in name)`) verifies — without retraining — that v11's save is complete.
+v11 is the canonical SimSat Gemma-4 fine-tune for the General AI Track. It was trained on dataset v2 (713 weighted ChatML rows, pre-defer-expansion), saved 410 LoRA tensors covering all language-model attention and MLP projections at the correct unique-module granularity, and produced the strongest operator-reviewed eval numbers in the v1–v19 series. The dynamic sanity gate added in v19 (`_EXPECTED_TOTAL = sum(1 for pn, p in model.named_parameters() if "lora_A" in pn or "lora_B" in pn)`) verifies — without retraining — that v11's save is complete.
 
 ## Why later versions (v17–v19) regress
 

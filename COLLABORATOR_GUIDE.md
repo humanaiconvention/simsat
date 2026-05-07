@@ -336,6 +336,8 @@ downloads, diagnoses, and runs the eval automatically.
 
 ## What the viability gates do to your output
 
+> **Naming note:** The six gates below are described in terms of what they mean for VLA-layer assessments (the vocabulary relevant to a collaborator plugging in a model). The same gates are described in operational/implementation terms in `CHALLENGE_ENTRY.md` as: information gain, observation quality, metadata consistency, update magnitude, update rate, and error balance. They are the same six checks viewed from different angles.
+
 Every candidate update — including changes driven by your model's confidence scores —
 passes through six non-compensatory viability gates before it can persist into system state:
 

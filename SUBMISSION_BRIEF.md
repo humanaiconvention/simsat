@@ -96,9 +96,9 @@ Per-track thesis statements for the pitch are finalized in [CHALLENGE_ENTRY.md](
 
 **Pinned casebook cases (one per pack):**
 - `maritime_chokepoints` → Suez Canal, reviewer `Ben Haslam`, usefulness `0.95`
-- `disaster_response_weather` → Houston Ship Channel, reviewer `Ben Haslam`, usefulness `0.92`
-- `urban_coastal_ambiguity` → Port of Rotterdam, reviewer `Ben Haslam`, usefulness `0.90`
-- `pedospheric_integrity` → Mato Grosso Agricultural Frontier, reviewer `Ben Haslam`, outcome `defer` (trust below refine threshold; honest result for a low-quality pass)
+- `disaster_response_weather` → Houston Ship Channel, reviewer `Ben Haslam`, usefulness `0.85`
+- `urban_coastal_ambiguity` → Port of Rotterdam, reviewer `Ben Haslam`, usefulness `0.89`
+- `pedospheric_integrity` → Nile Delta Agricultural Zone, reviewer `Ben Haslam`, outcome `accept`, usefulness `0.85`
 
 ## Inference Benchmarks
 
@@ -144,6 +144,8 @@ LFM2.5-VL-450M tile encoder + MuZero BC policy head, measured on RTX 2080 (`benh
 | Stage 1 BC (75 traces) | 0.800 | -0.0600 | Class collapse: 100% refine on eval |
 | Stage 2 v1 (uncapped aug) | 0.950 | -0.0396 | Skip over-predicted (36%); accept under-predicted (3%) |
 | **Stage 2 v2 (cap=4.0)** | **0.967** | **-0.0438** | **Canonical. Accept recovered (12%), skip normalized (17%)** |
+
+_Note: 0.967 is single-seed (seed=42) on the earlier 136-example corpus. The 10-seed sweep on the post-N=152 corpus gives best val\_acc **0.898 ± 0.049** [0.825, 0.975] — see [MUZERO\_SEED\_SWEEP.md](./MUZERO_SEED_SWEEP.md)._
 
 **Honest limitations:**
 - Defer: 0/75 predictions across all policies. Corpus has only 3 original defer traces — no augmentation ratio compensates for this. `scripts/build_defer_queue.py` generates a focused 20-candidate review queue to address it.

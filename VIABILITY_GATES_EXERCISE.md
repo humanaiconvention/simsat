@@ -37,6 +37,6 @@ Drives `WCLITrustModel.online_update()` through three synthetic operator-feedbac
 
 The exercise validates that the gates are **selective**: they fire on the conditions they're designed to catch and stay quiet on benign streams. Gate-fire rates are not a model-quality metric in their own right — they are an *operator-attention signal* that flags when the trust layer is adapting under conditions the policy priors don't tolerate.
 
-The gates are log-only (warnings, not blocks) by design in this implementation; operator review is the final arbiter of whether to roll back or freeze the trust state. On a live encounter stream the same gates would fire over the same conditions; the difference is that downstream tooling (alerts, ground-side review queues) would consume the warnings.
+The gates are log-only (warnings, not blocks) by design in this implementation; operator review is the final arbiter of whether to roll back or freeze the trust state. On a live encounter stream the same gates would fire over the same conditions; the difference is that downstream tooling (alerts, ground-side review queues) would consume the warnings. See `CHALLENGE_ENTRY.md` (viability gate section, gates 4–6) for the submission framing of gate semantics, which also discloses the warning-not-block behavior.
 
 Reproduce: `python scripts/viability_gates_exercise.py` from repo root.

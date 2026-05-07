@@ -19,9 +19,9 @@
 
 | scenario | reviewed_ready | pinned_trace | reviewer | packet_case | image_asset |
 | --- | --- | --- | --- | --- | --- |
-| disaster_response_weather | True | trace_1926b646ee4b48478913681a33fcdfb1 | Ben Haslam | True | True |
-| maritime_chokepoints | True | trace_868637cfaf6343acba5dc01bc22cfbd9 (+3 more) | regression_operator | True | True |
-| pedospheric_integrity | True | trace_bfa2fad124374601b3f2884c3be2a42e | Ben Haslam | True | True |
+| disaster_response_weather | True | trace_d886c4872e1047d8b3f50b3563448968 | Ben Haslam | True | True |
+| maritime_chokepoints | True | trace_3957ae2fabb34f298e9ff95ec912b6e1 | Ben Haslam | True | True |
+| pedospheric_integrity | True | trace_3d10cd03f80b48b88d3fcc895ff8917a | Ben Haslam | True | True |
 | urban_coastal_ambiguity | True | trace_4f65355f5c954fbf8db3fc684bb377af (+1 more) | Ben Haslam | True | True |
 
 ## Honesty Boundary

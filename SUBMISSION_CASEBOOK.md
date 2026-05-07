@@ -30,7 +30,7 @@ Generated on `2026-05-07T01:00Z` from pinned operator-reviewed submission cases.
 - Reviewer: `ben`
 - Operator action: `accept`
 - Useful: `True`
-- Usefulness score: `0.85`
+- Usefulness score: `0.95`
 - Observation runtime: `clip_local`
 - Sentinel source: `sentinel-2a`
 - Cloud cover: `0.130026`
@@ -77,7 +77,7 @@ At **0.00% cloud** this is the ideal spectral-biochemical observation: the Delta
 - Reviewer: `ben`
 - Operator action: `accept`
 - Useful: `True`
-- Usefulness score: `0.85`
+- Usefulness score: `0.89`
 - Observation runtime: `clip_local`
 - Sentinel source: `sentinel-2c`
 - Cloud cover: `48.782516`
