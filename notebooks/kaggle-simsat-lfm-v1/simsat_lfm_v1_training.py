@@ -99,7 +99,7 @@ get_ipython().system(  # noqa: F821
 # `is_offline_mode` for transformers main. --force-reinstall + --no-deps
 # ensures we override regardless of what pip's resolver wants.
 get_ipython().system(  # noqa: F821
-    "pip install -q --force-reinstall --no-deps 'huggingface_hub==0.34.4' 2>&1 | tail -5"
+    "pip install -q --force-reinstall --no-deps 'huggingface_hub==1.4.1' 2>&1 | tail -5"
 )
 
 import huggingface_hub as _hh, transformers as _tf
