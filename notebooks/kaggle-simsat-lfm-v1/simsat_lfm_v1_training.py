@@ -62,12 +62,14 @@ get_ipython().system(  # noqa: F821
     "pip install -q --force-reinstall --no-deps 'pillow==11.3.0' 2>&1 | tail -3"
 )
 
-# Step 2 — Install the training stack. transformers <5 keeps us off the
-# 5.0.0.dev wheel that the LFM config.json was built against; trust_remote_code
-# loads the LFM modeling code from the model repo, so 4.46+ is sufficient.
+# Step 2 — Install the training stack. LFM2.5-VL's tokenizer references a
+# `TokenizersBackend` class introduced in newer transformers; pin >=4.51.0
+# (May 2025+ release) which has the new tokenizer backend abstraction.
+# Also pin `tokenizers>=0.21` for the same reason.
 get_ipython().system(  # noqa: F821
     "pip install -q -U "
-    "'transformers>=4.46.0,<5.0.0' "
+    "'transformers>=4.51.0,<5.0.0' "
+    "'tokenizers>=0.21.0' "
     "'trl>=0.12.0' "
     "'peft>=0.13.0' "
     "'accelerate>=1.0.0' "
@@ -90,12 +92,21 @@ from transformers import AutoProcessor, AutoModelForImageTextToText
 
 MODEL_ID = "LiquidAI/LFM2.5-VL-450M"
 DTYPE = torch.bfloat16
-DATA_DIR = Path("/kaggle/input/simsat-lfm-v1")
+# Resolve the dataset mount path by searching for the train JSONL —
+# Kaggle's mount convention for this dataset is
+# /kaggle/input/datasets/<owner>/<slug>/, NOT /kaggle/input/<slug>/.
+# Searching by file basename is robust to whichever convention applies.
+_found = list(Path("/kaggle/input").rglob("simsat_lfm_train.jsonl"))
+if not _found:
+    raise FileNotFoundError(
+        "simsat_lfm_train.jsonl not found anywhere under /kaggle/input. "
+        "Verify the dataset 'benhaslam/simsat-lfm-v1' is attached to this kernel."
+    )
+DATA_DIR = _found[0].parent
 TRAIN_JSONL = DATA_DIR / "simsat_lfm_train.jsonl"
 HOLDOUT_JSONL = DATA_DIR / "simsat_lfm_holdout.jsonl"
 EVAL_JSONL = DATA_DIR / "simsat_lfm_eval.jsonl"
-
-assert TRAIN_JSONL.exists(), f"Missing {TRAIN_JSONL}"
+print(f"DATA_DIR resolved to: {DATA_DIR}")
 assert HOLDOUT_JSONL.exists(), f"Missing {HOLDOUT_JSONL}"
 
 print(f"Loading {MODEL_ID} in bfloat16 on cuda:0 ...")
