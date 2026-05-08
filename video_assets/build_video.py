@@ -1,68 +1,116 @@
 #!/usr/bin/env python3
-"""Stitch the 9 rendered frames into a silent demo video.
+"""Stitch the 9 rendered frames into a silent demo video using ffmpeg directly.
+
+Much faster than moviepy compose for a video of static images: each shot is
+a single PNG looped for its duration, with H.264 ultrafast encode. Total wall
+time on i5-9600K is well under a minute for the whole 4:43 demo.
 
 Timing matches VIDEO_SCRIPT.md shot list:
-  shot 1:  0:00-0:08   8s   title cold open
-  shot 2:  0:08-0:20   12s  title + Rotterdam band
-  shot 3:  0:20-0:50   30s  architecture diagram
-  shot 4:  0:50-1:20   30s  v3 holdout table (headline)
-  shot 5:  1:20-1:35   15s  MAE drop callout
-  shot 6:  1:35-2:30   55s  Rotterdam case panel
-  shot 7:  2:30-3:05   35s  TTT receipt
-  shot 8:  3:05-3:30   25s  v4 negative result
-  shot 9:  3:30-3:50   20s  close card
-                       ────
-                       230s = 3 min 50 sec
+  shot 1: 30s  HumanAI Convention logo on black (fade-in 2s)
+              Founder voiceover plays over this.
+  shot 2: 28s  SimSat title (Rotterdam Sentinel band)
+              Bridge voiceover ("This proposal operationalizes...").
+  shot 3: 30s  architecture diagram
+  shot 4: 30s  v3 holdout table (headline)
+  shot 5: 15s  MAE drop callout
+  shot 6: 55s  Rotterdam case panel
+  shot 7: 45s  TTT receipt — class-targeted lifts
+  shot 8: 25s  v4/v5/v3+ negative results
+  shot 9: 25s  close card (humanaiconvention.com first)
+              ────
+              283s = 4 min 43 sec
 
-Output: video_assets/silent_demo.mp4 (1920x1080, 30fps, h.264)
+Output: video_assets/silent_demo.mp4 (1920x1080, 30fps, h.264, yuv420p)
 """
 from __future__ import annotations
+import subprocess
+import tempfile
 from pathlib import Path
 
-from moviepy import ImageClip, concatenate_videoclips, CompositeVideoClip
+import imageio_ffmpeg
 
 ROOT = Path(__file__).resolve().parents[1]
 FRAMES = ROOT / "video_assets" / "frames"
 OUT = ROOT / "video_assets" / "silent_demo.mp4"
+SEGS = ROOT / "video_assets" / "segments"
+SEGS.mkdir(exist_ok=True)
+
+FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
+FPS = 30
 
 # (shot_idx, duration_seconds)
 SHOTS = [
-    (1,  8),
-    (2, 12),
-    (3, 30),
-    (4, 30),
-    (5, 15),
-    (6, 55),
-    (7, 45),  # was 35; extended for two-class TTT lift voiceover
-    (8, 25),
-    (9, 25),  # was 20; extended for "JSON-schema refinement" framing in close
+    (1, 30),  # HAIC logo on black, fade-in 2s; founder voiceover
+    (2, 28),  # SimSat title; bridge voiceover
+    (3, 30),  # architecture diagram
+    (4, 30),  # v3 holdout headline
+    (5, 15),  # MAE drop callout
+    (6, 55),  # Rotterdam case
+    (7, 45),  # TTT receipts
+    (8, 25),  # honest negatives
+    (9, 25),  # close card
 ]
 
 
-def main():
-    clips = []
-    for idx, dur in SHOTS:
-        path = FRAMES / f"shot{idx}.png"
-        if not path.exists():
-            raise FileNotFoundError(path)
-        # Add a half-second crossfade between shots for visual smoothness.
-        clip = ImageClip(str(path)).with_duration(dur)
-        clips.append(clip)
-        print(f"  shot{idx}: {dur}s  ({path.name})")
+def encode_segment(idx: int, dur: int) -> Path:
+    """Encode one PNG → mp4 segment of given duration. Shot 1 gets a 2s fade-in."""
+    src = FRAMES / f"shot{idx}.png"
+    dst = SEGS / f"seg{idx}.mp4"
+    if not src.exists():
+        raise FileNotFoundError(src)
+    cmd = [
+        FFMPEG, "-y",
+        "-loop", "1",
+        "-framerate", str(FPS),
+        "-t", str(dur),
+        "-i", str(src),
+    ]
+    if idx == 1:
+        # Fade in from black over 2s at the start of shot 1
+        cmd += ["-vf", "fade=t=in:st=0:d=2,format=yuv420p"]
+    else:
+        cmd += ["-vf", "format=yuv420p"]
+    cmd += [
+        "-c:v", "libx264",
+        "-preset", "ultrafast",
+        "-crf", "23",
+        "-pix_fmt", "yuv420p",
+        "-r", str(FPS),
+        str(dst),
+    ]
+    subprocess.run(cmd, check=True, capture_output=True)
+    return dst
 
-    # Simple concatenation (no fades — keeps the file simple to overlay audio on)
-    video = concatenate_videoclips(clips, method="compose")
-    print(f"\nTotal duration: {video.duration:.1f} s")
-    print(f"Writing {OUT} ...")
-    video.write_videofile(
+
+def main() -> None:
+    print(f"ffmpeg: {FFMPEG}")
+    segs = []
+    for idx, dur in SHOTS:
+        seg = encode_segment(idx, dur)
+        size_kb = seg.stat().st_size / 1024
+        print(f"  seg{idx}: {dur:>3}s  ({size_kb:>6.1f} KB)")
+        segs.append(seg)
+
+    # Concat with the concat demuxer (lossless — no re-encode)
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        for seg in segs:
+            f.write(f"file '{seg.as_posix()}'\n")
+        list_path = Path(f.name)
+
+    cmd = [
+        FFMPEG, "-y",
+        "-f", "concat", "-safe", "0",
+        "-i", str(list_path),
+        "-c", "copy",
         str(OUT),
-        fps=30,
-        codec="libx264",
-        audio=False,
-        preset="medium",
-        ffmpeg_params=["-pix_fmt", "yuv420p"],  # widely-compatible pixel format
-    )
-    print(f"\nDone: {OUT}  ({OUT.stat().st_size/1e6:.1f} MB)")
+    ]
+    print(f"\nconcat -> {OUT.name}")
+    subprocess.run(cmd, check=True, capture_output=True)
+    list_path.unlink()
+
+    total = sum(d for _, d in SHOTS)
+    print(f"\nTotal duration: {total}s ({total // 60}:{total % 60:02d})")
+    print(f"Done: {OUT}  ({OUT.stat().st_size / 1e6:.1f} MB)")
 
 
 if __name__ == "__main__":

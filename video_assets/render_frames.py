@@ -49,22 +49,27 @@ def text_block(d, x, y, lines, sz=28, color=TEXT, bold=False, line_h=None):
     return y + len(lines) * line_h
 
 
-# ---------------- SHOT 1: title cold open ----------------
+# ---------------- SHOT 1: HumanAI Convention logo on black ----------------
 def shot1():
-    img, d = new_frame("SimSat — 1/9")
-    title = "SimSat"
-    sub = "On-Orbit AI for Satellite Encounter Tasking"
-    f1 = font(140, bold=True)
-    f2 = font(48)
-    bb = d.textbbox((0, 0), title, font=f1)
-    d.text(((W - (bb[2] - bb[0])) / 2, 360), title, fill=ACCENT, font=f1)
-    bb = d.textbbox((0, 0), sub, font=f2)
-    d.text(((W - (bb[2] - bb[0])) / 2, 540), sub, fill=TEXT, font=f2)
-    tag = "DPhi Space × Liquid AI hackathon — May 2026"
-    f3 = font(28)
-    bb = d.textbbox((0, 0), tag, font=f3)
-    d.text(((W - (bb[2] - bb[0])) / 2, 640), tag, fill=DIM, font=f3)
-    img.save(FRAMES / "shot1.png")
+    """Black background with the HumanAI Convention phi-with-dot mark
+    centered in white. Build_video.py applies a 2-second fade-in on this
+    shot so it appears 'into the screen' as the founder voiceover starts.
+    """
+    BRAND = ROOT / "video_assets" / "brand" / "logo_video.png"
+    if not BRAND.exists():
+        # Fallback: regenerate from SVG
+        import cairosvg
+        cairosvg.svg2png(
+            url=str(ROOT / "video_assets" / "brand" / "logo.svg"),
+            output_height=820,
+            write_to=str(BRAND),
+        )
+    logo = Image.open(BRAND).convert("RGBA")
+    canvas = Image.new("RGB", (W, H), (0, 0, 0))  # pure black, not navy
+    x = (W - logo.width) // 2
+    y = (H - logo.height) // 2
+    canvas.paste(logo, (x, y), logo)
+    canvas.save(FRAMES / "shot1.png")
 
 
 # ---------------- SHOT 2: same title, fade Rotterdam in ----------------
@@ -380,13 +385,14 @@ def shot8():
 # ---------------- SHOT 9: close ----------------
 def shot9():
     img, d = new_frame("SimSat — 9/9")
-    y = 80
-    d.text((100, y), "SimSat", fill=ACCENT, font=font(96, bold=True)); y += 130
-    d.text((100, y), "On-Orbit AI for Satellite Encounter Tasking",
-           fill=TEXT, font=font(36)); y += 100
+    y = 60
+    d.text((100, y), "humanaiconvention.com",
+           fill=ACCENT, font=font(72, bold=True)); y += 100
+    d.text((100, y), "SimSat — On-orbit inference, refined by operator-labelled JSON",
+           fill=TEXT, font=font(28)); y += 70
 
-    f = font(28)
-    fb = font(28, bold=True)
+    f = font(26)
+    fb = font(26, bold=True)
     rows = [
         ("Code",     "github.com/HumanAIConvention/SimSat",            "AGPL-3"),
         ("",         "",                                                ""),
@@ -404,12 +410,12 @@ def shot9():
         d.text((280, y), val, fill=TEXT, font=f)
         if license:
             d.text((1500, y), license, fill=ACCENT, font=fb)
-        y += 42
+        y += 40
 
-    y += 80
+    y += 50
     d.text((100, y), "Built for the prize hardware — Orin 16 GB.",
-           fill=ACCENT, font=font(34, bold=True)); y += 60
-    d.text((100, y), "Thanks.", fill=TEXT, font=font(48, bold=True))
+           fill=ACCENT, font=font(32, bold=True)); y += 56
+    d.text((100, y), "Thanks.", fill=TEXT, font=font(44, bold=True))
 
     img.save(FRAMES / "shot9.png")
 

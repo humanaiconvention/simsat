@@ -13,8 +13,8 @@ lift speak for itself.
 
 | # | Time | What's on screen | What's said (voiceover) | Voiceover length |
 |---|---|---|---|---|
-| 1 | 0:00-0:08 | Title card: **SimSat — On-Orbit AI for Satellite Encounter Tasking** with the Rotterdam Sentinel-2 thumbnail (`submission_assets/urban_coastal_ambiguity_port_of_rotterdam.png`) blurred behind | "A satellite has minutes, not hours, between encounter windows." | 4 s |
-| 2 | 0:08-0:20 | Same title card, Rotterdam image sharpens | "There's no round-trip to ground for retraining. The uplink budget can't ferry weight updates either. *What it can ferry is JSON.* SimSat is on-orbit inference, continually refined by operator-labelled JSON within uplink bandwidth parameters." | 12 s |
+| 1 | 0:00-0:30 | **Black background. The HumanAI Convention phi-with-dot mark fades in from black to white over 2 seconds, then holds.** | "I'm Ben Haslam, founder of the HumanAI Convention — a humble project to enable mass human flourishing through robust, ethical training data. The HumanAI Convention's hypothesis is that the synthetic data AI scales on must be balanced with data from human lived experience, and an ethical framework — humans living their best lives — provides the optimal data. That's the **Viability Convention** as I hypothesize it." | 30 s |
+| 2 | 0:30-0:58 | Cross-fade to SimSat title card with Rotterdam Sentinel band | "This proposal takes that hypothesis and operationalizes it through SimSat — a working prototype where the Convention's six non-compensatory viability gates govern continual learning on a real-world problem. We chose satellite encounter triage because the constraints are physical: minutes between decisions, no round-trip to ground, an uplink too small to ferry weight updates. *What it can ferry is JSON.* The architecture is the contribution; the satellite is the test case." | 28 s |
 | 3 | 0:20-0:50 | Architecture diagram top half from `fig/ARCHITECTURE.md` (Sentinel tile → LFM2.5-VL-450M encoder → trust layer + scaffold → action) | "One vision-language tile encoder — Liquid AI's LFM2.5-VL-450M — feeds a planner over encounter windows. A trust layer scores each candidate against geometry, priority, cloud, and visibility. Six viability gates govern any continual learning that runs on top." | 28 s |
 | 4 | 0:50-1:20 | Cut to a terminal showing the v3 holdout report. Highlight rows with on-screen overlays | "Headline: we fine-tuned the LFM encoder with LoRA on 165 operator-reviewed Sentinel-2 tiles. Base model exact action agreement on a balanced 32-row holdout: 0.156. Tuned: zero point eight four four. Plus sixty-eight point eight points." | 28 s |
 | 5 | 1:20-1:35 | Same screen — focus on score MAE row | "Score MAE drops from 0.365 to 0.055 — about a thirty-one-point reduction in band-mapped prediction error. Per-class accept and refine are perfect. The adapter is on Hugging Face under Apache-2.0." | 14 s |
@@ -23,9 +23,10 @@ lift speak for itself.
 | 8 | 3:05-3:30 | Cut to the v3 / v4 / v5 / v3+ comparison panel | "We tried three different ways to beat v three. More imbalanced data: minus six point three. More class-balanced data: minus fifteen point six. A different recipe — lower learning rate, longer schedule, more dropout — minus three point one. Three independent angles, same conclusion: v three sits at a local optimum on this architecture and this holdout. That's empirical evidence for the runtime-TTT lane, not just an architectural claim. All three negatives are published in the methodology doc." | 25 s |
 | 9 | 3:30-3:55 | Final card: repo URL + HF model URLs stacked. White on black | "On-orbit inference, continually refined by operator-labelled JSON within uplink bandwidth parameters. Apache-2.0 weights on Hugging Face. Public training kernels on Kaggle. AGPL-3 code on GitHub. Built for the prize hardware — Orin sixteen gig is what unlocks the long-horizon adaptation we've already demonstrated end-to-end. Thanks." | 22 s |
 
-**Total: 3 min 55 sec.** (was 3:50; added ~5s to shots 1/2/9 to land the
-"on-orbit inference refined by low-bandwidth JSON feedback" framing as
-the cold open and the close, with the numbers as evidence inside.)
+**Total: 4 min 43 sec** (silent demo: 30 + 28 + 30 + 30 + 15 + 55 + 45 + 25
++ 25 = 283s). The HumanAI Convention logo cold-open (shot 1) plus the
+"viability convention → SimSat as test case" bridge (shot 2) frame the
+numbers as evidence; the close card (shot 9) leads with humanaiconvention.com.
 
 ---
 
