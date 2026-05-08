@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"/>
+<title>Text colors</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  html, body { margin:0; height:100%; }
+  body { display:grid; grid-template-rows: repeat(5, 1fr); background:#0a0e27; padding: 0; }
+  .r { display:flex; align-items:center; gap: 18px; padding: 0 24px; border-bottom: 1px solid rgba(255,255,255,.05); }
+  .r:last-child { border-bottom: 0; }
+  .chip { width: 22px; height: 22px; border-radius: 4px; border: 1px solid rgba(255,255,255,.08); }
+  .name { font-family: var(--font-mono); font-size: 11px; color: var(--fg-secondary); letter-spacing: .08em; text-transform: uppercase; min-width: 110px; }
+  .hex { font-family: var(--font-mono); font-size: 11px; color: var(--fg-tertiary); min-width: 80px; }
+  .sample { font-family: var(--font-sans); font-size: 18px; }
+</style>
+</head><body>
+  <div class="r"><div class="chip" style="background:#ffffff"></div><div class="name">fg-bright</div><div class="hex">#ffffff</div><div class="sample" style="color:#fff">Wordmark and rare emphasis</div></div>
+  <div class="r"><div class="chip" style="background:#dce6f5"></div><div class="name">fg-primary</div><div class="hex">#dce6f5</div><div class="sample" style="color:#dce6f5">Body text — calm, technical, confident</div></div>
+  <div class="r"><div class="chip" style="background:#a0aec0"></div><div class="name">fg-secondary</div><div class="hex">#a0aec0</div><div class="sample" style="color:#a0aec0">Meta, captions, supporting copy</div></div>
+  <div class="r"><div class="chip" style="background:#6b7693"></div><div class="name">fg-tertiary</div><div class="hex">#6b7693</div><div class="sample" style="color:#6b7693">Timestamps, logged gates, code line numbers</div></div>
+  <div class="r"><div class="chip" style="background:#fef3c7"></div><div class="name">accent</div><div class="hex">#fef3c7</div><div class="sample" style="color:#fef3c7;font-family:var(--font-mono);font-variant-numeric:tabular-nums;">+68.8 pp</div></div>
+</body></html>

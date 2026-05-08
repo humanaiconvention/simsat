@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"/>
+<title>Backgrounds</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  html, body { margin:0; height:100%; }
+  body { display:grid; grid-template-columns: repeat(4, 1fr); gap: 0; height:100vh; font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; }
+  .s { display:flex; align-items:flex-end; justify-content:flex-start; padding: 14px; color: var(--fg-secondary); border-right: 1px solid rgba(255,255,255,.05); }
+  .s:last-child { border-right: 0; }
+  .s b { color: var(--fg-primary); margin-right: 8px; font-weight:500; }
+  .a { background:#000; }
+  .b { background:#050812; }
+  .c { background:#0a0e27; }
+  .d { background:#131838; }
+</style>
+</head><body>
+  <div class="s a"><span><b>#000000</b>cold-open</span></div>
+  <div class="s b"><span><b>#050812</b>deep</span></div>
+  <div class="s c"><span><b>#0a0e27</b>content</span></div>
+  <div class="s d"><span><b>#131838</b>elevated</span></div>
+</body></html>

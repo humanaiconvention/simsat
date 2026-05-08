@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="utf-8"/>
+<title>Radii & lines</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:#0a0e27; padding: 18px 24px; display:flex; flex-direction:column; gap: 16px; justify-content:center; font-family: var(--font-mono); font-size: 11px; color: var(--fg-secondary); letter-spacing: .04em; }
+  .grp { display:flex; gap: 18px; align-items:center; }
+  .box { background:#131838; border:1px solid rgba(220,230,245,.08); width: 64px; height: 40px; }
+  .lbl { color: var(--fg-tertiary); }
+  .line { height: 1px; }
+  .title { color: var(--fg-primary); width: 80px; text-transform: uppercase; letter-spacing: .12em; }
+</style>
+</head><body>
+  <div class="grp">
+    <span class="title">radii</span>
+    <div class="box" style="border-radius:4px"></div><span class="lbl">4 sm</span>
+    <div class="box" style="border-radius:8px"></div><span class="lbl">8 md</span>
+    <div class="box" style="border-radius:12px"></div><span class="lbl">12 lg</span>
+    <div class="box" style="border-radius:999px;width:80px"></div><span class="lbl">pill</span>
+  </div>
+  <div class="grp" style="flex-direction:column; align-items:flex-start; gap:10px">
+    <div style="display:flex;align-items:center;gap:14px;width:100%"><span class="title">lines</span><div class="line" style="flex:1; background: rgba(220,230,245,.08)"></div><span class="lbl">soft .08</span></div>
+    <div style="display:flex;align-items:center;gap:14px;width:100%"><span class="title"></span><div class="line" style="flex:1; background: rgba(220,230,245,.16)"></div><span class="lbl">mid .16</span></div>
+    <div style="display:flex;align-items:center;gap:14px;width:100%"><span class="title"></span><div class="line" style="flex:1; background: rgba(220,230,245,.32)"></div><span class="lbl">strong .32</span></div>
+  </div>
+</body></html>

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>SimSat — Operator Console</title>
+<link rel="stylesheet" href="../../colors_and_type.css"/>
+<style>
+  html, body, #app { height: 100%; }
+  body { margin: 0; background: #0a0e27; }
+  #app { display: flex; flex-direction: column; }
+  .console { flex: 1; display: flex; min-height: 0; }
+  button:focus-visible, [role="button"]:focus-visible { outline: 2px solid #fef3c7; outline-offset: 2px; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: rgba(220,230,245,0.08); border-radius: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="Atoms.jsx"></script>
+<script type="text/babel" src="TopBar.jsx"></script>
+<script type="text/babel" src="EncounterQueue.jsx"></script>
+<script type="text/babel" src="Inspector.jsx"></script>
+<script type="text/babel" src="ReceiptsPanel.jsx"></script>
+
+<script type="text/babel">
+  function App() {
+    const [activeId, setActiveId] = React.useState('enc_4f65…');
+    return (
+      <div data-screen-label="SimSat Operator Console" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <TopBar />
+        <div className="console">
+          <EncounterQueue activeId={activeId} onPick={setActiveId} />
+          <Inspector />
+          <ReceiptsPanel />
+        </div>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById('app')).render(<App />);
+</script>
+</body>
+</html>

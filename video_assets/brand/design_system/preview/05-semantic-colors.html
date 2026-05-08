@@ -1,0 +1,18 @@
+<!doctype html><html><head><meta charset="utf-8"/>
+<title>Semantic colors</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  html, body { margin:0; height:100%; }
+  body { display:grid; grid-template-columns: repeat(3, 1fr); background:#0a0e27; }
+  .c { display:flex; flex-direction:column; justify-content:center; padding: 22px 24px; gap: 6px; border-right: 1px solid rgba(255,255,255,.05); }
+  .c:last-child { border-right: 0; }
+  .swatch { width: 44px; height: 44px; border-radius: 8px; border: 1px solid rgba(255,255,255,.08); margin-bottom: 6px; }
+  .name { font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-secondary); }
+  .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 22px; letter-spacing: -0.01em; }
+  .meta { font-family: var(--font-mono); font-size: 11px; color: var(--fg-tertiary); }
+</style>
+</head><body>
+  <div class="c"><div class="swatch" style="background:#68d391"></div><div class="name">--pos</div><div class="num" style="color:#68d391">+68.8 pp</div><div class="meta">action lift, gate-pass</div></div>
+  <div class="c"><div class="swatch" style="background:#fc8181"></div><div class="name">--neg</div><div class="num" style="color:#fc8181">−15.6 pp</div><div class="meta">regression, gate-block</div></div>
+  <div class="c"><div class="swatch" style="background:#7aa7ff"></div><div class="name">--info</div><div class="num" style="color:#7aa7ff">refine</div><div class="meta">trust-layer flag</div></div>
+</body></html>

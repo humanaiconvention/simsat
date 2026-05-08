@@ -1,0 +1,28 @@
+<!doctype html><html><head><meta charset="utf-8"/>
+<title>Card</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:#0a0e27; padding: 22px 28px; display:grid; place-items:center; }
+  .card {
+    width: 360px;
+    background:#131838;
+    border:1px solid rgba(220,230,245,.08);
+    border-radius: 8px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 24px 48px -24px rgba(0,0,0,0.6);
+    padding: 18px 20px 20px;
+    color: var(--fg-primary);
+    font-family: var(--font-sans);
+  }
+  .eyebrow { font: 500 10px/1 var(--font-sans); color:#a0aec0; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 12px;}
+  .num { font: 500 36px/1 var(--font-mono); color:#fef3c7; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+  .num small { font-size:13px; color:#a0aec0; margin-left:10px; letter-spacing: 0; font-weight:400;}
+  .meta { font: 400 12px/1.5 var(--font-mono); color:#6b7693; margin-top: 12px;}
+</style>
+</head><body>
+  <div class="card">
+    <div class="eyebrow">Liquid Track · v3 LoRA</div>
+    <div class="num">+68.8 pp <small>action lift</small></div>
+    <div class="meta">32-row stratified holdout · base 0.156 → tuned 0.844</div>
+  </div>
+</body></html>

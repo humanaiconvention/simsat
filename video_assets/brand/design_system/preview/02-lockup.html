@@ -1,0 +1,67 @@
+<!doctype html><html><head><meta charset="utf-8"/>
+<title>Lockup</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:#000; padding: 24px 28px; display:grid; grid-template-columns: repeat(3, 1fr); gap: 1px; align-items: stretch; background:#0f1228; }
+  .col { background:#000; padding: 28px 18px 22px; display:flex; flex-direction:column; align-items:center; justify-content:space-between; gap: 22px; }
+  .lockup { display:flex; flex-direction:column; align-items:center; gap: 16px; }
+  .lockup img { width: 44px; height:auto; }
+  .wm { font-family: var(--font-sans); color:#fff; text-align:center; line-height:1; }
+  .wm__primary { font-size: 34px; letter-spacing: -0.025em; display:inline-flex; align-items:baseline; }
+  .wm__primary .h { font-weight: 200; }
+  .wm__sub { font-size: 11px; font-weight:300; letter-spacing: .26em; text-transform: uppercase; opacity:.72; margin-top: .55em; }
+  .lbl { font-family: var(--font-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color:#6b7693; }
+
+  /* A — italic 300, tighter, lifted slightly */
+  .v-a .ai { font-weight: 300; font-style: italic; letter-spacing: -0.06em; margin-left: .14em; }
+
+  /* B — ultralight 100, dramatic negative tracking */
+  .v-b .ai { font-weight: 100; letter-spacing: -0.10em; margin-left: .12em; font-feature-settings: "ss01" 1; }
+
+  /* C — small caps style, AI rendered as taller ultralight initials with a hairline */
+  .v-c .wm__primary { align-items: baseline; }
+  .v-c .ai { font-weight: 200; letter-spacing: -0.02em; margin-left: .22em; font-style: italic; position: relative; }
+  .v-c .ai::before {
+    content: ""; position:absolute; left: -.12em; right: -.04em; bottom: -.18em;
+    height: 1px; background: #fef3c7; opacity: .8;
+  }
+</style>
+</head><body>
+
+  <div class="col v-a">
+    <span class="lbl">A — Italic 300</span>
+    <div class="lockup">
+      <img src="../assets/logo.svg" alt=""/>
+      <div class="wm">
+        <div class="wm__primary"><span class="h">Human</span><span class="ai">AI</span></div>
+        <div class="wm__sub">Convention</div>
+      </div>
+    </div>
+    <span class="lbl" style="color:#a0aec0">italic, lighter, dynamic</span>
+  </div>
+
+  <div class="col v-b">
+    <span class="lbl">B — Ultralight 100</span>
+    <div class="lockup">
+      <img src="../assets/logo.svg" alt=""/>
+      <div class="wm">
+        <div class="wm__primary"><span class="h">Human</span><span class="ai">AI</span></div>
+        <div class="wm__sub">Convention</div>
+      </div>
+    </div>
+    <span class="lbl" style="color:#a0aec0">hairline strokes, tight</span>
+  </div>
+
+  <div class="col v-c">
+    <span class="lbl">C — Italic + accent rule</span>
+    <div class="lockup">
+      <img src="../assets/logo.svg" alt=""/>
+      <div class="wm">
+        <div class="wm__primary"><span class="h">Human</span><span class="ai">AI</span></div>
+        <div class="wm__sub">Convention</div>
+      </div>
+    </div>
+    <span class="lbl" style="color:#a0aec0">underscored, signature feel</span>
+  </div>
+</body></html>

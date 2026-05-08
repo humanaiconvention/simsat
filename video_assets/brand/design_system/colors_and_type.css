@@ -1,0 +1,239 @@
+/* ============================================================
+   HumanAI Convention — Colors & Type
+   Single source of truth for color tokens, typography vars,
+   and the semantic styles that apply to h1/h2/p/code/etc.
+   ============================================================ */
+
+:root {
+  /* ── Color tokens ─────────────────────────────────────────── */
+
+  /* Backgrounds — pure black for cold-open / hero,
+     dark navy for content frames. */
+  --bg-cold-open: #000000;
+  --bg-content:   #0a0e27;
+  --bg-elevated:  #131838;   /* card / panel surface above content */
+  --bg-deep:      #050812;   /* even darker — for nested wells */
+
+  /* Text */
+  --fg-primary:   #dce6f5;   /* off-white — body text */
+  --fg-secondary: #a0aec0;   /* muted slate — meta, captions */
+  --fg-tertiary:  #6b7693;   /* very dimmed — timestamps, gates */
+  --fg-bright:    #ffffff;   /* reserved for the wordmark + occasional emphasis */
+
+  /* Accent — warm yellow — single-number callouts and section
+     headlines. Use sparingly. */
+  --accent:        #fef3c7;
+  --accent-strong: #fde68a;  /* hover / pressed on accent surfaces */
+
+  /* Semantic — outcome of measurements. Soft, never neon. */
+  --pos: #68d391;            /* lift, success, gate-pass */
+  --neg: #fc8181;            /* regression, gate-block */
+  --info:#7aa7ff;            /* trust-layer / refine flag */
+
+  /* Hairlines, dividers, gates */
+  --line-soft:   rgba(220, 230, 245, 0.08);
+  --line-mid:    rgba(220, 230, 245, 0.16);
+  --line-strong: rgba(220, 230, 245, 0.32);
+
+  /* Inner / outer shadows. Dark plane → very subtle elevation. */
+  --shadow-card: 0 1px 0 rgba(255,255,255,0.04) inset,
+                 0 24px 48px -24px rgba(0,0,0,0.6);
+  --shadow-pop:  0 32px 64px -28px rgba(0,0,0,0.7);
+
+  /* Radii — small, restrained. The brand is geometric, not friendly. */
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-pill: 999px;
+
+  /* Spacing scale — 4px base. */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --s-9: 96px;
+
+  /* ── Type tokens ──────────────────────────────────────────── */
+
+  /* Inter — primary face on the website. Segoe UI Variable is the
+     Windows-bundled near-match noted in the brand spec. */
+  --font-sans: "Inter", "Segoe UI Variable", "Segoe UI", system-ui,
+               -apple-system, "Helvetica Neue", Arial, sans-serif;
+
+  /* Fraunces — used by humanaiconvention.com for editorial quotes
+     and long-form. Optional, only when an editorial register helps. */
+  --font-serif: "Fraunces", "Iowan Old Style", "Source Serif Pro",
+                Georgia, "Times New Roman", serif;
+
+  /* JetBrains Mono — receipts, JSON, terminal output, numbers
+     where the digits need to align. */
+  --font-mono: "JetBrains Mono", "SF Mono", "Cascadia Code",
+               "IBM Plex Mono", Menlo, Consolas, monospace;
+
+  /* Display / hero / body sizes. The whole system runs cool —
+     plenty of leading, modest weight contrast. */
+  --t-display: 96px;   /* lockup wordmark on title cards */
+  --t-h1:      56px;
+  --t-h2:      36px;
+  --t-h3:      24px;
+  --t-lede:    20px;
+  --t-body:    16px;
+  --t-meta:    13px;
+  --t-micro:   11px;
+
+  --lh-tight:  1.05;
+  --lh-snug:   1.2;
+  --lh-normal: 1.45;
+  --lh-loose:  1.6;
+
+  --ls-tight:  -0.02em;  /* display + AI wordmark */
+  --ls-normal: 0;
+  --ls-wide:   0.08em;   /* uppercase eyebrows / labels */
+  --ls-num:    -0.01em;  /* tabular numerals */
+}
+
+/* ── Semantic styles — applied directly to elements ───────── */
+
+body, .ds-body {
+  background: var(--bg-content);
+  color: var(--fg-primary);
+  font-family: var(--font-sans);
+  font-size: var(--t-body);
+  line-height: var(--lh-normal);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, .h1 {
+  font-family: var(--font-sans);
+  font-size: var(--t-h1);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-tight);
+  font-weight: 300;
+  color: var(--fg-bright);
+  margin: 0 0 var(--s-5);
+}
+
+h2, .h2 {
+  font-size: var(--t-h2);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-tight);
+  font-weight: 400;
+  color: var(--fg-bright);
+  margin: 0 0 var(--s-4);
+}
+
+h3, .h3 {
+  font-size: var(--t-h3);
+  line-height: var(--lh-snug);
+  font-weight: 500;
+  color: var(--fg-primary);
+  margin: 0 0 var(--s-3);
+}
+
+.lede, p.lede {
+  font-size: var(--t-lede);
+  line-height: var(--lh-normal);
+  color: var(--fg-primary);
+  font-weight: 400;
+  max-width: 60ch;
+}
+
+p {
+  margin: 0 0 var(--s-4);
+  color: var(--fg-primary);
+}
+
+.eyebrow {
+  font-size: var(--t-micro);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--fg-secondary);
+}
+
+.meta, small {
+  font-size: var(--t-meta);
+  color: var(--fg-secondary);
+  line-height: var(--lh-normal);
+}
+
+.numeral, .stat {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  color: var(--accent);
+}
+
+code, kbd, pre, .mono {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  font-feature-settings: "calt" 0;
+}
+
+code {
+  color: var(--fg-primary);
+  background: rgba(220, 230, 245, 0.06);
+  padding: 1px 6px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-soft);
+}
+
+pre {
+  background: var(--bg-deep);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+  color: var(--fg-primary);
+  overflow-x: auto;
+  line-height: var(--lh-normal);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in oklab, var(--accent) 35%, transparent);
+  transition: border-color 160ms ease, color 160ms ease;
+}
+a:hover { color: var(--accent-strong); border-bottom-color: var(--accent-strong); }
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-soft);
+  margin: var(--s-6) 0;
+}
+
+/* Wordmark utility — used on cold-open and closing cards.
+   Mirrors the SimSat video shot 1 lockup: "Human" light,
+   " AI" regular and slightly tighter, "Convention" smaller,
+   below, slightly dimmed. */
+.wordmark {
+  font-family: var(--font-sans);
+  color: var(--fg-bright);
+  text-align: center;
+  line-height: 1;
+}
+.wordmark__primary {
+  font-size: var(--t-display);
+  letter-spacing: var(--ls-tight);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.18em;
+}
+.wordmark__human    { font-weight: 200; }
+.wordmark__ai       { font-weight: 400; letter-spacing: -0.04em; }
+.wordmark__convention {
+  display: block;
+  margin-top: 0.35em;
+  font-size: 0.42em;
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-primary);
+  opacity: 0.78;
+}

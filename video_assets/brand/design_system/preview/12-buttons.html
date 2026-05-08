@@ -1,0 +1,21 @@
+<!doctype html><html><head><meta charset="utf-8"/>
+<title>Buttons</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:#0a0e27; padding: 22px 28px; display:flex; gap: 14px; align-items:center; justify-content:center; flex-wrap: wrap; font-family: var(--font-sans); }
+  button { font: 500 14px/1 var(--font-sans); padding: 11px 18px; border-radius: 8px; cursor: pointer; transition: border-color 160ms ease, background 160ms ease, color 160ms ease; }
+  .primary { background: transparent; border: 1px solid #fef3c7; color: #fef3c7; }
+  .primary:hover { background: rgba(254,243,199,.08); border-color: #fde68a; color:#fde68a; }
+  .secondary { background: transparent; border: 1px solid rgba(255,255,255,.18); color: #dce6f5; }
+  .secondary:hover { border-color: rgba(255,255,255,.32); }
+  .ghost { background: transparent; border: 1px solid transparent; color: #a0aec0; }
+  .ghost:hover { color: #dce6f5; }
+  .pill { padding: 6px 12px; border-radius: 999px; font-family: var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; border:1px solid rgba(255,255,255,.18); color:#a0aec0; background:transparent; }
+</style>
+</head><body>
+  <button class="primary">Read brief</button>
+  <button class="secondary">View on GitHub</button>
+  <button class="ghost">Skip →</button>
+  <span class="pill">accept</span>
+</body></html>

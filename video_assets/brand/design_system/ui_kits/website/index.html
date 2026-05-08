@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>HumanAI Convention — humanaiconvention.com</title>
+<link rel="stylesheet" href="../../colors_and_type.css"/>
+<style>
+  html, body { margin: 0; }
+  body {
+    background: #000;
+    color: #dce6f5;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  a { color: #fef3c7; text-decoration: none; }
+  a:hover { color: #fde68a; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 40px; }
+
+  /* nav */
+  nav.top {
+    position: sticky; top: 0; z-index: 5;
+    backdrop-filter: blur(12px);
+    background: rgba(0,0,0,0.6);
+    border-bottom: 1px solid rgba(220,230,245,0.06);
+  }
+  nav.top .row {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+  }
+  .lockup { display: flex; align-items: baseline; gap: 8px; line-height: 1; color: #fff; }
+  .lockup img { width: 24px; height: auto; align-self: center;}
+  .lockup .h { font-weight: 200; font-size: 17px; letter-spacing: -0.01em; }
+  .lockup .ai { font-weight: 400; font-size: 17px; letter-spacing: -0.04em; }
+  .lockup .c { font-weight: 300; font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.7; margin-left: 12px; }
+
+  nav.top ul { display: flex; gap: 28px; list-style: none; padding: 0; margin: 0; }
+  nav.top ul a { color: #a0aec0; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
+  nav.top ul a:hover { color: #fff; }
+
+  /* hero */
+  section.hero {
+    position: relative;
+    min-height: 92vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 120px 0 80px;
+  }
+  .eyebrow {
+    font: 500 12px/1 var(--font-sans);
+    color: #a0aec0; letter-spacing: 0.32em; text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  h1.title {
+    font: 200 124px/0.95 var(--font-sans);
+    letter-spacing: -0.045em; color: #fff;
+    margin: 0 0 28px; max-width: 14ch;
+  }
+  h1.title .ai { font-weight: 400; letter-spacing: -0.06em; }
+  h1.title .dot { color: #fef3c7; }
+  .lede {
+    font: 300 26px/1.4 var(--font-sans); color: #dce6f5;
+    max-width: 56ch;
+  }
+  .lede em { color: #fef3c7; font-style: normal; }
+  .ctas { display: flex; gap: 14px; margin-top: 40px; }
+  .btn {
+    font: 500 14px/1 var(--font-sans);
+    padding: 13px 22px; border-radius: 8px; cursor: pointer;
+    transition: border-color 160ms, background 160ms, color 160ms;
+    text-decoration: none; display: inline-block;
+  }
+  .btn.primary { background: transparent; border: 1px solid #fef3c7; color: #fef3c7; }
+  .btn.primary:hover { background: rgba(254,243,199,0.08); border-color: #fde68a; color: #fde68a; }
+  .btn.secondary { background: transparent; border: 1px solid rgba(255,255,255,0.18); color: #dce6f5; }
+  .btn.secondary:hover { border-color: rgba(255,255,255,0.32); }
+
+  /* hero band */
+  .hero-band {
+    margin-top: 80px;
+    border-top: 1px solid rgba(255,255,255,0.10);
+    border-bottom: 1px solid rgba(255,255,255,0.10);
+  }
+  .hero-band .strip {
+    height: 110px;
+    background: url('../../assets/sentinel-rotterdam.png') center / cover no-repeat;
+  }
+  .hero-band .meta {
+    display: flex; justify-content: space-between;
+    padding: 14px 40px;
+    font: 500 12px/1 var(--font-mono);
+    color: #6b7693; letter-spacing: 0.14em; text-transform: uppercase;
+    max-width: 1120px; margin: 0 auto;
+  }
+  .hero-band .meta b { color: #a0aec0; font-weight: 500; margin-right: 8px; }
+
+  /* sections */
+  section.s {
+    padding: 96px 0;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .s h2 {
+    font: 200 56px/1.05 var(--font-sans);
+    letter-spacing: -0.025em; color: #fff; max-width: 22ch;
+    margin: 0 0 24px;
+  }
+  .s h2 em { font-style: normal; color: #fef3c7; font-weight: 300; }
+  .s p.body {
+    font: 400 17px/1.55 var(--font-sans);
+    color: #dce6f5; max-width: 64ch; margin: 0 0 14px;
+  }
+
+  /* receipts grid */
+  .receipts {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1px; background: rgba(220,230,245,0.08);
+    border: 1px solid rgba(220,230,245,0.08);
+    margin-top: 56px;
+  }
+  .receipt {
+    background: #0a0e27; padding: 36px 32px;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+  .receipt .num {
+    font: 400 56px/1 var(--font-mono);
+    color: #fef3c7; font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .receipt .lbl {
+    font: 500 11px/1 var(--font-sans);
+    color: #a0aec0; letter-spacing: 0.18em; text-transform: uppercase;
+  }
+  .receipt .det {
+    font: 400 13px/1.55 var(--font-mono);
+    color: #6b7693; margin-top: auto;
+  }
+
+  /* gates strip */
+  .gates {
+    margin-top: 56px;
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    gap: 0; border: 1px solid rgba(220,230,245,0.08);
+    background: rgba(220,230,245,0.04);
+  }
+  .gate {
+    padding: 28px 22px;
+    border-right: 1px solid rgba(220,230,245,0.08);
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .gate:last-child { border-right: none; }
+  .gate .ix {
+    font: 500 11px/1 var(--font-mono); color: #6b7693;
+  }
+  .gate .name {
+    font: 500 14px/1.3 var(--font-sans);
+    color: #dce6f5;
+  }
+  .gate .role {
+    font: 400 12px/1.55 var(--font-mono);
+    color: #a0aec0;
+  }
+
+  /* convention */
+  .conv-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 56px;
+    margin-top: 40px;
+  }
+  .conv-grid .col h3 {
+    font: 500 14px/1 var(--font-sans);
+    color: #fef3c7; letter-spacing: 0.18em; text-transform: uppercase;
+    margin: 0 0 18px;
+  }
+  .conv-grid .col p {
+    font: 400 16px/1.55 var(--font-sans);
+    color: #dce6f5; margin: 0 0 12px;
+  }
+  .conv-grid .col p.quiet { color: #a0aec0; font-size: 14px; }
+
+  /* footer */
+  footer {
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 48px 0 64px; margin-top: 60px;
+  }
+  footer .row {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 48px;
+  }
+  footer .links { display: grid; grid-template-columns: repeat(3, auto); gap: 12px 64px;
+    font: 400 13px/1.6 var(--font-mono); color: #a0aec0; }
+  footer .links b { color: #dce6f5; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; font-size: 11px; display: block; margin-bottom: 6px; }
+  footer .colophon {
+    font: 400 12px/1.6 var(--font-mono); color: #6b7693;
+    margin-top: 32px; padding-top: 24px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    display: flex; justify-content: space-between;
+  }
+</style>
+</head>
+<body data-screen-label="humanaiconvention.com landing">
+
+<nav class="top">
+  <div class="wrap row">
+    <a class="lockup" href="#">
+      <img src="../../assets/logo.svg" alt=""/>
+      <span class="h">Human</span><span class="ai">AI</span>
+      <span class="c">Convention</span>
+    </a>
+    <ul>
+      <li><a href="#simsat">SimSat</a></li>
+      <li><a href="#receipts">Receipts</a></li>
+      <li><a href="#convention">Convention</a></li>
+      <li><a href="#brief">Brief</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Liquid Track · General AI Track · May 2026</div>
+    <h1 class="title">SimSat<span class="dot">.</span></h1>
+    <p class="lede">On-orbit inference, continually refined by operator-labelled JSON within uplink bandwidth parameters — governed by <em>six non-compensatory viability gates</em>.</p>
+    <div class="ctas">
+      <a class="btn primary" href="#brief">Read the brief</a>
+      <a class="btn secondary" href="https://github.com/HumanAIConvention/SimSat">View on GitHub</a>
+    </div>
+  </div>
+
+  <div class="hero-band">
+    <div class="strip"></div>
+    <div class="meta">
+      <span><b>Sensor</b>sentinel-2c</span>
+      <span><b>Cloud</b>48.78 %</span>
+      <span><b>Cadence</b>5d encounter window</span>
+      <span><b>Backbone</b>LFM2.5-VL-450M + MuZero</span>
+      <span><b>Trace</b>4f65355f5c95</span>
+    </div>
+  </div>
+</header>
+
+<section class="s" id="simsat">
+  <div class="wrap">
+    <div style="font:500 11px/1 var(--font-mono); color:#a0aec0; letter-spacing:0.18em; text-transform:uppercase; margin-bottom:22px;">01 — The architecture</div>
+    <h2>The <em>architecture</em> is the contribution.</h2>
+    <p class="body">A satellite has minutes, not hours, between encounter windows. The next window arrives in minutes; sensor distributions drift between them. SimSat decides on-orbit and refines through what it can ferry: operator-labelled JSON within uplink bandwidth parameters.</p>
+    <p class="body">The same pipeline you would deploy on-orbit runs the demo here. It chooses an action — accept, refine, defer, skip — and writes a receipt. Six viability gates rule on each potential update before any weight moves.</p>
+  </div>
+</section>
+
+<section class="s" id="receipts">
+  <div class="wrap">
+    <div style="font:500 11px/1 var(--font-mono); color:#a0aec0; letter-spacing:0.18em; text-transform:uppercase; margin-bottom:22px;">02 — The numbers</div>
+    <h2>Plus sixty-eight point eight points.</h2>
+    <p class="body">Same v3 LoRA, same 32-row stratified holdout, evaluated head-to-head against the base model — and again with class-targeted test-time training, and again with three deliberate ablations to falsify the claim.</p>
+
+    <div class="receipts">
+      <div class="receipt">
+        <span class="lbl">v3 holdout · base → tuned</span>
+        <span class="num">+68.8 pp</span>
+        <span class="det">exact_action_agreement<br/>0.156 → 0.844 · parse_rate 1.000</span>
+      </div>
+      <div class="receipt">
+        <span class="lbl">Class-targeted TTT · skip</span>
+        <span class="num">+37.5 pp</span>
+        <span class="det">0.375 → 0.750 · 16 steps<br/>balanced 4-row support</span>
+      </div>
+      <div class="receipt">
+        <span class="lbl">Class-targeted TTT · defer</span>
+        <span class="num">+75.0 pp</span>
+        <span class="det">0.125 → 0.875 · 16 steps<br/>balanced 4-row support</span>
+      </div>
+    </div>
+
+    <p class="body" style="margin-top:32px; color:#a0aec0;">We logged the negatives too. v4, v5, and v3+ — three independent angles, same conclusion: v3 sits at a local optimum on this architecture and this holdout. Receipts for the failures live alongside the wins.</p>
+  </div>
+</section>
+
+<section class="s" id="convention">
+  <div class="wrap">
+    <div style="font:500 11px/1 var(--font-mono); color:#a0aec0; letter-spacing:0.18em; text-transform:uppercase; margin-bottom:22px;">03 — The convention</div>
+    <h2>Six gates. No averaging.</h2>
+    <p class="body">A viable update is one that passes every gate. The gates do not vote. They are not compensatory. Any single block ends the update; the trace persists.</p>
+
+    <div class="gates">
+      <div class="gate"><span class="ix">01</span><span class="name">information_gain</span><span class="role">Will the update teach anything new?</span></div>
+      <div class="gate"><span class="ix">02</span><span class="name">observation_quality</span><span class="role">Is the input good enough to learn from?</span></div>
+      <div class="gate"><span class="ix">03</span><span class="name">metadata_consistency</span><span class="role">Do the receipts agree with each other?</span></div>
+      <div class="gate"><span class="ix">04</span><span class="name">update_magnitude</span><span class="role">Is the proposed delta within bounds?</span></div>
+      <div class="gate"><span class="ix">05</span><span class="name">update_rate</span><span class="role">Are we updating too quickly to recover?</span></div>
+      <div class="gate"><span class="ix">06</span><span class="name">error_balance</span><span class="role">Are recent errors balanced or skewing?</span></div>
+    </div>
+
+    <div class="conv-grid">
+      <div class="col">
+        <h3>Operator action</h3>
+        <p>The operator decides. SimSat proposes. The trust layer challenges. The operator overrides — and the override becomes the next training row.</p>
+        <p class="quiet">Every action ships with a JSON receipt: trace id, sensor, cloud, gate verdict, lora_delta, reviewer.</p>
+      </div>
+      <div class="col">
+        <h3>License</h3>
+        <p>Apache-2.0 for weights and adapters. AGPL-3 for the operator console and continual-learning runtime.</p>
+        <p class="quiet">Code: github.com/HumanAIConvention/SimSat<br/>Weights: huggingface.co/HumanAIConvention<br/>Kernels: kaggle.com/benhaslam/simsat-lfm2-5-vl-v3-training</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="brief">
+  <div class="wrap">
+    <div class="row">
+      <a class="lockup" href="#">
+        <img src="../../assets/logo.svg" alt=""/>
+        <span class="h">Human</span><span class="ai">AI</span>
+        <span class="c">Convention</span>
+      </a>
+      <div class="links">
+        <div><b>Read</b><a href="#">SUBMISSION_BRIEF.md</a><br/><a href="#">SUBMISSION_CASEBOOK.md</a><br/><a href="#">VIDEO_SCRIPT.md</a></div>
+        <div><b>Run</b><a href="#">github.com/HumanAIConvention/SimSat</a><br/><a href="#">huggingface.co/HumanAIConvention</a><br/><a href="#">kaggle.com/benhaslam</a></div>
+        <div><b>Convention</b><a href="#">Six viability gates</a><br/><a href="#">The Viability Convention</a><br/><a href="#">Mass human flourishing</a></div>
+      </div>
+    </div>
+    <div class="colophon">
+      <span>The Viability Convention · Mass human flourishing through robust, ethical training data</span>
+      <span>humanaiconvention.com · 2026</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

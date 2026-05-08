@@ -129,3 +129,7 @@ video_assets/segments/*.mp4
 # assets so the silent video can be rebuilt from a fresh clone.
 !video_assets/frames/shot2.png
 !video_assets/frames/shot9.png
+
+# Don't commit the source ZIP from Claude Design exports — the unpacked
+# design system lives at video_assets/brand/design_system/.
+HumanAI*Design*System*.zip

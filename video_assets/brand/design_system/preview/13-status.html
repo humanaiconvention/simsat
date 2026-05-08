@@ -1,0 +1,19 @@
+<!doctype html><html><head><meta charset="utf-8"/>
+<title>Status badges</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:#0a0e27; padding: 22px 28px; display:flex; gap: 12px; align-items:center; justify-content:center; flex-wrap:wrap; font-family: var(--font-mono); }
+  .b { display:inline-flex; align-items:center; gap: 8px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; padding: 5px 12px 5px 10px; border-radius: 999px; border: 1px solid rgba(220,230,245,.16); color: var(--fg-primary); background: rgba(220,230,245,.04); }
+  .dot { width: 8px; height: 8px; border-radius: 999px; }
+  .accept .dot { background:#68d391; }
+  .refine .dot { background:#7aa7ff; box-shadow: inset 0 0 0 1.5px rgba(0,0,0,.4); }
+  .defer  .dot { background: transparent; border:1.5px solid #a0aec0; box-sizing: border-box; }
+  .skip   .dot { background:#fc8181; }
+</style>
+</head><body>
+  <span class="b accept"><span class="dot"></span>accept</span>
+  <span class="b refine"><span class="dot"></span>refine</span>
+  <span class="b defer"><span class="dot"></span>defer</span>
+  <span class="b skip"><span class="dot"></span>skip</span>
+</body></html>

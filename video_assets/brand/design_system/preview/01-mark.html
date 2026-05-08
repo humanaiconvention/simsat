@@ -1,0 +1,25 @@
+<!doctype html><html><head><meta charset="utf-8"/>
+<title>Mark</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  html, body { margin:0; height:100%; }
+  body { display:grid; place-items:center; background: var(--bg-cold-open); }
+  .row { display:flex; align-items:center; gap: 56px; padding: 24px; }
+  .swatch { display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .swatch img { display:block; }
+  .lbl { font-family: var(--font-mono); font-size: 11px; color: var(--fg-secondary); letter-spacing: .08em; text-transform: uppercase; }
+  .a { background: var(--bg-cold-open); }
+  .b { background: var(--bg-content); }
+  .c { background: #ffffff; }
+  .tile { width: 110px; height: 110px; display:grid; place-items:center; border-radius: 8px; border: 1px solid var(--line-soft); }
+  .c.tile { border-color: rgba(0,0,0,.08); }
+  .tile img { width: 60%; height:auto; }
+  .c img { filter: invert(1); }
+</style>
+</head><body>
+<div class="row">
+  <div class="swatch"><div class="tile a"><img src="../assets/logo.svg" alt=""/></div><div class="lbl">on black</div></div>
+  <div class="swatch"><div class="tile b"><img src="../assets/logo.svg" alt=""/></div><div class="lbl">on navy</div></div>
+  <div class="swatch"><div class="tile c"><img src="../assets/logo.svg" alt=""/></div><div class="lbl">inverted</div></div>
+</div>
+</body></html>
