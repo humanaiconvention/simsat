@@ -1,0 +1,459 @@
+{
+  "summary": {
+    "new_traces": 56,
+    "defer_envelope": 16,
+    "other": 40
+  },
+  "defer_envelope": [
+    {
+      "trace_id": "trace_ad3d751dd45e45cb97277d8d20e0b436",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Port of Singapore",
+      "cloud": 73.248863,
+      "elev": 54.05834501652253,
+      "off_nadir": 31.469452774889007
+    },
+    {
+      "trace_id": "trace_1d5a40191ee248deae9b539c4c926c4e",
+      "scenario": "urban_coastal_ambiguity",
+      "target_label": "Shenzhen Bay",
+      "cloud": 59.483862,
+      "elev": 81.32559026343833,
+      "off_nadir": 7.708857764068006
+    },
+    {
+      "trace_id": "trace_c47c106458474ff7a2c3122fc0e533e1",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Port of Singapore",
+      "cloud": 73.248863,
+      "elev": 54.03585825388498,
+      "off_nadir": 31.488469668874266
+    },
+    {
+      "trace_id": "trace_95635b6e91854ed8ac64aa8f4f8224ef",
+      "scenario": "urban_coastal_ambiguity",
+      "target_label": "Shenzhen Bay",
+      "cloud": 59.483862,
+      "elev": 81.72257478612016,
+      "off_nadir": 7.35658806447778
+    },
+    {
+      "trace_id": "trace_99e528eb92064c86ac47840b05327b0e",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Port of Singapore",
+      "cloud": 73.248863,
+      "elev": 53.93708058731689,
+      "off_nadir": 31.57193970045724
+    },
+    {
+      "trace_id": "trace_cec2af7826554d67a0d5119de257dded",
+      "scenario": "urban_coastal_ambiguity",
+      "target_label": "Shenzhen Bay",
+      "cloud": 59.483862,
+      "elev": 82.80415970955066,
+      "off_nadir": 6.3964583615360056
+    },
+    {
+      "trace_id": "trace_08e17675ab8e46b8a5b91dacdce22586",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Port of Singapore",
+      "cloud": 73.248863,
+      "elev": 53.84542074819354,
+      "off_nadir": 31.649341656096485
+    },
+    {
+      "trace_id": "trace_79d6ea1042474a98adf8ca60a98c5857",
+      "scenario": "urban_coastal_ambiguity",
+      "target_label": "Shenzhen Bay",
+      "cloud": 59.483862,
+      "elev": 83.40205659786852,
+      "off_nadir": 5.865489163434909
+    },
+    {
+      "trace_id": "trace_722ca10bb3b6435ab9b3e483a747a847",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Port of Singapore",
+      "cloud": 73.248863,
+      "elev": 53.73346351528512,
+      "off_nadir": 31.743833578836515
+    },
+    {
+      "trace_id": "trace_9dd7b653f47c4284a02f21b6fb69092c",
+      "scenario": "urban_coastal_ambiguity",
+      "target_label": "Shenzhen Bay",
+      "cloud": 59.483862,
+      "elev": 83.86508889703593,
+      "off_nadir": 5.454193389999789
+    },
+    {
+      "trace_id": "trace_96b7d33a8239413794f0042823190073",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Port of Singapore",
+      "cloud": 73.248863,
+      "elev": 53.601580178806806,
+      "off_nadir": 31.855081211037415
+    },
+    {
+      "trace_id": "trace_4364adb9700d4b24b2e7af2c428feff2",
+      "scenario": "urban_coastal_ambiguity",
+      "target_label": "Shenzhen Bay",
+      "cloud": 59.483862,
+      "elev": 84.15988586804266,
+      "off_nadir": 5.192293004786329
+    },
+    {
+      "trace_id": "trace_35d1cc5e6aec4d65a1696624ad389381",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Port of Singapore",
+      "cloud": 73.248863,
+      "elev": 53.567807208390036,
+      "off_nadir": 31.882572911633325
+    },
+    {
+      "trace_id": "trace_25fc23f625ac4454afe9216a4a06d640",
+      "scenario": "urban_coastal_ambiguity",
+      "target_label": "Shenzhen Bay",
+      "cloud": 59.483862,
+      "elev": 84.25974546792118,
+      "off_nadir": 5.1035641941922
+    },
+    {
+      "trace_id": "trace_2a09501ab31248b4b52f990092f2ee9f",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Port of Singapore",
+      "cloud": 73.248863,
+      "elev": 53.70426035653365,
+      "off_nadir": 31.767628647395334
+    },
+    {
+      "trace_id": "trace_f3e8fbd1815b4db892963ea916a76ad1",
+      "scenario": "urban_coastal_ambiguity",
+      "target_label": "Shenzhen Bay",
+      "cloud": 59.483862,
+      "elev": 84.15445513978904,
+      "off_nadir": 5.197098816696393
+    }
+  ],
+  "other": [
+    {
+      "trace_id": "trace_192e2ad385754ddd9909cadf77f92d4b",
+      "scenario": "disaster_response_weather",
+      "target_label": "Fort Myers Coast",
+      "cloud": 0.820876,
+      "elev": 36.91493578624804,
+      "off_nadir": 45.32881419745071
+    },
+    {
+      "trace_id": "trace_0080749acd3e42f5a29aeb9b43017db6",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Panama Canal",
+      "cloud": 49.300835,
+      "elev": 41.76636390429638,
+      "off_nadir": 41.56800825001518
+    },
+    {
+      "trace_id": "trace_554fa2635d0f46b1868e6eb2c9661fa5",
+      "scenario": "disaster_response_weather",
+      "target_label": "Houston Ship Channel",
+      "cloud": 98.019367,
+      "elev": 63.85136159309374,
+      "off_nadir": 23.075528881684043
+    },
+    {
+      "trace_id": "trace_7799ecb6621a43f88237ac6d1434bf95",
+      "scenario": "disaster_response_weather",
+      "target_label": "New Orleans Delta",
+      "cloud": 37.91354,
+      "elev": 77.02806404154398,
+      "off_nadir": 11.516333780257767
+    },
+    {
+      "trace_id": "trace_2c9e87197a684639baa4fd7ad53eb745",
+      "scenario": "pedospheric_integrity",
+      "target_label": "Mato Grosso Agricultural Frontier",
+      "cloud": 3.405938,
+      "elev": 79.4906366786922,
+      "off_nadir": 9.33346771614575
+    },
+    {
+      "trace_id": "trace_e731275fc9a84506b7f967f50ad222f4",
+      "scenario": "disaster_response_weather",
+      "target_label": "Fort Myers Coast",
+      "cloud": 0.820876,
+      "elev": 36.894895501724704,
+      "off_nadir": 45.34410479378726
+    },
+    {
+      "trace_id": "trace_ff5b87bca7934d95a6e947d7fd3178e6",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Panama Canal",
+      "cloud": 49.300835,
+      "elev": 41.80465461351889,
+      "off_nadir": 41.537667225154024
+    },
+    {
+      "trace_id": "trace_dfeb812f40224c4d92f78e8f7bd6ce45",
+      "scenario": "disaster_response_weather",
+      "target_label": "Houston Ship Channel",
+      "cloud": 98.019367,
+      "elev": 63.75819299204167,
+      "off_nadir": 23.15640496815856
+    },
+    {
+      "trace_id": "trace_a148d4ec22374f87b51243fb770a669c",
+      "scenario": "disaster_response_weather",
+      "target_label": "New Orleans Delta",
+      "cloud": 37.91354,
+      "elev": 76.73954128951266,
+      "off_nadir": 11.771518653078338
+    },
+    {
+      "trace_id": "trace_a080f5537fc54d62a3de60a44293a55c",
+      "scenario": "pedospheric_integrity",
+      "target_label": "Mato Grosso Agricultural Frontier",
+      "cloud": 3.405938,
+      "elev": 79.23204743803937,
+      "off_nadir": 9.562529989483014
+    },
+    {
+      "trace_id": "trace_15c2edf548c044739c89a9cb2c622047",
+      "scenario": "disaster_response_weather",
+      "target_label": "Fort Myers Coast",
+      "cloud": 0.820876,
+      "elev": 36.82331290886801,
+      "off_nadir": 45.3986600817412
+    },
+    {
+      "trace_id": "trace_137eb470a909493daf7a94c2857590ea",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Panama Canal",
+      "cloud": 49.300835,
+      "elev": 41.904076861945384,
+      "off_nadir": 41.4588411541143
+    },
+    {
+      "trace_id": "trace_3ef401464de04fe981a3560d0fd0aee4",
+      "scenario": "disaster_response_weather",
+      "target_label": "Houston Ship Channel",
+      "cloud": 98.019367,
+      "elev": 63.42850747046934,
+      "off_nadir": 23.442445755217655
+    },
+    {
+      "trace_id": "trace_e282a5bae49c40fa83f9729390dc5909",
+      "scenario": "disaster_response_weather",
+      "target_label": "New Orleans Delta",
+      "cloud": 37.91354,
+      "elev": 76.9759721999205,
+      "off_nadir": 11.561991695933273
+    },
+    {
+      "trace_id": "trace_dd31271d6fb040fe9553f4dd3be3f7c7",
+      "scenario": "pedospheric_integrity",
+      "target_label": "Mato Grosso Agricultural Frontier",
+      "cloud": 3.405938,
+      "elev": 78.34577024641771,
+      "off_nadir": 10.347281521978244
+    },
+    {
+      "trace_id": "trace_fff2a36ba34f439a8953468416f6c0df",
+      "scenario": "disaster_response_weather",
+      "target_label": "Fort Myers Coast",
+      "cloud": 0.820876,
+      "elev": 36.813376225834745,
+      "off_nadir": 45.40435567614992
+    },
+    {
+      "trace_id": "trace_06a2fc2956a44dc7b2f72287c307623b",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Panama Canal",
+      "cloud": 49.300835,
+      "elev": 41.957332934099476,
+      "off_nadir": 41.41658849017814
+    },
+    {
+      "trace_id": "trace_05442b790d2f44e1ba7f53272c891994",
+      "scenario": "disaster_response_weather",
+      "target_label": "Houston Ship Channel",
+      "cloud": 98.019367,
+      "elev": 63.38637744918206,
+      "off_nadir": 23.477955487454302
+    },
+    {
+      "trace_id": "trace_33b1a67599654728bf607aea68917736",
+      "scenario": "disaster_response_weather",
+      "target_label": "New Orleans Delta",
+      "cloud": 37.91354,
+      "elev": 77.51236319258621,
+      "off_nadir": 11.087508619541037
+    },
+    {
+      "trace_id": "trace_e48ccaf564274724a01f454f74318762",
+      "scenario": "pedospheric_integrity",
+      "target_label": "Mato Grosso Agricultural Frontier",
+      "cloud": 3.405938,
+      "elev": 77.71149753404708,
+      "off_nadir": 10.909281585172348
+    },
+    {
+      "trace_id": "trace_0e5749e6269040369b725104bd61595b",
+      "scenario": "disaster_response_weather",
+      "target_label": "Fort Myers Coast",
+      "cloud": 0.820876,
+      "elev": 36.86435835556913,
+      "off_nadir": 45.36578316449417
+    },
+    {
+      "trace_id": "trace_018c9366fe1044f987ba2bcec77e9d5b",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Panama Canal",
+      "cloud": 49.300835,
+      "elev": 42.000049818557834,
+      "off_nadir": 41.382679978354396
+    },
+    {
+      "trace_id": "trace_2768bfb75028464f94a31fe89affb842",
+      "scenario": "disaster_response_weather",
+      "target_label": "Houston Ship Channel",
+      "cloud": 98.019367,
+      "elev": 63.6197954900505,
+      "off_nadir": 23.275634634471245
+    },
+    {
+      "trace_id": "trace_039b8ee80cdc434db221faa2d581ef1f",
+      "scenario": "disaster_response_weather",
+      "target_label": "New Orleans Delta",
+      "cloud": 37.91354,
+      "elev": 77.98048309006182,
+      "off_nadir": 10.673243651147574
+    },
+    {
+      "trace_id": "trace_00e6b328c6af45d3bad8dbb5ac4be7e6",
+      "scenario": "pedospheric_integrity",
+      "target_label": "Mato Grosso Agricultural Frontier",
+      "cloud": 3.405938,
+      "elev": 78.37748893632727,
+      "off_nadir": 10.319791288310597
+    },
+    {
+      "trace_id": "trace_36c96ef1ba2c427186d2c9e9422b481d",
+      "scenario": "disaster_response_weather",
+      "target_label": "Fort Myers Coast",
+      "cloud": 0.820876,
+      "elev": 36.90773916041234,
+      "off_nadir": 45.33296574440129
+    },
+    {
+      "trace_id": "trace_a1add98c7ba34d8d9659d58223709ee2",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Panama Canal",
+      "cloud": 49.300835,
+      "elev": 42.0321471747515,
+      "off_nadir": 41.357187082436944
+    },
+    {
+      "trace_id": "trace_95566c2f69c243f180e65767faed0373",
+      "scenario": "disaster_response_weather",
+      "target_label": "Houston Ship Channel",
+      "cloud": 98.019367,
+      "elev": 63.8202495784673,
+      "off_nadir": 23.10181405059298
+    },
+    {
+      "trace_id": "trace_e241d1f6f88a4f20b33b136c68f5bfbb",
+      "scenario": "disaster_response_weather",
+      "target_label": "New Orleans Delta",
+      "cloud": 37.91354,
+      "elev": 78.37091908543553,
+      "off_nadir": 10.327608695515055
+    },
+    {
+      "trace_id": "trace_50b3404d4c874871a418fb2b02c87bab",
+      "scenario": "pedospheric_integrity",
+      "target_label": "Mato Grosso Agricultural Frontier",
+      "cloud": 3.405938,
+      "elev": 78.98302340826531,
+      "off_nadir": 9.783548752774044
+    },
+    {
+      "trace_id": "trace_2a0582b76dc74ce48f0200305fae38c4",
+      "scenario": "disaster_response_weather",
+      "target_label": "Fort Myers Coast",
+      "cloud": 0.820876,
+      "elev": 36.94345513601908,
+      "off_nadir": 45.30595919275211
+    },
+    {
+      "trace_id": "trace_f8cb810db9bc4c09b5a5094be24174b4",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Panama Canal",
+      "cloud": 49.300835,
+      "elev": 42.05356431049502,
+      "off_nadir": 41.3401637832763
+    },
+    {
+      "trace_id": "trace_f79e75ba66f940289c2ab5982c74fa63",
+      "scenario": "disaster_response_weather",
+      "target_label": "Houston Ship Channel",
+      "cloud": 98.019367,
+      "elev": 63.98656684225215,
+      "off_nadir": 22.95754961933581
+    },
+    {
+      "trace_id": "trace_928ac85015964dfc9b498f048cbe117d",
+      "scenario": "disaster_response_weather",
+      "target_label": "New Orleans Delta",
+      "cloud": 37.91354,
+      "elev": 78.67465989814967,
+      "off_nadir": 10.058653157936126
+    },
+    {
+      "trace_id": "trace_2df4de5e66344de2889bf9fc084a2524",
+      "scenario": "pedospheric_integrity",
+      "target_label": "Mato Grosso Agricultural Frontier",
+      "cloud": 3.405938,
+      "elev": 79.51612217634072,
+      "off_nadir": 9.311254615566112
+    },
+    {
+      "trace_id": "trace_a5ca585b44974702bc8d1aab4ce6bec1",
+      "scenario": "disaster_response_weather",
+      "target_label": "Fort Myers Coast",
+      "cloud": 0.820876,
+      "elev": 36.97145347659228,
+      "off_nadir": 45.2848098824249
+    },
+    {
+      "trace_id": "trace_5c94f7addc7141a386545650b0735c0c",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Panama Canal",
+      "cloud": 49.300835,
+      "elev": 42.06426053228351,
+      "off_nadir": 41.331646262137156
+    },
+    {
+      "trace_id": "trace_793bfa13b9234eb78e70ecfae42b772f",
+      "scenario": "disaster_response_weather",
+      "target_label": "Houston Ship Channel",
+      "cloud": 98.019367,
+      "elev": 64.1177453452952,
+      "off_nadir": 22.843743263772634
+    },
+    {
+      "trace_id": "trace_1afaa2a9f0d54408b2e5a4599ca90477",
+      "scenario": "disaster_response_weather",
+      "target_label": "New Orleans Delta",
+      "cloud": 37.91354,
+      "elev": 78.8838378571636,
+      "off_nadir": 9.873402540846236
+    },
+    {
+      "trace_id": "trace_8983d31e4bf643d48e6e1b3805c8ce6d",
+      "scenario": "pedospheric_integrity",
+      "target_label": "Mato Grosso Agricultural Frontier",
+      "cloud": 3.405938,
+      "elev": 79.96392081307106,
+      "off_nadir": 8.914392797185771
+    }
+  ]
+}

@@ -1,0 +1,171 @@
+{
+  "summary": {
+    "new_traces": 20,
+    "adversarial": 15,
+    "other": 5
+  },
+  "adversarial": [
+    {
+      "trace_id": "trace_629fa88f9fbc4f2b8659a1cae3bd74fa",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Port of Singapore",
+      "cloud": 73.248863,
+      "elev": 53.91734549801732,
+      "off_nadir": 31.588044182721283
+    },
+    {
+      "trace_id": "trace_88d7da57e876466cbf6bc7cabfefc605",
+      "scenario": "urban_coastal_ambiguity",
+      "target_label": "Port of Rotterdam",
+      "cloud": 72.463602,
+      "elev": 73.6412221122101,
+      "off_nadir": 14.496971864071039
+    },
+    {
+      "trace_id": "trace_9672909f7dc6466da5d5d294f698fbfc",
+      "scenario": "urban_coastal_ambiguity",
+      "target_label": "Shenzhen Bay",
+      "cloud": 59.483862,
+      "elev": 83.38788835632413,
+      "off_nadir": 5.87800831957601
+    },
+    {
+      "trace_id": "trace_529d4946dbfa450cb243848cf081c77e",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Port of Singapore",
+      "cloud": 73.248863,
+      "elev": 53.95788780073565,
+      "off_nadir": 31.553867829072917
+    },
+    {
+      "trace_id": "trace_762879f1c55c4b42af7f7410f5a15fda",
+      "scenario": "urban_coastal_ambiguity",
+      "target_label": "Port of Rotterdam",
+      "cloud": 72.463602,
+      "elev": 73.48443638029659,
+      "off_nadir": 14.635094119278353
+    },
+    {
+      "trace_id": "trace_9908e2dc2df74c2fb4311ffb7770a459",
+      "scenario": "urban_coastal_ambiguity",
+      "target_label": "Shenzhen Bay",
+      "cloud": 59.483862,
+      "elev": 83.10213967985773,
+      "off_nadir": 6.13177282031407
+    },
+    {
+      "trace_id": "trace_8d40b4eadac74d46a7e69664a6dea25b",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Port of Singapore",
+      "cloud": 73.248863,
+      "elev": 54.02344130019361,
+      "off_nadir": 31.4986096833919
+    },
+    {
+      "trace_id": "trace_d8cd31e7cb5f47458d80d7dd36bf43b7",
+      "scenario": "urban_coastal_ambiguity",
+      "target_label": "Port of Rotterdam",
+      "cloud": 72.463602,
+      "elev": 73.12876855228171,
+      "off_nadir": 14.948324417498455
+    },
+    {
+      "trace_id": "trace_c6d6a77d94564aa6a25e2afba0193e12",
+      "scenario": "urban_coastal_ambiguity",
+      "target_label": "Shenzhen Bay",
+      "cloud": 59.483862,
+      "elev": 82.44661217554959,
+      "off_nadir": 6.7138017956455736
+    },
+    {
+      "trace_id": "trace_37a254e27c2441e58929fdfae602c9f4",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Port of Singapore",
+      "cloud": 73.248863,
+      "elev": 54.06810598945719,
+      "off_nadir": 31.46097368097359
+    },
+    {
+      "trace_id": "trace_d9035aef2a3a4e1abd71c20775a53a81",
+      "scenario": "urban_coastal_ambiguity",
+      "target_label": "Port of Rotterdam",
+      "cloud": 72.463602,
+      "elev": 72.72054224247573,
+      "off_nadir": 15.307672536105141
+    },
+    {
+      "trace_id": "trace_adea515872954ba69ae00b119fb134de",
+      "scenario": "urban_coastal_ambiguity",
+      "target_label": "Shenzhen Bay",
+      "cloud": 59.483862,
+      "elev": 81.70280781629342,
+      "off_nadir": 7.3739815016591255
+    },
+    {
+      "trace_id": "trace_2319275224314c80b60a105d5f9b9f5d",
+      "scenario": "maritime_chokepoints",
+      "target_label": "Port of Singapore",
+      "cloud": 73.248863,
+      "elev": 54.08255375763215,
+      "off_nadir": 31.448810169971747
+    },
+    {
+      "trace_id": "trace_52c6587658c8414dabae6726df97d69e",
+      "scenario": "urban_coastal_ambiguity",
+      "target_label": "Port of Rotterdam",
+      "cloud": 72.463602,
+      "elev": 72.57443197817344,
+      "off_nadir": 15.435328881603814
+    },
+    {
+      "trace_id": "trace_9b8663b4cec64eb1869acccb54f53a54",
+      "scenario": "urban_coastal_ambiguity",
+      "target_label": "Shenzhen Bay",
+      "cloud": 59.483862,
+      "elev": 81.30527326707065,
+      "off_nadir": 7.726714024045796
+    }
+  ],
+  "other": [
+    {
+      "trace_id": "trace_48507a95fbae4a819f796dd97af0441e",
+      "scenario": "pedospheric_integrity",
+      "target_label": "Mato Grosso Agricultural Frontier",
+      "cloud": 3.405938,
+      "elev": 80.55307574966915,
+      "off_nadir": 8.3920555472997
+    },
+    {
+      "trace_id": "trace_a50be962d7694471bc72ef9523da8612",
+      "scenario": "pedospheric_integrity",
+      "target_label": "Mato Grosso Agricultural Frontier",
+      "cloud": 3.405938,
+      "elev": 80.6286549984141,
+      "off_nadir": 8.325025657724716
+    },
+    {
+      "trace_id": "trace_fdafe6b9e16f450eb18675626c4445df",
+      "scenario": "pedospheric_integrity",
+      "target_label": "Mato Grosso Agricultural Frontier",
+      "cloud": 3.405938,
+      "elev": 80.68758684608942,
+      "off_nadir": 8.272736046101638
+    },
+    {
+      "trace_id": "trace_b989fa6e35aa4c258b75f271407353d7",
+      "scenario": "pedospheric_integrity",
+      "target_label": "Mato Grosso Agricultural Frontier",
+      "cloud": 3.405938,
+      "elev": 80.62206185906656,
+      "off_nadir": 8.330798747134866
+    },
+    {
+      "trace_id": "trace_24482829f0054591bd34f13b146638ea",
+      "scenario": "pedospheric_integrity",
+      "target_label": "Mato Grosso Agricultural Frontier",
+      "cloud": 3.405938,
+      "elev": 80.54329130158833,
+      "off_nadir": 8.400620527390116
+    }
+  ]
+}
