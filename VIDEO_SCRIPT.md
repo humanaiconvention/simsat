@@ -20,7 +20,7 @@ lift speak for itself.
 | 5 | 1:20-1:35 | Same screen — focus on score MAE row | "Score MAE drops from 0.365 to 0.055 — about a thirty-one-point reduction in band-mapped prediction error. Per-class accept and refine are perfect. The adapter is on Hugging Face under Apache-2.0." | 14 s |
 | 6 | 1:35-2:30 | Cut to `submission_assets/urban_coastal_ambiguity_port_of_rotterdam.png` full-frame. Side panel showing the Rotterdam case row from `SUBMISSION_CASEBOOK.md` (scaffold accept → trust refine → operator accept) | "Rotterdam, forty-eight point seven eight percent cloud cover. The scaffold says accept — geometry is good. The trust layer disagrees, flips it to refine — the cloud might hide containers. The operator confirms accept: the visible fifty-one percent of the basin was operationally enough. This is the calibration loop. The same loop runs on every window." | 55 s |
 | 7 | 2:30-3:05 | Cut to terminal: `cat .kaggle_output/ttt_proof_of_life_receipt.json | head -40`. Highlight `stream_summary.applied: 5`, `blocked: 0`, and the post-MAE perfect score | "VLA-layer test-time training, exercised end-to-end on a real LFM checkpoint. Five operator-labelled encounters in. Five online LoRA gradient steps applied. Zero viability gates triggered. Post-MAE held at perfect on a stratified probe. The mechanism is real, not vapor." | 32 s |
-| 8 | 3:05-3:30 | Cut to the v3 / v4 / v5 comparison row from `LFM_FINETUNE_METHODOLOGY.md` §6.6 | "We trained v4 too. It regressed minus six point three points. We didn't ship it. That negative result is published in the methodology doc next to the wins. Honest negatives are part of the rubric story for us." | 22 s |
+| 8 | 3:05-3:30 | Cut to the v3 / v4 / v5 comparison panel | "We trained v4 too — minus six point three points action agreement. Then v5 with class-balanced data — minus fifteen point six. Two consecutive negatives on more training data confirm v3 is at the inflection point on this architecture and this holdout. The architectural lesson is that the next lift comes from runtime test-time training, not more offline corpus expansion. Both negatives are published next to the wins." | 22 s |
 | 9 | 3:30-3:50 | Final card: repo URL + HF model URLs stacked. White on black | "Apache-2.0 weights on Hugging Face. Public training kernels on Kaggle. AGPL-3 code on GitHub. Built for the prize hardware — Orin sixteen gig is what unlocks the long-horizon test-time training. Thanks." | 18 s |
 
 **Total: 3 min 50 sec.**
@@ -60,9 +60,12 @@ lift speak for itself.
 > applied. Zero viability gates triggered. Post-MAE held at perfect on a
 > stratified probe. The mechanism is real, not vapor.
 >
-> We trained v4 too. It regressed minus six point three points. We didn't
-> ship it. That negative result is published in the methodology doc next to
-> the wins. Honest negatives are part of the rubric story for us.
+> We trained v4 too — minus six point three points action agreement. Then
+> v5 with class-balanced data — minus fifteen point six. Two consecutive
+> negatives on more training data confirm v3 is at the inflection point
+> on this architecture and this holdout. The architectural lesson is that
+> the next lift comes from runtime test-time training, not more offline
+> corpus expansion. Both negatives are published next to the wins.
 >
 > Apache-2.0 weights on Hugging Face. Public training kernels on Kaggle.
 > AGPL-3 code on GitHub. Built for the prize hardware — Orin sixteen gig is

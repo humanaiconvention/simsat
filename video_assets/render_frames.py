@@ -301,41 +301,54 @@ def shot7():
     img.save(FRAMES / "shot7.png")
 
 
-# ---------------- SHOT 8: v4 negative result ----------------
+# ---------------- SHOT 8: v4 + v5 negative results ----------------
 def shot8():
-    img, d = new_frame("SimSat — 8/9 · honest negative")
-    y = 80
-    d.text((100, y), "v4 — published negative result", fill=ACCENT, font=font(48, bold=True)); y += 90
+    img, d = new_frame("SimSat — 8/9 · two honest negatives")
+    y = 70
+    d.text((100, y), "v4 + v5 — published negative results", fill=ACCENT, font=font(44, bold=True)); y += 75
 
-    f = font(30)
-    fb = font(30, bold=True)
-    d.text((100, y), "Same recipe + 20 more train rows (all refine + accept).", fill=TEXT, font=f); y += 50
-    d.text((100, y), "Result on the same 32-row holdout:", fill=TEXT, font=f); y += 80
+    f = font(26)
+    fb = font(26, bold=True)
+    d.text((100, y), "Same recipe + more train rows (different mixes). Same 32-row holdout.",
+           fill=TEXT, font=f); y += 60
 
     rows = [
-        ("Metric",                  "v3",     "v4",     "Δ"),
-        ("─" * 26,                  "─" * 8,  "─" * 8,  "─" * 8),
-        ("exact_action_agreement",  "0.844",  "0.781",  "−0.063"),
-        ("score_mae",               "0.055",  "0.066",  "+0.011"),
-        ("defer per-class",         "0.625",  "0.500",  "−0.125"),
-        ("skip per-class",          "0.750",  "0.625",  "−0.125"),
+        ("Metric",                  "v3",     "v4",     "v5",     "v3 vs v5"),
+        ("─" * 26,                  "─" * 6,  "─" * 6,  "─" * 6,  "─" * 8),
+        ("exact_action_agreement",  "0.844",  "0.781",  "0.688",  "−0.156"),
+        ("score_mae (lower better)","0.055",  "0.066",  "0.084",  "+0.029"),
+        ("useful_agreement",        "0.688",  "0.656",  "0.812",  "+0.124"),
+        ("",                        "",       "",       "",       ""),
+        ("accept per-class",        "1.000",  "1.000",  "1.000",  "0.000"),
+        ("refine per-class",        "1.000",  "1.000",  "0.875",  "−0.125"),
+        ("defer per-class",         "0.625",  "0.500",  "0.625",  "0.000"),
+        ("skip per-class",          "0.750",  "0.625",  "0.250",  "−0.500"),
     ]
-    for col_i, (m, v3, v4, dlt) in enumerate(rows):
-        c = TEXT if col_i < 2 else (RED if "−" in dlt or "+0.011" in dlt else TEXT)
-        d.text((100, y),  m,   fill=c, font=f)
+    for col_i, (m, v3, v4, v5, dlt) in enumerate(rows):
+        if not m and not v3:
+            y += 18
+            continue
+        is_data = col_i >= 2
+        c = TEXT
+        # Highlight regressions in red
+        bad = is_data and ("−" in dlt or "+0.029" in dlt or "+0.011" in dlt)
+        good = is_data and ("+0.124" in dlt)
+        if bad: c = RED
+        if good: c = GREEN
+        d.text((100, y),  m,   fill=c if is_data else TEXT, font=f)
         d.text((780, y),  v3,  fill=c, font=f)
-        d.text((990, y),  v4,  fill=c, font=f)
-        d.text((1200, y), dlt, fill=c, font=fb if col_i >= 2 else f)
-        y += 50
+        d.text((960, y),  v4,  fill=c, font=f)
+        d.text((1140, y), v5,  fill=c, font=fb if bad else f)
+        d.text((1340, y), dlt, fill=c, font=fb if (bad or good) else f)
+        y += 42
 
-    y += 50
-    d.text((100, y), "Decision: v3 retained as canonical. v4 not promoted.",
-           fill=ACCENT, font=font(32, bold=True)); y += 60
-    d.text((100, y), "Honest negatives are part of the rubric story.",
-           fill=DIM, font=font(28)); y += 50
-    y += 20
-    d.text((100, y), "v5 (BEAST overnight): defer-class-balanced retrain, +50% defer rows.",
-           fill=DIM, font=font(24))
+    y += 30
+    d.text((100, y), "Two consecutive negatives on +data → v3 is at the inflection point.",
+           fill=ACCENT, font=font(28, bold=True)); y += 50
+    d.text((100, y), "Decision: v3 retained canonical. v4/v5 weights kept for transparency.",
+           fill=ACCENT, font=font(26, bold=True)); y += 50
+    d.text((100, y), "Architectural lesson: next lift comes from runtime TTT, not more offline data.",
+           fill=DIM, font=font(22))
 
     img.save(FRAMES / "shot8.png")
 

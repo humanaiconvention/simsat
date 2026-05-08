@@ -346,6 +346,56 @@ representation in directions that hurt defer and skip recovery.
    operator-empirical override threshold sits where defer cases would
    actually emerge — see §6.5 calibration finding.
 
+### 6.7 v5 — class-balanced augmentation also regressed (kept v3 canonical)
+
+**v4 hypothesis:** more train data → +action agreement. **v4 result:** -6.3 pp
+action; the +20 rows were imbalanced (refine + accept only).
+
+**v5 hypothesis (correction of v4):** *class-balanced* augmentation will lift
+the minority classes that v4 hurt. Operator reviewed a third gallery batch
+specifically targeting the defer envelope (cloud 55-90% OR off_nadir>28° +
+elev<35°): 17 defer / 30 refine / 8 accept / 1 skip. New v5 train: 241 rows
+(60 accept / 51 defer / 105 refine / 25 skip). Same recipe; trained on BEAST
+RTX 2080 (Kaggle weekly GPU quota hit). Reduced effective_batch 8 → 4 to fit
+8 GB VRAM.
+
+**v5 result on the same 32-row holdout:**
+
+| Metric | v3 (canonical) | v5 | Delta |
+|---|---|---|---|
+| `exact_action_agreement` | **0.844** | 0.688 | **-0.156** |
+| `score_mae` (lower better) | **0.055** | 0.084 | +0.029 (worse) |
+| `useful_agreement` | 0.688 | **0.812** | +0.125 |
+| `parse_rate` | 1.000 | 1.000 | 0.000 |
+
+| Per-class | v3 | v5 | Delta |
+|---|---|---|---|
+| accept | 1.000 | 1.000 | 0.000 |
+| refine | **1.000** | 0.875 | -0.125 |
+| defer  | 0.625 | 0.625 | 0.000 |
+| skip   | **0.750** | 0.250 | **-0.500** |
+
+**Diagnosis:** the +17 defer rows pulled the model's borderline-class decision
+boundary toward `defer` and away from `skip` — even though only 1 new skip
+row landed, the model now over-predicts `defer` on cases the operator labelled
+`skip`. The `useful_agreement` lift is real but it's a binary metric
+(`accept ∨ refine`); the 4-way exact-action accuracy is what the rubric
+rewards, and on that v5 falls 15.6 pp behind v3.
+
+**Two consecutive negative results on +data confirm v3 sits at the
+inflection point of the training-data curve for this architecture / holdout
+combination.** The architectural lesson is consistent with the central
+submission claim: static corpus rebalancing cannot substitute for the
+on-orbit TTT loop. The right next experiment is *runtime adaptation under
+the six viability gates* (per `LFM_TTT_POC.md`), not a v6 with even more
+class-balanced data — there is no free lunch in further offline-corpus
+expansion before live encounter feedback.
+
+**Decision:** v3 retained as canonical. v5 weights kept locally for
+transparency at `.kaggle_output_v5/simsat-lfm25vl-450m-v5/` but **not
+promoted to HuggingFace**. v3 (`HumanAIConvention/simsat-lfm25vl-450m-v3`)
+remains the submission adapter.
+
 ## 7. Limitations
 
 These are honest limits of the v1 fine-tune; documenting them up front:

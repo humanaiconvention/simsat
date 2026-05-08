@@ -46,8 +46,12 @@ baseline 0.54, random 0.25). 410/410 LoRA tensor sanity gate pass
 
 ## Honest negatives published next to wins
 
-- **v4 fine-tune regressed −6.3 pp** on action vs v3 — kept v3 canonical, did
-  not promote v4 to HF. ([§6.6 in methodology](./LFM_FINETUNE_METHODOLOGY.md))
+- **v4 fine-tune regressed −6.3 pp** on action vs v3 (imbalanced +20 train);
+  **v5 regressed −15.6 pp** (defer-class-balanced +56 train cratered skip
+  0.75→0.25). Kept v3 canonical both times. **Two consecutive negative
+  results on +data confirm v3 is at the data-curve inflection point** —
+  the architectural argument for runtime TTT over more offline corpus
+  expansion. ([§6.6 / §6.7 methodology](./LFM_FINETUNE_METHODOLOGY.md))
 - **v12 retrain on dataset v4 hit a parse-rate regression** vs v11 — kept v11
   canonical, published the negative. ([KNOWN_ISSUES.md #28](./KNOWN_ISSUES.md))
 - **Cross-distribution N=152 v11 eval = 0.30 vs in-distribution N=37 = 0.86**
