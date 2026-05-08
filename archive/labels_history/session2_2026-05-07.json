@@ -1,0 +1,87 @@
+{
+  "reviewer": "ben",
+  "generated_at": "2026-05-07T22:24:59.833Z",
+  "total_in_pool": 20,
+  "labels": [
+    {
+      "trace_id": "trace_629fa88f9fbc4f2b8659a1cae3bd74fa",
+      "action": "refine"
+    },
+    {
+      "trace_id": "trace_88d7da57e876466cbf6bc7cabfefc605",
+      "action": "refine"
+    },
+    {
+      "trace_id": "trace_9672909f7dc6466da5d5d294f698fbfc",
+      "action": "refine"
+    },
+    {
+      "trace_id": "trace_48507a95fbae4a819f796dd97af0441e",
+      "action": "accept"
+    },
+    {
+      "trace_id": "trace_529d4946dbfa450cb243848cf081c77e",
+      "action": "refine"
+    },
+    {
+      "trace_id": "trace_762879f1c55c4b42af7f7410f5a15fda",
+      "action": "refine"
+    },
+    {
+      "trace_id": "trace_9908e2dc2df74c2fb4311ffb7770a459",
+      "action": "refine"
+    },
+    {
+      "trace_id": "trace_a50be962d7694471bc72ef9523da8612",
+      "action": "accept"
+    },
+    {
+      "trace_id": "trace_8d40b4eadac74d46a7e69664a6dea25b",
+      "action": "refine"
+    },
+    {
+      "trace_id": "trace_d8cd31e7cb5f47458d80d7dd36bf43b7",
+      "action": "refine"
+    },
+    {
+      "trace_id": "trace_c6d6a77d94564aa6a25e2afba0193e12",
+      "action": "refine"
+    },
+    {
+      "trace_id": "trace_fdafe6b9e16f450eb18675626c4445df",
+      "action": "accept"
+    },
+    {
+      "trace_id": "trace_37a254e27c2441e58929fdfae602c9f4",
+      "action": "refine"
+    },
+    {
+      "trace_id": "trace_d9035aef2a3a4e1abd71c20775a53a81",
+      "action": "refine"
+    },
+    {
+      "trace_id": "trace_adea515872954ba69ae00b119fb134de",
+      "action": "refine"
+    },
+    {
+      "trace_id": "trace_b989fa6e35aa4c258b75f271407353d7",
+      "action": "accept"
+    },
+    {
+      "trace_id": "trace_2319275224314c80b60a105d5f9b9f5d",
+      "action": "refine"
+    },
+    {
+      "trace_id": "trace_52c6587658c8414dabae6726df97d69e",
+      "action": "refine"
+    },
+    {
+      "trace_id": "trace_9b8663b4cec64eb1869acccb54f53a54",
+      "action": "refine"
+    },
+    {
+      "trace_id": "trace_24482829f0054591bd34f13b146638ea",
+      "action": "accept"
+    }
+  ]
+}

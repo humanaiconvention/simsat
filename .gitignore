@@ -97,3 +97,24 @@ diloco_kaggle_staging/
 
 # scratch files
 review.txt
+
+# --- Local Kaggle pull / kernel-output cache (regenerable from kaggle CLI) ---
+.kaggle_output*/
+.kaggle_pull*/
+
+# --- Kaggle notebook downloads at root (clutter from kaggle kernels output) ---
+/simsat-lfm2-5-vl-*.ipynb
+/simsat-gemma4-*.ipynb
+
+# --- Operator-review label downloads from gallery_review.html ---
+/labels*.json
+/labels*(*).json
+
+# --- Generated review tool output ---
+/gallery_review.html
+
+# --- Test artifacts (one-off API probes etc.) ---
+/test_sentinel*.png
+
+# --- Materializer snapshots (regenerable; debug data only) ---
+scripts/_*_snapshot.json
