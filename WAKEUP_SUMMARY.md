@@ -58,7 +58,7 @@ redesigned to show the PRE/POST table).
 
 ---
 
-## Full overnight experiment log (5 TTT receipts + 1 fine-tune)
+## Full overnight experiment log (7 TTT receipts + 1 fine-tune)
 
 | # | Experiment | Time | Result |
 |---|---|---|---|
@@ -70,7 +70,7 @@ redesigned to show the PRE/POST table).
 | Phase 4 | Class-targeted TTT v2 (defer-only stream) | 02:50-03:30 | **+75 pp lift on defer class.** Two-class generalization confirmed. |
 | Phase 4 | Stratified TTT v2 (4 per class × 4 = 16 steps, full 32-row holdout) | 03:30-04:00 | **Robustness check: net +3.1 pp overall, no catastrophic regression.** Skip +37.5 pp, defer/refine each −12.5 pp, accept flat. Architectural lesson: targeted TTT > stratified for max lift; stratified is safety floor. |
 
-All 5 receipts published in `.kaggle_output/*receipt*.json`. All 18+
+All 7 TTT receipts published in `.kaggle_output/*receipt*.json`. 20+
 commits pushed to `humanaiconvention/simsat` main.
 
 ---
