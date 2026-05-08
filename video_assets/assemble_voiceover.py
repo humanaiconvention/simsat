@@ -41,15 +41,15 @@ SAMPLE_RATE = 48000
 
 # Match SHOTS in build_video.py — (shot_idx, duration_seconds)
 SHOTS = [
-    (1, 30),  # HAIC logo cold open + founder voiceover
-    (2, 28),  # SimSat title bridge
-    (3, 30),  # architecture diagram
-    (4, 30),  # v3 holdout headline
-    (5, 15),  # MAE drop callout
-    (6, 55),  # Rotterdam case
-    (7, 45),  # TTT receipts
-    (8, 25),  # honest negatives
-    (9, 25),  # close card
+    (1, 36),
+    (2, 34),
+    (3, 30),
+    (4, 30),
+    (5, 22),
+    (6, 35),
+    (7, 65),
+    (8, 38),
+    (9, 30),
 ]
 
 
@@ -121,8 +121,10 @@ def main() -> None:
                     help="only report what's recorded vs missing — don't build")
     ap.add_argument("--music", type=Path, default=None,
                     help="optional background music file (mp3/wav)")
-    ap.add_argument("--music-vol", type=float, default=0.06,
-                    help="background music volume 0.0-1.0 (default 0.06)")
+    ap.add_argument("--music-vol", type=float, default=0.45,
+                    help="base background music volume 0.0-1.0 (default 0.45). "
+                         "This is the music level during silence — when voice plays "
+                         "the sidechain compressor ducks it ~8dB lower automatically.")
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT,
                     help=f"output mp4 path (default {DEFAULT_OUT.name})")
     args = ap.parse_args()
@@ -195,24 +197,38 @@ def main() -> None:
     # Mux voiceover (and optional music) onto silent video
     print(f"\nMuxing onto {SILENT.name} ...")
     if args.music and args.music.exists():
-        # Mix VO + music with sidechain ducking so music dips when VO speaks
+        # Sidechain-ducked music: voice signal compresses music when present,
+        # music breathes back up during silence between voiceover beats.
+        # - music_vol      sets the base music level (loud — the "breathing-up" target)
+        # - duck_ratio=8   heavy compression when voice present (~8 dB drop)
+        # - attack=10ms    fast clamp when voice starts
+        # - release=400ms  smooth recovery as voice ends — gives the breathe-up feel
         cmd = [
             FFMPEG, "-y",
             "-i", str(SILENT),
             "-i", str(voiceover),
-            "-i", str(args.music),
+            "-stream_loop", "-1", "-i", str(args.music),
             "-filter_complex",
-            f"[2:a]volume={args.music_vol},aloop=loop=-1:size=2e9[bgm];"
-            f"[1:a][bgm]amix=inputs=2:duration=first:dropout_transition=0[out]",
+            (
+                f"[2:a]aresample=48000,aformat=channel_layouts=stereo,"
+                f"volume={args.music_vol}[bgm_base];"
+                f"[1:a]aresample=48000,aformat=channel_layouts=stereo[vo_main];"
+                f"[1:a]aresample=48000,aformat=channel_layouts=stereo[vo_sc];"
+                f"[bgm_base][vo_sc]sidechaincompress="
+                f"threshold=0.03:ratio=8:attack=10:release=400:level_sc=1.0[bgm_ducked];"
+                f"[vo_main][bgm_ducked]amix=inputs=2:duration=first:"
+                f"dropout_transition=0:weights=1.0 0.9[mixed]"
+            ),
             "-map", "0:v",
-            "-map", "[out]",
+            "-map", "[mixed]",
             "-c:v", "copy",
             "-c:a", "aac",
             "-b:a", "192k",
-            "-shortest",
+            "-t", str(sum(d for _, d in SHOTS)),
             str(args.out),
         ]
-        print(f"  + music: {args.music.name} @ vol {args.music_vol}")
+        print(f"  + music: {args.music.name} (base vol {args.music_vol}, "
+              f"ducks under voice, breathes up during silence)")
     else:
         cmd = [
             FFMPEG, "-y",

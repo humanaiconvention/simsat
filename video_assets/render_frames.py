@@ -63,34 +63,42 @@ def shot1():
                         from shot1 to shot1_full at ~4-5s, timed for the
                         moment the founder says 'HumanAI Convention'.
     """
+    # Re-render the logo at a smaller scale (was 820) so the full mark
+    # (including the bar's bottom terminal) fits with proper breathing
+    # room above + below the lockup, and so the mark doesn't get cropped.
     BRAND = ROOT / "video_assets" / "brand" / "logo_video.png"
-    if not BRAND.exists():
-        import cairosvg
-        cairosvg.svg2png(
-            url=str(ROOT / "video_assets" / "brand" / "logo.svg"),
-            output_height=820,
-            write_to=str(BRAND),
-        )
+    LOGO_HEIGHT = 720
+    import cairosvg
+    cairosvg.svg2png(
+        url=str(ROOT / "video_assets" / "brand" / "logo.svg"),
+        output_height=LOGO_HEIGHT,
+        write_to=str(BRAND),
+    )
 
-    # Crop logo_video.png to just the mark — the SVG viewBox is 200×272.7,
-    # the mark portion is roughly 0-227 (top 83% of the height). At
-    # output_height=820 that's ~683 px. We keep a small bottom margin so
-    # the mark doesn't sit flush against the wordmark in the second frame.
+    # Crop the rendered PNG to just the mark glyph (no wordmark space —
+    # cairosvg can't render the Inter wordmark anyway, so the bottom of
+    # the SVG is empty pixels). The bar bottom sits at viewBox y≈257,
+    # so we crop just past that to viewBox y=263 to keep the full bar
+    # plus a hair of margin without including stray empty rows.
     full = Image.open(BRAND).convert("RGBA")
-    mark_h = int(full.height * (227.0 / 272.71322893124))
+    mark_h = int(full.height * (263.0 / 272.71322893124))
     mark = full.crop((0, 0, full.width, mark_h))
 
     # Mark + wordmark layout — compute mark position so the FULL lockup
-    # (mark + 2 wordmark lines) is vertically centered. We'll use the same
-    # mark position for both frames so the crossfade only adds the wordmark
-    # without a double-image artifact mid-transition.
+    # (mark + 2 wordmark lines) is vertically centered with a slight
+    # upward bias so the mark feels prominent during the cold-open phase
+    # before the wordmark crossfades in. The same mark position is used
+    # in both frames so the crossfade is purely wordmark-on-vs-off.
     scale = full.height / 272.71322893124
-    line1_size = int(39.91544817563599 * scale)   # "Human AI" ~120 px
-    line2_size = int(25.400739748131986 * scale)  # "Convention" ~76 px
-    gap_mark_to_line1 = int(20 * scale)   # breathing room
-    gap_line1_to_line2 = int(8 * scale)
+    line1_size = int(39.91544817563599 * scale)   # "Human AI" ~105 px at 720 height
+    line2_size = int(25.400739748131986 * scale)  # "Convention" ~67 px
+    gap_mark_to_line1 = int(34 * scale)   # generous breathing room (was 20 viewBox units)
+    gap_line1_to_line2 = int(10 * scale)
     total_h = mark.height + gap_mark_to_line1 + line1_size + gap_line1_to_line2 + line2_size
-    mark_top = (H - total_h) // 2
+    # Center vertically, then bias up by ~30px so the mark sits a touch
+    # above center — addresses the "mark feels low / cuts off from text"
+    # perception during the mark-only opening seconds.
+    mark_top = max(20, (H - total_h) // 2 - 30)
     mark_x = (W - mark.width) // 2
 
     # Frame 1: mark only at the locked position (so the crossfade is purely

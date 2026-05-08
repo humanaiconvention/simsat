@@ -473,6 +473,16 @@ If no argument is provided, the script runs the `sentinel_current` test by defau
 
 ---
 
+## Demo video credits
+
+Background music in the demo video: **"moodtimeflow"** by **ribhavagrawal**,
+via [Pixabay](https://pixabay.com/music/ambient-sci-fi-moodtimeflow-194382/)
+(Pixabay Content License — free for commercial use, attribution not
+required but given). Full media credits in
+[`video_assets/CREDITS.md`](./video_assets/CREDITS.md).
+
+---
+
 **HumanAI Convention** · [humanaiconvention.com](https://humanaiconvention.com)
 On-orbit inference, continually refined by operator-labelled JSON within
 uplink bandwidth parameters — six viability gates govern which feedback

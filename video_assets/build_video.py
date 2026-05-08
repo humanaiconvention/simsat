@@ -39,16 +39,21 @@ FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
 FPS = 30
 
 # (shot_idx, duration_seconds)
+# Durations = max(original_design, recorded_voiceover + 0.5s buffer).
+# Where the voiceover is shorter than the original visual allocation
+# (shots 3, 4, 6), the visual holds its full length and the audio is
+# padded with trailing silence. Background music breathes up during the
+# silent passages.
 SHOTS = [
-    (1, 30),  # HAIC logo on black, fade-in 2s; founder voiceover
-    (2, 28),  # SimSat title; bridge voiceover
-    (3, 30),  # architecture diagram
-    (4, 30),  # v3 holdout headline
-    (5, 15),  # MAE drop callout
-    (6, 55),  # Rotterdam case
-    (7, 45),  # TTT receipts
-    (8, 25),  # honest negatives
-    (9, 25),  # close card
+    (1, 36),  # HAIC logo + founder voiceover  (orig 30, vo 35.7s — extended)
+    (2, 34),  # SimSat title bridge             (orig 28, vo 32.9s — extended)
+    (3, 30),  # architecture diagram            (orig 30, vo 25.0s — kept)
+    (4, 30),  # v3 holdout headline             (orig 30, vo 24.0s — kept)
+    (5, 22),  # MAE drop callout                (orig 15, vo 21.4s — extended)
+    (6, 35),  # Rotterdam case                  (vo 25.6s + ~10s tail dwell)
+    (7, 65),  # TTT receipts                    (orig 45, vo 63.9s — extended)
+    (8, 38),  # honest negatives                (orig 25, vo 37.6s — extended)
+    (9, 30),  # close card                      (orig 25, vo 29.5s — extended)
 ]
 
 
