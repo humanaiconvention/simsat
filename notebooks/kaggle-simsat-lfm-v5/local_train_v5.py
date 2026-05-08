@@ -9,10 +9,10 @@ Memory-conservative version of the Kaggle v3/v4 kernel:
 - 5 epochs (matches v3 recipe).
 - repetition_penalty=1.05 in eval.
 
-Outputs:
-  D:/SimSat/.kaggle_output_v5/simsat-lfm25vl-450m-v5/  — adapter
-  D:/SimSat/.kaggle_output_v5/holdout_eval_report.json — base vs tuned
-  D:/SimSat/.kaggle_output_v5/{base,tuned}_predictions.json
+Outputs (relative to repo root):
+  .kaggle_output_v5/simsat-lfm25vl-450m-v5/  — adapter
+  .kaggle_output_v5/holdout_eval_report.json — base vs tuned
+  .kaggle_output_v5/{base,tuned}_predictions.json
 """
 from __future__ import annotations
 
