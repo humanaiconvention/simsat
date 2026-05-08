@@ -51,25 +51,85 @@ def text_block(d, x, y, lines, sz=28, color=TEXT, bold=False, line_h=None):
 
 # ---------------- SHOT 1: HumanAI Convention logo on black ----------------
 def shot1():
-    """Black background with the HumanAI Convention phi-with-dot mark
-    centered in white. Build_video.py applies a 2-second fade-in on this
-    shot so it appears 'into the screen' as the founder voiceover starts.
+    """Two frames for the cold open:
+
+    - shot1.png       — phi-with-dot mark only, centered, white on pure black.
+                        Build_video.py fades this in from black over 2s.
+    - shot1_full.png  — same composition, with the website-style "Human AI /
+                        Convention" wordmark rendered below the mark in
+                        Segoe UI (Inter is the website's preferred face but
+                        isn't installed; Segoe UI Variable is the closest
+                        Windows-bundled match). Build_video.py crossfades
+                        from shot1 to shot1_full at ~4-5s, timed for the
+                        moment the founder says 'HumanAI Convention'.
     """
     BRAND = ROOT / "video_assets" / "brand" / "logo_video.png"
     if not BRAND.exists():
-        # Fallback: regenerate from SVG
         import cairosvg
         cairosvg.svg2png(
             url=str(ROOT / "video_assets" / "brand" / "logo.svg"),
             output_height=820,
             write_to=str(BRAND),
         )
-    logo = Image.open(BRAND).convert("RGBA")
-    canvas = Image.new("RGB", (W, H), (0, 0, 0))  # pure black, not navy
-    x = (W - logo.width) // 2
-    y = (H - logo.height) // 2
-    canvas.paste(logo, (x, y), logo)
-    canvas.save(FRAMES / "shot1.png")
+
+    # Crop logo_video.png to just the mark — the SVG viewBox is 200×272.7,
+    # the mark portion is roughly 0-227 (top 83% of the height). At
+    # output_height=820 that's ~683 px. We keep a small bottom margin so
+    # the mark doesn't sit flush against the wordmark in the second frame.
+    full = Image.open(BRAND).convert("RGBA")
+    mark_h = int(full.height * (227.0 / 272.71322893124))
+    mark = full.crop((0, 0, full.width, mark_h))
+
+    # Mark + wordmark layout — compute mark position so the FULL lockup
+    # (mark + 2 wordmark lines) is vertically centered. We'll use the same
+    # mark position for both frames so the crossfade only adds the wordmark
+    # without a double-image artifact mid-transition.
+    scale = full.height / 272.71322893124
+    line1_size = int(39.91544817563599 * scale)   # "Human AI" ~120 px
+    line2_size = int(25.400739748131986 * scale)  # "Convention" ~76 px
+    gap_mark_to_line1 = int(20 * scale)   # breathing room
+    gap_line1_to_line2 = int(8 * scale)
+    total_h = mark.height + gap_mark_to_line1 + line1_size + gap_line1_to_line2 + line2_size
+    mark_top = (H - total_h) // 2
+    mark_x = (W - mark.width) // 2
+
+    # Frame 1: mark only at the locked position (so the crossfade is purely
+    # wordmark-on-vs-off and doesn't visibly shift the mark).
+    canvas1 = Image.new("RGB", (W, H), (0, 0, 0))
+    canvas1.paste(mark, (mark_x, mark_top), mark)
+    canvas1.save(FRAMES / "shot1.png")
+
+    # Frame 2: mark + wordmark, mark at the same locked position
+    canvas2 = Image.new("RGB", (W, H), (0, 0, 0))
+    canvas2.paste(mark, (mark_x, mark_top), mark)
+    top = mark_top  # alias for the existing wordmark math below
+
+    d2 = ImageDraw.Draw(canvas2)
+    SEGOE_LIGHT = "C:/Windows/Fonts/segoeuil.ttf"
+    SEGOE_REG = "C:/Windows/Fonts/segoeui.ttf"
+    f_human = ImageFont.truetype(SEGOE_LIGHT, line1_size)
+    f_ai = ImageFont.truetype(SEGOE_REG, line1_size)
+    f_conv = ImageFont.truetype(SEGOE_LIGHT, line2_size)
+
+    # Line 1: "Human" (light) + " AI" (regular), tracked slightly
+    line1_y = top + mark.height + gap_mark_to_line1
+    human_str = "Human"
+    ai_str = " AI"
+    human_w = d2.textlength(human_str, font=f_human)
+    ai_w = d2.textlength(ai_str, font=f_ai)
+    total_w1 = human_w + ai_w
+    x1 = (W - total_w1) // 2
+    d2.text((x1, line1_y), human_str, fill=(255, 255, 255), font=f_human)
+    d2.text((x1 + human_w, line1_y), ai_str, fill=(255, 255, 255), font=f_ai)
+
+    # Line 2: "Convention" — slightly dimmed (matches SVG opacity 0.9)
+    line2_y = line1_y + line1_size + gap_line1_to_line2
+    conv_str = "Convention"
+    conv_w = d2.textlength(conv_str, font=f_conv)
+    x2 = (W - conv_w) // 2
+    d2.text((x2, line2_y), conv_str, fill=(230, 230, 230), font=f_conv)
+
+    canvas2.save(FRAMES / "shot1_full.png")
 
 
 # ---------------- SHOT 2: same title, fade Rotterdam in ----------------

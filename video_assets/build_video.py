@@ -53,31 +53,60 @@ SHOTS = [
 
 
 def encode_segment(idx: int, dur: int) -> Path:
-    """Encode one PNG → mp4 segment of given duration. Shot 1 gets a 2s fade-in."""
-    src = FRAMES / f"shot{idx}.png"
+    """Encode one PNG → mp4 segment of given duration.
+
+    Shot 1 is a special case: two PNGs (mark only + mark with wordmark)
+    sequenced via xfade so the wordmark appears as the founder says
+    "HumanAI Convention" (~5s into the voiceover).
+
+      0-2s   black → mark fades in
+      2-4s   mark holds
+      4-5s   crossfade from mark to mark+wordmark (1s)
+      5-end  mark+wordmark holds
+    """
     dst = SEGS / f"seg{idx}.mp4"
-    if not src.exists():
-        raise FileNotFoundError(src)
-    cmd = [
-        FFMPEG, "-y",
-        "-loop", "1",
-        "-framerate", str(FPS),
-        "-t", str(dur),
-        "-i", str(src),
-    ]
+
     if idx == 1:
-        # Fade in from black over 2s at the start of shot 1
-        cmd += ["-vf", "fade=t=in:st=0:d=2,format=yuv420p"]
+        mark = FRAMES / "shot1.png"
+        full = FRAMES / "shot1_full.png"
+        if not mark.exists() or not full.exists():
+            raise FileNotFoundError(f"need both {mark.name} and {full.name}")
+        first_dur = 5
+        second_dur = dur - 4  # second clip starts at xfade offset (4s)
+        cmd = [
+            FFMPEG, "-y",
+            "-loop", "1", "-framerate", str(FPS), "-t", str(first_dur), "-i", str(mark),
+            "-loop", "1", "-framerate", str(FPS), "-t", str(second_dur), "-i", str(full),
+            "-filter_complex",
+            f"[0:v]fade=t=in:st=0:d=2[a];"
+            f"[a][1:v]xfade=transition=fade:duration=1:offset=4,format=yuv420p[v]",
+            "-map", "[v]",
+            "-t", str(dur),
+            "-c:v", "libx264",
+            "-preset", "ultrafast",
+            "-crf", "23",
+            "-pix_fmt", "yuv420p",
+            "-r", str(FPS),
+            str(dst),
+        ]
     else:
-        cmd += ["-vf", "format=yuv420p"]
-    cmd += [
-        "-c:v", "libx264",
-        "-preset", "ultrafast",
-        "-crf", "23",
-        "-pix_fmt", "yuv420p",
-        "-r", str(FPS),
-        str(dst),
-    ]
+        src = FRAMES / f"shot{idx}.png"
+        if not src.exists():
+            raise FileNotFoundError(src)
+        cmd = [
+            FFMPEG, "-y",
+            "-loop", "1",
+            "-framerate", str(FPS),
+            "-t", str(dur),
+            "-i", str(src),
+            "-vf", "format=yuv420p",
+            "-c:v", "libx264",
+            "-preset", "ultrafast",
+            "-crf", "23",
+            "-pix_fmt", "yuv420p",
+            "-r", str(FPS),
+            str(dst),
+        ]
     subprocess.run(cmd, check=True, capture_output=True)
     return dst
 
