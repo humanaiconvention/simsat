@@ -306,54 +306,60 @@ def shot7():
     img.save(FRAMES / "shot7.png")
 
 
-# ---------------- SHOT 8: v4 + v5 negative results ----------------
+# ---------------- SHOT 8: v4 + v5 + v3+ negative results ----------------
 def shot8():
-    img, d = new_frame("SimSat — 8/9 · two honest negatives")
-    y = 70
-    d.text((100, y), "v4 + v5 — published negative results", fill=ACCENT, font=font(44, bold=True)); y += 75
+    img, d = new_frame("SimSat — 8/9 · three honest negatives")
+    y = 60
+    d.text((100, y), "v4 + v5 + v3+ — three published negatives", fill=ACCENT, font=font(40, bold=True)); y += 65
 
-    f = font(26)
-    fb = font(26, bold=True)
-    d.text((100, y), "Same recipe + more train rows (different mixes). Same 32-row holdout.",
-           fill=TEXT, font=f); y += 60
+    f = font(24)
+    fb = font(24, bold=True)
+    d.text((100, y), "Three independent lines (data-imbalanced, data-balanced, recipe) — same 32-row holdout.",
+           fill=TEXT, font=f); y += 50
 
     rows = [
-        ("Metric",                  "v3",     "v4",     "v5",     "v3 vs v5"),
-        ("─" * 26,                  "─" * 6,  "─" * 6,  "─" * 6,  "─" * 8),
-        ("exact_action_agreement",  "0.844",  "0.781",  "0.688",  "−0.156"),
-        ("score_mae (lower better)","0.055",  "0.066",  "0.084",  "+0.029"),
-        ("useful_agreement",        "0.688",  "0.656",  "0.812",  "+0.124"),
-        ("",                        "",       "",       "",       ""),
-        ("accept per-class",        "1.000",  "1.000",  "1.000",  "0.000"),
-        ("refine per-class",        "1.000",  "1.000",  "0.875",  "−0.125"),
-        ("defer per-class",         "0.625",  "0.500",  "0.625",  "0.000"),
-        ("skip per-class",          "0.750",  "0.625",  "0.250",  "−0.500"),
+        ("Metric",                  "v3",     "v4",     "v5",     "v3+",    "vs v3"),
+        ("─" * 26,                  "─" * 6,  "─" * 6,  "─" * 6,  "─" * 6,  "─" * 6),
+        ("exact_action_agreement",  "0.844",  "0.781",  "0.688",  "0.812",  "all <"),
+        ("score_mae (lower better)","0.055",  "0.066",  "0.084",  "0.067",  "all >"),
+        ("useful_agreement",        "0.688",  "0.656",  "0.812",  "0.844",  "v5/v3+ >"),
+        ("",                        "",       "",       "",       "",       ""),
+        ("accept per-class",        "1.000",  "1.000",  "1.000",  "1.000",  "saturated"),
+        ("refine per-class",        "1.000",  "1.000",  "0.875",  "1.000",  "stable"),
+        ("defer per-class",         "0.625",  "0.500",  "0.625",  "0.750",  "v3+ best"),
+        ("skip per-class",          "0.750",  "0.625",  "0.250",  "0.500",  "v3 best"),
     ]
-    for col_i, (m, v3, v4, v5, dlt) in enumerate(rows):
+    for col_i, (m, v3, v4, v5, v3p, dlt) in enumerate(rows):
         if not m and not v3:
-            y += 18
+            y += 14
             continue
         is_data = col_i >= 2
         c = TEXT
-        # Highlight regressions in red
-        bad = is_data and ("−" in dlt or "+0.029" in dlt or "+0.011" in dlt)
-        good = is_data and ("+0.124" in dlt)
+        bad = is_data and ("all <" in dlt or "all >" in dlt or "v3 best" in dlt)
+        good = is_data and ("v5/v3+ >" in dlt or "v3+ best" in dlt)
         if bad: c = RED
         if good: c = GREEN
         d.text((100, y),  m,   fill=c if is_data else TEXT, font=f)
-        d.text((780, y),  v3,  fill=c, font=f)
-        d.text((960, y),  v4,  fill=c, font=f)
-        d.text((1140, y), v5,  fill=c, font=fb if bad else f)
-        d.text((1340, y), dlt, fill=c, font=fb if (bad or good) else f)
-        y += 42
+        d.text((720, y),  v3,  fill=c, font=fb if is_data else f)
+        d.text((860, y),  v4,  fill=c, font=f)
+        d.text((1000, y), v5,  fill=c, font=f)
+        d.text((1140, y), v3p, fill=c, font=f)
+        d.text((1280, y), dlt, fill=c, font=fb if (bad or good) else f)
+        y += 38
 
-    y += 30
-    d.text((100, y), "Two consecutive negatives on +data → v3 is at the inflection point.",
+    y += 20
+    d.text((100, y), "Three independent angles, same conclusion: v3 is at a local optimum.",
+           fill=ACCENT, font=font(26, bold=True)); y += 40
+    d.text((100, y), "v4: more imbalanced data → −6.3 pp action.",
+           fill=DIM, font=font(22)); y += 32
+    d.text((100, y), "v5: more class-balanced data → −15.6 pp action; skip cratered.",
+           fill=DIM, font=font(22)); y += 32
+    d.text((100, y), "v3+: recipe variant (lr↓, epochs↑, dropout↑) → −3.1 pp action.",
+           fill=DIM, font=font(22)); y += 50
+    d.text((100, y), "Empirical evidence — not just claim — for the runtime-TTT lane.",
            fill=ACCENT, font=font(28, bold=True)); y += 50
-    d.text((100, y), "Decision: v3 retained canonical. v4/v5 weights kept for transparency.",
-           fill=ACCENT, font=font(26, bold=True)); y += 50
-    d.text((100, y), "Architectural lesson: next lift comes from runtime TTT, not more offline data.",
-           fill=DIM, font=font(22))
+    d.text((100, y), "Decision: v3 retained canonical. None of v4/v5/v3+ promoted.",
+           fill=ACCENT, font=font(24, bold=True))
 
     img.save(FRAMES / "shot8.png")
 

@@ -20,7 +20,7 @@ lift speak for itself.
 | 5 | 1:20-1:35 | Same screen — focus on score MAE row | "Score MAE drops from 0.365 to 0.055 — about a thirty-one-point reduction in band-mapped prediction error. Per-class accept and refine are perfect. The adapter is on Hugging Face under Apache-2.0." | 14 s |
 | 6 | 1:35-2:30 | Cut to `submission_assets/urban_coastal_ambiguity_port_of_rotterdam.png` full-frame. Side panel showing the Rotterdam case row from `SUBMISSION_CASEBOOK.md` (scaffold accept → trust refine → operator accept) | "Rotterdam, forty-eight point seven eight percent cloud cover. The scaffold says accept — geometry is good. The trust layer disagrees, flips it to refine — the cloud might hide containers. The operator confirms accept: the visible fifty-one percent of the basin was operationally enough. This is the calibration loop. The same loop runs on every window." | 55 s |
 | 7 | 2:30-3:05 | Cut to terminal: TTT receipt summary panel | "VLA-layer test-time training. Thirty operator-labelled encounters streamed through the loop. Twenty-eight of thirty applied. Zero viability gates triggered. Zero CUDA out-of-memory errors. Parse rate held at one-point-zero through all thirty steps. The trust-layer TTT has hundred-cycle stability evidence; the VLA-layer now has thirty-cycle. The mechanism is real, not vapor." | 35 s |
-| 8 | 3:05-3:30 | Cut to the v3 / v4 / v5 comparison panel | "We trained v4 too — minus six point three points action agreement. Then v5 with class-balanced data — minus fifteen point six. Two consecutive negatives on more training data confirm v3 is at the inflection point on this architecture and this holdout. The architectural lesson is that the next lift comes from runtime test-time training, not more offline corpus expansion. Both negatives are published next to the wins." | 22 s |
+| 8 | 3:05-3:30 | Cut to the v3 / v4 / v5 / v3+ comparison panel | "We tried three different ways to beat v three. More imbalanced data: minus six point three. More class-balanced data: minus fifteen point six. A different recipe — lower learning rate, longer schedule, more dropout — minus three point one. Three independent angles, same conclusion: v three sits at a local optimum on this architecture and this holdout. That's empirical evidence for the runtime-TTT lane, not just an architectural claim. All three negatives are published in the methodology doc." | 25 s |
 | 9 | 3:30-3:50 | Final card: repo URL + HF model URLs stacked. White on black | "Apache-2.0 weights on Hugging Face. Public training kernels on Kaggle. AGPL-3 code on GitHub. Built for the prize hardware — Orin sixteen gig is what unlocks the long-horizon test-time training. Thanks." | 18 s |
 
 **Total: 3 min 50 sec.**
@@ -62,12 +62,14 @@ lift speak for itself.
 > has hundred-cycle stability evidence; the VLA-layer now has
 > thirty-cycle. The mechanism is real, not vapor.
 >
-> We trained v4 too — minus six point three points action agreement. Then
-> v5 with class-balanced data — minus fifteen point six. Two consecutive
-> negatives on more training data confirm v3 is at the inflection point
-> on this architecture and this holdout. The architectural lesson is that
-> the next lift comes from runtime test-time training, not more offline
-> corpus expansion. Both negatives are published next to the wins.
+> We tried three different ways to beat v three. More imbalanced data:
+> minus six point three. More class-balanced data: minus fifteen point
+> six. A different recipe — lower learning rate, longer schedule, more
+> dropout — minus three point one. Three independent angles, same
+> conclusion: v three sits at a local optimum on this architecture and
+> this holdout. That's empirical evidence for the runtime-TTT lane, not
+> just an architectural claim. All three negatives are published in the
+> methodology doc.
 >
 > Apache-2.0 weights on Hugging Face. Public training kernels on Kaggle.
 > AGPL-3 code on GitHub. Built for the prize hardware — Orin sixteen gig is

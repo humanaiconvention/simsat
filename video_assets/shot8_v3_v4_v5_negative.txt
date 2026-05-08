@@ -1,43 +1,44 @@
 ============================================================
-  v3 vs v4 vs v5 — published negative results
-  LFM_FINETUNE_METHODOLOGY.md §6.6 + §6.7
+  v3 vs v4 vs v5 vs v3+ — three published negatives
+  LFM_FINETUNE_METHODOLOGY.md §6.6 + §6.7 + §6.8
 ============================================================
 
-  Setup: same recipe (lr=2e-4, 5 epochs, r=16/α=32, decode hardening),
-         same 32-row holdout, only the train set differs.
+  Three independent angles to attempt to beat v3 on the same 32-row
+  holdout (8 per class). All three regressed.
 
-  Train sizes:  v3 165  → v4 185 (+20 imbalanced)
-                         → v5 241 (+56 defer-class-balanced)
+  v4: more imbalanced data    (refine + accept only,    +20 train)
+  v5: more class-balanced data (defer-targeted gallery, +56 train)
+  v3+: recipe variant         (lr↓, epochs↑, dropout↑, same data)
 
-  Metric                    v3        v4        v5        v3 vs v5
-  ------------------------  --------  --------  --------  --------
-  exact_action_agreement    0.844     0.781     0.688     -0.156  ← regression
-  score_mae (lower better)  0.055     0.066     0.084     +0.029  ← worse
-  useful_agreement          0.688     0.656     0.812     +0.124  ← improved (binary)
-  parse_rate                1.000     1.000     1.000     +0.000
+  Metric                    v3       v4       v5       v3+      vs v3
+  ------------------------  -------  -------  -------  -------  --------
+  exact_action_agreement    0.844    0.781    0.688    0.812    all <
+  score_mae (lower better)  0.055    0.066    0.084    0.067    all >
+  useful_agreement          0.688    0.656    0.812    0.844    v5/v3+ >
 
   Per-class:
-    accept   1.000  →  1.000  →  1.000   (saturated)
-    refine   1.000  →  1.000  →  0.875
-    defer    0.625  →  0.500  →  0.625
-    skip     0.750  →  0.625  →  0.250   ← v5 cratered
+    accept   1.000  →  1.000  →  1.000  →  1.000   (saturated everywhere)
+    refine   1.000  →  1.000  →  0.875  →  1.000
+    defer    0.625  →  0.500  →  0.625  →  0.750   (v3+ best)
+    skip     0.750  →  0.625  →  0.250  →  0.500   (v3 best)
+
+  Train-set sizes:  v3: 165,  v4: 185,  v5: 241,  v3+: 165 (same as v3)
 
   Diagnosis:
-    v4: +20 train rows were class-imbalanced (refine + accept only).
-        Hurt minority classes that were already hardest.
-    v5: +56 train rows were defer-class-balanced (17 defer + 1 skip).
-        Defer didn't lift; skip cratered. Model over-shifted toward
-        defer at skip's expense in borderline cases.
+    v4: imbalanced augmentation pushed boundary toward majority classes.
+    v5: balanced augmentation pulled boundary toward defer at skip's expense.
+    v3+: recipe-only variant traded exact for useful — same trade-off as v5.
 
-  Two consecutive negatives on +data.
+  Three independent lines of evidence, same conclusion:
+    v3 sits at a local optimum on this architecture × data × holdout
+    combination that further offline tuning cannot escape.
 
-  Decision:  v3 retained as canonical. Neither v4 nor v5 promoted.
+  Decision:  v3 retained as canonical.
+             v4, v5, v3+ kept locally for transparency. None promoted to HF.
 
-  Architectural lesson:
-    Static corpus expansion has hit the inflection point on this
-    architecture / holdout combination. The next lift comes from
-    runtime TTT under the six viability gates — exactly what the
-    submission's central claim says.
+  Architectural conclusion:
+    The next lift comes from runtime TTT under viability gates —
+    empirically motivated, not just architecturally asserted.
 
 ============================================================
   Honest negatives are part of the rubric story.

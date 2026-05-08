@@ -396,6 +396,70 @@ transparency at `.kaggle_output_v5/simsat-lfm25vl-450m-v5/` but **not
 promoted to HuggingFace**. v3 (`HumanAIConvention/simsat-lfm25vl-450m-v3`)
 remains the submission adapter.
 
+### 6.8 v3+ — recipe-variant attempt (third consecutive negative)
+
+After v4 (data, imbalanced) and v5 (data, class-balanced) both failed to
+beat v3, the natural follow-up question was: *maybe the data is fine but
+the recipe is wrong*. v3+ explores a different point in hyperparameter
+space against the **same v2 dataset that v3 used (165 train rows)** —
+isolating recipe from data.
+
+**Variant deltas vs v3:**
+
+| Knob | v3 | v3+ |
+|---|---|---|
+| `lr` | 2e-4 | 1e-4 (gentler) |
+| `epochs` | 5 | 8 (longer schedule) |
+| `lora_dropout` | 0.05 | 0.10 (more regularization) |
+| `warmup_ratio` | 0.03 | 0.05 |
+| `effective_batch` | 8 (T4) | 4 (BEAST 8 GB) |
+| dataset | v2 (165 train) | v2 (165 train) — **same** |
+
+**v3+ result on the same 32-row holdout (BEAST RTX 2080, 57 min wall):**
+
+| Metric | v3 (canonical) | v3+ | Delta |
+|---|---|---|---|
+| `exact_action_agreement` | **0.844** | 0.812 | **-0.031** |
+| `score_mae` (lower better) | **0.055** | 0.067 | +0.012 (worse) |
+| `useful_agreement` | 0.688 | **0.844** | +0.156 |
+| `parse_rate` | 1.000 | 1.000 | 0.000 |
+
+| Per-class | v3 | v3+ | Delta |
+|---|---|---|---|
+| accept | 1.000 | 1.000 | 0.000 |
+| refine | 1.000 | 1.000 | 0.000 |
+| defer  | 0.625 | **0.750** | +0.125 |
+| skip   | **0.750** | 0.500 | -0.250 |
+
+**Same useful-vs-exact trade-off as v5.** The recipe change DID lift
+defer per-class (+12.5 pp) and useful_agreement (+15.6 pp), but at the
+cost of -25 pp on skip and -3.1 pp on the headline exact-action metric.
+The model is making a different boundary choice — accept-or-refine vs
+defer-or-skip — that's locally optimal on a binary objective and locally
+worse on the 4-way objective the rubric rewards.
+
+**Three consecutive negative attempts to beat v3 from three independent
+angles** — class-imbalanced data (v4), class-balanced data (v5), recipe
+variant (v3+) — converge on the same conclusion: **v3 sits at a local
+optimum on this architecture × data × holdout combination that further
+offline tuning cannot escape**. This is empirical evidence (not just
+architectural assertion) for the runtime-TTT lane being the right next
+investment.
+
+**Decision:** v3 retained as canonical. v3+ weights kept locally for
+transparency at `.kaggle_output_v3plus/simsat-lfm25vl-450m-v3plus/`.
+Like v4 and v5, **not promoted to HuggingFace.** v3 stays the submission
+adapter at `HumanAIConvention/simsat-lfm25vl-450m-v3`.
+
+| Adapter | Train | exact_action | score_mae | useful | promoted? |
+|---|---|---|---|---|---|
+| v1 (Run 14) | 109 | 0.656 | 0.102 | 0.500 | superseded |
+| v1 + rep_pen (Run A) | 109 | 0.750 | 0.080 | 0.844 | retained as v1 reference |
+| **v3** (canonical) | 165 | **0.844** | **0.055** | 0.688 | ✓ on HF |
+| v4 (+20 imbalanced data) | 185 | 0.781 | 0.066 | 0.656 | ✗ negative |
+| v5 (+56 balanced data) | 241 | 0.688 | 0.084 | 0.812 | ✗ negative |
+| v3+ (recipe variant) | 165 | 0.812 | 0.067 | 0.844 | ✗ negative |
+
 ## 7. Limitations
 
 These are honest limits of the v1 fine-tune; documenting them up front:
