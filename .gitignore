@@ -133,3 +133,14 @@ video_assets/segments/*.mp4
 # Don't commit the source ZIP from Claude Design exports — the unpacked
 # design system lives at video_assets/brand/design_system/.
 HumanAI*Design*System*.zip
+
+# Voiceover recordings are private and large — keep out of the repo.
+# RECORDING.md (the script reference) is the only thing tracked here.
+video_assets/audio/*.wav
+video_assets/audio/*.mp3
+video_assets/audio/*.m4a
+video_assets/audio/*.flac
+
+# Local installers / one-off binaries that shouldn't ship.
+Audacity_Installer*.exe
+*.exe
