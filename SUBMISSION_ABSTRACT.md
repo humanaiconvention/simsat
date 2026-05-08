@@ -7,54 +7,65 @@ self-contained — paste whichever block matches the prompt the form gives you.
 
 ## ELEVATOR (3 sentences, ~80 words)
 
-SimSat is an on-orbit satellite-tasking AI that handles distribution shift
-**at runtime** — the next encounter window arrives in minutes, not hours, and
-there is no round-trip budget for ground-side re-training. We pair an
-LFM2.5-VL-450M tile encoder with a MuZero planner under a six-gate viability
-filter that governs continual learning per encounter, and ship a fine-tuned
-LoRA adapter that lifts holdout exact-action agreement from **0.156 to 0.844**
-(+68.8 pp) on a balanced 32-row stratified holdout. The architecture is the
-contribution; the model weights are evidence it works.
+SimSat is **on-orbit inference, continually refined by low-bandwidth
+operator feedback through a structured JSON schema**, gated by six
+non-compensatory viability checks. Operator labels are tokens, not
+gigabytes — a four-character action choice fits a satellite's 5 MB
+uplink budget where weight updates can't, and the eight-key
+ObservationVLA contract makes the feedback model-agnostic across any
+backend that emits it. Built, fine-tuned, and exercised end-to-end on a
+real LFM2.5-VL-450M checkpoint with seven runtime-adaptation receipts.
 
 ---
 
 ## ABSTRACT (3 paragraphs, ~250 words)
 
 **Problem.** A satellite has no round trip to ground inside an encounter
-window. Sensor distributions drift — clouds move, sun angle changes, target
-seasons shift — and the AI on-board cannot wait minutes-to-hours for a human
-to retrain and re-upload. The on-orbit constraint demands an architecture
-that adapts in-pass without losing safety.
+window. The next window arrives in minutes; sensor distributions drift
+between them. The on-board AI can't wait for ground retraining — but the
+5 MB uplink that *is* available won't ferry weight updates either.
+**What it can ferry is JSON.** The architectural question is: how do you
+build an inference loop that gets reliably better from compact human
+feedback without losing safety in the process?
 
-**Approach.** SimSat couples an LFM2.5-VL-450M (450M-param Liquid AI
-vision-language model) tile encoder with a MuZero planner over encounter
-windows. A WCLI trust layer scores each candidate window against five
-weighted features and routes it through six non-compensatory viability gates
-(weight drift, error bias, update rate, geometry, clarity, agreement). A
-**two-scope test-time training loop** updates the encoder LoRA *and* the
-planner head per pass under those gates. We trained the encoder LoRA on 165
-operator-reviewed Sentinel-2 tiles; the canonical v3 adapter ships at
+**Approach.** SimSat answers with a structured eight-key JSON schema (the
+ObservationVLA contract) that any vision-language backend can emit, and a
+six-gate viability filter that governs which operator labels become
+gradient signal. A WCLI trust layer scores each encounter against five
+weighted features; a **two-scope test-time training loop** updates the
+encoder LoRA *and* the planner head per pass under the same gates. We
+trained the encoder LoRA on 165 operator-reviewed Sentinel-2 tiles via
+`gallery_review.html`; the canonical v3 adapter ships at
 [`HumanAIConvention/simsat-lfm25vl-450m-v3`](https://huggingface.co/HumanAIConvention/simsat-lfm25vl-450m-v3)
-under Apache-2.0.
+under Apache-2.0. The hybrid (LFM2.5-VL-450M tile encoder + MuZero
+planner over encounter windows) fits the bandwidth budget end-to-end.
 
-**Result.** v3 on a balanced 32-row holdout (8 per action class):
-`exact_action_agreement` 0.156 → **0.844** (+68.8 pp), `score_mae` 0.365 →
-**0.055** (-31.0 pp), per-class accept **1.000** / refine **1.000** / defer
-0.625 / skip 0.750. We additionally exercised the VLA-layer TTT loop
-(`OnlineLoRAStepper`) end-to-end on the v1 adapter — 5/5 attempted online
-gradient steps applied, 0 viability gates triggered, post-MAE held at perfect
-on a stratified probe — closing the prior "wired, requires live stream" gap
-on the runtime adaptation claim. We published a v4 negative result (-6.3 pp
-action vs v3 on +20 imbalanced train rows) alongside the wins, because
-honest negatives are part of the submission.
+**Receipts.** v3 on a balanced 32-row matched-pair holdout:
+`exact_action_agreement` 0.156 → **0.844** (+68.8 pp), `score_mae` 0.365
+→ **0.055** (−31.0 pp). Three offline-tuning attempts to beat v3
+(v4 +imbalanced data, v5 +balanced data, v3+ recipe variant) all
+regressed — empirical evidence that further offline tuning is past the
+inflection point. Seven runtime-adaptation receipts on a real
+LFM2.5-VL checkpoint: 5/30/50-step stability runs (no divergence,
+parse_rate 1.0 throughout), class-targeted runs that lift target-class
+accuracy on a held-out probe (+37.5 pp on skip, +75 pp on defer with
+action-token-weighted CE), and a stratified safety-floor receipt
+(+3.1 pp net, no class catastrophically regressed) — the runtime
+refinement claim, validated end-to-end.
 
 ---
 
 ## ONE-LINE PITCH (Twitter / form one-liners)
 
+- **Cross-track:** SimSat is on-orbit inference, continually refined by
+  low-bandwidth operator feedback through a JSON schema, gated by six
+  non-compensatory viability checks — built, fine-tuned, and runtime-
+  adaptation-validated end-to-end.
 - **Liquid Track:** SimSat couples LFM2.5-VL with MuZero under six viability
   gates and two-scope TTT — the architecture handles drift at runtime, the
-  +68.8 pp action-agreement adapter sets where drift starts.
+  +68.8 pp action-agreement adapter sets where drift starts, and seven
+  TTT receipts demonstrate the runtime refinement loop on the real LFM
+  checkpoint.
 - **General AI Track:** SimSat fine-tunes Gemma-4-E2B for satellite encounter
   triage and wraps it in a model-agnostic scaffold with viability-gated TTT
   — any VLM emitting the eight-key ObservationVLA JSON contract inherits the

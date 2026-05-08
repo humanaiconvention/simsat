@@ -33,9 +33,9 @@ SHOTS = [
     (4, 30),
     (5, 15),
     (6, 55),
-    (7, 35),
+    (7, 45),  # was 35; extended for two-class TTT lift voiceover
     (8, 25),
-    (9, 20),
+    (9, 25),  # was 20; extended for "JSON-schema refinement" framing in close
 ]
 
 

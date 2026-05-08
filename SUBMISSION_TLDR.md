@@ -6,20 +6,27 @@
 
 ## What we built
 
-An on-orbit satellite-tasking AI for Sentinel-2 encounter triage. It treats
-each window as a small decision: `accept · refine · defer · skip`. The
-architecture handles **distribution shift at runtime** — no ground-side
-re-training between encounter windows — under **six non-compensatory
-viability gates** that govern continual learning per pass.
+**On-orbit inference, continually refined by low-bandwidth operator
+feedback through a structured JSON schema, gated by six non-compensatory
+viability checks.**
+
+Sentinel-2 encounter triage treats each window as one of four operator-
+meaningful decisions (`accept · refine · defer · skip`). The model runs
+on-board the satellite; operator labels come back up the 5 MB uplink as
+compact JSON tokens (not gigabytes of weight updates); a six-gate
+viability filter governs which labels become gradient signal; an
+eight-key ObservationVLA contract makes the entire feedback loop
+model-agnostic.
 
 ## The single claim
 
-A satellite has **minutes, not hours**, between windows. There's no
-round-trip budget for ground-side retraining. The whole system is built
-around that constraint: tile encoder + planner that fit a 5 MB uplink,
-viability gates that act as the human-in-the-loop substitute, and
-two-scope test-time training that actually moves both the encoder LoRA
-and the trust-layer weights *during the pass*, not after it.
+A satellite has **minutes, not hours**, between encounter windows.
+The 5 MB uplink budget can't ferry weight updates between them. **What
+it can ferry is JSON.** SimSat is the architecture that turns that
+constraint into a feature: small structured human feedback per pass,
+six viability gates filtering which feedback becomes gradient signal,
+two-scope test-time training adapting both the encoder LoRA and the
+trust-layer weights in flight under those gates.
 
 ## Headline numbers
 
@@ -107,8 +114,9 @@ Wired but not benchmarked yet (requires a live encounter stream the
 
 ---
 
-> **One-line pitch:** SimSat is the architecture you ship to satellites that
-> can't phone home — six viability gates, two-scope TTT that empirically
-> lifts +37.5 pp / +75 pp on two target classes per pass, +68.8 pp action
-> agreement on operator-reviewed Sentinel tiles, and an honest negative
-> result in the submission for every win.
+> **One-line pitch:** SimSat is on-orbit inference, continually refined by
+> low-bandwidth operator feedback through a JSON schema — six viability
+> gates govern which feedback becomes gradient signal, and seven runtime-
+> adaptation receipts on a real LFM2.5-VL checkpoint demonstrate the loop
+> end-to-end (mechanism + stability + class-targeted lift + balanced
+> safety floor).
