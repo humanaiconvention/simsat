@@ -118,3 +118,8 @@ review.txt
 
 # --- Materializer snapshots (regenerable; debug data only) ---
 scripts/_*_snapshot.json
+
+# --- Demo video build artifacts (regenerable from build_video.py) ---
+video_assets/silent_demo.mp4
+video_assets/simsat_demo_final.mp4
+video_assets/frames/*.png

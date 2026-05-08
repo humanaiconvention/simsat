@@ -57,3 +57,46 @@ When you're ready to record:
 10. ☐ Submit form using `SUBMISSION_ABSTRACT.md` content.
 
 Steps 7-10 are inherently human work. Everything before that is staged.
+
+---
+
+## NEW: pre-built silent video + audio overlay tool
+
+The shot panels are also pre-rendered into a single 1920×1080 silent video
+at the timing in `VIDEO_SCRIPT.md`:
+
+```bash
+python video_assets/build_video.py
+# Produces video_assets/silent_demo.mp4 (4.4 MB, 3:50, 30 fps)
+```
+
+To add your voiceover:
+
+```bash
+# Record voiceover in Audacity (or any DAW) following VIDEO_SCRIPT.md.
+# Save as voiceover.wav (or .mp3/.m4a) anywhere.
+
+python video_assets/overlay_audio.py path/to/voiceover.wav
+# Produces video_assets/simsat_demo_final.mp4 — the submission file
+```
+
+**Optional background music:** add `--music path/to/track.mp3 --music-vol 0.08`.
+
+**Adjust audio start:** add `--offset 1.5` (positive = VO starts later, e.g. if
+your recording has 1.5s of silence to trim manually).
+
+**Re-render the silent video** (after updating numbers in shot frames):
+
+```bash
+# 1. Edit video_assets/render_frames.py if numbers changed (e.g. v5 lands)
+# 2. Re-render frames:
+python video_assets/render_frames.py
+# 3. Rebuild silent video:
+python video_assets/build_video.py
+# 4. Re-overlay your audio:
+python video_assets/overlay_audio.py path/to/voiceover.wav
+```
+
+The MP4 outputs are gitignored (regenerable). Frames PNGs also gitignored.
+The build/overlay/render scripts and shot text panels are committed.
+
