@@ -34,10 +34,13 @@ and the trust-layer weights *during the pass*, not after it.
 Matched-pair eval, 32-row stratified holdout, 8 per action class. Same holdout
 across v1 / v3 / v4 / v5 for direct comparison.
 
-**TTT proof-of-life** ([receipt](.kaggle_output/ttt_proof_of_life_receipt.json)):
-5/5 attempted online-LoRA gradient steps applied, 0 viability gates triggered,
-post-MAE held perfect on stratified probe, `lora_delta_l2` grew monotonically
-0.0008 → 0.0021. Mechanism is real, not vapor.
+**TTT — two receipts shipped:**
+- **5-step proof-of-life** ([receipt](.kaggle_output/ttt_proof_of_life_receipt.json)):
+  5/5 applied, 0 viability gates triggered. Mechanism real, not vapor.
+- **30-step long-horizon stability on v3 adapter** ([receipt](.kaggle_output/extended_ttt_receipt.json)):
+  **28/30 applied, 0 OOM, 0 gate trips, parse_rate 1.000 throughout, lora_delta_l2 grew
+  monotonically 0.0008 → 0.0116, steady-state by step 10**. Trust-layer TTT has
+  100-cycle evidence; VLA-layer now has 30-cycle.
 
 **General AI Track — Gemma-4-E2B v11** ([adapter](https://huggingface.co/HumanAIConvention/simsat-gemma4-v11)):
 in-distribution N=37 exact 0.86 / useful 0.97 / MAE 0.13 (vs always-majority

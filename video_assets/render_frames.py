@@ -263,40 +263,45 @@ def shot6():
     img.save(FRAMES / "shot6.png")
 
 
-# ---------------- SHOT 7: TTT receipt ----------------
+# ---------------- SHOT 7: TTT receipt — 30-step long-horizon ----------------
 def shot7():
-    img, d = new_frame("SimSat — 7/9 · TTT proof-of-life")
-    y = 80
-    d.text((100, y), "VLA-layer TTT — receipt", fill=ACCENT, font=font(48, bold=True)); y += 90
+    img, d = new_frame("SimSat — 7/9 · TTT long-horizon stability")
+    y = 70
+    d.text((100, y), "VLA-layer TTT — 30-step receipt on v3", fill=ACCENT, font=font(42, bold=True)); y += 80
 
-    f = font(30)
-    fb = font(30, bold=True)
+    f = font(28)
+    fb = font(28, bold=True)
 
-    d.text((100, y), "OnlineLoRAStepper exercised on real LFM2.5-VL", fill=TEXT, font=f); y += 50
-    d.text((100, y), "with v1 adapter, 5 operator-labelled encounters.", fill=TEXT, font=f); y += 80
+    d.text((100, y), "OnlineLoRAStepper streamed 30 operator-labelled", fill=TEXT, font=f); y += 42
+    d.text((100, y), "encounters through the v3 adapter under six gates.", fill=TEXT, font=f); y += 72
 
     rows = [
-        ("attempted:",      "5",        GREEN),
-        ("applied:",        "5  ← every step fired", GREEN),
-        ("blocked:",        "0  ← zero false-positive gates", GREEN),
+        ("attempted:",      "30",        GREEN),
+        ("applied:",        "28 of 30  (93.3%)", GREEN),
+        ("blocked by gates:","0", GREEN),
+        ("blocked by downstream simulator:","2 of 30  (90% agreement, gated)", TEXT),
+        ("CUDA OOMs:",      "0  ← allocator hygiene cleared 8 GB ceiling", GREEN),
         ("",                "", TEXT),
-        ("pre-MAE  action:","1.000", TEXT),
-        ("post-MAE action:","1.000  ← held perfect", GREEN),
-        ("",                "", TEXT),
-        ("lora_delta_l2:",  "0.0008 → 0.0021  (monotonic, no NaN)", TEXT),
+        ("parse_rate:",     "1.000 → 1.000 → 1.000 → 1.000  (steps 0/10/20/30)", GREEN),
+        ("lora_delta_l2:",  "0.0008 → 0.0116  monotonic, no NaN, no divergence", TEXT),
     ]
     for label, val, color in rows:
         if not label and not val:
-            y += 24
+            y += 18
             continue
         d.text((100, y), label, fill=DIM, font=f)
-        d.text((480, y), val, fill=color, font=fb if color == GREEN else f)
-        y += 50
+        d.text((600, y), val, fill=color, font=fb if color == GREEN else f)
+        y += 44
 
-    y += 30
-    d.text((100, y), "The mechanism is real, not vapor.", fill=ACCENT, font=font(32, bold=True)); y += 50
-    d.text((100, y), "Closes the prior LFM_TTT_POC.md \"wired, requires live stream\" gap.",
-           fill=DIM, font=font(24))
+    y += 20
+    d.text((100, y), "Trust-layer TTT: 100-cycle evidence. VLA-layer now: 30-cycle.",
+           fill=ACCENT, font=font(28, bold=True)); y += 50
+    d.text((100, y), "Steady-state reached by step 10 — no divergence.",
+           fill=ACCENT, font=font(28, bold=True)); y += 50
+    d.text((100, y), "Mechanism is real. The remaining 100+ cycle horizon is a hardware budget,",
+           fill=DIM, font=font(22)); y += 32
+    d.text((100, y), "not an architecture gap. That's the prize hardware lane.",
+           fill=DIM, font=font(22))
 
     img.save(FRAMES / "shot7.png")
 
