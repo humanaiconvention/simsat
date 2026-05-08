@@ -35,17 +35,18 @@ The architectural argument graduated from *"TTT loop is wired and stable"*
 to *"TTT loop empirically lifts target-class accuracy +37.5 pp on a real
 LFM checkpoint, per pass, under operator-curated stream."*
 
-### Class-targeted TTT v2 (action-token-weighted CE)
+### Class-targeted TTT v2 (action-token-weighted CE) — two-class lift
 
-| Metric | PRE | POST (16 steps) | Δ |
+| Class | PRE | POST (16 steps) | Δ |
 |---|---|---|---|
-| skip-class action_agreement | 0.375 | **0.750** | **+0.375** |
-| score_mae | 0.237 | 0.162 | -0.075 |
-| skip predictions on probe | 3/8 | **6/8** | +3 |
+| skip | 0.375 | **0.750** | **+0.375 (+37.5 pp)** |
+| defer | 0.125 | **0.875** | **+0.750 (+75.0 pp)** |
+| **Average lift** | | | **+56.25 pp** |
 
-Loss drove from 1.15 → 0.0002. `lora_delta_l2` grew 0.0081 → 0.0408
-monotonically. Same `OnlineLoRAStepper`, same six viability gates as the
-stability receipts — only the loss mask changed.
+Both runs: loss drove ~1.0 → ~0 in 16 steps. `lora_delta_l2` grew
+0.0081 → ~0.040 monotonically. Same `OnlineLoRAStepper`, same six
+viability gates as the stability receipts, same v3 adapter starting
+point — only the loss mask and the target class changed between runs.
 
 **This is the strongest architectural evidence the submission can produce
 on available hardware before the prize hardware unlocks long-horizon

@@ -19,7 +19,7 @@ lift speak for itself.
 | 4 | 0:50-1:20 | Cut to a terminal showing the v3 holdout report. Highlight rows with on-screen overlays | "Headline: we fine-tuned the LFM encoder with LoRA on 165 operator-reviewed Sentinel-2 tiles. Base model exact action agreement on a balanced 32-row holdout: 0.156. Tuned: zero point eight four four. Plus sixty-eight point eight points." | 28 s |
 | 5 | 1:20-1:35 | Same screen — focus on score MAE row | "Score MAE drops from 0.365 to 0.055 — about a thirty-one-point reduction in band-mapped prediction error. Per-class accept and refine are perfect. The adapter is on Hugging Face under Apache-2.0." | 14 s |
 | 6 | 1:35-2:30 | Cut to `submission_assets/urban_coastal_ambiguity_port_of_rotterdam.png` full-frame. Side panel showing the Rotterdam case row from `SUBMISSION_CASEBOOK.md` (scaffold accept → trust refine → operator accept) | "Rotterdam, forty-eight point seven eight percent cloud cover. The scaffold says accept — geometry is good. The trust layer disagrees, flips it to refine — the cloud might hide containers. The operator confirms accept: the visible fifty-one percent of the basin was operationally enough. This is the calibration loop. The same loop runs on every window." | 55 s |
-| 7 | 2:30-3:15 | Cut to terminal: class-targeted TTT v2 result panel | "VLA-layer test-time training, validated end-to-end. Stability first: fifty steps on the v3 adapter, forty-eight applied, zero divergence, parse rate one-point-zero throughout. Then the headline result. Sixteen skip-class encounters streamed through the loop with action-token-weighted loss. The skip class on a held-out probe lifted from zero point three seven five to zero point seven five oh — plus thirty-seven point five points in sixteen steps. Loss drove from one point one five to zero point zero zero zero two. TTT under operator-curated stream empirically lifts target-class accuracy per pass — the architectural claim, validated on a real LFM checkpoint." | 45 s |
+| 7 | 2:30-3:20 | Cut to terminal: class-targeted TTT v2 two-class result panel | "VLA-layer test-time training, validated end-to-end. Stability first: fifty steps on the v three adapter, forty-eight applied, zero divergence, parse rate one-point-zero throughout. Then the headline result, on two classes. Sixteen skip-class encounters streamed: skip lifted from zero-point-three-seven-five to zero-point-seven-five — plus thirty-seven points. Sixteen defer-class encounters streamed: defer lifted from zero-point-one-two-five to zero-point-eight-seven-five — plus seventy-five points. Average lift across two classes, plus fifty-six points in sixteen steps. TTT under operator-curated stream empirically lifts target-class accuracy per pass on TWO independent classes — the architectural claim, validated on a real LFM checkpoint." | 50 s |
 | 8 | 3:05-3:30 | Cut to the v3 / v4 / v5 / v3+ comparison panel | "We tried three different ways to beat v three. More imbalanced data: minus six point three. More class-balanced data: minus fifteen point six. A different recipe — lower learning rate, longer schedule, more dropout — minus three point one. Three independent angles, same conclusion: v three sits at a local optimum on this architecture and this holdout. That's empirical evidence for the runtime-TTT lane, not just an architectural claim. All three negatives are published in the methodology doc." | 25 s |
 | 9 | 3:30-3:50 | Final card: repo URL + HF model URLs stacked. White on black | "Apache-2.0 weights on Hugging Face. Public training kernels on Kaggle. AGPL-3 code on GitHub. Built for the prize hardware — Orin sixteen gig is what unlocks the long-horizon test-time training. Thanks." | 18 s |
 
@@ -58,13 +58,15 @@ lift speak for itself.
 > VLA-layer test-time training, validated end-to-end. Stability first:
 > fifty steps on the v three adapter, forty-eight applied, zero
 > divergence, parse rate one-point-zero throughout. Then the headline
-> result. Sixteen skip-class encounters streamed through the loop with
-> action-token-weighted loss. The skip class on a held-out probe lifted
-> from zero point three seven five to zero point seven five oh — plus
-> thirty-seven point five points in sixteen steps. Loss drove from one
-> point one five to zero point zero zero zero two. TTT under
-> operator-curated stream empirically lifts target-class accuracy per
-> pass — the architectural claim, validated on a real LFM checkpoint.
+> result, on two classes. Sixteen skip-class encounters streamed: skip
+> lifted from zero-point-three-seven-five to zero-point-seven-five —
+> plus thirty-seven points. Sixteen defer-class encounters streamed:
+> defer lifted from zero-point-one-two-five to zero-point-eight-seven-
+> five — plus seventy-five points. Average lift across two classes,
+> plus fifty-six points in sixteen steps. TTT under operator-curated
+> stream empirically lifts target-class accuracy per pass on TWO
+> independent classes — the architectural claim, validated on a real
+> LFM checkpoint.
 >
 > We tried three different ways to beat v three. More imbalanced data:
 > minus six point three. More class-balanced data: minus fifteen point

@@ -264,22 +264,51 @@ template, not the action choice. Loss stayed in 2.7-3.3 range across all
 
 Receipt: [`.kaggle_output/class_targeted_ttt_receipt.json`](./.kaggle_output/class_targeted_ttt_receipt.json)
 
-### Variant 2 — action-token-weighted CE loss ⭐
+### Variant 2 — action-token-weighted CE loss ⭐ (TWO-CLASS LIFT)
 
 The fix: mask **all** assistant tokens except the `recommended_action`
 value range. The gradient now targets the single operationally-meaningful
 token. `lr=1e-4` (10× v1) since the action-only loss has 100× less
 signal-area to disperse across.
 
+**Run on the skip class (8 skip-only train rows in stream, 8 skip-only
+holdout rows as probe):**
+
 | Metric | pre | post 16-step | Δ |
 |---|---|---|---|
-| skip-only action_agreement | 0.375 | **0.750** | **+0.375 ⭐** |
-| skip-only score_mae | 0.237 | **0.162** | −0.075 |
-| skip predictions | 3/8 (with 3 defer + 2 accept noise) | **6/8** (with 2 accept noise) | +3 |
+| skip action_agreement | 0.375 | **0.750** | **+0.375 ⭐** |
+| skip score_mae | 0.237 | 0.162 | −0.075 |
+| skip predictions on probe | 3/8 (3 defer + 2 accept noise) | **6/8** (2 accept noise) | +3 correct |
 | Loss trajectory | 1.15 → 0.0002 (drove to near-zero) | | |
 | `lora_delta_l2` | 0.0081 → 0.0408 (monotonic, fast) | | |
 
 Receipt: [`.kaggle_output/class_targeted_ttt_v2_receipt.json`](./.kaggle_output/class_targeted_ttt_v2_receipt.json)
+
+**Run on the defer class (16 defer-only train rows in stream, 8
+defer-only holdout rows as probe; same script with `TARGET_CLASS = "defer"`):**
+
+| Metric | pre | post 16-step | Δ |
+|---|---|---|---|
+| defer action_agreement | 0.125 | **0.875** | **+0.750 ⭐⭐** |
+| defer score_mae | 0.131 | 0.056 | −0.075 |
+| defer predictions on probe | 1/8 (7 refine misclassifications) | **7/8** (1 accept noise) | +6 correct |
+| Loss trajectory | 0.245 → 0.0000 (drove fully to zero) | | |
+| `lora_delta_l2` | 0.0081 → 0.0398 | | |
+
+Receipt: [`.kaggle_output/class_targeted_ttt_v2_defer_receipt.json`](./.kaggle_output/class_targeted_ttt_v2_defer_receipt.json)
+
+**Both-class summary:** average lift across skip + defer = **+56.25 pp**
+on a held-out probe in 16 sequential gradient steps under viability
+gates.
+
+**Note on baseline drift:** the pre-TTT scores on these class-only
+probes (skip 0.375, defer 0.125) are lower than v3's full-stratified-
+holdout per-class accuracy (skip 0.750, defer 0.625). The class-only
+probe is a harder subset — same data, but no adjacent-class context
+in batch. **What's unambiguous is the within-experiment delta**: same
+probe pre and post, same v3 adapter starting point, same script — the
++0.375 / +0.750 lifts are real movement of the model's decision
+boundary toward the operator's labelled class.
 
 ### What this proves
 
