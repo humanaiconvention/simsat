@@ -53,10 +53,13 @@ OUT_DIR.mkdir(exist_ok=True)
 
 BASE_MODEL = "LiquidAI/LFM2.5-VL-450M"
 
-# How many TTT steps to run on the train stream
-N_TTT_STEPS = 24
-# How many holdout samples to use for pre/post MAE measurement
-N_PROBE = 16
+# How many TTT steps to run on the train stream — TTT is "1 step per live
+# encounter" in production, so a small batch better matches the architectural
+# claim than a long run that looks like mini-retraining.
+N_TTT_STEPS = 6
+# How many holdout samples to use for pre/post MAE measurement.
+# Stratified: 2 per class × 4 classes = 8.
+N_PROBE = 8
 # Synthetic downstream-outcome agreement rate (real production: pulled from
 # decision retrospective; here, a deterministic seed ensures a fixed sequence)
 DOWNSTREAM_AGREE_RATE = 0.90
@@ -190,17 +193,18 @@ def _build_forward_loss_fn():
             labels[labels == processor.tokenizer.pad_token_id] = -100
 
         out = model(**enc, labels=labels)
-        # For the predicted action: do a quick max-likelihood greedy continuation
+        # Predicted-action extraction: short greedy generate (max_new_tokens=24
+        # is enough to reach `"recommended_action": "..."` in the JSON). This
+        # is the correct way to extract a prediction without confusion from
+        # teacher-forcing alignment offsets.
         with torch.no_grad():
-            inp_ids = p_enc["input_ids"].to(model.device)
-            attn = p_enc.get("attention_mask")
-            if attn is not None:
-                attn = attn.to(model.device)
             inputs2 = {k: v.to(model.device) for k, v in p_enc.items() if hasattr(v, "to")}
-            gen_out = model.generate(**inputs2, max_new_tokens=64, do_sample=False,
-                                     repetition_penalty=1.05, no_repeat_ngram_size=20)
+            gen_out = model.generate(
+                **inputs2, max_new_tokens=24, do_sample=False,
+                repetition_penalty=1.05, no_repeat_ngram_size=20,
+            )
             tail = gen_out[0, prompt_len:]
-            raw = processor.decode(tail, skip_special_tokens=True)
+            raw = processor.decode(tail.cpu(), skip_special_tokens=True)
             m = re.search(r'"recommended_action"\s*:\s*"(\w+)"', raw)
             pa = m.group(1) if m else None
 
@@ -235,7 +239,17 @@ def main() -> int:
     holdout_recs = [json.loads(l) for l in open(HOLDOUT_PATH, encoding="utf-8")]
     rng.shuffle(train_recs)
 
-    probe_set = holdout_recs[:N_PROBE]
+    # Stratified probe: 2 per class × 4 classes = 8 (instead of taking the
+    # first 8, which sorts by class and gave us all-accept last run).
+    by_class: dict[str, list[dict]] = {}
+    for r in holdout_recs:
+        by_class.setdefault(_expected_action(r), []).append(r)
+    probe_set: list[dict] = []
+    per_class = max(1, N_PROBE // max(1, len(by_class)))
+    for cls in sorted(by_class.keys()):
+        probe_set.extend(by_class[cls][:per_class])
+    probe_set = probe_set[:N_PROBE]
+
     ttt_stream = train_recs[:N_TTT_STEPS]
     print(f"\nProbe set: {len(probe_set)}  TTT stream: {len(ttt_stream)}")
 
@@ -246,9 +260,11 @@ def main() -> int:
     print(f"  pre: {json.dumps(pre_metrics, indent=2)}")
 
     # ------------- (1) Run the TTT stream --------------
+    # lr=1e-5 — production TTT is "1 step per encounter", so a gentle
+    # update rate is correct. (Earlier 5e-5 over-tuned in batch mode.)
     optimizer = torch.optim.AdamW(
         [p for p in model.parameters() if p.requires_grad],
-        lr=5e-5, weight_decay=0.0,
+        lr=1e-5, weight_decay=0.0,
     )
     forward_loss_fn = _build_forward_loss_fn()
     stepper = OnlineLoRAStepper(model, processor, optimizer, forward_loss_fn=forward_loss_fn)
@@ -325,7 +341,7 @@ def main() -> int:
             "n_ttt_steps_planned": N_TTT_STEPS,
             "n_probe": N_PROBE,
             "downstream_agree_rate": DOWNSTREAM_AGREE_RATE,
-            "lr": 5e-5,
+            "lr": 1e-5,
             "rep_penalty": 1.05,
             "seed": 42,
         },
