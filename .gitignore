@@ -124,3 +124,8 @@ video_assets/silent_demo.mp4
 video_assets/simsat_demo_final.mp4
 video_assets/frames/*.png
 video_assets/segments/*.mp4
+# Exception: shot2.png and shot9.png are exported from Claude Design and
+# not regenerable via render_frames.py — they are committed as design
+# assets so the silent video can be rebuilt from a fresh clone.
+!video_assets/frames/shot2.png
+!video_assets/frames/shot9.png
