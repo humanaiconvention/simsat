@@ -179,17 +179,33 @@ def main() -> int:
         # from /data/image/sentinel.
         png_name = f"trace_{tid.replace('trace_', '')}.png"
         out_path = OUT_IMAGES / png_name
+        # If existing file is zero/empty, force re-fetch
+        if out_path.exists() and out_path.stat().st_size < 1024:
+            out_path.unlink()
         if out_path.exists():
             pass  # already there
-        elif png_name in cache_v1:
+        elif png_name in cache_v1 and cache_v1[png_name].stat().st_size >= 1024:
             shutil.copy(cache_v1[png_name], out_path)
         else:
             content = _fetch_image_for_trace(client, sample, sample.get("images") or [])
-            if content is None:
-                print(f"  [{i+1}] {tid[:24]}  no image; skipping")
+            if content is None or len(content) < 1024:
+                print(f"  [{i+1}] {tid[:24]}  no image / empty content; skipping row")
                 continue
             out_path.write_bytes(content)
             time.sleep(2.5)  # polite throttle to stay under 30/min
+
+        # Validate the image is decodable before including the row.
+        try:
+            from PIL import Image as _PIL
+            _im = _PIL.open(out_path)
+            _im.load()
+        except Exception as e:
+            print(f"  [{i+1}] {tid[:24]}  bad image ({e}); deleting + skipping row")
+            try:
+                out_path.unlink()
+            except Exception:
+                pass
+            continue
 
         target_json = _operator_target_json(op_action, sample)
         prompt_text = _build_prompt_text(scenario, target, sample)
