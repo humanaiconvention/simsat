@@ -309,6 +309,43 @@ accuracy: stable, not degraded — meaning the existing skip examples are
 sufficient to maintain that class once decode hardening fixes the
 repetition-loop pathology.
 
+### 6.6 v4 — diminishing-returns negative result (kept v3 canonical)
+
+After v3 shipped, ran v4 on `simsat-lfm-v3` dataset (185 train rows, +20
+over v2 from the second adversarial review session). Same recipe, same
+holdout, same `repetition_penalty=1.05` decode.
+
+| Metric | v3 (canonical) | v4 | Delta |
+|---|---|---|---|
+| `exact_action_agreement` | **0.844** | 0.781 | **-0.063** |
+| `useful_agreement` | 0.688 | 0.656 | -0.032 |
+| `score_mae` (lower better) | **0.055** | 0.066 | +0.011 (worse) |
+| `parse_rate` | 1.000 | 1.000 | 0.000 |
+| accept per-class | 1.000 | 1.000 | 0.000 |
+| refine per-class | 1.000 | 1.000 | 0.000 |
+| defer per-class | 0.625 | 0.500 | -0.125 |
+| skip per-class | 0.750 | 0.625 | -0.125 |
+
+**v4 regressed on the hard classes.** Diagnosis: the +20 train rows in
+the v3 dataset were 16 refine + 4 accept (and 0 defer / 0 skip — see
+§6.5 for why the planner pre-filter blocks defer/skip generation under
+the operator threshold). Adding more refine/accept examples to a model
+that was already at 1.000 per-class on those classes nudged the
+representation in directions that hurt defer and skip recovery.
+
+**This is the right negative result to publish.** It shows:
+1. **v3 was at the inflection point** — beyond ~165 train rows on this
+   architecture/holdout combination, additional class-imbalanced data
+   degrades minority-class accuracy without helping majority classes.
+2. **The published canonical is v3, not v4.** v4 weights remain on
+   Kaggle (`benhaslam/simsat-lfm2-5-vl-v4-training` adapter artifact)
+   for transparency but were not promoted to HuggingFace.
+3. **The next experiment is class-balanced augmentation, not more
+   data.** A defer/skip-targeted operator review batch (the 56-trace
+   defer-envelope gallery saved on disk) would address this if the
+   operator-empirical override threshold sits where defer cases would
+   actually emerge — see §6.5 calibration finding.
+
 ## 7. Limitations
 
 These are honest limits of the v1 fine-tune; documenting them up front:
