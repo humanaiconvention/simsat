@@ -263,45 +263,56 @@ def shot6():
     img.save(FRAMES / "shot6.png")
 
 
-# ---------------- SHOT 7: TTT receipt — 30-step long-horizon ----------------
+# ---------------- SHOT 7: TTT — class-targeted lift (HEADLINE) ----------------
 def shot7():
-    img, d = new_frame("SimSat — 7/9 · TTT long-horizon stability")
-    y = 70
-    d.text((100, y), "VLA-layer TTT — 30-step receipt on v3", fill=ACCENT, font=font(42, bold=True)); y += 80
+    img, d = new_frame("SimSat — 7/9 · TTT empirically lifts target class")
+    y = 60
+    d.text((100, y), "VLA-layer TTT — class-targeted lift on v3", fill=ACCENT, font=font(40, bold=True)); y += 70
 
-    f = font(28)
-    fb = font(28, bold=True)
-
-    d.text((100, y), "OnlineLoRAStepper streamed 30 operator-labelled", fill=TEXT, font=f); y += 42
-    d.text((100, y), "encounters through the v3 adapter under six gates.", fill=TEXT, font=f); y += 72
+    f = font(26)
+    fb = font(26, bold=True)
+    d.text((100, y), "16 skip-only train rows streamed → 8 skip-only holdout probe.",
+           fill=TEXT, font=f); y += 42
+    d.text((100, y), "Action-token-weighted CE loss (mask all but recommended_action).",
+           fill=DIM, font=font(22)); y += 60
 
     rows = [
-        ("attempted:",      "30",        GREEN),
-        ("applied:",        "28 of 30  (93.3%)", GREEN),
-        ("blocked by gates:","0", GREEN),
-        ("blocked by downstream simulator:","2 of 30  (90% agreement, gated)", TEXT),
-        ("CUDA OOMs:",      "0  ← allocator hygiene cleared 8 GB ceiling", GREEN),
-        ("",                "", TEXT),
-        ("parse_rate:",     "1.000 → 1.000 → 1.000 → 1.000  (steps 0/10/20/30)", GREEN),
-        ("lora_delta_l2:",  "0.0008 → 0.0116  monotonic, no NaN, no divergence", TEXT),
+        ("",                "PRE",          "POST (16 steps)",   "Δ"),
+        ("─" * 24,          "─" * 8,        "─" * 12,            "─" * 12),
+        ("action_agreement","0.375",        "0.750",             "+0.375"),
+        ("score_mae",       "0.237",        "0.162",             "−0.075"),
+        ("predictions",     "3 defer +",     "6 skip +",         "+3 skip"),
+        ("",                "3 skip +",     "2 accept",          "−3 wrong"),
+        ("",                "2 accept",     "",                  ""),
     ]
-    for label, val, color in rows:
-        if not label and not val:
-            y += 18
+    for col_i, (m, pre, post, dlt) in enumerate(rows):
+        if not m and not pre and not post and not dlt:
             continue
-        d.text((100, y), label, fill=DIM, font=f)
-        d.text((600, y), val, fill=color, font=fb if color == GREEN else f)
-        y += 44
+        is_data = col_i >= 2
+        c = TEXT
+        if "+0.375" in dlt or "+3 skip" in dlt or "−0.075" in dlt:
+            c = GREEN
+        d.text((100, y),  m,    fill=c if is_data else DIM, font=f)
+        d.text((600, y),  pre,  fill=c if is_data else TEXT, font=f)
+        d.text((860, y),  post, fill=c if is_data else TEXT, font=fb if c == GREEN else f)
+        d.text((1200, y), dlt,  fill=c if is_data else TEXT, font=fb if c == GREEN else f)
+        y += 38
 
-    y += 20
-    d.text((100, y), "Trust-layer TTT: 100-cycle evidence. VLA-layer now: 30-cycle.",
-           fill=ACCENT, font=font(28, bold=True)); y += 50
-    d.text((100, y), "Steady-state reached by step 10 — no divergence.",
-           fill=ACCENT, font=font(28, bold=True)); y += 50
-    d.text((100, y), "Mechanism is real. The remaining 100+ cycle horizon is a hardware budget,",
-           fill=DIM, font=font(22)); y += 32
-    d.text((100, y), "not an architecture gap. That's the prize hardware lane.",
-           fill=DIM, font=font(22))
+    y += 30
+    d.text((100, y), "Loss trajectory: 1.15 → 0.0002 (action-token CE drove to near-zero)",
+           fill=TEXT, font=f); y += 36
+    d.text((100, y), "lora_delta_l2:  0.0081 → 0.0408 (monotonic, real weight movement)",
+           fill=TEXT, font=f); y += 60
+
+    d.text((100, y), "TTT under curated stream + action-weighted loss",
+           fill=ACCENT, font=font(30, bold=True)); y += 40
+    d.text((100, y), "empirically LIFTS the target class +37.5 pp / pass.",
+           fill=ACCENT, font=font(30, bold=True)); y += 60
+
+    d.text((100, y), "Plus 5 / 30 / 50-step stability receipts above (no divergence, parse 1.0).",
+           fill=DIM, font=font(20)); y += 28
+    d.text((100, y), "Architectural claim validated on a real LFM2.5-VL checkpoint.",
+           fill=DIM, font=font(20))
 
     img.save(FRAMES / "shot7.png")
 
