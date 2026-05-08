@@ -35,4 +35,5 @@ repos:
         entry: python -c "import re,sys; bad=[(f,l+1,line) for f in sys.argv[1:] for l,line in enumerate(open(f,encoding='utf-8',errors='ignore').readlines()) if re.search(r'D:[/\\\\]SimSat|C:[/\\\\]Users[/\\\\]benja', line)]; sys.exit(0 if not bad else (print('Hardcoded path:',*bad,sep='\\n') or 1))"
         language: system
         files: \.(py|toml|yaml|yml)$
-        exclude: '^(KNOWN_ISSUES\.md|CONTRIBUTING\.md|\.github/.*)$'
+        # Self-references to the regex are allowed in the CI scrub configs themselves.
+        exclude: '^(KNOWN_ISSUES\.md|CONTRIBUTING\.md|\.github/.*|\.pre-commit-config\.yaml)$'
