@@ -1,7 +1,7 @@
-# Good morning — overnight summary (T-1 deadline day)
+# Good morning — overnight summary (deadline day)
 
 You were gone 22:18 PDT (May 7) → 06:30 PDT (May 8). This file is the
-first thing to read. Last update: ~02:45 PDT.
+first thing to read. **Final state: 04:59 PDT, 22 commits pushed.**
 
 **Submission deadline: Friday May 8, 5:00 PM PDT (8:00 PM EST).**
 You have ~10 hours from when you read this.
@@ -128,7 +128,7 @@ Total: 2-3 hours of focused work + the recording itself.
 - **Architecture diagram:** `fig/architecture_diagram.png`
 - **HF adapter:** `HumanAIConvention/simsat-lfm25vl-450m-v3` (canonical)
 - **Public Kaggle kernels:** `benhaslam/simsat-lfm2-5-vl-{v1,v3,v4,v5}-training`
-- **TTT receipts (5 of them):** `.kaggle_output/*receipt*.json`
+- **TTT receipts (7 of them):** `.kaggle_output/*receipt*.json` (see [`TTT_RECEIPTS_INDEX.md`](./TTT_RECEIPTS_INDEX.md) for navigation)
 - **Today's session log:** `SESSION_LOG.md`
 
 ---
@@ -154,3 +154,24 @@ Total: 2-3 hours of focused work + the recording itself.
    YouTube/Vimeo? If link, YouTube unlisted is fine.
 4. **Licenses:** Apache-2.0 weights / AGPL-3 code — is that consistent
    with form requirements?
+
+---
+
+## Final close-of-night state
+
+- **22 commits this overnight session**, all pushed to
+  `humanaiconvention/simsat` main (the private repo — see #1 BLOCKER).
+- **36/36 TTT + viability tests passing** (last verified 04:59 PDT).
+- **HF v3 model card live** with current canonical numbers
+  (action 0.844, MAE 0.055, Apache-2.0).
+- **silent_demo.mp4 fresh** with the two-class TTT lift on shot 7.
+- **WAKEUP_SUMMARY.md, SESSION_LOG.md, TTT_RECEIPTS_INDEX.md** all
+  current.
+
+The submission work that requires you (record voiceover, submit form,
+make repo public, tag release) is fully scaffolded. Everything else
+that could be done autonomously, has been.
+
+Good luck. Sleep well in the few hours remaining; this thing is ready.
+
+— Claude, 04:59 PDT, 2026-05-08
