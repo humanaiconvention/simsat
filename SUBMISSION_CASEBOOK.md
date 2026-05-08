@@ -1,5 +1,12 @@
 # SimSat Submission Casebook
 
+> **Submitted by HumanAI Convention** · [humanaiconvention.com](https://humanaiconvention.com)
+>
+> Each case below shows the *operator-labelled JSON within uplink bandwidth
+> parameters* loop in action: scaffold proposes, trust layer disagrees or
+> agrees, the operator confirms, and the disagreement (or confirmation)
+> becomes signal that the six viability gates filter into gradient updates.
+
 Generated on `2026-05-07T04:51:12Z` from pinned operator-reviewed submission cases. One primary case per scenario pack; reviewer=`ben` throughout. Additional pinned traces per pack visible in `gallery_review.html`. Traces marked `stub` were assessed before the torchvision reinstall; the Gemma-4 v11 reviewed eval runs separately against the same Sentinel imagery.
 
 ---

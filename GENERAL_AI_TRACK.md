@@ -1,5 +1,13 @@
 # SimSat — General AI Track Entry
 
+> **Submitted by HumanAI Convention** · [humanaiconvention.com](https://humanaiconvention.com)
+>
+> SimSat operationalizes the **Viability Convention** hypothesis: that AI
+> systems must balance synthetic data with human lived experience, governed
+> by an ethical framework that filters which feedback becomes gradient
+> signal. The eight-key JSON contract makes the entire feedback loop
+> **model-agnostic** — any VLM that emits it plugs into the same governance.
+
 **Audience:** judges scoring the General AI Track of the AI in Space
 Hackathon (DPhi Space × Liquid AI). Rubric: 20 / 25 / 35 / 20 (Use of
 Satellite Imagery / Innovation & Problem-Solution Fit / Technical
@@ -172,3 +180,10 @@ operator-reviewed eval pipeline work whether you plug in Gemma-4-E2B
 CLIP, or any future VLM emitting the eight-key contract. Splitting the
 repo would force two copies of the same code; keeping it unified shows
 the contribution.
+
+---
+
+**HumanAI Convention** · [humanaiconvention.com](https://humanaiconvention.com)
+On-orbit inference, continually refined by operator-labelled JSON within
+uplink bandwidth parameters. Apache-2.0 weights · AGPL-3 code · public
+training kernels.

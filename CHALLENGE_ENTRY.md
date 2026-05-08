@@ -1,5 +1,13 @@
 # SimSat Challenge Entry
 
+> **Submitted by HumanAI Convention** · [humanaiconvention.com](https://humanaiconvention.com)
+>
+> SimSat is HumanAI Convention's operationalization of the **Viability
+> Convention** hypothesis: AI systems trained on synthetic data must be
+> balanced with human lived experience, governed by an ethical framework
+> that filters which feedback becomes gradient signal. Satellite encounter
+> triage is the test case — the architecture is the contribution.
+
 ## Thesis
 SimSat is a governed on-orbit continual-learning loop. It reframes mission operations as a sequence of encounter windows, runs stacked test-time training at the vision-language and trust-layer levels, and gates every adaptation through six non-compensatory viability checks. The result is a pipeline that demonstrably improves with every pass instead of drifting, with no ground-truth validator required — which is why it has to run in orbit.
 

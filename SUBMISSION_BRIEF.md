@@ -1,5 +1,16 @@
 # SimSat Submission Brief
 
+> **Submitted by HumanAI Convention** · [humanaiconvention.com](https://humanaiconvention.com)
+>
+> SimSat operationalizes the **Viability Convention** hypothesis on a real
+> physical constraint. The hypothesis: AI systems trained on synthetic data
+> must be balanced with human lived experience, governed by an ethical
+> framework that filters which feedback becomes gradient signal. The test
+> case: satellite encounter triage, where minutes between decisions and a
+> 5 MB uplink rule out ground retraining — but **JSON-shaped operator labels
+> fit through it**. The architecture is the contribution; the satellite is
+> the test case.
+
 ## Claim
 SimSat is a governed on-orbit continual-learning loop. It treats mission operations as a sequence of encounter windows rather than continuous propagation. A deterministic scaffold ranks windows cheaply, then a WCLI-style trust layer decides whether to accept, defer, skip, or refine before expensive imagery materialization. A Sentinel-first ObservationVLA lane performs image-conditioned reassessment, and a mission-response layer converts those judgments into explicit downstream actions with logged utility. **Test-time training runs at two layers simultaneously** — the VLA backend adapts on streaming Sentinel tiles, and the trust layer tunes online from realized-utility feedback — with **both adaptation streams gated by six non-compensatory viability checks** before any update is allowed to persist.
 
@@ -282,3 +293,11 @@ python scripts/submission_readiness.py --base-url http://127.0.0.1:8000
 
 ## Acknowledgments
 Thanks to **Guilherme Mesquita** (Genesis) and **Garrett Sutherland** (Tesseract T3) for ongoing conversations and feedback on the model-agnostic ObservationVLA contract. Their independent VLM tracks helped sharpen the eight-key JSON schema even though those backends are not part of this submission.
+
+---
+
+**HumanAI Convention** · [humanaiconvention.com](https://humanaiconvention.com)
+On-orbit inference, continually refined by operator-labelled JSON within
+uplink bandwidth parameters — six viability gates govern which feedback
+becomes gradient signal. Apache-2.0 weights · AGPL-3 code · public training
+kernels.

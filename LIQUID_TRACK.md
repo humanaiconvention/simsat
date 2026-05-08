@@ -1,5 +1,13 @@
 # SimSat — Liquid Track Entry
 
+> **Submitted by HumanAI Convention** · [humanaiconvention.com](https://humanaiconvention.com)
+>
+> SimSat operationalizes the **Viability Convention** hypothesis: that AI
+> systems must balance synthetic data with human lived experience, governed
+> by an ethical framework that filters which feedback becomes gradient
+> signal. *The architecture is the contribution; the satellite is the test
+> case.*
+
 **Audience:** judges scoring the Liquid Track of the AI in Space Hackathon
 (DPhi Space × Liquid AI). Rubric: 10 / 35 / 35 / 20 (Use of Liquid Models /
 Innovation & Problem-Solution Fit / Technical Implementation / Demo).
@@ -142,3 +150,10 @@ prize. Specifically: long-horizon (100+ cycle) two-scope TTT under live
 encounter outcomes, with the confirmed-outcome signal source from orbit
 retrospective. The 7 published TTT receipts demonstrate the loop is
 ready for that lane.
+
+---
+
+**HumanAI Convention** · [humanaiconvention.com](https://humanaiconvention.com)
+On-orbit inference, continually refined by operator-labelled JSON within
+uplink bandwidth parameters. Apache-2.0 weights · AGPL-3 code · public
+training kernels.

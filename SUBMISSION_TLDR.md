@@ -1,5 +1,9 @@
 # SimSat — One-Page TL;DR for Judges
 
+> **Submitted by HumanAI Convention** · [humanaiconvention.com](https://humanaiconvention.com)
+> SimSat operationalizes the **Viability Convention** hypothesis. *The
+> architecture is the contribution; the satellite is the test case.*
+
 **Hackathon:** AI in Space (DPhi Space × Liquid AI), May 2026.
 **Tracks submitted:** Liquid Track + General AI Track.
 **Code:** [`HumanAIConvention/SimSat`](https://github.com/HumanAIConvention/SimSat) (AGPL-3) · **Weights:** [`HumanAIConvention`](https://huggingface.co/HumanAIConvention) on HF (Apache-2.0)

@@ -9,6 +9,16 @@
 [![kaggle](https://img.shields.io/badge/Kaggle-simsat--gemma4--v1-20BEFF)](https://www.kaggle.com/code/benhaslam/simsat-gemma4-v1-training)
 [![license](https://img.shields.io/badge/license-see%20LICENSE-lightgrey)](./LICENSE)
 
+> **Submitted by HumanAI Convention** · [humanaiconvention.com](https://humanaiconvention.com)
+>
+> SimSat operationalizes the **Viability Convention** hypothesis on a real
+> physical constraint. The hypothesis: AI systems trained on synthetic data
+> must be balanced with human lived experience, governed by an ethical
+> framework that filters which feedback becomes gradient signal. The test
+> case: satellite encounter triage — minutes between decisions, no
+> ground round-trip, an uplink too small for weight updates. *The
+> architecture is the contribution; the satellite is the test case.*
+
 ## TL;DR for judges
 
 **SimSat is on-orbit inference, continually refined by operator-labelled JSON within uplink bandwidth parameters, gated by six non-compensatory viability checks.** A satellite has minutes — not hours — between encounter windows. The 5 MB uplink budget can't ferry weight updates between them. *What it can ferry is JSON.* SimSat turns that constraint into a feature: each encounter window becomes a small structured decision (`accept · refine · defer · skip`); operator labels come back up the uplink as compact JSON tokens; the six viability gates filter which labels become gradient signal; two-scope test-time training adapts both the encoder LoRA and the trust-layer weights in flight under those gates. The eight-key ObservationVLA contract makes the entire feedback loop model-agnostic across any VLM backend that emits it. Two observational registers (geometric/structural + spectral-biochemical via NDVI / SWIR / EVI), identical pipeline across both.
@@ -460,4 +470,12 @@ Available arguments:
 - `mapbox_current`: Retrieves and displays a Mapbox image for the current simulated satellite's position
 
 If no argument is provided, the script runs the `sentinel_current` test by default.
+
+---
+
+**HumanAI Convention** · [humanaiconvention.com](https://humanaiconvention.com)
+On-orbit inference, continually refined by operator-labelled JSON within
+uplink bandwidth parameters — six viability gates govern which feedback
+becomes gradient signal. Apache-2.0 weights · AGPL-3 code · public training
+kernels.
 

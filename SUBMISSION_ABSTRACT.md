@@ -1,5 +1,7 @@
 # SimSat — Submission Abstract Drafts
 
+> **Submitted by HumanAI Convention** · [humanaiconvention.com](https://humanaiconvention.com)
+
 Form-fillable copy for the DPhi / Liquid AI hackathon submission. Each section is
 self-contained — paste whichever block matches the prompt the form gives you.
 
