@@ -1,5 +1,7 @@
 # SimSat
 
+<img src="banner.jpeg" alt="DPhi Space × Liquid AI — Beyond the Clouds. AI in Space." width="800">
+
 [![tests](https://github.com/humanaiconvention/simsat/actions/workflows/tests.yml/badge.svg)](./.github/workflows/tests.yml)
 [![python](https://img.shields.io/badge/python-3.11%20%7C%203.13-blue)](./requirements.txt)
 [![track](https://img.shields.io/badge/AI%20in%20Space-Liquid%20%2B%20General%20AI-orange)](./CHALLENGE_ENTRY.md)
@@ -23,7 +25,7 @@
 - **Encounter planner (248 windows, 5×48h, 4 packs)**: scaffold produces zero `refine`; trust adds 72; 92/248 changed action
 - **v11 audit**: 410/410 LoRA tensor sanity gate **PASS** ([`V11_AUDIT.md`](./V11_AUDIT.md))
 
-**Judges, start here:** [SUBMISSION_BRIEF.md](./SUBMISSION_BRIEF.md) → [SUBMISSION_CASEBOOK.md](./SUBMISSION_CASEBOOK.md) → [SUBMISSION_PACKET.md](./SUBMISSION_PACKET.md) → [CHALLENGE_ENTRY.md](./CHALLENGE_ENTRY.md).
+**Judges, start here:** [SUBMISSION_TLDR.md](./SUBMISSION_TLDR.md) (1 page, 30 sec) → [SUBMISSION_BRIEF.md](./SUBMISSION_BRIEF.md) (rubric mapping) → [SUBMISSION_CASEBOOK.md](./SUBMISSION_CASEBOOK.md) (4 pinned cases) → [CHALLENGE_ENTRY.md](./CHALLENGE_ENTRY.md) (full thesis) → [SUBMISSION_PACKET.md](./SUBMISSION_PACKET.md) (auto-generated state).
 
 **Why this must run in orbit:** distribution shift without a ground-truth validator + a 5 MB uplink budget that can't ship weight updates + the next encounter window arrives in minutes. See [SUBMISSION_BRIEF.md](./SUBMISSION_BRIEF.md) for the three-constraint argument.
 
