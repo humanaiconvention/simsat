@@ -1,0 +1,25 @@
+┌──────────────────────────────────────────────────────────────────┐
+│                          SimSat                                   │
+│         On-Orbit Satellite Encounter Tasking AI                   │
+└──────────────────────────────────────────────────────────────────┘
+
+
+  CODE:    github.com/HumanAIConvention/SimSat        AGPL-3
+  WEIGHTS: huggingface.co/HumanAIConvention           Apache-2.0
+           ├── simsat-lfm25vl-450m-v3   (Liquid Track canonical)
+           ├── simsat-lfm25vl-450m-v1   (reference)
+           └── simsat-gemma4-v11        (General AI Track canonical)
+
+  KERNELS: kaggle.com/code/benhaslam
+           ├── simsat-lfm2-5-vl-v1-training
+           ├── simsat-lfm2-5-vl-v3-training   ← canonical
+           ├── simsat-lfm2-5-vl-v4-training
+           ├── simsat-lfm2-5-vl-v5-training
+           └── simsat-gemma4-v1-training
+
+  DATASETS (Kaggle, public):
+           simsat-lfm-{v1,v2,v3,v5}, simsat-gemma4-v1
+
+
+           Built for the prize hardware — Orin 16 GB.
+           Thanks.

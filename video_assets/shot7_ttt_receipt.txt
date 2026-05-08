@@ -1,0 +1,36 @@
+============================================================
+  TTT PROOF-OF-LIFE — VLA-layer LoRA online updates
+  Receipt: .kaggle_output/ttt_proof_of_life_receipt.json
+============================================================
+
+  Config:
+    base_model:  LiquidAI/LFM2.5-VL-450M
+    adapter:     simsat-lfm25vl-450m-v1
+    lr:          1e-5  (gentle, "1 step per encounter")
+    n_steps:     6 planned
+    n_probe:     8 (stratified, 2 per class)
+    seed:        42
+    rep_penalty: 1.05  (decode hardening)
+
+  Stream summary:
+    attempted:        5    (step 6 hit clean CUDA OOM at 8 GB)
+    applied:          5    ← every attempt fired
+    blocked:          0    ← zero false-positive viability gates
+    blocked_reasons:  {}
+
+  Probe MAE — pre vs post:
+    exact_action_agreement   pre 1.000   post 1.000   ← held perfect
+    score_mae                pre 0.000   post 0.000   ← held perfect
+    parse_rate               pre 1.000   post 1.000
+
+  Per-step LoRA delta L2 (real weight movement):
+    step 1:  0.0008
+    step 2:  0.0013
+    step 3:  0.0016
+    step 4:  0.0019
+    step 5:  0.0021     ← monotonic growth, no NaN, no divergence
+
+============================================================
+  The mechanism is real, not vapor.
+  Closes the prior LFM_TTT_POC.md "wired, requires live stream" gap.
+============================================================

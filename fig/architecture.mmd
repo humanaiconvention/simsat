@@ -1,0 +1,41 @@
+flowchart TB
+    subgraph orbit["ON-ORBIT (per encounter window)"]
+        sentinel["Sentinel-2 Tile<br/>(15 km, multi-spectral)"]
+        encoder["LFM2.5-VL-450M<br/>+ v3 LoRA adapter<br/>(SigLIP-2 NaFlex tower<br/>768-dim pooled)"]
+        scaffold["Scaffold Policy<br/>(geometry, priority, visibility)"]
+        trust["WCLI Trust Layer<br/>5 weighted features<br/>→ trust_band"]
+        action["Action Decision<br/>{accept, refine, defer, skip}"]
+        sentinel --> encoder
+        encoder --> scaffold
+        encoder --> trust
+        scaffold --> action
+        trust --> action
+    end
+
+    subgraph ttt["TWO-SCOPE TTT (per pass, gated)"]
+        gate{"Six Viability Gates<br/>error_bias (BLOCKING)<br/>weight_drift, update_rate<br/>geometry, clarity, agreement"}
+        scope1["Scope 1: Trust LoRA update<br/>WCLITrustModel.online_update"]
+        scope2["Scope 2: VLA LoRA update<br/>OnlineLoRAStepper<br/>(lfm_ttt.py)"]
+        action --> gate
+        gate -- "pass" --> scope1
+        gate -- "pass" --> scope2
+        gate -- "fail" --> skip["record_skipped_observation()"]
+        scope1 -.-> trust
+        scope2 -.-> encoder
+    end
+
+    subgraph ground["GROUND (offline, optional)"]
+        review["Operator Review<br/>(gallery_review.html)"]
+        retrain["Static Fine-tune<br/>(Kaggle T4 / BEAST)"]
+        adapter_hf["HF Adapter<br/>simsat-lfm25vl-450m-v3"]
+        review --> retrain
+        retrain --> adapter_hf
+        adapter_hf -.-> encoder
+    end
+
+    classDef hot fill:#fef3c7,stroke:#d97706,color:#000
+    classDef cold fill:#e0e7ff,stroke:#6366f1,color:#000
+    classDef gate fill:#fee2e2,stroke:#dc2626,color:#000
+    class sentinel,encoder,scaffold,trust,action hot
+    class review,retrain,adapter_hf cold
+    class gate gate

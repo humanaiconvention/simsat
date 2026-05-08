@@ -1,0 +1,36 @@
+============================================================
+  v3 vs v4 — published negative result
+  LFM_FINETUNE_METHODOLOGY.md §6.6
+============================================================
+
+  Setup: same recipe (lr=2e-4, 5 epochs, r=16/α=32, eff_batch),
+         same 32-row holdout, +20 train rows in v4
+         (16 refine + 4 accept; 0 defer, 0 skip)
+
+  Metric                    v3        v4        Delta
+  ------------------------  --------  --------  --------
+  exact_action_agreement    0.844     0.781     -0.063  ← regression
+  useful_agreement          0.688     0.656     -0.032
+  score_mae (lower better)  0.055     0.066     +0.011  ← worse
+  parse_rate                1.000     1.000      0.000
+
+  Per-class:
+    accept   1.000  →  1.000   (saturated)
+    refine   1.000  →  1.000   (saturated)
+    defer    0.625  →  0.500   ← pulled away from minority class
+    skip     0.750  →  0.625   ← pulled away from minority class
+
+  Diagnosis:
+    The +20 train rows were class-imbalanced (only refine + accept,
+    classes already at 1.000). Adding more of them pushed the
+    representation away from minority-class boundaries.
+
+  Decision:  v3 retained as canonical. v4 not promoted to HF.
+
+  v5 (in flight, BEAST overnight):
+    Same recipe, defer-class-balanced augmentation
+    (defer 34 → 51 train rows, skip 24 → 25)
+
+============================================================
+  Honest negatives are part of the rubric story.
+============================================================

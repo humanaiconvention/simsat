@@ -1,0 +1,35 @@
+┌──────────────────────────────────────────────────────────────────┐
+│  ROTTERDAM CASE — urban_coastal_ambiguity                        │
+│  trace_4f65355f5c954fbf8db3fc684bb377af                          │
+└──────────────────────────────────────────────────────────────────┘
+
+  Target:               Port of Rotterdam
+  Sentinel source:      sentinel-2c
+  Cloud cover:          48.78%   ← compound-risk threshold zone
+  Reviewer:             ben
+
+  ┌──────────┐    ┌──────────┐    ┌──────────┐
+  │ scaffold │ →  │  trust   │ →  │ operator │
+  │  ACCEPT  │    │  REFINE  │    │  ACCEPT  │
+  └──────────┘    └──────────┘    └──────────┘
+       │              │                │
+       │              │                └─ "visible 51% was
+       │              │                    operationally enough"
+       │              │
+       │              └─ flagged compound cloud + structural-detail
+       │                 risk; refine = secondary pass
+       │
+       └─ geometry-only scaffold: window passes elevation +
+          off-nadir checks → accept
+
+  This is the calibration loop:
+    – Scaffold commits on geometry alone.
+    – Trust layer raises the bar on compound risk.
+    – Operator override tunes the trust-layer threshold.
+    – TTT loop adapts the scaffold + trust per-pass under viability gates.
+
+  Mission response:  action = escalate_operator
+                     utility_realized = 0.85
+
+  Pinned in: SUBMISSION_CASEBOOK.md §urban_coastal_ambiguity
+  Image:     submission_assets/urban_coastal_ambiguity_port_of_rotterdam.png
