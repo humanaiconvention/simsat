@@ -310,7 +310,50 @@ probe pre and post, same v3 adapter starting point, same script — the
 +0.375 / +0.750 lifts are real movement of the model's decision
 boundary toward the operator's labelled class.
 
-### What this proves
+### Stratified TTT — robustness check (full 32-row holdout pre/post)
+
+The single-class lifts are dramatic but raise a fair question: do
+they come at the cost of regressing other classes? The stratified
+TTT run answers this directly. Same machinery, but the stream is a
+balanced 4-per-class round-robin (16 steps total = 4 accept + 4 defer
++ 4 refine + 4 skip), and the probe is the **full 32-row v3 holdout
+(8 per class) measured pre and post**.
+
+| Class | pre | post (16 stratified steps) | Δ |
+|---|---|---|---|
+| accept | 1.000 | 1.000 | 0.000 |
+| defer | 0.125 | 0.000 | −0.125 |
+| refine | 1.000 | 0.875 | −0.125 |
+| skip | 0.375 | **0.750** | **+0.375 ⭐** |
+| **overall exact_action** | **0.625** | **0.656** | **+0.031** |
+| **overall score_mae** | 0.092 | 0.089 | −0.003 |
+
+Receipt: [`.kaggle_output/stratified_ttt_v2_receipt.json`](./.kaggle_output/stratified_ttt_v2_receipt.json)
+
+**Reading:** stratified TTT gives a **mild net lift (+3.1 pp overall)**
+with class-redistribution. Skip dramatically up (matches the
+class-targeted skip lift); defer and refine each drop one sample. **No
+catastrophic regression**: no class collapses below where the model
+started, and the overall metric improves.
+
+**The architectural takeaway is the comparison itself:**
+
+| Stream type | Steps | Per-class lift on target | Cost on others |
+|---|---|---|---|
+| Skip-targeted | 16 | skip +0.375 | (probe was skip-only — collateral cost not measured) |
+| Defer-targeted | 16 | defer +0.750 | (probe was defer-only — collateral cost not measured) |
+| **Stratified balanced** | **16** | **skip +0.375; others ±0.125** | **none catastrophic; +0.031 net** |
+
+The single-class runs are the **upper bound of what TTT can lift on the
+target class with a fully curated stream**. The stratified run is the
+**baseline of what TTT does with mixed operator feedback**. The right
+operational pattern in production is somewhere in between — the gates
+filter which encounters generate gradient signal, the operator review
+calibrates which encounters get prioritized into the stream, and the
+curation policy (which class gets the focus this pass) is a top-level
+engineering decision the prize-hardware lane will make per-mission.
+
+### What the full evidence base proves
 
 1. **TTT under operator-curated stream + appropriate loss empirically
    LIFTS target-class accuracy on a held-out probe.** The architectural

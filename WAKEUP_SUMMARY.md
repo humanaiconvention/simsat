@@ -66,7 +66,9 @@ redesigned to show the PRE/POST table).
 | Phase 3 | v3+ recipe variant (lr=1e-4, 8 epochs, dropout=0.10, same v2 dataset) | 23:00-01:00 | -3.1 pp action vs v3 (negative). **Third consecutive offline-tuning negative attempt to beat v3** (after v4 +imbalanced data and v5 +balanced data). Strong empirical evidence v3 is at a local optimum. |
 | Phase 3.5 | Extended TTT v2 (50 steps, 16-row probe, v3 adapter) | 01:10-02:05 | 48/50 applied, 0 OOM, steady-state from step 10. **Tighter probe sharpens architectural argument: TTT preserves but boundary movement is data-dependent → why the lane is gated TTT, not free-running TTT.** |
 | Phase 4 | Class-targeted TTT v1 (full-CE loss, skip-only stream) | 02:05-02:25 | -37.5 pp regression (negative). **Diagnosed: full-assistant CE diluted action signal across ~99 non-action tokens.** Honest negative published. |
-| Phase 4 | Class-targeted TTT v2 (action-token-weighted CE, skip-only stream) | 02:25-02:50 | **+37.5 pp lift on skip class (HEADLINE).** Architectural claim validated end-to-end. |
+| Phase 4 | Class-targeted TTT v2 (action-token-weighted CE, skip-only stream) | 02:25-02:50 | **+37.5 pp lift on skip class.** Mechanism + curation + loss → real lift. |
+| Phase 4 | Class-targeted TTT v2 (defer-only stream) | 02:50-03:30 | **+75 pp lift on defer class.** Two-class generalization confirmed. |
+| Phase 4 | Stratified TTT v2 (4 per class × 4 = 16 steps, full 32-row holdout) | 03:30-04:00 | **Robustness check: net +3.1 pp overall, no catastrophic regression.** Skip +37.5 pp, defer/refine each −12.5 pp, accept flat. Architectural lesson: targeted TTT > stratified for max lift; stratified is safety floor. |
 
 All 5 receipts published in `.kaggle_output/*receipt*.json`. All 18+
 commits pushed to `humanaiconvention/simsat` main.

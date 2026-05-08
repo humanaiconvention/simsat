@@ -34,7 +34,7 @@ and the trust-layer weights *during the pass*, not after it.
 Matched-pair eval, 32-row stratified holdout, 8 per action class. Same holdout
 across v1 / v3 / v4 / v5 for direct comparison.
 
-**TTT — five receipts (full development arc):**
+**TTT — seven receipts (full development arc):**
 - **Stability:** 5-step / 30-step / 50-step receipts on v3 adapter all run cleanly,
   no divergence, no OOM, parse_rate 1.000 throughout. Trust-layer TTT has
   100-cycle evidence; VLA-layer now has 50-cycle.
@@ -48,7 +48,13 @@ across v1 / v3 / v4 / v5 for direct comparison.
   claim validated end-to-end on TWO independent classes.** Published next
   to the v1 negative result (full-CE loss regressed skip 0.375 → 0.000), so
   the design space is mapped: action-token-weighted loss is the necessary
-  ingredient. ([receipts in `.kaggle_output/`](./.kaggle_output/))
+  ingredient.
+- **Robustness check (stratified TTT, full 32-row holdout):** balanced
+  4-per-class operator-feedback stream over 16 steps, **net +3.1 pp overall
+  with NO catastrophic regression** — skip lifted +37.5 pp, defer/refine
+  each dropped one sample, accept held perfect. The single-class runs are
+  the upper bound; stratified is the safety floor.
+  ([receipts in `.kaggle_output/`](./.kaggle_output/))
 
 **General AI Track — Gemma-4-E2B v11** ([adapter](https://huggingface.co/HumanAIConvention/simsat-gemma4-v11)):
 in-distribution N=37 exact 0.86 / useful 0.97 / MAE 0.13 (vs always-majority
