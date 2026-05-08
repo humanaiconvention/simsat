@@ -6,8 +6,8 @@
 
 ## What we built
 
-**On-orbit inference, continually refined by low-bandwidth operator
-feedback through a structured JSON schema, gated by six non-compensatory
+**On-orbit inference, continually refined by operator-labelled JSON
+within uplink bandwidth parameters, gated by six non-compensatory
 viability checks.**
 
 Sentinel-2 encounter triage treats each window as one of four operator-
@@ -115,7 +115,7 @@ Wired but not benchmarked yet (requires a live encounter stream the
 ---
 
 > **One-line pitch:** SimSat is on-orbit inference, continually refined by
-> low-bandwidth operator feedback through a JSON schema — six viability
+> operator-labelled JSON within uplink bandwidth parameters — six viability
 > gates govern which feedback becomes gradient signal, and seven runtime-
 > adaptation receipts on a real LFM2.5-VL checkpoint demonstrate the loop
 > end-to-end (mechanism + stability + class-targeted lift + balanced

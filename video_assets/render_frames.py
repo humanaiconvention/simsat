@@ -78,7 +78,7 @@ def shot2():
     f2 = font(36)
     bb = d.textbbox((0, 0), title, font=f1)
     d.text(((W - (bb[2] - bb[0])) / 2, 80), title, fill=ACCENT, font=f1)
-    sub = "On-orbit inference, refined by low-bandwidth JSON feedback"
+    sub = "On-orbit inference, refined by operator-labelled JSON within uplink bandwidth"
     bb = d.textbbox((0, 0), sub, font=f2)
     d.text(((W - (bb[2] - bb[0])) / 2, 240), sub, fill=TEXT, font=f2)
 
