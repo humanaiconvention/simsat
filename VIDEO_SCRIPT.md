@@ -1,0 +1,126 @@
+# SimSat Demo Video — Recording Script
+
+**Target:** 3 min 50 sec. Single-take or two-take. 1080p MP4. Voiceover over
+screen recording + still frames. Submit alongside the abstract.
+
+**Tone:** confident, technical, honest about what's published vs what's the
+prize-hardware lane. No hype, no "revolutionary" — let the +68.8 pp action
+lift speak for itself.
+
+---
+
+## Shot list (one row per visual change on screen)
+
+| # | Time | What's on screen | What's said (voiceover) | Voiceover length |
+|---|---|---|---|---|
+| 1 | 0:00-0:08 | Title card: **SimSat — On-Orbit AI for Satellite Encounter Tasking** with the Rotterdam Sentinel-2 thumbnail (`submission_assets/urban_coastal_ambiguity_port_of_rotterdam.png`) blurred behind | "A satellite has minutes, not hours." | 2 s |
+| 2 | 0:08-0:20 | Same title card, Rotterdam image sharpens | "When the next encounter window arrives, there's no round-trip to ground for retraining. SimSat is built for that constraint." | 8 s |
+| 3 | 0:20-0:50 | Architecture diagram top half from `fig/ARCHITECTURE.md` (Sentinel tile → LFM2.5-VL-450M encoder → trust layer + scaffold → action) | "One vision-language tile encoder — Liquid AI's LFM2.5-VL-450M — feeds a planner over encounter windows. A trust layer scores each candidate against geometry, priority, cloud, and visibility. Six viability gates govern any continual learning that runs on top." | 28 s |
+| 4 | 0:50-1:20 | Cut to a terminal showing the v3 holdout report. Highlight rows with on-screen overlays | "Headline: we fine-tuned the LFM encoder with LoRA on 165 operator-reviewed Sentinel-2 tiles. Base model exact action agreement on a balanced 32-row holdout: 0.156. Tuned: zero point eight four four. Plus sixty-eight point eight points." | 28 s |
+| 5 | 1:20-1:35 | Same screen — focus on score MAE row | "Score MAE drops from 0.365 to 0.055 — about a thirty-one-point reduction in band-mapped prediction error. Per-class accept and refine are perfect. The adapter is on Hugging Face under Apache-2.0." | 14 s |
+| 6 | 1:35-2:30 | Cut to `submission_assets/urban_coastal_ambiguity_port_of_rotterdam.png` full-frame. Side panel showing the Rotterdam case row from `SUBMISSION_CASEBOOK.md` (scaffold accept → trust refine → operator accept) | "Rotterdam, forty-eight point seven eight percent cloud cover. The scaffold says accept — geometry is good. The trust layer disagrees, flips it to refine — the cloud might hide containers. The operator confirms accept: the visible fifty-one percent of the basin was operationally enough. This is the calibration loop. The same loop runs on every window." | 55 s |
+| 7 | 2:30-3:05 | Cut to terminal: `cat .kaggle_output/ttt_proof_of_life_receipt.json | head -40`. Highlight `stream_summary.applied: 5`, `blocked: 0`, and the post-MAE perfect score | "VLA-layer test-time training, exercised end-to-end on a real LFM checkpoint. Five operator-labelled encounters in. Five online LoRA gradient steps applied. Zero viability gates triggered. Post-MAE held at perfect on a stratified probe. The mechanism is real, not vapor." | 32 s |
+| 8 | 3:05-3:30 | Cut to the v3 / v4 / v5 comparison row from `LFM_FINETUNE_METHODOLOGY.md` §6.6 | "We trained v4 too. It regressed minus six point three points. We didn't ship it. That negative result is published in the methodology doc next to the wins. Honest negatives are part of the rubric story for us." | 22 s |
+| 9 | 3:30-3:50 | Final card: repo URL + HF model URLs stacked. White on black | "Apache-2.0 weights on Hugging Face. Public training kernels on Kaggle. AGPL-3 code on GitHub. Built for the prize hardware — Orin sixteen gig is what unlocks the long-horizon test-time training. Thanks." | 18 s |
+
+**Total: 3 min 50 sec.**
+
+---
+
+## Full voiceover script (run-through, no shot breaks)
+
+> A satellite has minutes, not hours. When the next encounter window arrives,
+> there's no round-trip to ground for retraining. SimSat is built for that
+> constraint.
+>
+> One vision-language tile encoder — Liquid AI's LFM-two-point-five-VL-450M —
+> feeds a planner over encounter windows. A trust layer scores each
+> candidate against geometry, priority, cloud, and visibility. Six viability
+> gates govern any continual learning that runs on top.
+>
+> Headline: we fine-tuned the LFM encoder with LoRA on a hundred
+> sixty-five operator-reviewed Sentinel-2 tiles. Base model exact action
+> agreement on a balanced thirty-two-row holdout: zero point one
+> five six. Tuned: zero point eight four four. Plus sixty-eight point
+> eight points.
+>
+> Score MAE drops from zero-point-three-six-five to zero-point-zero-five-five
+> — about a thirty-one-point reduction in band-mapped prediction error.
+> Per-class accept and refine are perfect. The adapter is on Hugging Face
+> under Apache-2.0.
+>
+> Rotterdam. Forty-eight point seven eight percent cloud cover. The scaffold
+> says accept — geometry is good. The trust layer disagrees, flips it to
+> refine — the cloud might hide containers. The operator confirms accept:
+> the visible fifty-one percent of the basin was operationally enough. This
+> is the calibration loop. The same loop runs on every window.
+>
+> VLA-layer test-time training, exercised end-to-end on a real LFM checkpoint.
+> Five operator-labelled encounters in. Five online LoRA gradient steps
+> applied. Zero viability gates triggered. Post-MAE held at perfect on a
+> stratified probe. The mechanism is real, not vapor.
+>
+> We trained v4 too. It regressed minus six point three points. We didn't
+> ship it. That negative result is published in the methodology doc next to
+> the wins. Honest negatives are part of the rubric story for us.
+>
+> Apache-2.0 weights on Hugging Face. Public training kernels on Kaggle.
+> AGPL-3 code on GitHub. Built for the prize hardware — Orin sixteen gig is
+> what unlocks the long-horizon test-time training. Thanks.
+
+---
+
+## Pre-recording prep checklist
+
+- [ ] Render `fig/ARCHITECTURE.md` Mermaid block to `fig/architecture_diagram.png`
+      via <https://mermaid.live> or `mmdc`.
+- [ ] Run `python notebooks/kaggle-simsat-lfm-v3/fetch_run_outputs.py` to
+      ensure `.kaggle_output_v3/holdout_eval_report.json` is fresh on disk
+      for the terminal screenshot.
+- [ ] Open `submission_assets/urban_coastal_ambiguity_port_of_rotterdam.png`
+      in a clean image viewer.
+- [ ] Open `SUBMISSION_CASEBOOK.md` Rotterdam section in a markdown viewer.
+- [ ] Open `.kaggle_output/ttt_proof_of_life_receipt.json` formatted nicely.
+- [ ] Test mic levels — 30s test recording first.
+- [ ] Close all notification sources (Slack, mail, etc.).
+- [ ] Set screen resolution to 1920×1080 to match output.
+
+## Recording approach options
+
+**Option 1 — single take voiceover with shot list:**
+- Set up OBS Studio with two scenes: full-screen terminal, full-screen browser.
+- Record voiceover and screen as one continuous take.
+- Edit cuts in DaVinci Resolve (free).
+
+**Option 2 — voiceover-first, then b-roll:**
+- Record voiceover audio in Audacity (free) — gives you a polished clean track.
+- Record screen captures separately for each shot.
+- Layer voiceover over b-roll in DaVinci Resolve.
+- More polished result, ~1-2 hours longer to produce.
+
+**Option 3 — use Loom (one-button):**
+- Loom does voiceover + screen + face-cam in one click.
+- Less polish, but ships in 30 minutes if you're confident in the take.
+
+For a hackathon with a 17:00 PDT deadline, **Option 1 or 3** is the right
+call. Save Option 2 for if you finish v5 + the form well before the deadline.
+
+## Word-counts and pacing
+
+- ~440 words at a comfortable 115 wpm = 3 min 50 sec.
+- If you naturally talk at 130 wpm, target ~500 words; pad with 5-second
+  silent transitions between shots so the viewer can absorb the on-screen
+  numbers.
+- Don't rush the headline numbers (shot 4) — those are the biggest rubric
+  hit. Slow down for "zero point eight four four."
+
+## Caption / closed-caption file
+
+Auto-generate captions from the video itself in DaVinci Resolve (Studio
+license; the free version doesn't have it) or in YouTube Studio (free) by
+uploading and downloading the auto-generated `.srt`. The voiceover is clean
+and short, so auto-captions will be ~95% accurate; budget 15 minutes for a
+human pass.
+
+Submitting captions with the video is a small accessibility +1 that judges
+notice.
