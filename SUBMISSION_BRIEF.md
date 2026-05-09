@@ -292,7 +292,7 @@ python scripts/submission_readiness.py --base-url http://127.0.0.1:8000
 ```
 
 ## Acknowledgments
-Thanks to **Guilherme Mesquita** (Genesis) and **Garrett Sutherland** (Tesseract T3) for ongoing conversations and feedback on the model-agnostic ObservationVLA contract. Their independent VLM tracks helped sharpen the eight-key JSON schema even though those backends are not part of this submission.
+Thanks to **[Guilherme Ferrari Brescia](https://huggingface.co/guiferrarib/genesis-152m-instruct)** (Genesis) and **[Garrett Sutherland](https://github.com/GMaN1911/t3-gemma-transfer)** (T³) for conversations and feedback as the project evolved. Their independent VLM tracks helped tighten the schema and the model-agnostic adapter pattern. Those backends are not part of this submission, but the collaboration improved it.
 
 ---
 

@@ -1,6 +1,8 @@
-"""Tesseract T3 VLA backend — General AI Track collaborator seat (Garrett Sutherland).
+"""Tesseract T³ VLA backend — General AI Track collaborator seat (Garrett Sutherland).
 
-Wraps TransformersVLMAdapter and points it at the Tesseract T3 model.
+Wraps TransformersVLMAdapter and points it at the Tesseract T³ model.
+Reference: https://github.com/GMaN1911/t3-gemma-transfer (MirrorEthic LLC,
+"Geometric Optimization for Deep Learning").
 Enable with: OBSERVATION_VLA_BACKEND=tesseract_t3
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

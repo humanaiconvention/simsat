@@ -377,7 +377,7 @@ Known open gaps (disclosed, not hidden):
 - MuZero MCTS planning over encounter windows is implemented and wired; full tree-search planning is tested in simulation but not yet exercised in the live encounter planner loop.
 
 ## Acknowledgments
-Thanks to **Guilherme Mesquita** ([Genesis](https://huggingface.co/HumanAIConvention/gemma4-haic-grounding-v1) and the orchOSModel project) and **Garrett Sutherland** (Tesseract T3) for collegial conversations and prompt-shape feedback as the ObservationVLA eight-key contract evolved. Their independent VLM tracks helped tighten the schema and the model-agnostic adapter pattern. Those backends are not part of this submission, but the collaboration improved it.
+Thanks to **[Guilherme Ferrari Brescia](https://huggingface.co/guiferrarib/genesis-152m-instruct)** (Genesis) and **[Garrett Sutherland](https://github.com/GMaN1911/t3-gemma-transfer)** (T³) for conversations and feedback as the project evolved. Their independent VLM tracks helped tighten the schema and the model-agnostic adapter pattern. Those backends are not part of this submission, but the collaboration improved it.
 
 ## Submission Framing
 Use this wording in the pitch:

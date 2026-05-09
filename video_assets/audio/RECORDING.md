@@ -47,15 +47,13 @@ intentional pauses. *Italics* mark words to lean on a little.
 
 ### 🎙 shot1.wav — 30 s — founder identity
 
-> I'm Ben Haslam, founder of the **HumanAI Convention** — a humble project
-> to enable mass human flourishing through robust, ethical training data.
->
-> The HumanAI Convention's hypothesis is that the synthetic data AI scales
-> on must be balanced with data from human lived experience, and an
-> ethical framework — humans living their best lives — provides the
-> optimal data.
->
-> That's the **Viability Convention** as I hypothesize it.
+> I'm Ben Haslam, founder of the **HumanAI Convention**
+
+HumanAI Convention is a humble project to enable mass human flourishing through robust, ethical training data.
+
+The hypothesis is that the synthetic data AI scales on must be balanced with data from human lived experience, and an ethical framework — humans living their best lives — provides the optimal data.
+
+That's the **Viability Condition, or Convention,** that underlies this project.
 
 **Visual:** black → phi-with-dot mark fades in white over 2 s, then the
 "Human AI / Convention" wordmark crossfades in below at ~5 s. Both hold
@@ -68,17 +66,7 @@ introducing. Slow it down.
 
 ### 🎙 shot2.wav — 28 s — operationalization bridge
 
-> This proposal takes that hypothesis and operationalizes it through
-> SimSat — a working prototype where the Convention's six non-compensatory
-> viability gates govern continual learning on a real-world problem.
->
-> We chose satellite encounter triage because the constraints are
-> physical: minutes between decisions, no round-trip to ground, an uplink
-> too small to ferry weight updates.
->
-> *What it can ferry is JSON.*
->
-> The architecture is the contribution; the satellite is the test case.
+This proposal operationalizes that hypothesis through SimSat — a working prototype where the Convention's six non-compensatory viability gates govern continual learning on a real-world problem. I chose satellite encounter triage because the constraints are physical: minutes between decisions, no round-trip to ground, an uplink too small for weight updates but large enough for compact operator labels. The architecture is the contribution; the satellite is the test case.
 
 **Visual:** SimSat title card from Claude Design — phi-with-dot lockup
 top-left, "SimSat." centered, tagline, Sentinel band of Rotterdam.
@@ -105,138 +93,47 @@ Say each piece distinctly.
 
 ---
 
-### 🎙 shot4.wav — 28 s — headline numbers
+### 🎙 shot4.wav — 28 s — 
 
-> Headline: we fine-tuned the LFM encoder with LoRA on 165
-> operator-reviewed Sentinel-2 tiles.
->
-> Base model exact action agreement on a balanced 32-row holdout: 0.156.
->
-> Tuned: **zero point eight four four**.
->
-> Plus sixty-eight point eight points.
+Two tracks, one architecture. The Liquid Track runs LFM 2.5-VL 450M. The General AI Track runs Gemma 4 E2B — and is open to any vision-language model that emits the eight-key JSON contract. Same scaffold, same six viability gates, same operator-curated stream across both. The backend is the variable; the architecture is what generalizes.
 
-**Visual:** v3 holdout report table.
-
-**Land carefully:** Slow down for "zero point eight four four." This is
-the biggest rubric hit in the video. Don't rush past it.
 
 ---
 
-### 🎙 shot5.wav — 14 s — MAE drop
+shot5.wav headline
 
-> Score MAE drops from 0.365 to 0.055 — about a thirty-one-point reduction
-> in band-mapped prediction error.
->
-> Per-class accept and refine are perfect.
->
-> The adapter is on Hugging Face under Apache-2.0.
 
-**Visual:** MAE drop callout.
-
-**Tone:** Crisp. Don't oversell. Numbers stand on their own.
+The Headline is: we fine-tuned the LFM encoder on a hundred sixty-five operator-reviewed Sentinel-2 tiles — each one a human judgment encoded as training data. Base model exact action agreement on a balanced thirty-two-row holdout, demonstrating a 68.8 percent improvement.
 
 ---
 
-### 🎙 shot6.wav — 55 s — Rotterdam case (longest)
+### 🎙 shot6.wav — 14 s — MAE drop
 
-> Rotterdam, forty-eight point seven eight percent cloud cover.
->
-> The scaffold says accept — geometry is good.
->
-> The trust layer disagrees, flips it to refine — the cloud might hide
-> containers.
->
-> The operator confirms accept: the visible fifty-one percent of the basin
-> was operationally enough.
->
-> This is the calibration loop.
->
-> The same loop runs on every window.
-
-**Visual:** Rotterdam Sentinel image full-frame + case panel showing
-scaffold → trust → operator boxes.
-
-**Tone:** Tell it like a story. The scaffold-trust-operator handoff is
-the dramatic beat. You can take your time on this one — there's 55
-seconds of visual.
+Score Mean Absolute Error, or MAE — the alignment between model and operator judgment — drops from 0.365 to 0.055. The model and the human now agree to within one band step. Per-class accept and refine are perfect. The adapter is on Hugging Face under an Apache 2.0 license.
 
 ---
 
-### 🎙 shot7.wav — 50 s — TTT class-targeted lift
+### 🎙 shot7.wav — 55 s — Rotterdam case (longest)
 
-> VLA-layer test-time training, validated end-to-end.
->
-> Stability first: fifty steps on the v three adapter, forty-eight applied,
-> zero divergence, parse rate one-point-zero throughout.
->
-> Then the headline result, on two classes.
->
-> Sixteen skip-class encounters streamed: skip lifted from
-> zero-point-three-seven-five to zero-point-seven-five — plus thirty-seven
-> points.
->
-> Sixteen defer-class encounters streamed: defer lifted from
-> zero-point-one-two-five to zero-point-eight-seven-five — plus
-> seventy-five points.
->
-> Average lift across two classes, plus fifty-six points in sixteen steps.
->
-> TTT under operator-curated stream empirically lifts target-class accuracy
-> per pass on **TWO independent classes** — the architectural claim,
-> validated on a real LFM checkpoint.
-
-**Visual:** TTT receipts panel.
-
-**Breath points:** after "parse rate one-point-zero throughout" and after
-"plus seventy-five points." This is the densest segment — give yourself
-two breaths.
+Rotterdam, 48.8 percent cloud cover. Scaffold says accept — geometry is good. Trust layer flips to refine — the cloud might hide containers. The operator confirms accept: the visible fifty-one percent of the basin was operationally enough. That human judgment is the signal. Every operator review is one of these — the calibration loop runs on every window.
 
 ---
 
-### 🎙 shot8.wav — 25 s — three honest negatives
+### 🎙 shot8.wav — 50 s — TTT class-targeted lift
 
-> We tried three different ways to beat v three.
->
-> More imbalanced data: minus six point three.
->
-> More class-balanced data: minus fifteen point six.
->
-> A different recipe — lower learning rate, longer schedule, more dropout
-> — minus three point one.
->
-> Three independent angles, same conclusion: v three sits at a local
-> optimum on this architecture and this holdout.
->
-> That's empirical evidence for the runtime-TTT lane, not just an
-> architectural claim. All three negatives are published in the
-> methodology doc.
-
-**Visual:** v3 / v4 / v5 / v3+ comparison panel.
-
-**Tone:** Don't apologize for the minuses. They are the evidence — that's
-the whole point. Read them flat and confident.
+Vision-Language-Action or VLA-layer test-time training under operator-curated stream — each encounter a human judgment, every update gate-filtered. Stability first: fifty cycles on the v three adapter, zero divergence, parse rate one-point-zero throughout. Then the architectural claim. Sixteen skip-class encounters: skip lifted from 0.375 to 0.57. Sixteen defer-class encounters: defer lifted from 0.25 to 0.875 — plus seventy-five points. These numbers are the proof of mechanism. The mechanism is operator participation becoming model improvement, gate-filtered, on a real LFM checkpoint.
 
 ---
 
-### 🎙 shot9.wav — 22 s — close
+### 🎙 shot9.wav — 25 s — three honest negatives
 
-> On-orbit inference, continually refined by operator-labelled JSON within
-> uplink bandwidth parameters.
->
-> Apache-2.0 weights on Hugging Face. Public training kernels on Kaggle.
-> AGPL-3 code on GitHub.
->
-> Built for the prize hardware — Orin sixteen gig is what unlocks the
-> long-horizon adaptation we've already demonstrated end-to-end.
->
-> Thanks.
+Three honest negatives. More imbalanced data — minus 6.33. More class-balanced data — minus 15.6. Different recipe — minus 3.1. Same conclusion across three independent angles: v three sits at a local optimum that offline data cannot escape. Static training has hit its ceiling here; the next axis is operator participation — runtime contributions, gate-filtered, becoming gradient signal. All three negatives are published in the methodology doc.
 
-**Visual:** Closing card from Claude Design — humanaiconvention.com,
-URL stack, Orin line.
+---
 
-**Tone:** The exhale. Conversational. "Thanks" should feel earned, not
-perfunctory.
+### 🎙 shot10.wav — 22 s — close
+
+What this loop enables is mass human flourishing through ethical training data — one operator review at a time, gated by six viability checks, contributed locally where lived experience exists. SimSat is one instance. The architecture moves to medicine, education, anywhere expert humans guide AI. Apache licensed 2.0 weights, AGPL 3 code, public kernels. This framework is built for the Orin 16 gig system. Thanks.
 
 ---
 

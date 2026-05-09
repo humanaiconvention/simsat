@@ -1,10 +1,11 @@
-"""Genesis VLA backend — General AI Track collaborator seat (Guilherme Mesquita).
+"""Genesis VLA backend — General AI Track collaborator seat (Guilherme Ferrari Brescia).
 
-Native loader for Genesis-152M-Instruct (orchOSModel v3, custom architecture).
-Uses the genesis package directly — does NOT delegate to TransformersVLMAdapter.
+Native loader for Genesis-152M-Instruct (custom architecture; HF model card:
+https://huggingface.co/guiferrarib/genesis-152m-instruct). Uses the genesis
+package directly — does NOT delegate to TransformersVLMAdapter.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-COLLABORATOR SETUP — Guilherme Mesquita (Genesis)
+COLLABORATOR SETUP — Guilherme Ferrari Brescia (Genesis)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Step 1 — Clone your genesis repo and set the path:
