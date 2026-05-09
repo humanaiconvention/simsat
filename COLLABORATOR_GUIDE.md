@@ -95,8 +95,9 @@ Genesis uses a **native loader** — it does not delegate to `TransformersVLMAda
 The model architecture is custom (GLA+FoX hybrid, NeoX tokenizer, ChatML format).
 
 ```bash
-# Step 1 — clone your genesis repo and point to it
-export GENESIS_REPO_PATH=/path/to/orchOSModel-genesis-v3
+# Step 1 — clone your genesis package repo and point to it
+# (HF model card: https://huggingface.co/guiferrarib/genesis-152m-instruct)
+export GENESIS_REPO_PATH=/path/to/genesis-package
 
 # Step 2 — point to your weights file
 export GENESIS_WEIGHTS_PATH=/path/to/genesis_152m_instruct.safetensors

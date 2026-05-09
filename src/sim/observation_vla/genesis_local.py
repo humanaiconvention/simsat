@@ -8,10 +8,11 @@ package directly — does NOT delegate to TransformersVLMAdapter.
 COLLABORATOR SETUP — Guilherme Ferrari Brescia (Genesis)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Step 1 — Clone your genesis repo and set the path:
+Step 1 — Clone your genesis package repo and set the path:
 
-    git clone https://github.com/GuiMesquita/orchOSModel-genesis-v3  # adjust URL
-    export GENESIS_REPO_PATH=/path/to/orchOSModel-genesis-v3
+    # HF model card: https://huggingface.co/guiferrarib/genesis-152m-instruct
+    # (the loader needs the source package, not just the safetensors)
+    export GENESIS_REPO_PATH=/path/to/genesis-package
 
 Step 2 — Point to your weights file:
 
@@ -115,8 +116,8 @@ class GenesisAdapter:
     """Native Genesis-152M adapter for ObservationVLA.
 
     Loads genesis_152m_instruct.safetensors using the genesis package
-    (orchOSModel-genesis-v3). Falls back to stub if the package or weights
-    are unavailable.
+    (HF model: guiferrarib/genesis-152m-instruct). Falls back to stub if
+    the package or weights are unavailable.
     """
 
     def __init__(
@@ -175,7 +176,8 @@ class GenesisAdapter:
             if repo_path is None:
                 raise ImportError(
                     "genesis package not importable. Set GENESIS_REPO_PATH to "
-                    "the orchOSModel-genesis-v3 repo root, or pip install it."
+                    "the local genesis package repo root, or pip install it. "
+                    "HF model: https://huggingface.co/guiferrarib/genesis-152m-instruct"
                 )
             if not repo_path.exists():
                 raise FileNotFoundError(f"GENESIS_REPO_PATH does not exist: {repo_path}")
